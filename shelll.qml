@@ -1,6 +1,6 @@
 import Quickshell
 import QtQuick
-import Quickshell.Services.Notifications
+import Quickshell.Services.Pipewire
 import qs.ui.topbar.statusarea
 import qs.ui.topbar.statusarea.ai
 import qs.ui.topbar.controlcenter.panels
@@ -27,6 +27,9 @@ ShellRoot {
     property bool bluetoothOpened:   false
     property int  wifiX:             0
     property int  bluetoothX:        0
+
+    property real brtValue:    0.65
+    property real kbdBrtValue: 0.0
 
     Variants {
         model: Quickshell.screens
@@ -84,27 +87,49 @@ ShellRoot {
         notifServer: _globalNotifServer
     }
 
+    PwObjectTracker {
+        objects: Pipewire.defaultAudioSink ? [Pipewire.defaultAudioSink] : []
+    }
+
     OSD {
-        id: _osd
-        blocked: appRoot.ccOpened
-                 || appRoot.wifiOpened
-                 || appRoot.bluetoothOpened
-                 || appRoot.aiOpened
-                 || appRoot.notifCenterOpened
-                 || appRoot.spotlightOpened
+        id: volumeOSD
+        type:      "volume"
+        label:     Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.description : "Volume"
+        iconLow:   "volume/audio-volume-1.svg"
+        iconHigh:  "volume/audio-volume-3.svg"
+        fillColor: "#F5A623"
+        value:     Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio.volume : 0
     }
 
-    BatteryOSD {
-        id: _batteryOSD
+    OSD {
+        id: brightnessOSD
+        type:      "brightness"
+        label:     "Luminosité"
+        iconLow:   "sun-small.svg"
+        iconHigh:  "sun-huge.svg"
+        fillColor: "#1C7AFF"
+        value:     appRoot.brtValue
     }
 
-    NotificationServer {
-        id: _globalNotifServer
-        keepOnReload:        true
-        bodyMarkupSupported: true
-        actionsSupported:    true
-        imageSupported:      true
+    OSD {
+        id: kbdBrightnessOSD
+        type:      "kbdbrt"
+        label:     "Luminosité clavier"
+        iconLow:   "brightness/display-brightness-off-symbolic.svg"
+        iconHigh:  "brightness/display-brightness-symbolic.svg"
+        fillColor: "#FFD60A"
+        value:     appRoot.kbdBrtValue
     }
+
+    Connections {
+        target: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
+        function onVolumeChanged() {
+            volumeOSD.show()
+        }
+    }
+
+    onBrtValueChanged:    brightnessOSD.show()
+    onKbdBrtValueChanged: kbdBrightnessOSD.show()
 
     StatusSubMenuWindow {
         opened: appRoot.wifiOpened

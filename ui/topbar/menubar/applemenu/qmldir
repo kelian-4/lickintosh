@@ -1,0 +1,4 @@
+module qs.topbar.menubar.applemenu
+AppleMenu 1.0 AppleMenu.qml
+AppleMenuWindow 1.0 AppleMenuWindow.qml
+AboutWindow 1.0 AboutWindow.qml

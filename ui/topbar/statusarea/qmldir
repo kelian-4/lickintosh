@@ -1,0 +1,3 @@
+module qs.topbar.statusarea
+StatusArea 1.0 StatusArea.qml
+StatusSubMenuWindow 1.0 StatusSubMenuWindow.qml

@@ -1,0 +1,3 @@
+module qs.topbar.spotlight
+SpotlightWindow 1.0 SpotlightWindow.qml
+SpotlightResults 1.0 SpotlightResults.qml

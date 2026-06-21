@@ -1,0 +1,3 @@
+module qs.glass
+BoxGlass 1.0 BoxGlass.qml
+GlassRim 1.0 GlassRim.qml

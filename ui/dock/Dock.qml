@@ -19,11 +19,10 @@ Scope {
     readonly property real magScale3:    1.08
     readonly property int  hoverRegionH: 4
 
-    property bool pinned:      true
-    property var  clientList:       []
+    property bool pinned:         true
+    property var  clientList:     []
     property bool fullscreenActive: false
-    property var  cycleIndex: ({})
-
+    property var  cycleIndex:     ({})
     property string tooltipText:    ""
     property real   tooltipCenterX: 0
     property bool   tooltipVisible: false
@@ -35,43 +34,25 @@ Scope {
         { name: "Settings", cmd: "",           icon: "preferences-system"  }
     ]
 
-    // ─────────────────────────────────────────────────────────────────────
-    //  Résolution d'icône
-    //  Ordre : heuristicLookup → startupWmClass match → iconPath direct
-    // ─────────────────────────────────────────────────────────────────────
     function resolveIcon(appId) {
         if (!appId || appId === "") return ""
-
         var de = DesktopEntries.heuristicLookup(appId)
         if (de && de.icon) {
             var p = Quickshell.iconPath(de.icon, true)
             if (p !== "") return p
             if (de.icon.indexOf("/") === 0) return de.icon
         }
-
         var p2 = Quickshell.iconPath(appId.toLowerCase(), true)
         if (p2 !== "") return p2
-
         var de2 = DesktopEntries.byId(appId.toLowerCase())
         if (!de2) de2 = DesktopEntries.byId(appId)
         if (de2 && de2.icon) {
             var p3 = Quickshell.iconPath(de2.icon, true)
             if (p3 !== "") return p3
         }
-
         return ""
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    //  Cache des .desktop : name_minuscule → { icon, desktopId }
-    //  Construit au démarrage depuis /run/current-system/sw/share/applications/
-    //  Utilisé pour les apps Electron dont class=initialClass="electron"
-    //  et dont seul initialTitle ("Proton Pass", "Ente Photos"…) est fiable.
-    //
-    //  Données réelles observées sur ce système :
-    //    electron | electron | Proton Pass  → proton-pass.desktop
-    //    electron | electron | Ente Photos  → ente-desktop.desktop
-    // ─────────────────────────────────────────────────────────────────────
     property var desktopByName: ({})
 
     Process {
@@ -91,15 +72,12 @@ Scope {
             for (var i = 0; i < lines.length; i++) {
                 var parts = lines[i].split("|")
                 if (parts.length < 2 || parts[0].trim() === "") continue
-                var name     = parts[0].trim()
+                var name      = parts[0].trim()
                 var desktopId = parts[1] || ""
-                var icon     = parts[2] || ""
-                var entry    = { desktopId: desktopId, icon: icon, name: name }
-                // Indexer par Name complet ("Ente", "Proton Pass")
+                var icon      = parts[2] || ""
+                var entry     = { desktopId: desktopId, icon: icon, name: name }
                 cache[name.toLowerCase()] = entry
-                // Indexer par desktopId ("ente-desktop", "proton-pass")
                 if (desktopId) cache[desktopId.toLowerCase()] = entry
-                // Indexer par desktopId sans suffixes communs
                 var stripped = desktopId.replace(/-desktop$|-app$|-browser$/, "")
                 if (stripped && stripped !== desktopId) cache[stripped.toLowerCase()] = entry
             }
@@ -108,48 +86,19 @@ Scope {
         }
     }
 
-    function resolveAppId(c) {
-        var cls    = c.cls          || ""
-        var icls   = c.initialClass || ""
-        var ititle = c.initialTitle || ""
-        var clsLow = cls.toLowerCase()
-
-        var electronLike = (clsLow === "electron" ||
-                            icls.toLowerCase() === "electron" ||
-                            clsLow.indexOf("electron") === 0)
-
-        if (!electronLike)
-            return icls !== "" ? icls : cls
-
-        if (ititle && ititle !== "") {
-            var entry = _lookupDesktopEntry(ititle)
-            if (entry && entry.name)
-                return entry.name
-            var seg = ititle.split(/\s[—–-]\s/)[0].trim()
-            if (seg.length > 1) return seg
-        }
-
-        return cls
-    }
-
     function _lookupDesktopEntry(ititle) {
         var cache = dockRoot.desktopByName
-        // 1. Titre complet exact
         var e = cache[ititle.toLowerCase()]
         if (e) return e
-        // 2. Premier mot seulement ("Ente" depuis "Ente Photos")
         var firstWord = ititle.split(/\s/)[0].toLowerCase()
         e = cache[firstWord]
         if (e) return e
-        // 3. Segment avant séparateur
         var seg = ititle.split(/\s[—–-]\s/)[0].trim().toLowerCase()
         e = cache[seg]
         if (e) return e
-        // 4. Kebab-case complet ("ente-photos")
         var kebab = ititle.toLowerCase().replace(/\s+/g, "-")
         e = cache[kebab]
         if (e) return e
-        // 5. Chercher si une clé du cache commence par le premier mot
         var keys = Object.keys(cache)
         for (var k = 0; k < keys.length; k++) {
             if (keys[k].indexOf(firstWord) === 0)
@@ -158,12 +107,30 @@ Scope {
         return null
     }
 
+    function resolveAppId(c) {
+        var cls    = c.cls          || ""
+        var icls   = c.initialClass || ""
+        var ititle = c.initialTitle || ""
+        var clsLow = cls.toLowerCase()
+        var electronLike = (clsLow === "electron" ||
+                            icls.toLowerCase() === "electron" ||
+                            clsLow.indexOf("electron") === 0)
+        if (!electronLike)
+            return icls !== "" ? icls : cls
+        if (ititle && ititle !== "") {
+            var entry = _lookupDesktopEntry(ititle)
+            if (entry && entry.name) return entry.name
+            var seg = ititle.split(/\s[—–-]\s/)[0].trim()
+            if (seg.length > 1) return seg
+        }
+        return cls
+    }
+
     function resolveIconForClient(c) {
-        var clsLow = (c.cls || "").toLowerCase()
+        var clsLow  = (c.cls          || "").toLowerCase()
         var iclsLow = (c.initialClass || "").toLowerCase()
         var electronLike = (clsLow === "electron" || iclsLow === "electron" ||
                             clsLow.indexOf("electron") === 0)
-
         if (electronLike) {
             var ititle = (c.initialTitle || "").trim()
             if (ititle !== "") {
@@ -179,24 +146,18 @@ Scope {
                 }
             }
         }
-
         return resolveIcon(resolveAppId(c))
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    //  Groupement des clients par appId résolu
-    // ─────────────────────────────────────────────────────────────────────
     property var groupedClients: []
 
     function _rebuildGroupedClients() {
         var groups = {}
         var order  = []
-
         for (var i = 0; i < clientList.length; i++) {
             var c     = clientList[i]
             var appId = resolveAppId(c)
             var key   = appId.toLowerCase()
-
             if (!groups[key]) {
                 groups[key] = {
                     key:         key,
@@ -213,17 +174,12 @@ Scope {
                 ws:      c.ws
             })
         }
-
         var result = []
         for (var j = 0; j < order.length; j++)
             result.push(groups[order[j]])
-
         dockRoot.groupedClients = result
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    //  Hyprland polling
-    // ─────────────────────────────────────────────────────────────────────
     Process {
         id: _hyprClients
         command: ["sh", "-c", "hyprctl clients -j 2>/dev/null"]
@@ -288,40 +244,20 @@ Scope {
         }
     }
 
-    Process {
-        id: _hyprFocus
-        property string targetAddress: ""
-        command: ["hyprctl", "dispatch", "focuswindow", "address:" + targetAddress]
-        running: false
-    }
-
-    function activateWindow(address) {
+    function focusWindow(address) {
         if (!address || address === "") return
-        var needle = address.toLowerCase()
-        if (needle.indexOf("0x") !== 0) needle = "0x" + needle
-
-        var tops = Hyprland.toplevels
-        if (tops) {
-            for (var i = 0; i < tops.length; i++) {
-                var t = tops[i]
-                if (!t || !t.address) continue
-                var ta = t.address.toLowerCase()
-                if (ta.indexOf("0x") !== 0) ta = "0x" + ta
-                if (ta === needle) {
-                    t.activate()
-                    return
-                }
-            }
-        }
-
-        _hyprFocus.targetAddress = needle
-        _hyprFocus.running = true
+        var addr = address.toLowerCase()
+        if (addr.indexOf("0x") !== 0) addr = "0x" + addr
+        Hyprland.dispatch("focuswindow address:" + addr)
     }
 
     function cycleWindow(groupKey, instances) {
         if (!instances || instances.length === 0) return
         var idx = (dockRoot.cycleIndex[groupKey] || 0) % instances.length
-        activateWindow(instances[idx].address)
+        var inst = instances[idx]
+        Hyprland.dispatch("focuswindow address:" + inst.address)
+        if (inst.ws > 0)
+            Hyprland.dispatch("workspace " + inst.ws)
         var ci = dockRoot.cycleIndex
         ci[groupKey] = (idx + 1) % instances.length
         dockRoot.cycleIndex = ci
@@ -329,7 +265,7 @@ Scope {
 
     function launchDetached(cmd) {
         if (!cmd || cmd === "") return
-        Quickshell.execDetached(["sh", "-c", cmd])
+        Hyprland.dispatch("exec " + cmd)
     }
 
     function pinnedGroupInstances(entry) {
@@ -344,9 +280,6 @@ Scope {
         return result
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    //  Autohide
-    // ─────────────────────────────────────────────────────────────────────
     property bool _dockReveal: true
 
     Timer {
@@ -359,9 +292,6 @@ Scope {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    //  PanelWindow
-    // ─────────────────────────────────────────────────────────────────────
     Loader {
         active: true
         sourceComponent: Component {
@@ -394,7 +324,7 @@ Scope {
                         }
                     }
                     implicitWidth: dockContainer.width + 40
-                    hoverEnabled: true
+                    hoverEnabled:  true
 
                     Behavior on anchors.topMargin {
                         NumberAnimation { duration: 380; easing.type: Easing.OutQuart }
@@ -637,9 +567,6 @@ Scope {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    //  DockIcon
-    // ─────────────────────────────────────────────────────────────────────
     component DockIcon: Item {
         id: iconItem
 

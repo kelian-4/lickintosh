@@ -1,0 +1,3 @@
+module qs.topbar.statusarea.ai
+AiWindow 1.0 AiWindow.qml
+singleton AiConfig 1.0 AiConfig.qml
