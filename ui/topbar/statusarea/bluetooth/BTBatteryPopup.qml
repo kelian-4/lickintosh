@@ -1,82 +1,30 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
-import Quickshell.Services.UPower
 import qs.ui.glass
 import qs.ui.primitives
 
 Scope {
     id: root
 
-    property bool   _visible:     false
-    property bool   _ready:       false
-    property string _deviceName:  "Batterie"
-    property real   _percentage:  0.0
-    property bool   _isCharging:  false
+    property string deviceName: ""
+    property real   pct:        -1
+    property bool   isCharging: false
+    property bool   _isAirpods: false
+    property int    xPos:       0
+    property bool   _visible:   false
 
-    readonly property bool isShowing: _visible
-
-    property var _notifiedLevels: ({})
-
-    Timer {
-        id: _bootGuard
-        interval: 5000
-        repeat:   false
-        running:  true
-        onTriggered: root._ready = true
-    }
-
-    IpcHandler {
-        target: "batteryOSD"
-        function testShow(): void {
-            _testProc.running = true
+    function toggle() {
+        if (_visible) {
+            _visible = false
+            _unloadTimer.restart()
+        } else {
+            _panelLoader.active = true
+            _visible = true
+            _hideTimer.restart()
         }
-    }
-
-    Process {
-        id: _testProc
-        command: ["sh", "-c", "upower -i $(upower -e | grep BAT | head -1) | grep percentage | awk '{print $2}' | tr -d '%'"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var dev = root._laptopBattery
-                root._deviceName  = dev ? (dev.model || "Batterie") : "Batterie"
-                root._percentage  = parseFloat(text.trim()) || (dev ? dev.percentage * 100 : 50)
-                root._trigger()
-            }
-        }
-    }
-
-    function _shouldNotify(key, pct, notifiedMap, isCharging) {
-        var pct100     = pct * 100
-        var thresholds = isCharging ? [100, 80] : [20, 15, 10, 5]
-        var crossed    = -1
-        for (var i = 0; i < thresholds.length; i++) {
-            var t = thresholds[i]
-            if (pct100 >= t - 0.5 && pct100 <= t + 0.5) {
-                crossed = t
-                break
-            }
-        }
-        if (crossed < 0) {
-            if (notifiedMap[key] !== undefined) {
-                var last = notifiedMap[key]
-                if (Math.abs(pct100 - last) > 3) {
-                    delete notifiedMap[key]
-                }
-            }
-            return false
-        }
-        if (notifiedMap[key] === crossed) return false
-        notifiedMap[key] = crossed
-        return true
-    }
-
-    function _trigger() {
-        _panelLoader.active = true
-        _visible = true
     }
 
     function dismiss() {
@@ -84,75 +32,11 @@ Scope {
         _unloadTimer.restart()
     }
 
-    property var _laptopBattery: null
-
-    function _findLaptopBattery() {
-        var devs = UPower.devices.values
-        for (var i = 0; i < devs.length; i++) {
-            if (devs[i].isLaptopBattery) {
-                root._laptopBattery = devs[i]
-                return
-            }
-        }
-    }
-
-    function _checkBattery() {
-        var dev = root._laptopBattery
-        if (!dev) return
-        var pct        = dev.percentage
-        var isCharging = dev.state === UPowerDeviceState.Charging
-                         || dev.state === UPowerDeviceState.FullyCharged
-        if (!root._ready) return
-        if (!root._shouldNotify("laptop", pct, root._notifiedLevels, isCharging)) return
-        root._deviceName  = "Batterie"
-        root._percentage  = pct * 100
-        root._isCharging  = isCharging
-        root._trigger()
-    }
-
-    Connections {
-        target: root
-        function on_LaptopBatteryChanged() {
-            if (!root._laptopBattery) return
-            _battConn.target = root._laptopBattery
-        }
-    }
-
-    Connections {
-        id: _battConn
-        target: null
-        function onPercentageChanged() {
-            root._checkBattery()
-        }
-        function onStateChanged() {
-            var dev = root._laptopBattery
-            if (!dev || !root._ready) return
-            root._deviceName  = "Batterie"
-            root._percentage  = dev.percentage * 100
-            root._isCharging  = dev.state === UPowerDeviceState.Charging
-                                 || dev.state === UPowerDeviceState.FullyCharged
-            root._trigger()
-        }
-    }
-
     Timer {
-        interval: 60000
-        running:  root._ready
-        repeat:   true
-        onTriggered: root._checkBattery()
-    }
-
-    Component.onCompleted: _findRetryTimer.start()
-
-    Timer {
-        id: _findRetryTimer
-        interval: 200
-        repeat:   true
-        running:  false
-        onTriggered: {
-            root._findLaptopBattery()
-            if (root._laptopBattery !== null) _findRetryTimer.stop()
-        }
+        id: _hideTimer
+        interval: 4000
+        repeat:   false
+        onTriggered: root.dismiss()
     }
 
     Timer {
@@ -178,7 +62,7 @@ Scope {
                     return Quickshell.screens[0]
                 }
 
-                WlrLayershell.namespace:     "quickshell:batteryosd"
+                WlrLayershell.namespace:     "quickshell:btbattery"
                 WlrLayershell.layer:         WlrLayer.Top
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color:         "transparent"
@@ -186,6 +70,7 @@ Scope {
 
                 anchors {
                     top:   true
+                    left:  true
                     right: true
                 }
 
@@ -197,9 +82,9 @@ Scope {
                     width:  300
                     height: 54
                     anchors.top:         parent.top
-                    anchors.right:       parent.right
+                    anchors.left:        parent.left
                     anchors.topMargin:   40
-                    anchors.rightMargin: 12
+                    anchors.leftMargin:  root.xPos - 140
 
                     opacity: root._visible ? 1.0 : 0.0
                     scale:   root._visible ? 1.0 : 0.94
@@ -237,15 +122,22 @@ Scope {
                         spacing: 10
 
                         CFVI {
-                            icon: {
-                                var p = Math.round(root._percentage / 10) * 10
-                                p = Math.max(0, Math.min(100, p))
-                                var pad = p < 10 ? "00" + p : (p < 100 ? "0" + p : "100")
-                                return "battery/battery-" + pad + (root._isCharging ? "-charging" : "") + ".svg"
-                            }
-                            size:             20
+                            icon:             "bluetooth/bluetooth.svg"
+                            size:             18
                             color:            "#ccffffff"
                             Layout.alignment: Qt.AlignVCenter
+                            visible:          !root._isAirpods
+                        }
+
+                        Image {
+                            source:            Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/devices/airpods.png")
+                            width:             22
+                            height:            18
+                            fillMode:          Image.PreserveAspectFit
+                            sourceSize.width:  44
+                            sourceSize.height: 44
+                            Layout.alignment:  Qt.AlignVCenter
+                            visible:           root._isAirpods
                         }
 
                         ColumnLayout {
@@ -254,7 +146,7 @@ Scope {
                             spacing:          2
 
                             CFText {
-                                text:                root._deviceName
+                                text:                root.deviceName
                                 font.pixelSize:      13
                                 font.weight:         Font.Bold
                                 color:               "#ffffff"
@@ -264,7 +156,7 @@ Scope {
                             }
 
                             CFText {
-                                text:                "Batterie système"
+                                text:                "Connecté"
                                 font.pixelSize:      11
                                 color:               Qt.rgba(1, 1, 1, 0.55)
                                 Layout.fillWidth:    true
@@ -277,12 +169,12 @@ Scope {
                             width:            42
                             height:           42
                             Layout.alignment: Qt.AlignVCenter
+                            visible:          root.pct >= 0
 
                             readonly property color ringColor: {
-                                if (root._isCharging)          return "#30D158"
-                                if (root._percentage <= 10)    return "#FF453A"
-                                if (root._percentage <= 20)    return "#FF9F0A"
-                                return "#ffffff"
+                                if (root.pct <= 10) return "#FF453A"
+                                if (root.pct <= 20) return "#FF9F0A"
+                                return "#30D158"
                             }
 
                             onRingColorChanged:    ringCanvas.requestPaint()
@@ -290,8 +182,7 @@ Scope {
 
                             Connections {
                                 target: root
-                                function on_PercentageChanged() { ringCanvas.requestPaint() }
-                                function on_IsChargingChanged() { ringCanvas.requestPaint() }
+                                function onPctChanged() { ringCanvas.requestPaint() }
                             }
 
                             Canvas {
@@ -304,7 +195,7 @@ Scope {
                                     var cy  = height / 2
                                     var r   = width / 2 - 3.5
                                     var lw  = 4
-                                    var pct = Math.max(0, Math.min(1, root._percentage / 100.0))
+                                    var pct = Math.max(0, Math.min(1, root.pct / 100.0))
 
                                     ctx.beginPath()
                                     ctx.arc(cx, cy, r, 0, Math.PI * 2)
@@ -326,11 +217,19 @@ Scope {
 
                             CFText {
                                 anchors.centerIn: parent
-                                text:             Math.round(root._percentage).toString()
+                                text:             root.pct >= 0 ? Math.round(root.pct).toString() : ""
                                 font.pixelSize:   12
                                 font.weight:      Font.Bold
                                 color:            "#ffffff"
                             }
+                        }
+
+                        CFText {
+                            text:             "N/A"
+                            font.pixelSize:   12
+                            color:            Qt.rgba(1, 1, 1, 0.4)
+                            visible:          root.pct < 0
+                            Layout.alignment: Qt.AlignVCenter
                         }
                     }
                 }

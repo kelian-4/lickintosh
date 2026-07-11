@@ -1,8 +1,10 @@
 import Quickshell
 import QtQuick
 import Quickshell.Services.Notifications
+import qs.core.network
 import qs.ui.topbar.statusarea
 import qs.ui.topbar.statusarea.ai
+import qs.ui.topbar.statusarea.battery
 import qs.ui.topbar.controlcenter.panels
 import qs.ui.topbar.notifcenter
 import qs.ui.topbar
@@ -27,6 +29,8 @@ ShellRoot {
     property bool bluetoothOpened:   false
     property int  wifiX:             0
     property int  bluetoothX:        0
+    property bool batteryOpened:     false
+    property int  batteryX:          0
 
     Variants {
         model: Quickshell.screens
@@ -49,6 +53,7 @@ ShellRoot {
                 onToggleNotifCenter:  appRoot.notifCenterOpened  = !appRoot.notifCenterOpened
                 onToggleWifi:         (x) => { appRoot.wifiX = x; appRoot.wifiOpened = !appRoot.wifiOpened }
                 onToggleBluetooth:    (x) => { appRoot.bluetoothX = x; appRoot.bluetoothOpened = !appRoot.bluetoothOpened }
+                onToggleBattery:      (x) => { appRoot.batteryX = x; appRoot.batteryOpened = !appRoot.batteryOpened }
             }
         }
     }
@@ -92,6 +97,7 @@ ShellRoot {
                  || appRoot.aiOpened
                  || appRoot.notifCenterOpened
                  || appRoot.spotlightOpened
+        batteryShowing: _batteryOSD.isShowing
     }
 
     BatteryOSD {
@@ -121,6 +127,15 @@ ShellRoot {
         onCloseRequested: appRoot.bluetoothOpened = false
         contentComponent: Component {
             CCBluetoothPanel {}
+        }
+    }
+
+    StatusSubMenuWindow {
+        opened: appRoot.batteryOpened
+        xPos: appRoot.batteryX
+        onCloseRequested: appRoot.batteryOpened = false
+        contentComponent: Component {
+            BatteryPanel {}
         }
     }
 }

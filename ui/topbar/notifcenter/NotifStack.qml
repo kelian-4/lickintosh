@@ -10,12 +10,11 @@ ColumnLayout {
     property string appName: ""
     property var    items:    []
 
-    readonly property int cascadeOffset: 10
     readonly property int animDur:       260
+    readonly property int cascadeOffset:  10
+    property int maxVisible: 3
 
     property bool expanded: false
-
-    signal contextMenuRequested(real x, real y, var notification, bool isStack)
 
     spacing: 6
 
@@ -29,22 +28,11 @@ ColumnLayout {
         NumberAnimation { target: root; property: "scale";   to: 1; duration: root.animDur + 60; easing.type: Easing.OutBack; easing.overshoot: 0.4 }
     }
 
-    Layout.preferredHeight: root.expanded ? _expandedView.implicitHeight : _collapsedView.implicitHeight
-
-    Behavior on Layout.preferredHeight {
-        NumberAnimation { duration: root.animDur; easing.type: Easing.OutCubic }
-    }
-
     Item {
         id: _collapsedView
         Layout.fillWidth: true
-        implicitHeight: _topCard.implicitHeight + Math.min(root.items.length - 1, 2) * root.cascadeOffset
-        visible: opacity > 0
-        opacity: root.expanded ? 0 : 1
-        scale:   root.expanded ? 0.94 : 1.0
-
-        Behavior on opacity { NumberAnimation { duration: root.animDur } }
-        Behavior on scale   { NumberAnimation { duration: root.animDur; easing.type: Easing.OutCubic } }
+        Layout.preferredHeight: _topCard.implicitHeight + Math.min(root.items.length - 1, 2) * root.cascadeOffset
+        visible: !root.expanded
 
         Repeater {
             model: Math.max(0, Math.min(root.items.length, 3) - 1)
@@ -55,10 +43,6 @@ ColumnLayout {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: parent.top
                 anchors.topMargin: (index + 1) * root.cascadeOffset
-
-                Behavior on width        { NumberAnimation { duration: root.animDur; easing.type: Easing.OutCubic } }
-                Behavior on anchors.topMargin { NumberAnimation { duration: root.animDur; easing.type: Easing.OutCubic } }
-
                 radius: 16
                 color:  Qt.rgba(0.0, 0.0, 0.0, Math.max(0.30, 0.55 - (index + 1) * 0.08))
                 light:  Qt.rgba(1, 1, 1, 0.14)
@@ -74,10 +58,7 @@ ColumnLayout {
             notification: root.items.length > 0 ? root.items[0] : null
             showClose: root.items.length === 1
             isStack: root.items.length > 1
-
-            onContextMenuRequested: function(x, y) {
-                root.contextMenuRequested(x, y, _topCard.notification, root.items.length > 1)
-            }
+            stackItems: root.items
         }
 
         Rectangle {
@@ -114,67 +95,83 @@ ColumnLayout {
     ColumnLayout {
         id: _expandedView
         Layout.fillWidth: true
-        spacing: 6
-        visible: opacity > 0
-        opacity: root.expanded ? 1 : 0
-        scale:   root.expanded ? 1.0 : 0.94
-
-        Behavior on opacity { NumberAnimation { duration: root.animDur } }
-        Behavior on scale   { NumberAnimation { duration: root.animDur; easing.type: Easing.OutCubic } }
+        spacing: 4
+        visible: root.expanded
 
         RowLayout {
             Layout.fillWidth: true
             Layout.leftMargin: 2
-            visible: root.items.length > 1
+            Layout.rightMargin: 2
 
             Text {
                 Layout.fillWidth: true
                 text: root.appName
-                font.pixelSize: 12
+                font.pixelSize: 13
                 font.weight: Font.Bold
                 font.family: "SF Pro Rounded"
-                color: Qt.rgba(1, 1, 1, 0.65)
+                color: "#ffffff"
                 renderType: Text.NativeRendering
             }
 
             Rectangle {
-                width:  _lessTxt.implicitWidth + 20
-                height: 24
-                radius: 12
-                color:  Qt.rgba(1, 1, 1, 0.14)
+                width:  _lessLabel.implicitWidth + 16
+                height: 22
+                radius: 11
+                color:  _lessMa.containsMouse ? Qt.rgba(1, 1, 1, 0.20) : Qt.rgba(1, 1, 1, 0.12)
 
                 Text {
-                    id: _lessTxt
+                    id: _lessLabel
                     anchors.centerIn: parent
-                    text: "Voir moins"
+                    text: "Show less"
                     font.pixelSize: 11
-                    font.weight: Font.DemiBold
                     font.family: "SF Pro Rounded"
                     color: "#ffffff"
                     renderType: Text.NativeRendering
                 }
 
                 MouseArea {
+                    id: _lessMa
                     anchors.fill: parent
+                    hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.expanded = false
+                    onClicked: { root.expanded = false; root.maxVisible = 3 }
+                }
+            }
+
+            Rectangle {
+                width:  18
+                height: 18
+                radius: 9
+                color:  _closeMa.containsMouse ? Qt.rgba(1, 1, 1, 0.20) : Qt.rgba(1, 1, 1, 0.12)
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "×"
+                    font.pixelSize: 13
+                    font.family: "SF Pro Rounded"
+                    color: "#ffffff"
+                    renderType: Text.NativeRendering
+                }
+
+                MouseArea {
+                    id: _closeMa
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: NotifService.dismissGroup(root.items)
                 }
             }
         }
 
         Repeater {
-            model: root.expanded ? root.items : []
+            model: root.expanded ? Math.min(root.items.length, root.maxVisible) : 0
             delegate: NotifItem {
                 id: _delegateItem
                 Layout.fillWidth: true
-                notification: modelData
+                notification: root.items[index]
 
                 opacity: 0
                 Component.onCompleted: _appearAnim.start()
-
-                onContextMenuRequested: function(x, y) {
-                    root.contextMenuRequested(x, y, _delegateItem.notification, false)
-                }
 
                 NumberAnimation {
                     id: _appearAnim
@@ -184,6 +181,31 @@ ColumnLayout {
                     duration: root.animDur
                     easing.type: Easing.OutCubic
                 }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 32
+            radius: 10
+            color: _moreMa.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.07)
+            visible: root.items.length > root.maxVisible
+
+            Text {
+                anchors.centerIn: parent
+                text: (root.items.length - root.maxVisible) + " more notification" + (root.items.length - root.maxVisible > 1 ? "s" : "")
+                font.pixelSize: 11
+                font.family: "SF Pro Rounded"
+                color: Qt.rgba(1, 1, 1, 0.60)
+                renderType: Text.NativeRendering
+            }
+
+            MouseArea {
+                id: _moreMa
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.maxVisible = root.items.length
             }
         }
     }

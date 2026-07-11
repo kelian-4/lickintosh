@@ -208,13 +208,6 @@ Scope {
                                         Layout.topMargin: index === 0 ? 8 : 0
                                         appName: modelData.appName
                                         items:   modelData.items
-
-                                        onContextMenuRequested: function(x, y, notif, stackFlag) {
-                                            _ctxMenu.notification = notif
-                                            _ctxMenu.isStack      = stackFlag
-                                            _ctxMenu.stackItems   = modelData.items
-                                            _ctxMenu.openAt(x, y)
-                                        }
                                     }
                                 }
 
@@ -281,13 +274,6 @@ Scope {
                                         Layout.fillWidth: true
                                         appName: modelData.appName
                                         items:   modelData.items
-
-                                        onContextMenuRequested: function(x, y, notif, stackFlag) {
-                                            _ctxMenu.notification = notif
-                                            _ctxMenu.isStack      = stackFlag
-                                            _ctxMenu.stackItems   = modelData.items
-                                            _ctxMenu.openAt(x, y)
-                                        }
                                     }
                                 }
 
@@ -428,24 +414,6 @@ Scope {
                                 Layout.preferredHeight: 10
                             }
                         }
-                    }
-                }
-
-                NotifContextMenu {
-                    id: _ctxMenu
-                    anchors.fill: parent
-                    onClearRequested: {
-                        if (_ctxMenu.isStack) {
-                            NotifService.dismissGroup(_ctxMenu.stackItems)
-                        } else if (_ctxMenu.notification) {
-                            _ctxMenu.notification.dismiss()
-                        }
-                    }
-                    onRemindRequested: function(minutes) {
-                        NotifService.remindLater(_ctxMenu.notification, minutes)
-                    }
-                    onOptionsRequested: {
-                        NotifService.openAppOptions(_ctxMenu.notification)
                     }
                 }
             }

@@ -2,7 +2,6 @@ module qs.ui.topbar.notifcenter
 
 singleton NotifService 1.0 NotifService.qml
 NotifIcon 1.0 NotifIcon.qml
-NotifContextMenu 1.0 NotifContextMenu.qml
 NotifCenter 1.0 NotifCenter.qml
 NotifItem 1.0 NotifItem.qml
 NotifStack 1.0 NotifStack.qml

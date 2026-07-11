@@ -44,9 +44,13 @@ Scope {
                 Connections {
                     target: NotifService
                     function onDismissGenChanged() {
+                        var items = []
                         for (var i = 0; i < _repeater.count; i++) {
                             var d = _repeater.itemAt(i)
-                            if (d) d.dismiss()
+                            if (d) items.push(d)
+                        }
+                        for (var j = 0; j < items.length; j++) {
+                            items[j].autoHide()
                         }
                     }
                 }
@@ -67,12 +71,21 @@ Scope {
                             width:  root.popupWidth
                             height: _glass.height
 
-                            property var myNotif: notifObj
+                            property var  myNotif: notifObj
                             property bool isLeaving: false
+                            property bool _shouldDismissNotif: false
 
                             function dismiss() {
                                 if (wrap.isLeaving) return
                                 wrap.isLeaving = true
+                                wrap._shouldDismissNotif = true
+                                _out.start()
+                            }
+
+                            function autoHide() {
+                                if (wrap.isLeaving) return
+                                wrap.isLeaving = true
+                                wrap._shouldDismissNotif = false
                                 _out.start()
                             }
 
@@ -96,14 +109,20 @@ Scope {
                                 to: root.popupWidth + root.rightMargin + 20
                                 duration: root.animDur
                                 easing.type: Easing.InCubic
-                                onFinished: NotifService.removePopup(wrap.myNotif)
+                                onFinished: {
+                                    NotifService.removePopup(wrap.myNotif)
+                                    if (wrap._shouldDismissNotif && wrap.myNotif) {
+                                        wrap.myNotif.dismiss()
+                                    }
+                                }
                             }
 
                             BoxGlass {
                                 id: _glass
                                 width:  root.popupWidth
-                                height: _content.implicitHeight + 24
+                                height: _row.implicitHeight + 24
                                 radius: 20
+                                clip:   true
                                 color:  Qt.rgba(0.0, 0.0, 0.0, 0.6)
                                 light:  Qt.rgba(1, 1, 1, 0.18)
                                 rimStrength: 1.2
@@ -111,24 +130,20 @@ Scope {
                                 MouseArea {
                                     anchors.fill: parent
                                     cursorShape:  Qt.PointingHandCursor
-                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                    onClicked: function(mouse) {
-                                        if (mouse.button === Qt.RightButton) {
-                                            var pt = _glass.mapToItem(null, mouse.x, mouse.y)
-                                            _ctxMenu.notification = wrap.myNotif
-                                            _ctxMenu.isStack      = false
-                                            _ctxMenu.openAt(pt.x, pt.y)
-                                            return
-                                        }
+                                    acceptedButtons: Qt.LeftButton
+                                    hoverEnabled: true
+                                    z: -1
+                                    onEntered: NotifService.stopGroupTimer()
+                                    onExited:  NotifService.restartGroupTimer()
+                                    onClicked: {
                                         var act = NotifService.findDefaultAction(wrap.myNotif)
                                         if (act) act.invoke()
-                                        NotifService.stopGroupTimer()
                                         wrap.dismiss()
                                     }
                                 }
 
                                 RowLayout {
-                                    id: _content
+                                    id: _row
                                     anchors.left:        parent.left
                                     anchors.right:       parent.right
                                     anchors.top:         parent.top
@@ -190,17 +205,6 @@ Scope {
                                 }
                             }
                         }
-                    }
-                }
-
-                NotifContextMenu {
-                    id: _ctxMenu
-                    anchors.fill: parent
-                    onRemindRequested: function(minutes) {
-                        NotifService.remindLater(_ctxMenu.notification, minutes)
-                    }
-                    onOptionsRequested: {
-                        NotifService.openAppOptions(_ctxMenu.notification)
                     }
                 }
             }

@@ -15,6 +15,7 @@ Rectangle {
     signal toggleNotifCenter()
     signal toggleWifi(int xPos)
     signal toggleBluetooth(int xPos)
+    signal toggleBattery(int xPos)
 
     property bool appleMenuOpened:  false
     property bool spotlightOpened:  false
@@ -61,6 +62,7 @@ Rectangle {
             onToggleNotifCenter: root.toggleNotifCenter()
             onToggleWifi:      (x) => root.toggleWifi(x)
             onToggleBluetooth: (x) => root.toggleBluetooth(x)
+            onToggleBattery:    (x) => root.toggleBattery(x)
         }
     }
 }

@@ -19,7 +19,6 @@ RowLayout {
     signal toggleNotifCenter()
     signal toggleWifi(int xPos)
     signal toggleBluetooth(int xPos)
-    signal toggleBattery(int xPos)
 
     property int notifUnreadCount: 0
 
@@ -32,18 +31,16 @@ RowLayout {
         Layout.alignment: Qt.AlignVCenter
     }
 
-    BTDeviceTray {
-        Layout.alignment: Qt.AlignVCenter
-    }
-
     Volume {
         Layout.alignment: Qt.AlignVCenter
     }
 
     Battery {
-        id: batteryIcon
         Layout.alignment: Qt.AlignVCenter
-        onToggleBattery: (x) => root.toggleBattery(x)
+    }
+
+    BTDeviceTray {
+        Layout.alignment: Qt.AlignVCenter
     }
 
     Bluetooth {

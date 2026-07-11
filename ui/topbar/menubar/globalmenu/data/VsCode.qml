@@ -1,0 +1,227 @@
+pragma Singleton
+import QtQuick
+
+QtObject {
+    property list<var> menus: [
+        {
+            label: "Fichier",
+            items: [
+                { label: "New Text File", mods: "CTRL", key: "N" },
+                { label: "New File...", mods: "CTRL ALT SUPER", key: "N" },
+                { label: "New Window", mods: "CTRL SHIFT", key: "N" },
+                { label: "New Window with Profile", disabled: true },
+                { separator: true },
+                { label: "Open File...", mods: "CTRL", key: "O" },
+                { label: "Open Folder...", chord: [ { mods: "CTRL", key: "K" }, { mods: "CTRL", key: "O" } ] },
+                { label: "Open Workspace from File...", disabled: true },
+                { label: "Open Recent", disabled: true },
+                { separator: true },
+                { label: "Add Folder to Workspace...", disabled: true },
+                { label: "Save Workspace As...", disabled: true },
+                { label: "Duplicate Workspace", disabled: true },
+                { separator: true },
+                { label: "Save", mods: "CTRL", key: "S" },
+                { label: "Save As...", mods: "CTRL SHIFT", key: "S" },
+                { label: "Save All", disabled: true },
+                { separator: true },
+                { label: "Share", disabled: true },
+                { separator: true },
+                { label: "Auto Save", disabled: true },
+                {
+                    label: "Preferences",
+                    submenu: [
+                        { label: "Settings", mods: "CTRL", key: "comma" },
+                        { label: "Extensions", mods: "CTRL SHIFT", key: "X" },
+                        { label: "Keyboard Shortcuts", chord: [ { mods: "CTRL", key: "K" }, { mods: "CTRL", key: "S" } ] },
+                        { separator: true },
+                        { label: "Profiles", disabled: true },
+                        { label: "Turn on Settings Sync...", disabled: true }
+                    ]
+                },
+                { separator: true },
+                { label: "Revert File", disabled: true },
+                { label: "Close Editor", mods: "CTRL", key: "W" },
+                { label: "Close Folder", chord: [ { mods: "CTRL", key: "K" }, { mods: "", key: "F" } ] },
+                { label: "Close Window", mods: "ALT", key: "F4" },
+                { separator: true },
+                { label: "Exit", mods: "CTRL", key: "Q" }
+            ]
+        },
+        {
+            label: "Édition",
+            items: [
+                { label: "Undo", mods: "CTRL", key: "Z" },
+                { label: "Redo", mods: "CTRL", key: "Y" },
+                { separator: true },
+                { label: "Cut", mods: "CTRL", key: "X" },
+                { label: "Copy", mods: "CTRL", key: "C" },
+                { label: "Paste", mods: "CTRL", key: "V" },
+                { separator: true },
+                { label: "Find", mods: "CTRL", key: "F" },
+                { label: "Replace", mods: "CTRL", key: "H" },
+                { separator: true },
+                { label: "Find in Files", mods: "CTRL SHIFT", key: "F" },
+                { label: "Replace in Files", mods: "CTRL SHIFT", key: "H" },
+                { separator: true },
+                { label: "Toggle Line Comment", mods: "CTRL SHIFT", key: "7" },
+                { label: "Toggle Block Comment", mods: "CTRL SHIFT", key: "A" },
+                { label: "Emmet: Expand Abbreviation", mods: "", key: "Tab" }
+            ]
+        },
+        {
+            label: "Sélection",
+            items: [
+                { label: "Select All", mods: "CTRL", key: "A" },
+                { label: "Expand Selection", mods: "SHIFT ALT", key: "Right" },
+                { label: "Shrink Selection", mods: "SHIFT ALT", key: "Left" },
+                { separator: true },
+                { label: "Copy Line Up", mods: "CTRL SHIFT ALT", key: "Up" },
+                { label: "Copy Line Down", mods: "CTRL SHIFT ALT", key: "Down" },
+                { label: "Move Line Up", mods: "ALT", key: "Up" },
+                { label: "Move Line Down", mods: "ALT", key: "Down" },
+                { label: "Duplicate Selection", disabled: true },
+                { separator: true },
+                { label: "Add Cursor Above", mods: "SHIFT ALT", key: "Up" },
+                { label: "Add Cursor Below", mods: "SHIFT ALT", key: "Down" },
+                { label: "Add Cursors to Line Ends", mods: "SHIFT ALT", key: "I" },
+                { label: "Add Next Occurrence", mods: "CTRL", key: "D" },
+                { label: "Add Previous Occurrence", disabled: true },
+                { label: "Select All Occurrences", mods: "CTRL SHIFT", key: "L" },
+                { separator: true },
+                { label: "Switch to Ctrl+Click for Multi-Cursor", disabled: true },
+                { label: "Column Selection Mode", disabled: true }
+            ]
+        },
+        {
+            label: "Affichage",
+            items: [
+                { label: "Command Palette...", mods: "CTRL SHIFT", key: "P" },
+                { label: "Open View...", disabled: true },
+                { separator: true },
+                { label: "Appearance", disabled: true },
+                { label: "Editor Layout", disabled: true },
+                { separator: true },
+                { label: "Explorer", mods: "CTRL SHIFT", key: "E" },
+                { label: "Search", mods: "CTRL SHIFT", key: "F" },
+                { label: "Source Control", mods: "CTRL SHIFT", key: "G" },
+                { label: "Run", mods: "CTRL SHIFT", key: "D" },
+                { label: "Extensions", mods: "CTRL SHIFT", key: "X" },
+                { label: "Testing", disabled: true },
+                { separator: true },
+                { label: "Chat", mods: "CTRL ALT", key: "I" },
+                { label: "Browser", mods: "CTRL SHIFT ALT", key: "7" },
+                { separator: true },
+                { label: "Problems", mods: "CTRL SHIFT", key: "M" },
+                { label: "Output", chord: [ { mods: "CTRL", key: "K" }, { mods: "CTRL", key: "H" } ] },
+                { label: "Debug Console", mods: "CTRL SHIFT", key: "Y" },
+                { label: "Terminal", mods: "CTRL SHIFT", key: "grave" },
+                { separator: true },
+                { label: "Word Wrap", mods: "ALT", key: "Z" }
+            ]
+        },
+        {
+            label: "Aller à",
+            items: [
+                { label: "Back", mods: "CTRL ALT", key: "minus" },
+                { label: "Forward", mods: "CTRL SHIFT", key: "minus" },
+                { label: "Last Edit Location", disabled: true },
+                { separator: true },
+                { label: "Switch Editor", disabled: true },
+                { label: "Switch Group", disabled: true },
+                { separator: true },
+                { label: "Go to File...", mods: "CTRL", key: "P" },
+                { label: "Go to Symbol in Workspace...", mods: "CTRL", key: "T" },
+                { label: "Go to Symbol in Editor...", mods: "CTRL SHIFT", key: "O" },
+                { label: "Go to Definition", mods: "", key: "F12" },
+                { label: "Go to Declaration", disabled: true },
+                { label: "Go to Type Definition", disabled: true },
+                { label: "Go to Implementations", mods: "CTRL", key: "F12" },
+                { label: "Go to References", mods: "SHIFT", key: "F12" },
+                { separator: true },
+                { label: "Go to Line/Column...", mods: "CTRL", key: "G" },
+                { label: "Go to Bracket", mods: "CTRL", key: "bar" },
+                { separator: true },
+                { label: "Next Problem", mods: "", key: "F8" },
+                { label: "Previous Problem", mods: "SHIFT", key: "F8" },
+                { separator: true },
+                { label: "Next Change", mods: "ALT", key: "F3" },
+                { label: "Previous Change", mods: "SHIFT ALT", key: "F3" }
+            ]
+        },
+        {
+            label: "Exécuter",
+            items: [
+                { label: "Start Debugging", mods: "", key: "F5" },
+                { label: "Run Without Debugging", mods: "CTRL", key: "F5" },
+                { label: "Stop Debugging", mods: "SHIFT", key: "F5" },
+                { label: "Restart Debugging", mods: "CTRL SHIFT", key: "F5" },
+                { separator: true },
+                { label: "Open Configurations", disabled: true },
+                { label: "Add Configuration...", disabled: true },
+                { separator: true },
+                { label: "Step Over", mods: "", key: "F10" },
+                { label: "Step Into", mods: "", key: "F11" },
+                { label: "Step Out", mods: "SHIFT", key: "F11" },
+                { label: "Continue", mods: "", key: "F5" },
+                { separator: true },
+                { label: "Toggle Breakpoint", mods: "", key: "F9" },
+                { label: "New Breakpoint", disabled: true },
+                { separator: true },
+                { label: "Enable All Breakpoints", disabled: true },
+                { label: "Disable All Breakpoints", disabled: true },
+                { label: "Remove All Breakpoints", disabled: true },
+                { separator: true },
+                { label: "Install Additional Debuggers...", disabled: true }
+            ]
+        },
+        {
+            label: "Terminal",
+            items: [
+                { label: "New Terminal", disabled: true },
+                { label: "Split Terminal", mods: "CTRL SHIFT", key: "5" },
+                { label: "New Terminal Window", disabled: true },
+                { separator: true },
+                { label: "Run Task...", disabled: true },
+                { label: "Run Build Task...", mods: "CTRL SHIFT", key: "B" },
+                { label: "Run Active File", disabled: true },
+                { label: "Run Selected Text", disabled: true },
+                { separator: true },
+                { label: "Show Running Tasks...", disabled: true },
+                { label: "Restart Running Task...", disabled: true },
+                { label: "Terminate Task...", disabled: true },
+                { separator: true },
+                { label: "Configure Tasks...", disabled: true },
+                { label: "Configure Default Build Task...", disabled: true }
+            ]
+        },
+        {
+            label: "Help",
+            items: [
+                { label: "Welcome", disabled: true },
+                { label: "Show All Commands", mods: "CTRL SHIFT", key: "P" },
+                { label: "Documentation", disabled: true },
+                { label: "Editor Playground", disabled: true },
+                { label: "Open Walkthrough...", disabled: true },
+                { label: "Show Release Notes", disabled: true },
+                { label: "Get Started with Accessibility Features", disabled: true },
+                { label: "Ask @vscode", disabled: true },
+                { separator: true },
+                { label: "Keyboard Shortcuts Reference", chord: [ { mods: "CTRL", key: "K" }, { mods: "CTRL", key: "R" } ] },
+                { label: "Video Tutorials", disabled: true },
+                { label: "Tips and Tricks", disabled: true },
+                { separator: true },
+                { label: "Join Us on YouTube", disabled: true },
+                { label: "Search Feature Requests", disabled: true },
+                { label: "Report Issue", disabled: true },
+                { separator: true },
+                { label: "View License", disabled: true },
+                { label: "Privacy Statement", disabled: true },
+                { separator: true },
+                { label: "Toggle Developer Tools", disabled: true },
+                { label: "Open Process Explorer", disabled: true },
+                { separator: true },
+                { label: "About", disabled: true }
+            ]
+        }
+    ]
+}

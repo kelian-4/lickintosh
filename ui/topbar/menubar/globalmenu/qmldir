@@ -1,0 +1,4 @@
+singleton GlobalMenuService 1.0 GlobalMenuService.qml
+singleton ShortcutSymbols 1.0 ShortcutSymbols.qml
+GlobalMenuBar 1.0 GlobalMenuBar.qml
+PopupMenu 1.0 PopupMenu.qml

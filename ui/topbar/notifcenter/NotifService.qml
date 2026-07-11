@@ -110,6 +110,11 @@ Singleton {
         _groupTimer.stop()
     }
 
+    function restartGroupTimer() {
+        _groupTimer.stop()
+        _groupTimer.start()
+    }
+
     function removePopup(notifObj) {
         for (var i = 0; i < _popupModel.count; i++) {
             if (_popupModel.get(i).notifObj === notifObj) {

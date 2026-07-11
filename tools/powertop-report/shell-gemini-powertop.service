@@ -1,0 +1,6 @@
+[Unit]
+Description=Generate powertop CSV report for shell gemini
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /home/kelian/code/macos\x20shell/shell\x20gemini/tools/powertop-report/generate-powertop-report.sh

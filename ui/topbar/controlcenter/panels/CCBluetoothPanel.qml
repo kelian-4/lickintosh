@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
@@ -9,196 +8,213 @@ import qs.ui.primitives
 Item {
     id: root
 
-    property var adapter: Bluetooth.defaultAdapter
-    property bool btOn: adapter ? adapter.enabled : false
-    
     signal closeRequested()
 
-    
     readonly property int rowHeight: 48
-    readonly property int iconSize: 22
+    readonly property int iconSize:  22
 
-    property var devices: {
-        if (!adapter || !btOn) return []
-        var d = adapter.devices.values.filter(function(device) {
-            return device.name !== ""
-        })
-        return d
+    property var  _adapter: Bluetooth.defaultAdapter
+    property bool _btOn:    _adapter ? _adapter.enabled : false
+
+    property var _devices: {
+        if (!_adapter || !_btOn) return []
+        return _adapter.devices.values.filter(function(d) { return d.name !== "" })
     }
 
-    implicitHeight: content.height + 20
+    implicitHeight: _content.implicitHeight + 20
 
-    Item {
-        id: content
-        width: parent.width
-        height: title.height + list.height + 40
+    Column {
+        id: _content
+        width:            parent.width
+        anchors.top:      parent.top
+        anchors.topMargin: 10
+        spacing: 0
 
-        CFText {
-            id: title
-            text: "Bluetooth"
-            font.weight: 700
-            font.pixelSize: 18
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            anchors.top: parent.top
-            anchors.topMargin: 20
+        Item {
+            width:  parent.width
+            height: 54
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: root.closeRequested()
+            CFText {
+                text:           "Bluetooth"
+                font.weight:    Font.Bold
+                font.pixelSize: 18
+                anchors.left:        parent.left
+                anchors.leftMargin:  20
+                anchors.verticalCenter: parent.verticalCenter
             }
-        }
 
-        CFSwitch {
-            anchors.right: parent.right
-            anchors.rightMargin: 15
-            anchors.verticalCenter: title.verticalCenter
-            checked: root.btOn
-            onCheckedChanged: {
-                if (adapter) {
-                    adapter.enabled = checked
+            CFSwitch {
+                anchors.right:          parent.right
+                anchors.rightMargin:    15
+                anchors.verticalCenter: parent.verticalCenter
+                checked: root._btOn
+                onCheckedChanged: {
+                    if (root._adapter && checked !== root._btOn) {
+                        root._adapter.enabled = checked
+                    }
                 }
             }
         }
 
         Rectangle {
-            id: sep
-            width: parent.width - 40
+            width:  parent.width - 40
             height: 1
-            anchors.top: parent.top
-            anchors.topMargin: 55
+            color:  "#20ffffff"
             anchors.horizontalCenter: parent.horizontalCenter
-            color: "#20ffffff"
         }
 
-        Column {
-            id: list
-            anchors.top: sep.bottom
-            anchors.topMargin: 15
-            anchors.left: parent.left
-            anchors.right: parent.right
-            spacing: 5
+        Item { width: parent.width; height: 10 }
 
-            
-            CFText {
-                text: "Mes appareils"
-                font.pixelSize: 13
-                gray: true
-                visible: root.devices.some(function(d){return d.paired})
-                leftPadding: 20
-                bottomPadding: 5
-            }
+        CFText {
+            text:           "Mes appareils"
+            font.pixelSize: 13
+            gray:           true
+            visible:        root._devices.some(function(d) { return d.paired })
+            leftPadding:    20
+            bottomPadding:  4
+        }
 
-            Repeater {
-                model: root.devices.filter(function(d){return d.paired})
-                delegate: DeviceRow {}
-            }
+        Repeater {
+            model: root._devices.filter(function(d) { return d.paired })
+            delegate: DeviceRow {}
+        }
 
-            
-            CFText {
-                text: "Autres appareils"
-                font.pixelSize: 13
-                gray: true
-                visible: root.devices.some(function(d){return !d.paired})
-                leftPadding: 20
-                topPadding: 5
-                bottomPadding: 5
-            }
+        Item { width: parent.width; height: 8 }
 
-            Repeater {
-                model: root.devices.filter(function(d){return !d.paired})
-                delegate: DeviceRow {}
-            }
+        CFText {
+            text:          "Autres appareils"
+            font.pixelSize: 13
+            gray:           true
+            visible:        root._devices.some(function(d) { return !d.paired })
+            leftPadding:    20
+            bottomPadding:  4
+        }
 
-            Rectangle {
-                width: parent.width - 40
-                height: 1
-                color: "#10ffffff"
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: btOn
-            }
+        Repeater {
+            model: root._devices.filter(function(d) { return !d.paired })
+            delegate: DeviceRow {}
+        }
+
+        Rectangle {
+            width:   parent.width - 40
+            height:  1
+            color:   "#10ffffff"
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: root._btOn
+        }
+
+        Item {
+            width:   parent.width
+            height:  42
+            visible: root._btOn
 
             CFText {
-                text: "Paramètres Bluetooth…"
+                text:           "Paramètres Bluetooth…"
                 font.pixelSize: 14
-                gray: true
-                leftPadding: 20
-                topPadding: 10
-                visible: btOn
+                gray:           true
+                anchors.left:        parent.left
+                anchors.leftMargin:  20
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
     }
 
     component DeviceRow: Item {
-        id: _br
+        id:             _dr
         required property var modelData
-        width: list.width
-        height: root.rowHeight
-        property bool hovered: false
-        
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 4
-            radius: 10
-            color: _br.hovered ? "#15ffffff" : "transparent"
-        }
-        
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            spacing: 15
-            
-            CFClippingRect {
-                width: 32
-                height: 32
-                radius: 16
-                color: modelData.connected ? "#fff" : "#25ffffff"
-                CFVI {
-                    anchors.centerIn: parent
-                    icon: "bluetooth/bluetooth.svg"
-                    size: root.iconSize
-                    color: modelData.connected ? "#1C7AFF" : "#fff"
+        width:          parent.width
+        height:         root.rowHeight
+        property bool   _hovered:      false
+        property bool   _connecting:   false
+        property bool   _disconnecting: false
+
+        Connections {
+            target: _dr.modelData
+            function onConnectedChanged() {
+                if (_dr.modelData.connected) {
+                    _dr._connecting    = false
+                } else {
+                    _dr._disconnecting = false
                 }
             }
-            
-            CFText {
-                text: modelData.name
-                font.pixelSize: 14
-                Layout.fillWidth: true
-                elide: Text.ElideRight
+        }
+
+        Rectangle {
+            anchors.fill:    parent
+            anchors.margins: 4
+            radius:          10
+            color:           _dr._hovered ? "#15ffffff" : "transparent"
+        }
+
+        RowLayout {
+            anchors.fill:        parent
+            anchors.leftMargin:  20
+            anchors.rightMargin: 20
+            spacing: 15
+
+            CFClippingRect {
+                width:  32
+                height: 32
+                radius: 16
+                color:  _dr.modelData.connected ? "#fff" : "#25ffffff"
+                CFVI {
+                    anchors.centerIn: parent
+                    icon:  "bluetooth/bluetooth.svg"
+                    size:  root.iconSize
+                    color: _dr.modelData.connected ? "#1C7AFF" : "#fff"
+                }
             }
 
             CFText {
-                text: "Connexion..."
-                font.pixelSize: 12
-                gray: true
-                visible: modelData.connecting && !modelData.connected
+                text:             _dr.modelData.name
+                font.pixelSize:   14
+                Layout.fillWidth: true
+                elide:            Text.ElideRight
             }
-            
+
             CFText {
-                text: "✓"
-                visible: modelData.connected && !modelData.connecting
-                color: "#1C7AFF"
-                font.weight: Font.Bold
+                text:    "Connexion…"
+                font.pixelSize: 12
+                gray:    true
+                visible: _dr._connecting && !_dr.modelData.connected
+            }
+
+            CFText {
+                text:    "Déconnexion…"
+                font.pixelSize: 12
+                gray:    true
+                visible: _dr._disconnecting && _dr.modelData.connected
+            }
+
+            CFText {
+                text:           "✓"
+                visible:        _dr.modelData.connected && !_dr._connecting && !_dr._disconnecting
+                color:          "#1C7AFF"
+                font.weight:    Font.Bold
                 font.pixelSize: 16
             }
         }
-        
+
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: { _br.hovered = true }
-            onExited: { _br.hovered = false }
+            onEntered:    _dr._hovered = true
+            onExited:     _dr._hovered = false
             onClicked: {
-                if (modelData.connected) {
-                    modelData.disconnect()
+                if (_dr.modelData.connected) {
+                    _dr._disconnecting = true
+                    _dr._connecting    = false
+                    _dr.modelData.disconnect()
                 } else {
-                    var paired = root.devices.filter(function(d){return d.paired})
+                    var paired = root._devices.filter(function(d) { return d.paired })
                     for (var i = 0; i < paired.length; i++) {
-                        if (paired[i].connected && paired[i] !== modelData) paired[i].disconnect()
+                        if (paired[i].connected && paired[i] !== _dr.modelData) {
+                            paired[i].disconnect()
+                        }
                     }
-                    modelData.connect()
+                    _dr._connecting    = true
+                    _dr._disconnecting = false
+                    _dr.modelData.connect()
                 }
             }
         }

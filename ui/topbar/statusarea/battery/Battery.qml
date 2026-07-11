@@ -4,19 +4,21 @@ import QtQuick.VectorImage
 import Quickshell.Services.UPower
 
 RowLayout {
+    id: root
     spacing: 4
+
+    signal toggleBattery(int xPos)
 
     FontLoader {
         id: macFont
         source: "../../../../assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf"
     }
 
-    readonly property bool onBattery: UPower.onBattery
+    readonly property bool onBattery:     UPower.onBattery
     readonly property real batPercentage: UPower.displayDevice.isLaptopBattery ? UPower.displayDevice.percentage : 1
-    readonly property bool charging: onBattery ? (UPower.displayDevice.state === 1 ) : true
-
+    readonly property bool charging:      onBattery ? (UPower.displayDevice.state === 1) : true
     readonly property string batIcon: {
-        let level = (batPercentage > 0.95) ? "100" :
+        var level = (batPercentage > 0.95) ? "100" :
                     (batPercentage > 0.85) ? "090" :
                     (batPercentage > 0.75) ? "080" :
                     (batPercentage > 0.65) ? "070" :
@@ -25,29 +27,37 @@ RowLayout {
                     (batPercentage > 0.35) ? "040" :
                     (batPercentage > 0.25) ? "030" :
                     (batPercentage > 0.15) ? "020" :
-                    (batPercentage > 0.05) ? "010" : "000";
-        return "battery-" + level + (charging ? "-charging.svg" : ".svg");
+                    (batPercentage > 0.05) ? "010" : "000"
+        return "battery-" + level + (charging ? "-charging.svg" : ".svg")
     }
 
     Item {
-        width: 22
+        id: _batBtn
+        width:  22
         height: 22
         Layout.alignment: Qt.AlignVCenter
 
         VectorImage {
-            id: batImg
-            source: "../../../../assets/icons/battery/" + batIcon
+            source: "../../../../assets/icons/battery/" + root.batIcon
             anchors.fill: parent
             preferredRendererType: VectorImage.CurveRenderer
+        }
+
+        MouseArea {
+            anchors.fill:    parent
+            anchors.margins: -4
+            cursorShape:     Qt.PointingHandCursor
+            onClicked:       root.toggleBattery(_batBtn.mapToItem(null, _batBtn.width / 2, 0).x)
         }
     }
 
     Text {
-        text: Math.round(batPercentage * 100) + "%"
-        color: "#FFFFFF"
-        font.family: macFont.name
+        id: _pctText
+        text:           Math.round(root.batPercentage * 100) + "%"
+        color:          "#FFFFFF"
+        font.family:    macFont.name
         font.pixelSize: 13
-        renderType: Text.NativeRendering
+        renderType:     Text.NativeRendering
         Layout.alignment: Qt.AlignVCenter
     }
 }

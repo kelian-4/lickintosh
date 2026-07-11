@@ -13,7 +13,8 @@ Scope {
 
     property real brtValue:    0.65
     property real kbdBrtValue: 0.0
-    property bool blocked:     false
+    property bool blocked:        false
+    property bool batteryShowing: false
 
     property string _brtPath:     ""
     property string _kbdPath:     ""
@@ -31,7 +32,7 @@ Scope {
     property color  _currentFill:  "#F5A623"
     property string _currentIconL: ""
     property string _currentIconH: ""
-    property int    _currentSteps: 16
+    property int    _currentSteps: 10
 
     property real _lastKbdValue: -1.0
     property real _lastBrtValue: -1.0
@@ -59,7 +60,7 @@ Scope {
     Connections {
         target: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
         function onVolumeChanged() {
-            if (!root._ready || root.blocked) return
+            if (!root._ready || root.blocked || root.batteryShowing) return
             var sink = Pipewire.defaultAudioSink
             if (sink && sink.audio && sink.audio.muted && sink.audio.volume > 0) {
                 sink.audio.muted = false
@@ -68,7 +69,7 @@ Scope {
             root._showVolume()
         }
         function onMutedChanged() {
-            if (!root._ready || root.blocked) return
+            if (!root._ready || root.blocked || root.batteryShowing) return
             root._showVolume()
         }
     }
@@ -84,31 +85,31 @@ Scope {
         _currentFill  = "#F5A623"
         _currentIconL = "volume/audio-volume-1.svg"
         _currentIconH = "volume/audio-volume-3.svg"
-        _currentSteps = 16
+        _currentSteps = 10
         _trigger()
     }
 
     onBrtValueChanged: {
-        if (!root._brtReady || root.blocked) return
+        if (!root._brtReady || root.blocked || root.batteryShowing) return
         _currentType  = "brightness"
         _currentValue = root.brtValue
         _currentLabel = "Luminosité"
         _currentFill  = "#1C7AFF"
         _currentIconL = "sun-small.svg"
         _currentIconH = "sun-huge.svg"
-        _currentSteps = 20
+        _currentSteps = 10
         _trigger()
     }
 
     onKbdBrtValueChanged: {
-        if (!root._kbdReady || root.blocked) return
+        if (!root._kbdReady || root.blocked || root.batteryShowing) return
         _currentType  = "kbdbrt"
         _currentValue = root.kbdBrtValue
         _currentLabel = "Luminosité clavier"
         _currentFill  = "#FFD60A"
         _currentIconL = "brightness/display-brightness-off-symbolic.svg"
         _currentIconH = "brightness/display-brightness-symbolic.svg"
-        _currentSteps = 10
+        _currentSteps = 3
         _trigger()
     }
 
@@ -395,24 +396,25 @@ Scope {
                         Row {
                             id: dotsRow
                             anchors.top:         sliderRow.bottom
-                            anchors.topMargin:   5
+                            anchors.topMargin:   3
                             anchors.left:        sliderRow.left
                             anchors.leftMargin:  iconLeft.width + 8
                             anchors.right:       sliderRow.right
                             anchors.rightMargin: iconRight.width + 8
+                            visible:             root._currentType !== "kbdbrt"
 
                             Repeater {
                                 model: root._currentSteps
                                 delegate: Item {
                                     required property int index
                                     width:  dotsRow.width / root._currentSteps
-                                    height: 8
+                                    height: 5
 
                                     Rectangle {
                                         anchors.centerIn: parent
-                                        width:   4
-                                        height:  4
-                                        radius:  2
+                                        width:   3
+                                        height:  3
+                                        radius:  1.5
                                         color: (index + 1) <= Math.round(root._currentValue * root._currentSteps)
                                                ? "#ffffffff"
                                                : Qt.rgba(1, 1, 1, 0.28)

@@ -38,12 +38,6 @@ MouseArea {
         anchors.fill: parent
         anchors.margins: 2
         source: root.item.icon
-        
-        
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            colorization: 1
-            colorizationColor: root.containsMouse ? "#AAAAAA" : "#FFFFFF"
-        }
+
     }
 }
