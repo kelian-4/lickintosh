@@ -50,7 +50,18 @@ for stat_file in /proc/[0-9]*/stat; do
 
     rss_kb=0
     swap_kb=0
-    if [ -r "/proc/$pid/status" ]; then
+    if [ -r "/proc/$pid/smaps_rollup" ]; then
+        while IFS= read -r line; do
+            case "$line" in
+                Pss:*)
+                    read -r _ rss_kb _ <<< "$line"
+                    ;;
+                SwapPss:*)
+                    read -r _ swap_kb _ <<< "$line"
+                    ;;
+            esac
+        done < "/proc/$pid/smaps_rollup" 2>/dev/null
+    elif [ -r "/proc/$pid/status" ]; then
         while IFS= read -r line; do
             case "$line" in
                 VmRSS:*)
@@ -60,10 +71,11 @@ for stat_file in /proc/[0-9]*/stat; do
                     read -r _ swap_kb _ <<< "$line"
                     ;;
             esac
-        done < "/proc/$pid/status"
+        done < "/proc/$pid/status" 2>/dev/null
     fi
     [ -z "$rss_kb" ] && rss_kb=0
     [ -z "$swap_kb" ] && swap_kb=0
+
 
     MEM_KB[$appkey]=$(( ${MEM_KB[$appkey]:-0} + rss_kb ))
     SWAP_KB[$appkey]=$(( ${SWAP_KB[$appkey]:-0} + swap_kb ))

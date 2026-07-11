@@ -9,6 +9,7 @@ Item {
     id: root
     signal closeRequested()
     property bool needsKeyboard: false
+  
     implicitHeight: content.implicitHeight + 24
 
     readonly property bool onBattery: UPower.onBattery
@@ -136,7 +137,7 @@ Item {
                             }
                         }
                     }
-                    results.sort(function(a, b) { return b.cpu - a.cpu })
+		    results.sort(function(a, b) { return b.rssMb - a.rssMb })
                     var top = results.slice(0, 3)
 
                     for (var i = 0; i < top.length; i++) {
@@ -329,9 +330,11 @@ Item {
                 font.weight: Font.Bold
             }
 
+	    property bool hasCollectedOnce: root.previousTimestamp > 0
+
             CFText {
                 visible: root.topConsumers.length === 0
-                text: "No Apps Using Significant Energy"
+                text: root.hasCollectedOnce ? "No Apps Using Significant Energy" : "Calculating..."
                 gray: true
                 font.pixelSize: 12
             }
