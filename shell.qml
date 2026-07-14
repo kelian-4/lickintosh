@@ -1,3 +1,4 @@
+//@ pragma UseQApplication
 import Quickshell
 import QtQuick
 import Quickshell.Services.Notifications
@@ -5,6 +6,7 @@ import qs.core.network
 import qs.ui.topbar.statusarea
 import qs.ui.topbar.statusarea.ai
 import qs.ui.topbar.statusarea.battery
+import qs.ui.topbar.statusarea.volume
 import qs.ui.topbar.controlcenter.panels
 import qs.ui.topbar.notifcenter
 import qs.ui.topbar
@@ -31,10 +33,13 @@ ShellRoot {
     property int  bluetoothX:        0
     property bool batteryOpened:     false
     property int  batteryX:          0
+    property bool volumeOpened:      false
+    property int  volumeX:           0
 
     Variants {
         model: Quickshell.screens
         PanelWindow {
+            id: topBarWindow
             required property var modelData
             screen: modelData
             anchors { top: true; left: true; right: true }
@@ -43,6 +48,7 @@ ShellRoot {
             exclusiveZone: implicitHeight
 
             TopBar {
+                hostWindow:       topBarWindow
                 appleMenuOpened:  appRoot.appleMenuOpened
                 spotlightOpened:  appRoot.spotlightOpened
                 notifUnreadCount: _globalNotifServer.trackedNotifications.length
@@ -54,6 +60,7 @@ ShellRoot {
                 onToggleWifi:         (x) => { appRoot.wifiX = x; appRoot.wifiOpened = !appRoot.wifiOpened }
                 onToggleBluetooth:    (x) => { appRoot.bluetoothX = x; appRoot.bluetoothOpened = !appRoot.bluetoothOpened }
                 onToggleBattery:      (x) => { appRoot.batteryX = x; appRoot.batteryOpened = !appRoot.batteryOpened }
+                onToggleVolume:       (x) => { appRoot.volumeX = x; appRoot.volumeOpened = !appRoot.volumeOpened }
             }
         }
     }
@@ -136,6 +143,15 @@ ShellRoot {
         onCloseRequested: appRoot.batteryOpened = false
         contentComponent: Component {
             BatteryPanel {}
+        }
+    }
+
+    StatusSubMenuWindow {
+        opened: appRoot.volumeOpened
+        xPos: appRoot.volumeX
+        onCloseRequested: appRoot.volumeOpened = false
+        contentComponent: Component {
+            VolumePanel {}
         }
     }
 }

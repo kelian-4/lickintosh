@@ -20,8 +20,11 @@ RowLayout {
     signal toggleWifi(int xPos)
     signal toggleBluetooth(int xPos)
     signal toggleBattery(int xPos)
+    signal toggleVolume(int xPos)
 
+    property var hostWindow: null
     property int notifUnreadCount: 0
+    property real barWidth: 0
 
     FontLoader {
         id: macFont
@@ -29,158 +32,169 @@ RowLayout {
     }
 
     SystemTray {
+        id: systemTray
         Layout.alignment: Qt.AlignVCenter
+        hostWindow: root.hostWindow
+        maxWidth: Math.max(60, root.barWidth / 2 - otherControlsRow.implicitWidth - root.spacing)
     }
 
-    BTDeviceTray {
+    RowLayout {
+        id: otherControlsRow
+        spacing: 15
         Layout.alignment: Qt.AlignVCenter
-    }
 
-    Volume {
-        Layout.alignment: Qt.AlignVCenter
-    }
-
-    Battery {
-        id: batteryIcon
-        Layout.alignment: Qt.AlignVCenter
-        onToggleBattery: (x) => root.toggleBattery(x)
-    }
-
-    Bluetooth {
-        id: btIcon
-        Layout.alignment: Qt.AlignVCenter
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.toggleBluetooth(btIcon.mapToItem(null, btIcon.width, 0).x)
+        BTDeviceTray {
+            Layout.alignment: Qt.AlignVCenter
         }
-    }
 
-    Wifi {
-        id: wifiIcon
-        Layout.alignment: Qt.AlignVCenter
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.toggleWifi(wifiIcon.mapToItem(null, wifiIcon.width, 0).x)
+        Volume {
+            id: volumeIcon
+            Layout.alignment: Qt.AlignVCenter
+            onToggleVolume: (x) => root.toggleVolume(x)
         }
-    }
 
-    Item {
-        id: spotlightBtn
-        width: 18
-        height: 18
-        Layout.alignment: Qt.AlignVCenter
+        Battery {
+            id: batteryIcon
+            Layout.alignment: Qt.AlignVCenter
+            onToggleBattery: (x) => root.toggleBattery(x)
+        }
 
-        property bool hovered: false
+        Bluetooth {
+            id: btIcon
+            Layout.alignment: Qt.AlignVCenter
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.toggleBluetooth(btIcon.mapToItem(null, btIcon.width, 0).x)
+            }
+        }
 
-        VectorImage {
-            anchors.fill: parent
-            source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/search.svg")
-            preferredRendererType: VectorImage.CurveRenderer
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1
-                colorizationColor: spotlightBtn.hovered ? "#AAAAAA" : "#FFFFFF"
+        Wifi {
+            id: wifiIcon
+            Layout.alignment: Qt.AlignVCenter
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.toggleWifi(wifiIcon.mapToItem(null, wifiIcon.width, 0).x)
+            }
+        }
+
+        Item {
+            id: spotlightBtn
+            width: 18
+            height: 18
+            Layout.alignment: Qt.AlignVCenter
+
+            property bool hovered: false
+
+            VectorImage {
+                anchors.fill: parent
+                source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/search.svg")
+                preferredRendererType: VectorImage.CurveRenderer
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1
+                    colorizationColor: spotlightBtn.hovered ? "#AAAAAA" : "#FFFFFF"
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onEntered: spotlightBtn.hovered = true
+                onExited:  spotlightBtn.hovered = false
+                onClicked: root.toggleSpotlight()
             }
         }
 
         MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onEntered: spotlightBtn.hovered = true
-            onExited:  spotlightBtn.hovered = false
-            onClicked: root.toggleSpotlight()
-        }
-    }
-
-    MouseArea {
-        width: 16
-        height: 16
-        Layout.alignment: Qt.AlignVCenter
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: root.toggleCC()
-
-        VectorImage {
-            anchors.centerIn: parent
             width: 16
             height: 16
-            source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/control-center.svg")
-            preferredRendererType: VectorImage.CurveRenderer
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1
-                colorizationColor: parent.containsMouse ? "#AAAAAA" : "#FFFFFF"
-            }
-        }
-    }
-
-    Item {
-        id: aiBtn
-        width: 18
-        height: 18
-        Layout.alignment: Qt.AlignVCenter
-
-        property bool hovered: false
-
-        VectorImage {
-            anchors.fill: parent
-            source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/ai.svg")
-            preferredRendererType: VectorImage.CurveRenderer
-        }
-
-        MouseArea {
-            anchors.fill: parent
+            Layout.alignment: Qt.AlignVCenter
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onEntered: aiBtn.hovered = true
-            onExited:  aiBtn.hovered = false
-            onClicked: root.toggleAI()
-        }
-    }
+            onClicked: root.toggleCC()
 
-    Item {
-        id: _clockWrap
-        Layout.alignment: Qt.AlignVCenter
-        implicitWidth:  _clock.implicitWidth + (root.notifUnreadCount > 0 ? _badge.width + 4 : 0)
-        implicitHeight: _clock.implicitHeight
-
-        Clock {
-            id: _clock
-        }
-
-        Rectangle {
-            id: _badge
-            anchors.left:           _clock.right
-            anchors.leftMargin:     4
-            anchors.verticalCenter: _clock.verticalCenter
-            width:   Math.max(16, _badgeTxt.implicitWidth + 8)
-            height:  16
-            radius:  8
-            color:   "#FF453A"
-            visible: root.notifUnreadCount > 0
-
-            Text {
-                id: _badgeTxt
+            VectorImage {
                 anchors.centerIn: parent
-                text:           root.notifUnreadCount > 99 ? "99+" : root.notifUnreadCount.toString()
-                font.pixelSize: 10
-                font.weight:    Font.Bold
-                font.family:    "SF Pro Rounded"
-                color:          "#fff"
-                renderType:     Text.NativeRendering
+                width: 16
+                height: 16
+                source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/control-center.svg")
+                preferredRendererType: VectorImage.CurveRenderer
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1
+                    colorizationColor: parent.containsMouse ? "#AAAAAA" : "#FFFFFF"
+                }
             }
         }
 
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape:  Qt.PointingHandCursor
-            onClicked:    root.toggleNotifCenter()
-            onEntered:    _clock.color = Qt.rgba(1, 1, 1, 0.70)
-            onExited:     _clock.color = "#FFFFFF"
+        Item {
+            id: aiBtn
+            width: 18
+            height: 18
+            Layout.alignment: Qt.AlignVCenter
+
+            property bool hovered: false
+
+            VectorImage {
+                anchors.fill: parent
+                source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/ai.svg")
+                preferredRendererType: VectorImage.CurveRenderer
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onEntered: aiBtn.hovered = true
+                onExited:  aiBtn.hovered = false
+                onClicked: root.toggleAI()
+            }
+        }
+
+        Item {
+            id: _clockWrap
+            Layout.alignment: Qt.AlignVCenter
+            implicitWidth:  _clock.implicitWidth + (root.notifUnreadCount > 0 ? _badge.width + 4 : 0)
+            implicitHeight: _clock.implicitHeight
+
+            Clock {
+                id: _clock
+            }
+
+            Rectangle {
+                id: _badge
+                anchors.left:           _clock.right
+                anchors.leftMargin:     4
+                anchors.verticalCenter: _clock.verticalCenter
+                width:   Math.max(16, _badgeTxt.implicitWidth + 8)
+                height:  16
+                radius:  8
+                color:   "#FF453A"
+                visible: root.notifUnreadCount > 0
+
+                Text {
+                    id: _badgeTxt
+                    anchors.centerIn: parent
+                    text:           root.notifUnreadCount > 99 ? "99+" : root.notifUnreadCount.toString()
+                    font.pixelSize: 10
+                    font.weight:    Font.Bold
+                    font.family:    "SF Pro Rounded"
+                    color:          "#fff"
+                    renderType:     Text.NativeRendering
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape:  Qt.PointingHandCursor
+                onClicked:    root.toggleNotifCenter()
+                onEntered:    _clock.color = Qt.rgba(1, 1, 1, 0.70)
+                onExited:     _clock.color = "#FFFFFF"
+            }
         }
     }
 }

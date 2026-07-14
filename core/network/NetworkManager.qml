@@ -14,6 +14,11 @@ Singleton {
     readonly property AccessPoint active:              networks.find(function(n) { return n.active }) || null
     property bool wifiEnabled:                         true
     readonly property bool scanning:                   _rescan.running
+    readonly property bool busy:                       _connect.running
+                                                         || _connectFresh.running
+                                                         || _disconnect.running
+                                                         || _deleteProfile.running
+                                                         || _deleteProfileSilent.running
 
     property string _pendingSSID:     ""
     property string _pendingPassword: ""
@@ -105,21 +110,13 @@ Singleton {
                 _getKnown.running    = true
             }
         }
-        stderr: StdioCollector {
-            onStreamFinished: {
-                var t = text.trim()
-                if (t.indexOf("Secrets were required") !== -1 ||
-                    t.indexOf("no-secrets") !== -1 ||
-                    t.indexOf("activation failed") !== -1) {
-                    var failedSSID = _connect.command[_connect.command.length - 1]
-                    _deleteProfileSilent.command = ["nmcli", "conn", "delete", failedSSID]
-                    _deleteProfileSilent.running = true
-                    root.connectionFailed(failedSSID)
-                    _getKnown.running = true
-                }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                var failedSSID = _connect.command[_connect.command.length - 1]
+                _deleteProfileSilent.command = ["nmcli", "conn", "delete", failedSSID]
+                _deleteProfileSilent.running = true
+                root.connectionFailed(failedSSID)
             }
-        }
-        onExited: {
             _getNetworks.running = true
             _getKnown.running    = true
         }
@@ -154,17 +151,15 @@ Singleton {
 
     Process {
         id: _connectFresh
-        stderr: StdioCollector {
-            onStreamFinished: {
-                var t = text.trim()
-                if (t.indexOf("Error") !== -1 || t.indexOf("failed") !== -1) {
-                    root.connectionFailed(root._pendingSSID)
-                }
-            }
-        }
-        onExited: {
+        onExited: (exitCode, exitStatus) => {
+            var failedSSID = root._pendingSSID
             root._pendingSSID     = ""
             root._pendingPassword = ""
+            if (exitCode !== 0) {
+                _deleteProfileSilent.command = ["nmcli", "conn", "delete", failedSSID]
+                _deleteProfileSilent.running = true
+                root.connectionFailed(failedSSID)
+            }
             _getNetworks.running  = true
             _getKnown.running     = true
         }
@@ -213,7 +208,11 @@ Singleton {
                     for (var m = 0; m < next.length; m++) {
                         if (next[m].ssid === current[k].ssid) { found = true; break }
                     }
-                    if (!found) current.splice(k, 1)
+                    if (!found) {
+                        var removedObj = current[k]
+                        current.splice(k, 1)
+                        removedObj.destroy()
+                    }
                 }
 
                 for (var q = 0; q < next.length; q++) {

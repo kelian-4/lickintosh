@@ -11,19 +11,25 @@ Item {
 
     signal closeRequested()
 
-    readonly property int rowHeight: 44
-    readonly property int iconSize:  20
+    readonly property int rowHeight:       44
+    readonly property int iconSize:        20
+    readonly property int maxScrollHeight: 360
 
-    property int  _passwordForIndex: -1
-    property bool _disconnecting:    false
-    property bool needsKeyboard:     _passwordForIndex !== -1
-    property var  _failedSSIDs:      ({})
+    property int  _passwordForIndex:   -1
+    property int  _connectingIndex:    -1
+    property bool _disconnecting:      false
+    property bool needsKeyboard:       _passwordForIndex !== -1
+    property var  _failedSSIDs:        ({})
 
     Timer {
         interval: 1000
         running:  true
         repeat:   true
-        onTriggered: NetworkManager.refresh()
+        onTriggered: {
+            if (!NetworkManager.busy) {
+                NetworkManager.refresh()
+            }
+        }
     }
 
     Connections {
@@ -41,28 +47,44 @@ Item {
         function onConnectionFailed(ssid) {
             root._failedSSIDs[ssid] = true
             root._failedSSIDsChanged()
-            var nets = NetworkManager.networks
-            for (var i = 0; i < nets.length; i++) {
-                if (nets[i].ssid === ssid) {
-                    var isKnown = NetworkManager.networksKnown.indexOf(nets[i]) !== -1
-                    root._passwordForIndex = isKnown ? i : 10000 + i
-                    break
+
+            var knownList = NetworkManager.networksKnown.filter(function(n) { return !n.active })
+            for (var i = 0; i < knownList.length; i++) {
+                if (knownList[i].ssid === ssid) {
+                    root._passwordForIndex = i
+                    return
                 }
+            }
+
+            var otherList = NetworkManager.networks.filter(function(n) {
+                return !n.active && NetworkManager.networksKnown.indexOf(n) === -1
+            })
+            for (var j = 0; j < otherList.length; j++) {
+                if (otherList[j].ssid === ssid) {
+                    root._passwordForIndex = 10000 + j
+                    return
+                }
+            }
+        }
+        function onBusyChanged() {
+            if (!NetworkManager.busy) {
+                root._connectingIndex = -1
             }
         }
     }
 
-    implicitHeight: _col.implicitHeight + 20
+    implicitHeight: _layout.implicitHeight
 
-    Column {
-        id: _col
-        width:             parent.width
-        anchors.top:       parent.top
-        anchors.topMargin: 10
-        spacing:           0
+    ColumnLayout {
+        id: _layout
+        anchors.left:  parent.left
+        anchors.right: parent.right
+        anchors.top:   parent.top
+        spacing: 0
 
         Item {
-            width:  parent.width
+            Layout.fillWidth: true
+            Layout.topMargin: 10
             height: 54
 
             CFText {
@@ -84,126 +106,144 @@ Item {
         }
 
         Rectangle {
-            width:  parent.width - 40
+            Layout.fillWidth:            true
+            Layout.leftMargin:           20
+            Layout.rightMargin:          20
             height: 1
             color:  "#20ffffff"
-            anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        Item { width: parent.width; height: 10 }
+        ScrollView {
+            id: _scrollArea
+            Layout.fillWidth: true
+            Layout.preferredHeight: Math.min(_col.implicitHeight, root.maxScrollHeight)
+            clip: true
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-        CFText {
-            text:          "Connecté"
-            font.pixelSize: 13
-            gray:           true
-            visible:        NetworkManager.active !== null
-            leftPadding:    20
-            bottomPadding:  4
-        }
+            Column {
+                id: _col
+                width:   _scrollArea.width
+                spacing: 0
 
-        NetRow {
-            width:    parent.width
-            net:      NetworkManager.active
-            isActive: true
-            visible:  NetworkManager.active !== null
-            rowIndex: -1
-        }
+                Item { width: parent.width; height: 10 }
 
-        Item { width: parent.width; height: NetworkManager.networksKnown.length > 0 ? 8 : 0 }
-
-        CFText {
-            text:           "Réseaux connus"
-            font.pixelSize: 13
-            gray:           true
-            visible:        NetworkManager.networksKnown.filter(function(n) { return !n.active }).length > 0
-            leftPadding:    20
-            bottomPadding:  4
-        }
-
-        Repeater {
-            model: NetworkManager.networksKnown.filter(function(n) { return !n.active })
-            delegate: NetRow {
-                required property var modelData
-                required property int index
-                width:    parent.width
-                net:      modelData
-                isActive: false
-                rowIndex: index
-            }
-        }
-
-        Item { width: parent.width; height: 8 }
-
-        Rectangle {
-            width:   parent.width - 40
-            height:  1
-            color:   "#10ffffff"
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: _otherNets.count > 0
-        }
-
-        Item {
-            id:      _otherHeader
-            width:   parent.width
-            height:  38
-            visible: _otherNets.count > 0
-            property bool _shown: false
-
-            CFText {
-                text:           "Autres réseaux"
-                font.pixelSize: 13
-                gray:           true
-                anchors.left:           parent.left
-                anchors.leftMargin:     20
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            CFVI {
-                anchors.right:          parent.right
-                anchors.rightMargin:    20
-                anchors.verticalCenter: parent.verticalCenter
-                icon:     "chevron-right.svg"
-                size:     14
-                rotation: _otherHeader._shown ? 90 : 0
-                Behavior on rotation { NumberAnimation { duration: 200 } }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked:    _otherHeader._shown = !_otherHeader._shown
-            }
-        }
-
-        Column {
-            width:   parent.width
-            visible: _otherHeader._shown
-            spacing: 0
-
-            Repeater {
-                id: _otherNets
-                model: NetworkManager.networks.filter(function(n) {
-                    return !n.active && NetworkManager.networksKnown.indexOf(n) === -1
-                })
-                delegate: NetRow {
-                    required property var modelData
-                    required property int index
-                    width:    parent.width
-                    net:      modelData
-                    isActive: false
-                    rowIndex: 10000 + index
+                CFText {
+                    text:          "Connecté"
+                    font.pixelSize: 13
+                    gray:           true
+                    visible:        NetworkManager.active !== null
+                    leftPadding:    20
+                    bottomPadding:  4
                 }
+
+                NetRow {
+                    width:    parent.width
+                    net:      NetworkManager.active
+                    isActive: true
+                    visible:  NetworkManager.active !== null
+                    rowIndex: -1
+                }
+
+                Item { width: parent.width; height: NetworkManager.networksKnown.length > 0 ? 8 : 0 }
+
+                CFText {
+                    text:           "Réseaux connus"
+                    font.pixelSize: 13
+                    gray:           true
+                    visible:        NetworkManager.networksKnown.filter(function(n) { return !n.active }).length > 0
+                    leftPadding:    20
+                    bottomPadding:  4
+                }
+
+                Repeater {
+                    model: NetworkManager.networksKnown.filter(function(n) { return !n.active })
+                    delegate: NetRow {
+                        required property var modelData
+                        required property int index
+                        width:    parent.width
+                        net:      modelData
+                        isActive: false
+                        rowIndex: index
+                    }
+                }
+
+                Item { width: parent.width; height: 8 }
+
+                Rectangle {
+                    width:   parent.width - 40
+                    height:  1
+                    color:   "#10ffffff"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: _otherNets.count > 0
+                }
+
+                Item {
+                    id:      _otherHeader
+                    width:   parent.width
+                    height:  38
+                    visible: _otherNets.count > 0
+                    property bool _shown: false
+
+                    CFText {
+                        text:           "Autres réseaux"
+                        font.pixelSize: 13
+                        gray:           true
+                        anchors.left:           parent.left
+                        anchors.leftMargin:     20
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    CFVI {
+                        anchors.right:          parent.right
+                        anchors.rightMargin:    20
+                        anchors.verticalCenter: parent.verticalCenter
+                        icon:     "chevron-right.svg"
+                        size:     14
+                        rotation: _otherHeader._shown ? 90 : 0
+                        Behavior on rotation { NumberAnimation { duration: 200 } }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked:    _otherHeader._shown = !_otherHeader._shown
+                    }
+                }
+
+                Column {
+                    width:   parent.width
+                    visible: _otherHeader._shown
+                    spacing: 0
+
+                    Repeater {
+                        id: _otherNets
+                        model: NetworkManager.networks.filter(function(n) {
+                            return !n.active && NetworkManager.networksKnown.indexOf(n) === -1
+                        })
+                        delegate: NetRow {
+                            required property var modelData
+                            required property int index
+                            width:    parent.width
+                            net:      modelData
+                            isActive: false
+                            rowIndex: 10000 + index
+                        }
+                    }
+                }
+
+                Item { width: parent.width; height: 8 }
             }
         }
 
         Rectangle {
-            width:  parent.width - 40
+            Layout.fillWidth:   true
+            Layout.leftMargin:  20
+            Layout.rightMargin: 20
             height: 1
             color:  "#10ffffff"
-            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Item {
-            width:  parent.width
+            Layout.fillWidth: true
             height: 44
 
             CFText {
@@ -282,8 +322,7 @@ Item {
                 text:           "Connexion…"
                 font.pixelSize: 12
                 gray:           true
-                visible:        !_nr.isActive && root._passwordForIndex === -2
-                                && NetworkManager.active === null
+                visible:        !_nr.isActive && root._connectingIndex === _nr.rowIndex
             }
 
             CFVI {
@@ -291,6 +330,7 @@ Item {
                 size:    13
                 visible: _nr.net && _nr.net.isSecure && !_nr.isActive
                          && root._passwordForIndex !== _nr.rowIndex
+                         && root._connectingIndex !== _nr.rowIndex
                 gray:    true
             }
 
@@ -339,9 +379,10 @@ Item {
                 }
                 onAccepted: {
                     if (_nr.net) {
+                        root._connectingIndex  = _nr.rowIndex
+                        root._passwordForIndex = -1
                         NetworkManager.connectToNetwork(_nr.net.ssid, text)
                         text = ""
-                        root._passwordForIndex = -1
                     }
                 }
                 onVisibleChanged: {
@@ -371,9 +412,10 @@ Item {
                     cursorShape:  Qt.PointingHandCursor
                     onClicked: {
                         if (_nr.net) {
+                            root._connectingIndex  = _nr.rowIndex
+                            root._passwordForIndex = -1
                             NetworkManager.connectToNetwork(_nr.net.ssid, _pwField.text)
                             _pwField.text = ""
-                            root._passwordForIndex = -1
                         }
                     }
                 }
@@ -400,6 +442,7 @@ Item {
                     root._passwordForIndex = (root._passwordForIndex === _nr.rowIndex)
                                              ? -1 : _nr.rowIndex
                 } else if (_nr.net) {
+                    root._connectingIndex = _nr.rowIndex
                     NetworkManager.connectToNetwork(_nr.net.ssid, "")
                 }
             }

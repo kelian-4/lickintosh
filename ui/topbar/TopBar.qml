@@ -16,7 +16,9 @@ Rectangle {
     signal toggleWifi(int xPos)
     signal toggleBluetooth(int xPos)
     signal toggleBattery(int xPos)
+    signal toggleVolume(int xPos)
 
+    property var hostWindow: null
     property bool appleMenuOpened:  false
     property bool spotlightOpened:  false
     property int  notifUnreadCount: 0
@@ -55,6 +57,7 @@ Rectangle {
 
         StatusArea {
             Layout.alignment:  Qt.AlignRight | Qt.AlignVCenter
+            hostWindow:        root.hostWindow
             notifUnreadCount:  root.notifUnreadCount
             onToggleCC:        root.toggleCC()
             onToggleSpotlight: root.toggleSpotlight()
@@ -63,6 +66,7 @@ Rectangle {
             onToggleWifi:      (x) => root.toggleWifi(x)
             onToggleBluetooth: (x) => root.toggleBluetooth(x)
             onToggleBattery:    (x) => root.toggleBattery(x)
+            onToggleVolume:    (x) => root.toggleVolume(x)
         }
     }
 }
