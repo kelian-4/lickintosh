@@ -7,6 +7,7 @@ Scope {
     property bool opened: false
     signal closeRequested()
     signal openAbout()
+    signal lockRequested()
 
     Loader {
         active: root.opened
@@ -38,6 +39,7 @@ Scope {
                     opened: root.opened
                     onCloseRequested: root.closeRequested()
                     onOpenAbout: root.openAbout()
+                    onLockRequested: root.lockRequested()
                 }
             }
         }

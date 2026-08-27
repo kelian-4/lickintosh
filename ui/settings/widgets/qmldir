@@ -1,0 +1,6 @@
+module qs.ui.settings.widgets
+ConfigSlider 1.0 ConfigSlider.qml
+ConfigSwitch 1.0 ConfigSwitch.qml
+ContentPage 1.0 ContentPage.qml
+ContentSection 1.0 ContentSection.qml
+PlaceholderPage 1.0 PlaceholderPage.qml

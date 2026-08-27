@@ -8,11 +8,25 @@ Item {
     signal closeRequested()
     property bool needsKeyboard: false
     property var menuHandle: null
-    implicitHeight: content.implicitHeight + 16
+
+    // Pile de navigation : [] = racine, [entry1] = sous-menu de entry1,
+    // [entry1, entry2] = sous-menu de entry2 dans entry1, etc.
+    property var _menuStack: []
+
+    readonly property var _currentMenu: _menuStack.length > 0
+                                         ? _menuStack[_menuStack.length - 1]
+                                         : root.menuHandle
+    readonly property string _currentTitle: _menuStack.length > 0
+                                             ? (_menuStack[_menuStack.length - 1].text || "")
+                                             : ""
+
+    implicitHeight: content.implicitHeight + 16 + (root._menuStack.length > 0 ? 34 : 0)
+
+    onMenuHandleChanged: root._menuStack = []
 
     QsMenuOpener {
         id: opener
-        menu: root.menuHandle
+        menu: root._currentMenu
     }
 
     ColumnLayout {
@@ -25,16 +39,60 @@ Item {
         anchors.topMargin: 8
         spacing: 2
 
+        Item {
+            Layout.fillWidth: true
+            height: 34
+            visible: root._menuStack.length > 0
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 4
+                spacing: 6
+
+                CFText {
+                    text: "\u2039"
+                    font.pixelSize: 15
+                    font.weight: Font.Bold
+                }
+
+                CFText {
+                    text: root._currentTitle
+                    font.pixelSize: 13
+                    font.weight: Font.Bold
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    var s = root._menuStack.slice()
+                    s.pop()
+                    root._menuStack = s
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "#20ffffff"
+            visible: root._menuStack.length > 0
+        }
+
         Repeater {
-            model: root.menuHandle ? opener.children : []
+            model: root._currentMenu ? opener.children : []
 
             Item {
                 id: entryRoot
+                required property var modelData
                 Layout.fillWidth: true
                 height: modelData.isSeparator ? 9 : 34
 
                 Rectangle {
-                    visible: modelData.isSeparator
+                    visible: entryRoot.modelData.isSeparator
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
@@ -43,10 +101,10 @@ Item {
                 }
 
                 Rectangle {
-                    visible: !modelData.isSeparator
+                    visible: !entryRoot.modelData.isSeparator
                     anchors.fill: parent
                     radius: 6
-                    color: entryMouse.containsMouse && modelData.enabled ? "#14ffffff" : "transparent"
+                    color: entryMouse.containsMouse && entryRoot.modelData.enabled ? "#14ffffff" : "transparent"
 
                     Behavior on color {
                         ColorAnimation { duration: 120 }
@@ -65,22 +123,22 @@ Item {
 
                             CFText {
                                 anchors.centerIn: parent
-                                visible: modelData.checkState === 2
+                                visible: entryRoot.modelData.checkState === 2
                                 text: "\u2713"
                                 font.pixelSize: 12
                             }
                         }
 
                         CFText {
-                            text: modelData.text
+                            text: entryRoot.modelData.text
                             font.pixelSize: 13
-                            gray: !modelData.enabled
+                            gray: !entryRoot.modelData.enabled
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                         }
 
                         CFText {
-                            visible: modelData.hasChildren
+                            visible: entryRoot.modelData.hasChildren
                             text: "\u203a"
                             gray: true
                             font.pixelSize: 13
@@ -91,11 +149,17 @@ Item {
                         id: entryMouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        enabled: modelData.enabled
+                        enabled: entryRoot.modelData.enabled
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            modelData.triggered()
-                            root.closeRequested()
+                            if (entryRoot.modelData.hasChildren) {
+                                var s = root._menuStack.slice()
+                                s.push(entryRoot.modelData)
+                                root._menuStack = s
+                            } else {
+                                entryRoot.modelData.triggered()
+                                root.closeRequested()
+                            }
                         }
                     }
                 }

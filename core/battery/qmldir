@@ -1,0 +1,3 @@
+module qs.core.battery
+singleton BatteryHealthState 1.0 BatteryHealthState.qml
+singleton BatteryHistoryState 1.0 BatteryHistoryState.qml

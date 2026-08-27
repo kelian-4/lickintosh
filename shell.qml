@@ -15,6 +15,7 @@ import qs.ui.topbar.menubar.applemenu
 import qs.ui.dock
 import qs.ui.topbar.spotlight
 import qs.ui.osd
+import qs.ui.lockscreen
 
 
 ShellRoot {
@@ -69,6 +70,7 @@ ShellRoot {
         opened: appRoot.appleMenuOpened
         onCloseRequested: appRoot.appleMenuOpened = false
         onOpenAbout:      appRoot.aboutOpened     = true
+        onLockRequested:  lockScreen.lock()
     }
     AboutWindow {
         opened: appRoot.aboutOpened
@@ -82,6 +84,7 @@ ShellRoot {
     SpotlightWindow {
         opened: appRoot.spotlightOpened
         onCloseRequested: appRoot.spotlightOpened = false
+    	onOpenRequested:  appRoot.spotlightOpened = true
     }
     AiWindow {
         opened: appRoot.aiOpened
@@ -117,6 +120,10 @@ ShellRoot {
         bodyMarkupSupported: true
         actionsSupported:    true
         imageSupported:      true
+    }
+
+    LockScreen {
+        id: lockScreen
     }
 
     StatusSubMenuWindow {

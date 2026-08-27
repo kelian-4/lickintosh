@@ -15,11 +15,25 @@ Item {
     readonly property int iconSize:        20
     readonly property int maxScrollHeight: 360
 
-    property int  _passwordForIndex:   -1
-    property int  _connectingIndex:    -1
-    property bool _disconnecting:      false
-    property bool needsKeyboard:       _passwordForIndex !== -1
+    property string _passwordForSSID:  ""
+    property string _connectingSSID:   ""
+    property string _disconnectingSSID: ""
+    property bool needsKeyboard:       _passwordForSSID !== ""
     property var  _failedSSIDs:        ({})
+
+    property var  _ctxNet: null
+    property real _ctxX: 0
+    property real _ctxY: 0
+
+    function openContextMenu(net, x, y) {
+        root._ctxNet = net
+        root._ctxX = x
+        root._ctxY = y
+    }
+
+    function closeContextMenu() {
+        root._ctxNet = null
+    }
 
     Timer {
         interval: 1000
@@ -36,39 +50,25 @@ Item {
         target: NetworkManager
         function onActiveChanged() {
             if (NetworkManager.active !== null) {
-                root._disconnecting = false
+                root._disconnectingSSID = ""
                 if (NetworkManager.active.ssid) {
                     delete root._failedSSIDs[NetworkManager.active.ssid]
                     root._failedSSIDsChanged()
                 }
-                root._passwordForIndex = -1
+                root._passwordForSSID = ""
             }
         }
         function onConnectionFailed(ssid) {
             root._failedSSIDs[ssid] = true
             root._failedSSIDsChanged()
-
-            var knownList = NetworkManager.networksKnown.filter(function(n) { return !n.active })
-            for (var i = 0; i < knownList.length; i++) {
-                if (knownList[i].ssid === ssid) {
-                    root._passwordForIndex = i
-                    return
-                }
-            }
-
-            var otherList = NetworkManager.networks.filter(function(n) {
-                return !n.active && NetworkManager.networksKnown.indexOf(n) === -1
-            })
-            for (var j = 0; j < otherList.length; j++) {
-                if (otherList[j].ssid === ssid) {
-                    root._passwordForIndex = 10000 + j
-                    return
-                }
-            }
+            root._passwordForSSID = ssid
+        }
+        function onPasswordRequired(ssid) {
+            root._passwordForSSID = ssid
         }
         function onBusyChanged() {
             if (!NetworkManager.busy) {
-                root._connectingIndex = -1
+                root._connectingSSID = ""
             }
         }
     }
@@ -120,6 +120,23 @@ Item {
             clip: true
             ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
+            ScrollBar.vertical: ScrollBar {
+                id: _vbar
+                parent: _scrollArea
+                x: _scrollArea.width - width
+                width: 4
+                policy: ScrollBar.AsNeeded
+
+                contentItem: Rectangle {
+                    implicitWidth: 4
+                    radius: 2
+                    color: "#50ffffff"
+                    opacity: _vbar.pressed ? 0.9 : (_vbar.hovered ? 0.7 : 0.0)
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                }
+                background: Item {}
+            }
+
             Column {
                 id: _col
                 width:   _scrollArea.width
@@ -141,7 +158,6 @@ Item {
                     net:      NetworkManager.active
                     isActive: true
                     visible:  NetworkManager.active !== null
-                    rowIndex: -1
                 }
 
                 Item { width: parent.width; height: NetworkManager.networksKnown.length > 0 ? 8 : 0 }
@@ -159,11 +175,9 @@ Item {
                     model: NetworkManager.networksKnown.filter(function(n) { return !n.active })
                     delegate: NetRow {
                         required property var modelData
-                        required property int index
                         width:    parent.width
                         net:      modelData
                         isActive: false
-                        rowIndex: index
                     }
                 }
 
@@ -221,11 +235,9 @@ Item {
                         })
                         delegate: NetRow {
                             required property var modelData
-                            required property int index
                             width:    parent.width
                             net:      modelData
                             isActive: false
-                            rowIndex: 10000 + index
                         }
                     }
                 }
@@ -261,15 +273,26 @@ Item {
         id:           _nr
         property var  net:      null
         property bool isActive: false
-        property int  rowIndex: -1
         property bool _hovered: false
+
+        readonly property string signalIcon: {
+            var s = _nr.net ? (_nr.net.strength || 0) : 0
+            if (s >= 80) return "wifi/nm-signal-100-symbolic.svg"
+            if (s >= 55) return "wifi/nm-signal-66-symbolic.svg"
+            if (s >= 25) return "wifi/nm-signal-33-symbolic.svg"
+            return "wifi/nm-signal-0-symbolic.svg"
+        }
 
         readonly property bool _showPassword: !isActive
                                               && net !== null
                                               && net.isSecure
-                                              && root._passwordForIndex === rowIndex
+                                              && root._passwordForSSID === net.ssid
 
-        height: _showPassword ? rowHeight + 48 : rowHeight
+        readonly property bool _showError: _nr.net
+                                           && root._failedSSIDs[_nr.net.ssid] === true
+                                           && _nr._showPassword
+
+        height: _showPassword ? rowHeight + (_showError ? 68 : 48) : rowHeight
         Behavior on height {
             NumberAnimation { duration: 180; easing.type: Easing.OutBack; easing.overshoot: 0.5 }
         }
@@ -291,14 +314,14 @@ Item {
             height:              rowHeight
             spacing:             14
 
-            CFClippingRect {
+            Rectangle {
                 width:  30
                 height: 30
                 radius: 15
                 color:  _nr.isActive ? "#fff" : "#25ffffff"
                 CFVI {
                     anchors.centerIn: parent
-                    icon:  "wifi/nm-signal-100-symbolic.svg"
+                    icon:  _nr.signalIcon
                     size:  root.iconSize
                     color: _nr.isActive ? "#1C7AFF" : "#fff"
                 }
@@ -315,31 +338,21 @@ Item {
                 text:           "Déconnexion…"
                 font.pixelSize: 12
                 gray:           true
-                visible:        _nr.isActive && root._disconnecting
+                visible:        _nr.isActive && _nr.net && root._disconnectingSSID === _nr.net.ssid
             }
 
             CFText {
                 text:           "Connexion…"
                 font.pixelSize: 12
                 gray:           true
-                visible:        !_nr.isActive && root._connectingIndex === _nr.rowIndex
+                visible:        !_nr.isActive && _nr.net && root._connectingSSID === _nr.net.ssid
             }
 
             CFVI {
                 icon:    "lock.svg"
                 size:    13
-                visible: _nr.net && _nr.net.isSecure && !_nr.isActive
-                         && root._passwordForIndex !== _nr.rowIndex
-                         && root._connectingIndex !== _nr.rowIndex
+                visible: _nr.net && _nr.net.isSecure
                 gray:    true
-            }
-
-            CFText {
-                text:           "✓"
-                visible:        _nr.isActive && !root._disconnecting
-                color:          "#1C7AFF"
-                font.weight:    Font.Bold
-                font.pixelSize: 16
             }
         }
 
@@ -350,17 +363,28 @@ Item {
             anchors.right:       parent.right
             anchors.leftMargin:  20
             anchors.rightMargin: 20
-            height:              44
+            height:              _nr._showError ? 64 : 44
             visible:             _nr._showPassword
             opacity:             _nr._showPassword ? 1.0 : 0.0
             Behavior on opacity { NumberAnimation { duration: 160 } }
 
+            CFText {
+                id: _errorText
+                visible:        _nr._showError
+                text:           "Mot de passe incorrect, réessayez"
+                color:          "#FF6B6B"
+                font.pixelSize: 11
+                anchors.top:        parent.top
+                anchors.left:       parent.left
+                bottomPadding:      6
+            }
+
             TextField {
                 id: _pwField
+                anchors.top:             _nr._showError ? _errorText.bottom : parent.top
                 anchors.left:            parent.left
                 anchors.right:           _joinBtn.left
                 anchors.rightMargin:     8
-                anchors.verticalCenter:  parent.verticalCenter
                 height:                  32
                 echoMode:                TextInput.Password
                 placeholderText:         "Mot de passe"
@@ -374,13 +398,13 @@ Item {
                 background: Rectangle {
                     radius:       8
                     color:        Qt.rgba(1, 1, 1, 0.12)
-                    border.color: Qt.rgba(1, 1, 1, 0.18)
+                    border.color: _nr._showError ? Qt.rgba(1, 0.42, 0.42, 0.5) : Qt.rgba(1, 1, 1, 0.18)
                     border.width: 1
                 }
                 onAccepted: {
                     if (_nr.net) {
-                        root._connectingIndex  = _nr.rowIndex
-                        root._passwordForIndex = -1
+                        root._connectingSSID  = _nr.net.ssid
+                        root._passwordForSSID = ""
                         NetworkManager.connectToNetwork(_nr.net.ssid, text)
                         text = ""
                     }
@@ -391,9 +415,9 @@ Item {
             }
 
             Rectangle {
-                id:                     _joinBtn
-                anchors.right:          parent.right
-                anchors.verticalCenter: parent.verticalCenter
+                id:              _joinBtn
+                anchors.top:     _pwField.top
+                anchors.right:   parent.right
                 width:  72
                 height: 32
                 radius: 8
@@ -403,7 +427,7 @@ Item {
                     anchors.centerIn: parent
                     text:           "Joindre"
                     font.pixelSize: 13
-                    font.weight:    Font.SemiBold
+                    font.weight:    Font.DemiBold
                     color:          "#ffffff"
                 }
 
@@ -412,8 +436,8 @@ Item {
                     cursorShape:  Qt.PointingHandCursor
                     onClicked: {
                         if (_nr.net) {
-                            root._connectingIndex  = _nr.rowIndex
-                            root._passwordForIndex = -1
+                            root._connectingSSID  = _nr.net.ssid
+                            root._passwordForSSID = ""
                             NetworkManager.connectToNetwork(_nr.net.ssid, _pwField.text)
                             _pwField.text = ""
                         }
@@ -428,22 +452,123 @@ Item {
             anchors.top:   parent.top
             height:        rowHeight
             hoverEnabled:  true
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
             onEntered:     _nr._hovered = true
             onExited:      _nr._hovered = false
-            onClicked: {
+            onClicked: function(mouse) {
+                if (mouse.button === Qt.RightButton) {
+                    if (!_nr.net) return
+                    var pos = _nr.mapToItem(root, mouse.x, mouse.y)
+                    root.openContextMenu(_nr.net, pos.x, pos.y)
+                    return
+                }
                 if (_nr.isActive) {
-                    root._disconnecting = true
+                    if (_nr.net) root._disconnectingSSID = _nr.net.ssid
                     NetworkManager.disconnectFromNetwork()
                     return
                 }
                 var isKnown  = NetworkManager.networksKnown.indexOf(_nr.net) !== -1
                 var isFailed = _nr.net && root._failedSSIDs[_nr.net.ssid] === true
                 if (_nr.net && (_nr.net.isSecure && !isKnown || isFailed)) {
-                    root._passwordForIndex = (root._passwordForIndex === _nr.rowIndex)
-                                             ? -1 : _nr.rowIndex
+                    root._passwordForSSID = (root._passwordForSSID === _nr.net.ssid)
+                                             ? "" : _nr.net.ssid
                 } else if (_nr.net) {
-                    root._connectingIndex = _nr.rowIndex
+                    root._connectingSSID = _nr.net.ssid
                     NetworkManager.connectToNetwork(_nr.net.ssid, "")
+                }
+            }
+        }
+    }
+
+    component CtxItem: Rectangle {
+        id: _ci
+        property string label: ""
+        property bool destructive: false
+        signal activated()
+        width: parent.width
+        height: 32
+        radius: 6
+        property bool _hov: false
+        color: _ci._hov ? "#18ffffff" : "transparent"
+
+        CFText {
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            text: _ci.label
+            font.pixelSize: 13
+            font.weight: Font.Bold
+            color: _ci.destructive ? "#FF6B6B" : "#fff"
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onEntered: _ci._hov = true
+            onExited:  _ci._hov = false
+            onClicked: {
+                _ci.activated()
+                root.closeContextMenu()
+            }
+        }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+        visible: root._ctxNet !== null
+        z: 1000
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.closeContextMenu()
+        }
+
+        Rectangle {
+            id: _wifiCtxMenu
+            x: Math.min(root._ctxX, root.width - width - 8)
+            y: root._ctxY
+            width: 170
+            radius: 10
+            color: "#e6202020"
+            border.color: "#20ffffff"
+            border.width: 1
+            implicitHeight: _wifiCtxCol.implicitHeight + 8
+            height: implicitHeight
+
+            Column {
+                id: _wifiCtxCol
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: 4
+                spacing: 2
+
+                CtxItem {
+                    label: root._ctxNet && root._ctxNet.active ? "Déconnecter" : "Connecter"
+                    onActivated: {
+                        if (!root._ctxNet) return
+                        if (root._ctxNet.active) {
+                            root._disconnectingSSID = root._ctxNet.ssid
+                            NetworkManager.disconnectFromNetwork()
+                        } else {
+                            root._connectingSSID = root._ctxNet.ssid
+                            NetworkManager.connectToNetwork(root._ctxNet.ssid, "")
+                        }
+                    }
+                }
+
+                CtxItem {
+                    visible: root._ctxNet && NetworkManager.networksKnown.indexOf(root._ctxNet) !== -1
+                    height: visible ? 32 : 0
+                    label: "Oublier ce réseau"
+                    destructive: true
+                    onActivated: {
+                        if (root._ctxNet) {
+                            NetworkManager.forgetNetwork(root._ctxNet.ssid)
+                        }
+                    }
                 }
             }
         }

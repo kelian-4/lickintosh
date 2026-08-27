@@ -1,0 +1,2 @@
+module qs.core.config
+singleton ShellConfig 1.0 ShellConfig.qml

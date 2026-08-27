@@ -1,0 +1,3 @@
+module qs.core.gamemode
+
+singleton GameMode 1.0 GameMode.qml

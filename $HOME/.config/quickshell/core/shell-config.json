@@ -1,0 +1,73 @@
+{
+    "appearance": {
+        "accentColor": "#1C7AFF",
+        "panelOpacity": 0.85,
+        "reduceMotion": false
+    },
+    "battery": {
+        "powerProfile": "balanced"
+    },
+    "dock": {
+        "pinnedApps": [
+            {
+                "autostart": false,
+                "cmd": "dolphin",
+                "icon": "system-file-manager",
+                "iconPath": "",
+                "name": "Finder"
+            },
+            {
+                "autostart": false,
+                "cmd": "kitty",
+                "icon": "kitty",
+                "iconPath": "",
+                "name": "Terminal"
+            },
+            {
+                "autostart": false,
+                "cmd": "brave",
+                "icon": "brave-browser",
+                "iconPath": "",
+                "name": "Browser"
+            },
+            {
+                "autostart": false,
+                "cmd": "",
+                "icon": "preferences-system",
+                "iconPath": "",
+                "name": "Settings"
+            }
+        ],
+        "pinnedFiles": [
+        ]
+    },
+    "dockAppearance": {
+        "enable": true,
+        "height": 60,
+        "hoverToReveal": true,
+        "monochromeIcons": true
+    },
+    "notifications": {
+        "enable": true,
+        "timeoutSecs": 5
+    },
+    "sound": {
+        "osdTimeout": 1.5,
+        "showOsd": true
+    },
+    "spotlight": {
+        "hotkey": "Super"
+    },
+    "topbar": {
+        "barHeight": 30,
+        "clockFormat": "HH:mm",
+        "showBattery": true,
+        "showBluetooth": true,
+        "showClock": true,
+        "showSystemTray": true,
+        "showWifi": true
+    },
+    "wallpaper": {
+        "path": ""
+    }
+}

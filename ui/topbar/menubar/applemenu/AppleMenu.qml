@@ -12,6 +12,7 @@ Item {
     property bool opened: false
     signal closeRequested()
     signal openAbout()
+    signal lockRequested()
 
     readonly property int menuWidth: 260
     readonly property int rowHeight: 30
@@ -23,6 +24,21 @@ Item {
 
     implicitWidth:  menuWidth
     implicitHeight: menuCol.implicitHeight + 12
+
+    Process {
+        id: _openSettings
+        command: ["quickshell", "-p", Quickshell.shellDir + "/settings.qml"]
+        running: false
+        stdout: SplitParser { onRead: data => console.log("[AppleMenu Settings stdout]", data) }
+        stderr: SplitParser { onRead: data => console.log("[AppleMenu Settings stderr]", data) }
+        onExited: (exitCode, exitStatus) => console.log("[AppleMenu Settings] exited", exitCode, exitStatus)
+    }
+
+    function openSettingsApp() {
+        console.log("[AppleMenu] launching settings via execDetached, shellDir=", Quickshell.shellDir)
+        Quickshell.execDetached(["quickshell", "-p", Quickshell.shellDir + "/settings.qml"])
+        console.log("[AppleMenu] execDetached call returned")
+    }
 
     Process { id: _suspend;  command: ["systemctl", "suspend"];  running: false }
     Process { id: _reboot;   command: ["systemctl", "reboot"];   running: false }
@@ -157,7 +173,11 @@ Item {
         MenuRow {
             label: "System Settings…"
             icon: "dropdown/settings.svg"
-            dimmed: true
+            onActivated: {
+                console.log("[AppleMenu] System Settings clicked")
+                root.openSettingsApp()
+                root.closeRequested()
+            }
         }
         MenuRow {
             label: "App Store"
@@ -215,7 +235,10 @@ Item {
             label: "Lock Screen"
             icon: "dropdown/lock.svg"
             shortcut: "⌃⌘L"
-            dimmed: true
+            onActivated: {
+                root.lockRequested()
+                root.closeRequested()
+            }
         }
 
         Item { height: 4; width: 1 }

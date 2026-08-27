@@ -1,3 +1,5 @@
 module qs.topbar.spotlight
 SpotlightWindow 1.0 SpotlightWindow.qml
 SpotlightResults 1.0 SpotlightResults.qml
+SpotlightCategoryGrid 1.0 SpotlightCategoryGrid.qml
+SpotlightWallpaperPicker 1.0 SpotlightWallpaperPicker.qml

@@ -94,12 +94,13 @@ Singleton {
     readonly property alias popupModel: _popupModel
     property int  dismissGen:   0
     property bool centerOpened: false
+    property bool dndEnabled:   false
 
     function pushPopup(notification) {
         _centerModel.append({ notifObj: notification })
         root.rebuild()
 
-        if (!root.centerOpened) {
+        if (!root.centerOpened && !root.dndEnabled) {
             _popupModel.append({ notifObj: notification })
             _groupTimer.stop()
             _groupTimer.start()

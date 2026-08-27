@@ -1,9 +1,12 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
 import qs.ui.primitives
+import qs.core.config
 
 Item {
     id: root
@@ -16,7 +19,7 @@ Item {
     readonly property real batPercentage: UPower.displayDevice.isLaptopBattery ? UPower.displayDevice.percentage : 1
     readonly property bool charging: onBattery ? (UPower.displayDevice.state === 1) : true
     readonly property string powerSourceText: onBattery ? "Battery" : "Power Adapter"
-    property string currentProfile: ""
+    readonly property string currentProfile: ShellConfig.powerProfile
 
     readonly property var profiles: [
         { id: "balanced", label: "Automatic", icon: "battery/battery-100.svg" },
@@ -25,173 +28,12 @@ Item {
     ]
 
     function setProfile(profileId) {
-        root.currentProfile = profileId
-        setProfileProc.command = ["powerprofilesctl", "set", profileId]
-        setProfileProc.running = true
+        ShellConfig.setPowerProfile(profileId)
     }
 
-    property var previousSample: ({})
-    property double previousTimestamp: 0
-    property double memTotalKb: 1
-    property var iconCache: ({})
-    property var iconQueue: []
-    property var topConsumers: []
-
-    function enqueueIconLookup(appkey) {
-        if (root.iconCache[appkey] !== undefined) return
-        if (root.iconQueue.indexOf(appkey) !== -1) return
-        var q = root.iconQueue.slice()
-        q.push(appkey)
-        root.iconQueue = q
-        processIconQueue()
-    }
-
-    function processIconQueue() {
-        if (iconLookupProc.running) return
-        if (root.iconQueue.length === 0) return
-        var next = root.iconQueue[0]
-        var q = root.iconQueue.slice()
-        q.shift()
-        root.iconQueue = q
-        iconLookupProc.targetKey = next
-        iconLookupProc.command = ["bash", Quickshell.shellDir + "/tools/energy-usage/find-app-icon.sh", next]
-        iconLookupProc.running = true
-    }
-
-    Component.onCompleted: {
-        memTotalProc.running = true
-        sampleProc.running = true
-    }
-
-    Process {
-        id: getProfileProc
-        command: ["powerprofilesctl", "get"]
-        running: true
-        stdout: SplitParser {
-            onRead: data => root.currentProfile = data.trim()
-        }
-    }
-
-    Process {
-        id: setProfileProc
-    }
-
-    Process {
-        id: memTotalProc
-        command: ["bash", "-c", "awk '/^MemTotal:/{print $2}' /proc/meminfo"]
-        stdout: SplitParser {
-            onRead: data => {
-                var v = parseFloat(data.trim())
-                if (v > 0) root.memTotalKb = v
-            }
-        }
-    }
-
-     function formatMemory(mb) {
-        if (mb >= 1024) return (mb / 1024).toFixed(1) + " GB"
-        return Math.round(mb) + " MB"
-    }
-
-    Process {
-        id: sampleProc
-        command: ["bash", Quickshell.shellDir + "/tools/energy-usage/sample-processes.sh"]
-        property var pending: ({})
-        stdout: SplitParser {
-            onRead: data => {
-                var line = data.trim()
-                if (line.length === 0) return
-                var parts = line.split(";")
-                if (parts.length === 4) {
-                    sampleProc.pending[parts[0]] = {
-                        cpu: parseFloat(parts[1]),
-                        rss: parseFloat(parts[2]),
-                        swap: parseFloat(parts[3])
-                    }
-                }
-            }
-        }
-        onExited: {
-            var now = Date.now()
-            var current = sampleProc.pending
-            sampleProc.pending = ({})
-
-            if (root.previousTimestamp > 0) {
-                var elapsedSec = (now - root.previousTimestamp) / 1000
-                if (elapsedSec > 0.2) {
-                    var results = []
-                    for (var key in current) {
-                        var prev = root.previousSample[key]
-                        if (prev) {
-                            var deltaTicks = current[key].cpu - prev.cpu
-                            if (deltaTicks < 0) deltaTicks = 0
-                            var cpuPct = (deltaTicks / 100) / elapsedSec * 100
-                            var rssMb = current[key].rss / 1024
-                            var swapMb = current[key].swap / 1024
-                            if (cpuPct > 0.3 || rssMb > 50) {
-                                results.push({
-                                    name: key,
-                                    cpu: cpuPct,
-                                    rssMb: rssMb,
-                                    swap: swapMb
-                                })
-                            }
-                        }
-                    }
-		    results.sort(function(a, b) { return b.rssMb - a.rssMb })
-                    var top = results.slice(0, 3)
-
-                    for (var i = 0; i < top.length; i++) {
-                        var appkey = top[i].name
-                        top[i].icon = root.iconCache[appkey] !== undefined ? root.iconCache[appkey] : ""
-                        root.enqueueIconLookup(appkey)
-                    }
-
-                    root.topConsumers = top
-                }
-            }
-
-            root.previousSample = current
-            root.previousTimestamp = now
-        }
-    }
-
-
-    Process {
-        id: iconLookupProc
-        property string targetKey: ""
-        stdout: SplitParser {
-            onRead: data => {
-                var path = data.trim()
-                var cache = root.iconCache
-                cache[iconLookupProc.targetKey] = path
-                root.iconCache = cache
-            }
-        }
-        onExited: {
-            if (root.iconCache[iconLookupProc.targetKey] === undefined) {
-                var cache = root.iconCache
-                cache[iconLookupProc.targetKey] = ""
-                root.iconCache = cache
-            }
-            var updated = root.topConsumers.slice()
-            for (var i = 0; i < updated.length; i++) {
-                if (updated[i].name === iconLookupProc.targetKey) {
-                    updated[i].icon = root.iconCache[iconLookupProc.targetKey]
-                }
-            }
-            root.topConsumers = updated
-            root.processIconQueue()
-        }
-    }
-
-    Timer {
-        interval: 3000
-        running: true
-        repeat: true
-        onTriggered: {
-            if (!sampleProc.running) sampleProc.running = true
-        }
-    }
+    readonly property var topConsumers: ShellConfig.topConsumers
+    readonly property bool hasCollectedOnce: ShellConfig.hasCollectedOnce
+    function formatMemory(mb) { return ShellConfig.formatMemory(mb) }
 
     ColumnLayout {
         id: content
@@ -256,6 +98,7 @@ Item {
 
                     Rectangle {
                         id: profileRow
+                        required property var modelData
                         Layout.fillWidth: true
                         height: 40
                         radius: 8
@@ -277,10 +120,6 @@ Item {
                                 radius: 14
                                 color: modelData.id === root.currentProfile ? "#1C7AFF" : "transparent"
                                 Layout.alignment: Qt.AlignVCenter
-
-                                Behavior on color {
-                                    ColorAnimation { duration: 200 }
-                                }
 
                                 CFVI {
                                     anchors.centerIn: parent
@@ -330,9 +169,7 @@ Item {
                 font.weight: Font.Bold
             }
 
-	    property bool hasCollectedOnce: root.previousTimestamp > 0
-
-            CFText {
+	    CFText {
                 visible: root.topConsumers.length === 0
                 text: root.hasCollectedOnce ? "No Apps Using Significant Energy" : "Calculating..."
                 gray: true
@@ -349,6 +186,7 @@ Item {
 
                     Rectangle {
                         id: usageRow
+                        required property var modelData
                         Layout.fillWidth: true
                         height: 48
                         radius: 8
@@ -373,17 +211,20 @@ Item {
                                 clip: true
 
                                 Image {
+                                    id: usageIco
                                     anchors.fill: parent
                                     anchors.margins: 4
-                                    visible: modelData.icon.length > 0
-                                    source: modelData.icon.length > 0 ? "file://" + modelData.icon : ""
+                                    visible: source !== "" && status === Image.Ready
+                                    source: modelData.icon || ""
                                     fillMode: Image.PreserveAspectFit
+                                    smooth: true
+                                    mipmap: true
                                     asynchronous: true
                                 }
 
                                 CFText {
                                     anchors.centerIn: parent
-                                    visible: modelData.icon.length === 0
+                                    visible: !usageIco.visible
                                     text: modelData.name.length > 0 ? modelData.name.charAt(0).toUpperCase() : "?"
                                     font.pixelSize: 13
                                     font.weight: Font.Bold

@@ -1,7 +1,7 @@
-import Quickshell
 import QtQuick
 import QtQuick.VectorImage
 import QtQuick.Effects
+import Quickshell
 import qs.ui.glass
 
 ListView {
@@ -13,9 +13,19 @@ ListView {
     required property string      fontFamilyMedium
     required property int         currentIdx
     property bool                 showWhenEmpty: false
+    property bool                 sectioned: false
 
     signal itemClicked(var data)
     signal hoveredIdx(int idx)
+    signal reindexRequested()
+    signal randomWallpaperRequested()
+    signal shellCmdRequested(string cmd)
+    signal todoAddRequested(string text)
+    signal todoItemActivated(var id, bool done)
+
+    function shQuote(s) {
+        return "'" + String(s).replace(/'/g, "'\\''") + "'"
+    }
 
     function activateIndex(idx) {
         var item = itemAtIndex(idx)
@@ -34,19 +44,20 @@ ListView {
         values: (root.searchText === "" && !root.showWhenEmpty) ? [] : root.answers
     }
 
-    delegate: Item {
+    delegate: Column {
         id:       row
         required property var modelData
         required property int index
         width:    root.width
-        height:   50
+        spacing:  0
 
-        property bool isApp:    typeof row.modelData.execute === "function"
+        property bool isApp:     typeof row.modelData.execute === "function"
         property bool isCurrent: row.index === root.currentIdx
+        readonly property bool showHeader: root.sectioned && !!row.modelData._section
+            && (row.index === 0 || !root.answers[row.index - 1] || root.answers[row.index - 1]._section !== row.modelData._section)
 
         function activate() {
             if (row.modelData.dummy) {
-                
                 return
             }
 
@@ -54,18 +65,33 @@ ListView {
                 row.modelData.execute()
                 root.itemClicked(row.modelData)
             } else if (row.modelData.isWallpaper) {
-                var p = row.modelData.path
-                Quickshell.execDetached(["awww", "img", p, "--transition-bezier", ".43,1.19,1,.4", "--transition-type", "random"])
                 root.itemClicked(row.modelData)
             } else if (row.modelData.isCalc) {
                 Quickshell.execDetached(["sh", "-c", "echo -n '" + row.modelData.value + "' | wl-copy"])
                 root.itemClicked(row.modelData)
             } else if (row.modelData.isWeb) {
-                
-                Quickshell.execDetached(["xdg-open", "https://www.google.com/search?q=" + encodeURIComponent(row.modelData.query)])
+                Quickshell.execDetached(["xdg-open", "https://search.brave.com/search?q=" + encodeURIComponent(row.modelData.query)])
                 root.itemClicked(row.modelData)
-            } else if (row.modelData.rawLine) {
-                Quickshell.execDetached(["sh", "-c", "printf '%s' '" + row.modelData.rawLine.replace(/'/g, "") + "' | cliphist decode | wl-copy"])
+            } else if (row.modelData.clipImage) {
+                Quickshell.execDetached(["bash", "-c", "wl-copy --type image/png < '" + row.modelData.clipImage + "'"])
+                root.itemClicked(row.modelData)
+            } else if (row.modelData.clipFile) {
+                Quickshell.execDetached(["bash", "-c", "wl-copy < '" + row.modelData.clipFile + "'"])
+                root.itemClicked(row.modelData)
+            } else if (row.modelData.isEmoji) {
+                Quickshell.execDetached(["sh", "-c", "printf '%s' " + root.shQuote(row.modelData.value) + " | wl-copy"])
+                root.itemClicked(row.modelData)
+            } else if (row.modelData.isShellCmd) {
+                root.shellCmdRequested(row.modelData.value)
+            } else if (row.modelData.isTodoAdd) {
+                root.todoAddRequested(row.modelData.value)
+            } else if (row.modelData.isTodoItem) {
+                root.todoItemActivated(row.modelData.todoId, row.modelData.todoDone)
+            } else if (row.modelData.randomWallpaper) {
+                root.randomWallpaperRequested()
+                root.itemClicked(row.modelData)
+            } else if (row.modelData.reindex) {
+                root.reindexRequested()
                 root.itemClicked(row.modelData)
             } else if (row.modelData.cmd) {
                 Quickshell.execDetached(["sh", "-c", row.modelData.cmd])
@@ -76,6 +102,26 @@ ListView {
             }
         }
 
+        Text {
+            visible: row.showHeader
+            width: row.width
+            topPadding: row.index === 0 ? 2 : 14
+            bottomPadding: 4
+            leftPadding: 12
+            text: row.modelData._section || ""
+            color: "#ffffff"
+            opacity: 0.5
+            font.family:    root.fontFamilyMedium
+            font.pixelSize: 12
+            font.weight:    Font.DemiBold
+            renderType:     Text.NativeRendering
+        }
+
+        Item {
+        id: content
+        width:    row.width
+        height:   50
+
         Rectangle {
             anchors.fill: parent
             radius:       12
@@ -83,26 +129,31 @@ ListView {
             Behavior on color { ColorAnimation { duration: 120 } }
         }
 
-        Rectangle {
+        Item {
             id:     iconBg
             anchors.verticalCenter: parent.verticalCenter
             anchors.left:           parent.left
             anchors.leftMargin:     12
-            width: 36; height: 36; radius: 9
-            color: "#20ffffff"
-            clip:  true
+            width: 36; height: 36
 
             Image {
                 id:       ico
                 anchors.fill: parent
                 visible:  !row.modelData.icon || !row.modelData.icon.endsWith(".svg")
+                property bool directLoadFailed: false
+                onStatusChanged: if (status === Image.Error) directLoadFailed = true
                 source: {
                     if (row.isApp) return Quickshell.iconPath(row.modelData.icon, true)
-                    if (row.modelData.isWallpaper) return "file://" + row.modelData.path
+                    if (row.modelData.isWallpaper && !directLoadFailed) return "file://" + row.modelData.path
+                    if (row.modelData.clipImage && !directLoadFailed) return "file://" + row.modelData.clipImage
+                    if (row.modelData.isImage && !directLoadFailed) return "file://" + row.modelData.path
+                    if (row.modelData.isEmoji) return row.modelData.emojiUrl
                     if (row.modelData.icon && !row.modelData.icon.endsWith(".svg")) return Quickshell.iconPath(row.modelData.icon, true)
-                    return ""
+                    return Quickshell.iconPath("image-x-generic", true)
                 }
-                fillMode: row.modelData.isWallpaper ? Image.PreserveAspectCrop : Image.PreserveAspectFit
+                fillMode: (row.modelData.isWallpaper || row.modelData.clipImage || row.modelData.isImage) ? Image.PreserveAspectCrop : Image.PreserveAspectFit
+                sourceSize.width:  72
+                sourceSize.height: 72
                 smooth:   true
                 mipmap:   true
             }
@@ -110,7 +161,7 @@ ListView {
             VectorImage {
                 anchors.centerIn: parent
                 width: 22; height: 22
-                visible: row.modelData.icon && row.modelData.icon.endsWith(".svg")
+                visible: !!(row.modelData.icon && row.modelData.icon.endsWith(".svg"))
                 source: row.modelData.icon && row.modelData.icon.endsWith(".svg") 
                         ? (row.modelData.icon.startsWith("/") ? "file://" + row.modelData.icon : Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + row.modelData.icon))
                         : ""
@@ -124,10 +175,10 @@ ListView {
 
             Text {
                 anchors.centerIn: parent
-                visible:  (!row.isApp && !row.modelData.isWallpaper && !row.modelData.icon) || (ico.status !== Image.Ready && !row.modelData.icon)
-                text:     (row.modelData.name || row.modelData.title || "?")[0].toUpperCase()
+                visible:  (!row.isApp && !row.modelData.isWallpaper && !row.modelData.clipImage && !row.modelData.isImage && !row.modelData.isEmoji && !row.modelData.icon) || (ico.status !== Image.Ready && !row.modelData.icon)
+                text:     row.modelData.isEmoji ? row.modelData.value : (row.modelData.name || row.modelData.title || "?")[0].toUpperCase()
                 color:          "#ffffff"
-                font.pixelSize: 16
+                font.pixelSize: row.modelData.isEmoji ? 20 : 16
                 font.weight:    Font.Bold
                 renderType:     Text.NativeRendering
             }
@@ -141,9 +192,10 @@ ListView {
             anchors.right:       parent.right
             anchors.rightMargin: 12
             text:           row.modelData.name || row.modelData.title || ""
-            color:          "#ffffff"
+            color:          row.modelData.isTodoItem && row.modelData.todoDone ? "#80ffffff" : "#ffffff"
             font.family:    root.fontFamilyMedium
             font.pixelSize: 15
+            font.strikeout: !!(row.modelData.isTodoItem && row.modelData.todoDone)
             font.weight:    Font.Medium
             renderType:     Text.NativeRendering
             elide:          Text.ElideRight
@@ -160,7 +212,7 @@ ListView {
                 if (row.isApp) return "Application"
                 if (row.modelData.isWallpaper) return "Fond d'écran"
                 if (row.modelData.isCalc) return "Calculatrice"
-                if (row.modelData.isWeb) return "Recherche Web"
+                if (row.modelData.isWeb) return "Recherche"
                 return row.modelData.description || ""
             }
             color:          "#80ffffff"
@@ -177,14 +229,12 @@ ListView {
             onEntered:  { root.hoveredIdx(row.index) }
             onClicked: {
                 if (row.modelData.dummy && row.modelData.targetPrefix) {
-                    
-                    
-                    
                     searchField.applyPrefix(row.modelData.targetPrefix)
                 } else {
                     row.activate()
                 }
             }
+        }
         }
     }
 }
