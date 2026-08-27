@@ -1,4 +1,0 @@
-module qs.ui.topbar.statusarea.bluetooth
-Bluetooth 0.1 Bluetooth.qml
-BTDeviceTray 0.1 BTDeviceTray.qml
-BTBatteryPopup 0.1 BTBatteryPopup.qml

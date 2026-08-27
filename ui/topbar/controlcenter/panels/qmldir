@@ -1,3 +1,0 @@
-module qs.ui.topbar.controlcenter.panels
-CCBluetoothPanel 1.0 CCBluetoothPanel.qml
-CCWifiPanel 1.0 CCWifiPanel.qml

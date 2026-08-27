@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.ui.glass
+import qs.components.glass
 
 Item {
     id: root

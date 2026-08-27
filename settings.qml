@@ -8,8 +8,8 @@ import QtQuick.Layouts
 import QtQuick.Window
 import Quickshell
 import Quickshell.Io
-import qs.ui.glass
-import qs.ui.primitives
+import qs.components.glass
+import qs.components
 import qs.ui.settings.widgets
 import qs.ui.settings.pages
 

@@ -3,85 +3,37 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
-import qs.core.config
-import qs.ui.primitives
+import qs.services
+import qs.components
 import qs.ui.settings.widgets
 
 ContentPage {
     id: root
 
     readonly property var _widgets: [
-        { id: "wifiWidget",      name: "Wi-Fi",              icon: "wifi/nm-signal-100-symbolic.svg" },
-        { id: "btWidget",        name: "Bluetooth",          icon: "bluetooth/bluetooth.svg" },
-        { id: "adWidget",        name: "AirDrop / KDE Connect", icon: "devices/smartphone.svg" },
-        { id: "musicWidget",     name: "Lecteur multimédia", icon: "music/play.svg" },
-        { id: "focusWidget",     name: "Focus",               icon: "dnd.svg" },
-        { id: "stageWidget",     name: "Capture d'écran",    icon: "screenshot/region.svg" },
-        { id: "shareWidget",     name: "Partage d'écran",    icon: "screenshare.svg" },
-        { id: "darkWidget",      name: "Mode sombre",         icon: "notch/moon.svg" },
-        { id: "calcWidget",      name: "Calculatrice",        icon: "" },
-        { id: "gameModeWidget",  name: "Mode jeu",             icon: "" },
-        { id: "displayWidget",   name: "Luminosité",          icon: "sun-small.svg" },
-        { id: "volumeWidget",    name: "Volume",               icon: "volume/audio-volume-3.svg" },
-        { id: "timerWidget",     name: "Minuteur",             icon: "notch/clock.svg" },
-        { id: "alarmWidget",     name: "Alarme",                icon: "notch/bell.svg" },
-        { id: "stopwatchWidget", name: "Chronomètre",          icon: "notch/watch.svg" }
+        { id: "wifiWidget",      name: "Wi-Fi",              icon: "wifi/nm-signal-100-symbolic.svg", locked: true },
+        { id: "btWidget",        name: "Bluetooth",          icon: "bluetooth/bluetooth.svg", locked: true },
+        { id: "adWidget",        name: "AirDrop / KDE Connect", icon: "devices/smartphone.svg", locked: true },
+        { id: "musicWidget",     name: "Lecteur multimédia", icon: "music/play.svg", locked: true },
+        { id: "focusWidget",     name: "Focus",               icon: "dnd.svg", locked: true },
+        { id: "stageWidget",     name: "Capture d'écran",    icon: "screenshot/region.svg", locked: true },
+        { id: "shareWidget",     name: "Partage d'écran",    icon: "screenshare.svg", locked: true },
+        { id: "displayWidget",   name: "Luminosité",          icon: "sun-small.svg", locked: true },
+        { id: "volumeWidget",    name: "Volume",               icon: "volume/audio-volume-3.svg", locked: true },
+        { id: "darkWidget",      name: "Mode sombre",         icon: "notch/moon.svg", locked: false },
+        { id: "calcWidget",      name: "Calculatrice",        icon: "", locked: false },
+        { id: "gameModeWidget",  name: "Mode jeu",             icon: "", locked: false },
+        { id: "timerWidget",     name: "Minuteur",             icon: "notch/clock.svg", locked: false },
+        { id: "alarmWidget",     name: "Alarme",                icon: "notch/bell.svg", locked: false },
+        { id: "stopwatchWidget", name: "Chronomètre",          icon: "notch/watch.svg", locked: false }
     ]
 
-    Process {
-        id: _openControlCenterProc
-        command: ["sh", "-c", "qs ipc -p \"" + Quickshell.shellDir + "/shell.qml\" call controlcenter openEditMode 2>/dev/null || true"]
-    }
-
     ContentSection {
-        RowLayout {
+        CFText {
+            text: "Contrôles disponibles"
+            font.pixelSize: 14
+            color: "#fff"
             Layout.fillWidth: true
-            spacing: 10
-
-            CFText {
-                text: "Contrôles disponibles"
-                font.pixelSize: 14
-                color: "#fff"
-                elide: Text.ElideRight
-                Layout.fillWidth: true
-            }
-
-            Rectangle {
-                id: _openCcButton
-                Layout.preferredWidth: 160
-                Layout.minimumWidth: 100
-                Layout.preferredHeight: 30
-                radius: 8
-                color: _openCcMouse.containsMouse ? "#24ffffff" : "#18ffffff"
-                border.color: "#14ffffff"
-                border.width: 1
-                clip: true
-
-                RowLayout {
-                    anchors.centerIn: parent
-                    spacing: 6
-
-                    CFVI {
-                        width: 13
-                        height: 13
-                        icon: "control-center.svg"
-                    }
-                    CFText {
-                        text: "Ouvrir le Control Center"
-                        font.pixelSize: 12
-                        color: "#fff"
-                        elide: Text.ElideRight
-                    }
-                }
-
-                MouseArea {
-                    id: _openCcMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: _openControlCenterProc.running = true
-                }
-            }
         }
 
         CFText {
@@ -224,7 +176,8 @@ ContentPage {
                     width: 44
                     height: 24
                     radius: 12
-                    color: ShellConfig.ccWidgetVisible(_widgetRow.modelData.id) ? "#34c759" : "#40ffffff"
+                    opacity: _widgetRow.modelData.locked ? 0.35 : 1
+                    color: _widgetRow.modelData.locked ? "#34c759" : (ShellConfig.ccWidgetVisible(_widgetRow.modelData.id) ? "#34c759" : "#40ffffff")
                     Behavior on color { ColorAnimation { duration: 150 } }
 
                     Rectangle {
@@ -233,12 +186,13 @@ ContentPage {
                         radius: 10
                         color: "#fff"
                         anchors.verticalCenter: parent.verticalCenter
-                        x: ShellConfig.ccWidgetVisible(_widgetRow.modelData.id) ? parent.width - width - 2 : 2
+                        x: (_widgetRow.modelData.locked || ShellConfig.ccWidgetVisible(_widgetRow.modelData.id)) ? parent.width - width - 2 : 2
                         Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
                     }
 
                     MouseArea {
                         anchors.fill: parent
+                        enabled: !_widgetRow.modelData.locked
                         cursorShape: Qt.PointingHandCursor
                         onClicked: ShellConfig.setCcWidgetVisible(
                             _widgetRow.modelData.id,

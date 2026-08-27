@@ -1,9 +1,0 @@
-module qs.ui.topbar.statusarea.ai
-singleton AiConfig 1.0 AiConfig.qml
-singleton AiCommands 1.0 AiCommands.qml
-singleton AiChats 1.0 AiChats.qml
-singleton AiToolSchema 1.0 AiToolSchema.qml
-AiWindow 1.0 AiWindow.qml
-AiTools 1.0 AiTools.qml
-AiSpeech 1.0 AiSpeech.qml
-SlashMenu 1.0 SlashMenu.qml

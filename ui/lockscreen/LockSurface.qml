@@ -4,8 +4,8 @@ import QtQuick.Controls
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
-import qs.ui.glass
-import qs.ui.primitives
+import qs.components.glass
+import qs.components
 
 Item {
     id: root

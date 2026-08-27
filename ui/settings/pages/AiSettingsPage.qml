@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import qs.ui.topbar.statusarea.ai
-import qs.ui.primitives
+import qs.components
 import qs.ui.settings.widgets
 
 ContentPage {

@@ -4,8 +4,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.VectorImage
 import QtQuick.Effects
-import qs.ui.glass
-import qs.ui.primitives
+import qs.components.glass
+import qs.components
 import qs.ui.topbar.menubar.globalmenu
 
 Scope {

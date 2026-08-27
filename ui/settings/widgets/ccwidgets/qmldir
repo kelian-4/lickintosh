@@ -1,4 +1,0 @@
-module qs.core.ccwidgets
-singleton TimerState 1.0 TimerState.qml
-singleton AlarmState 1.0 AlarmState.qml
-singleton StopwatchState 1.0 StopwatchState.qml

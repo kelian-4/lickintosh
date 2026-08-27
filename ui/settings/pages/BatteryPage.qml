@@ -2,9 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtGraphs
-import qs.core.config
-import qs.core.battery
-import qs.ui.primitives
+import qs.services
+import qs.services
+import qs.components
 import qs.ui.settings.widgets
 
 ContentPage {

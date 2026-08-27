@@ -1,2 +1,0 @@
-module qs.core.bluetooth
-singleton BluetoothState 1.0 BluetoothState.qml

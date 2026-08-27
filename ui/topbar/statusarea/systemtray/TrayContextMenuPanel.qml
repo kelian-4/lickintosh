@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import qs.ui.primitives
+import qs.components
 
 Item {
     id: root

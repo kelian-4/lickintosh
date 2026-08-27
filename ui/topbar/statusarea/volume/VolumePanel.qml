@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.VectorImage
 import Quickshell.Services.Pipewire
-import qs.ui.primitives
+import qs.components
 
 Item {
     id: root

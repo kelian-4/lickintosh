@@ -5,8 +5,8 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.Pipewire
-import qs.ui.glass
-import qs.ui.primitives
+import qs.components.glass
+import qs.components
 
 Scope {
     id: root

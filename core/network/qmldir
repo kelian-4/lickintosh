@@ -1,2 +1,0 @@
-module qs.core.network
-singleton NetworkManager 0.1 NetworkManager.qml

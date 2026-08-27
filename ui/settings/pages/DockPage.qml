@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.core.config
+import qs.services
 import qs.ui.settings.widgets
 
 ContentPage {

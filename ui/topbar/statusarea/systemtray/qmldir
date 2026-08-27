@@ -1,4 +1,0 @@
-module qs.topbar.statusarea.systemtray
-SystemTray 1.0 SystemTray.qml
-SysTrayItem 1.0 SysTrayItem.qml
-TrayContextMenuPanel 1.0 TrayContextMenuPanel.qml

@@ -5,8 +5,8 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
-import qs.ui.primitives
-import qs.core.config
+import qs.components
+import qs.services
 
 Item {
     id: root

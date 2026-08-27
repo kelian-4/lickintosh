@@ -1,9 +1,0 @@
-module qs.ui.settings.pages
-WifiPage 1.0 WifiPage.qml
-BluetoothPage 1.0 BluetoothPage.qml
-BatteryPage 1.0 BatteryPage.qml
-TopBarPage 1.0 TopBarPage.qml
-DockPage 1.0 DockPage.qml
-GeneralPage 1.0 GeneralPage.qml
-AiSettingsPage 1.0 AiSettingsPage.qml
-ControlCenterPage 1.0 ControlCenterPage.qml

@@ -3,7 +3,7 @@ import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
 import QtQuick.VectorImage
-import qs.ui.glass
+import qs.components.glass
 
 Scope {
     id: root

@@ -2,18 +2,18 @@
 import Quickshell
 import QtQuick
 import Quickshell.Services.Notifications
-import qs.core.network
+import qs.services
 import qs.ui.topbar.statusarea
 import qs.ui.topbar.statusarea.ai
 import qs.ui.topbar.statusarea.battery
 import qs.ui.topbar.statusarea.volume
-import qs.ui.topbar.controlcenter.panels
-import qs.ui.topbar.notifcenter
+import qs.ui.topbar.statusarea.controlcenter.panels
+import qs.ui.topbar.statusarea.notifcenter
 import qs.ui.topbar
-import qs.ui.topbar.controlcenter
+import qs.ui.topbar.statusarea.controlcenter
 import qs.ui.topbar.menubar.applemenu
 import qs.ui.dock
-import qs.ui.topbar.spotlight
+import qs.ui.topbar.statusarea.spotlight
 import qs.ui.osd
 import qs.ui.lockscreen
 

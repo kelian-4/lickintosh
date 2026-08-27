@@ -4,7 +4,7 @@ import QtQuick.VectorImage
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
-import qs.ui.glass
+import qs.components.glass
 
 Item {
     id: root

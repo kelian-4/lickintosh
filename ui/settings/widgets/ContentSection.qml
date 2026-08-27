@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.ui.glass
-import qs.ui.primitives
+import qs.components.glass
+import qs.components
 
 ColumnLayout {
     id: root

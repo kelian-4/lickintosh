@@ -6,7 +6,7 @@ import QtQuick.Shapes
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
-import qs.ui.glass
+import qs.components.glass
 
 Scope {
     id: root

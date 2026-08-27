@@ -1,6 +1,0 @@
-module qs.primitives
-CFClippingRect 1.0 CFClippingRect.qml
-CFSlider 1.0 CFSlider.qml
-CFSwitch 1.0 CFSwitch.qml
-CFText 1.0 CFText.qml
-CFVI 1.0 CFVI.qml

@@ -1,8 +1,0 @@
-module qs.ui.topbar.notifcenter
-
-singleton NotifService 1.0 NotifService.qml
-NotifIcon 1.0 NotifIcon.qml
-NotifCenter 1.0 NotifCenter.qml
-NotifItem 1.0 NotifItem.qml
-NotifStack 1.0 NotifStack.qml
-NotifPopup 1.0 NotifPopup.qml

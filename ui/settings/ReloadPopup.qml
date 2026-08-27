@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
-import qs.ui.glass
-import qs.ui.primitives
+import qs.components.glass
+import qs.components
 
 Scope {
     id: root

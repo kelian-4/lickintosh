@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import qs.core.network
-import qs.ui.primitives
+import qs.services
+import qs.components
 import qs.ui.settings.widgets
 
 ContentPage {
