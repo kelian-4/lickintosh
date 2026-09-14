@@ -1,21 +1,38 @@
 import QtQuick
+import qs.services
 
-Text {
-    id: clockText
-    color: "#FFFFFF"
-    font.pixelSize: 13
-    font.bold: true
-    renderType: Text.NativeRendering
+Row {
+    id: clockRoot
+    spacing: 6
+
+    Text {
+        id: dateText
+        color: "#FFFFFF"
+        font.pixelSize: 13
+        font.bold: true
+        renderType: Text.NativeRendering
+        visible: ShellConfig.options.topbar.clockTextVisible && text.length > 0
+    }
+
+    Text {
+        id: timeText
+        color: "#FFFFFF"
+        font.pixelSize: 13
+        font.bold: true
+        renderType: Text.NativeRendering
+    }
 
     function updateTime() {
-        clockText.text = Qt.formatDateTime(new Date(), "ddd d MMM HH:mm");
+        var now = new Date()
+        dateText.text = Qt.formatDateTime(now, "ddd d MMM")
+        timeText.text = Qt.formatDateTime(now, "HH:mm")
     }
 
     Timer {
         interval: 1000
         running: true
         repeat: true
-        onTriggered: clockText.updateTime()
+        onTriggered: clockRoot.updateTime()
     }
 
     Component.onCompleted: updateTime()

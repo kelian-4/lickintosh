@@ -1,4 +1,5 @@
 //@ pragma UseQApplication
+//@ pragma ShellId main-shell
 import Quickshell
 import QtQuick
 import Quickshell.Services.Notifications
@@ -13,6 +14,7 @@ import qs.ui.topbar
 import qs.ui.topbar.statusarea.controlcenter
 import qs.ui.topbar.menubar.applemenu
 import qs.ui.dock
+import qs.ui.topbar.notch
 import qs.ui.topbar.statusarea.spotlight
 import qs.ui.osd
 import qs.ui.lockscreen
@@ -37,22 +39,96 @@ ShellRoot {
     property bool volumeOpened:      false
     property int  volumeX:           0
 
+    readonly property bool anySubmenuOpened: ccOpened || appleMenuOpened || aboutOpened ||
+        spotlightOpened || aiOpened || notifCenterOpened || wifiOpened || bluetoothOpened ||
+        batteryOpened || volumeOpened
+
     Variants {
         model: Quickshell.screens
         PanelWindow {
             id: topBarWindow
             required property var modelData
+            property bool _revealed: true
             screen: modelData
             anchors { top: true; left: true; right: true }
             implicitHeight: 32
             color: "transparent"
-            exclusiveZone: implicitHeight
+            exclusiveZone: ShellConfig.options.menuBar.autoHide ? 0 : implicitHeight
+
+            Connections {
+                target: ShellConfig.options.menuBar
+                function onAutoHideChanged() {
+                    if (ShellConfig.options.menuBar.autoHide) {
+                        if (!appRoot.anySubmenuOpened) _topBarHideTimer.restart()
+                    } else {
+                        _topBarHideTimer.stop()
+                        topBarWindow._revealed = true
+                    }
+                }
+            }
+
+            Connections {
+                target: appRoot
+                function onAnySubmenuOpenedChanged() {
+                    if (!ShellConfig.options.menuBar.autoHide) return
+                    if (appRoot.anySubmenuOpened) {
+                        _topBarHideTimer.stop()
+                        topBarWindow._revealed = true
+                    } else if (!_topBarLeaveDetector.hovered) {
+                        _topBarHideTimer.restart()
+                    }
+                }
+            }
+
+            Component.onCompleted: {
+                if (ShellConfig.options.menuBar.autoHide && !appRoot.anySubmenuOpened) _topBarHideTimer.restart()
+            }
+
+            MouseArea {
+                id: _topBarTriggerZone
+                anchors { top: parent.top; left: parent.left; right: parent.right }
+                height: 4
+                hoverEnabled: true
+                visible: ShellConfig.options.menuBar.autoHide && !topBarWindow._revealed
+                z: 10
+                onEntered: {
+                    _topBarHideTimer.stop()
+                    topBarWindow._revealed = true
+                }
+            }
+
+            Timer {
+                id: _topBarHideTimer
+                interval: 700
+                onTriggered: {
+                    if (ShellConfig.options.menuBar.autoHide && !appRoot.anySubmenuOpened) topBarWindow._revealed = false
+                }
+            }
 
             TopBar {
+                id: _topBarItem
                 hostWindow:       topBarWindow
+                anchors.topMargin: (ShellConfig.options.menuBar.autoHide && !topBarWindow._revealed) ? -implicitHeight : 0
+                Behavior on anchors.topMargin {
+                    enabled: ShellConfig.options.menuBar.autoHide
+                    NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
+                }
+
+                HoverHandler {
+                    id: _topBarLeaveDetector
+                    enabled: ShellConfig.options.menuBar.autoHide
+                    onHoveredChanged: {
+                        if (!ShellConfig.options.menuBar.autoHide) return
+                        if (hovered) {
+                            _topBarHideTimer.stop()
+                        } else if (!appRoot.anySubmenuOpened) {
+                            _topBarHideTimer.restart()
+                        }
+                    }
+                }
                 appleMenuOpened:  appRoot.appleMenuOpened
                 spotlightOpened:  appRoot.spotlightOpened
-                notifUnreadCount: _globalNotifServer.trackedNotifications.length
+                notifUnreadCount: NotifService.trackedCount
                 onToggleCC:           appRoot.ccOpened           = !appRoot.ccOpened
                 onToggleAppleMenu:    appRoot.appleMenuOpened    = !appRoot.appleMenuOpened
                 onToggleSpotlight:    appRoot.spotlightOpened    = !appRoot.spotlightOpened
@@ -81,6 +157,9 @@ ShellRoot {
         onClosing: appRoot.ccOpened = false
     }
     Dock {}
+    Notch {
+        notifServer: _globalNotifServer
+    }
     SpotlightWindow {
         opened: appRoot.spotlightOpened
         onCloseRequested: appRoot.spotlightOpened = false

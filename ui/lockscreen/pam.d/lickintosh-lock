@@ -1,0 +1,51 @@
+#%PAM-1.0
+# Stack PAM utilisé par le lockscreen lickintosh (LockContext.qml).
+#
+# Chargé DIRECTEMENT par Quickshell (Quickshell.Services.Pam / PamContext,
+# via configDirectory + config) : ce n'est pas un raccourci vers
+# /etc/pam.d, c'est un vrai fichier de règles PAM que Quickshell interprète
+# lui-même (confirmé dans les sources de Quickshell : configDirectory est
+# une vraie Q_PROPERTY, pas un artifice). Aucune déclaration
+# security.pam.services.* n'est nécessaire pour CE fichier précisément —
+# contrairement à hyprlock, qui utilise un service PAM système nommé et a
+# donc besoin de security.pam.services.hyprlock = {} côté NixOS.
+#
+# NixOS natif (votre cas) : "pam_unix.so" (nom court, résolu par le
+# libpam de Nix) fonctionne nativement car /run/wrappers/bin/unix_chkpwd
+# existe déjà sur NixOS (généré par security.wrappers, sur lequel PAM
+# s'appuie pour lire /etc/shadow avec les bons privilèges). Ce contexte
+# est différent du cas "Quickshell installé via nix-profile/home-manager
+# sur une distro non-NixOS (Ubuntu, etc.)", où ce chemin n'existe pas et
+# nécessite un correctif manuel — ça ne vous concerne pas ici.
+#
+# pam_faillock.so est bien disponible dans le paquet `pam` de nixpkgs
+# (le module système security.pam.services l'utilise lui-même en
+# interne pour "logFailures"), donc activé par défaut ci-dessous.
+# Compteurs stockés dans /var/run/faillock (défaut standard, un fichier
+# par utilisateur, pas de configuration supplémentaire nécessaire). En
+# cas de souci de permissions sur ce répertoire (rare), utiliser
+# `faillock --dir /chemin/perso` pour diagnostiquer, ou ajouter
+# `dir=/chemin/perso` aux 4 lignes pam_faillock ci-dessous.
+# Réinitialiser un compte bloqué : `faillock --user <nom> --reset`.
+#
+# Stack strictement conforme à l'exemple canonique du man pam_faillock(8)
+# (repris identiquement par Arch, Ubuntu, RHEL) :
+#   - "auth [success=1 default=bad] pam_unix.so" : en cas de succès, saute
+#     directement 1 ligne (donc la ligne authfail), sans quoi authfail
+#     s'exécuterait même après un mot de passe correct.
+#   - "auth [default=die] pam_faillock.so authfail" : en cas d'échec,
+#     enregistre l'échec et arrête immédiatement la chaîne (die).
+#   - "auth sufficient pam_faillock.so authsucc" : c'est bien "sufficient"
+#     et non "required" ici — avec "required", si cette ligne pose le
+#     moindre souci (permissions sur le répertoire de compteurs, etc.),
+#     TOUTE la chaîne échoue malgré un mot de passe déjà validé par
+#     pam_unix.so juste avant. C'était le bug de la version précédente de
+#     ce fichier : "Autorisation refusée" malgré un mot de passe correct.
+
+auth    required                    pam_faillock.so     preauth
+auth    [success=1 default=bad]     pam_unix.so          nullok
+auth    [default=die]               pam_faillock.so     authfail
+auth    sufficient                  pam_faillock.so      authsucc
+auth    required                    pam_deny.so
+
+account required pam_unix.so

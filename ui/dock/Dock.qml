@@ -1,25 +1,27 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Io
+import qs.services
 
 Scope {
     id: dockRoot
 
-    readonly property int  baseIconSize: 54
+    readonly property int  baseIconSize: ShellConfig.options.dockAppearance.iconSize
     readonly property int  dockPadH:     14
     readonly property int  dockPadV:     10
     readonly property int  dockHeight:   baseIconSize + dockPadV * 2 + 12
     readonly property int  dockRadius:   22
     readonly property int  iconSpacing:  8
-    readonly property real magScale1:    1.50
-    readonly property real magScale2:    1.25
-    readonly property real magScale3:    1.08
+    readonly property real magScale1:    ShellConfig.options.dockAppearance.magnificationEnabled ? ShellConfig.options.dockAppearance.magnification : 1.0
+    readonly property real magScale2:    ShellConfig.options.dockAppearance.magnificationEnabled ? (1.0 + (ShellConfig.options.dockAppearance.magnification - 1.0) * 0.5) : 1.0
+    readonly property real magScale3:    ShellConfig.options.dockAppearance.magnificationEnabled ? (1.0 + (ShellConfig.options.dockAppearance.magnification - 1.0) * 0.16) : 1.0
     readonly property int  hoverRegionH: 4
 
-    property bool pinned:         true
+    property bool pinned:         !ShellConfig.options.dockAppearance.hoverToReveal
     property var  clientList:     []
     property bool fullscreenActive: false
     property var  cycleIndex:     ({})
@@ -275,6 +277,7 @@ Scope {
         _hyprClients.running = true
         _hyprActive.running  = true
         _stateLoad.running   = true
+        if (!dockRoot.pinned) _hideTimer.restart()
     }
 
     function _parseClients(json) {
@@ -370,6 +373,15 @@ Scope {
 
     property bool _dockReveal: true
     property bool hoverActive: false
+
+    onPinnedChanged: {
+        if (!dockRoot.pinned && !dockRoot.hoverActive) {
+            _hideTimer.restart()
+        } else if (dockRoot.pinned) {
+            _hideTimer.stop()
+            dockRoot._dockReveal = true
+        }
+    }
 
     Timer {
         id: _hideTimer
@@ -924,8 +936,9 @@ Scope {
                                         cursorShape:  Qt.PointingHandCursor
                                         hoverEnabled: true
                                         onClicked: {
-                                            dockRoot.pinned = !dockRoot.pinned
-                                            if (!dockRoot.pinned) {
+                                            var newHoverToReveal = !ShellConfig.options.dockAppearance.hoverToReveal
+                                            ShellConfig.options.dockAppearance.hoverToReveal = newHoverToReveal
+                                            if (newHoverToReveal) {
                                                 _hideTimer.stop()
                                                 dockRoot._dockReveal = true
                                             }
@@ -1439,6 +1452,10 @@ Scope {
                 smooth:          true
                 antialiasing:    true
                 visible:         status === Image.Ready && source !== ""
+                layer.enabled:   ShellConfig.options.dockAppearance.monochromeIcons
+                layer.effect: MultiEffect {
+                    saturation: -1
+                }
             }
 
             Rectangle {

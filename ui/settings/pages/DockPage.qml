@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import qs.services
+import qs.components
 import qs.ui.settings.widgets
 
 ContentPage {
@@ -10,16 +12,35 @@ ContentPage {
         title: "Dock"
 
         ConfigSwitch {
-            text: "Afficher le Dock"
-            checked: ShellConfig.options.dockAppearance.enable
-            onToggled: function(v) { ShellConfig.options.dockAppearance.enable = v }
+            text: "Masquer et afficher automatiquement le Dock"
+            checked: ShellConfig.options.dockAppearance.hoverToReveal
+            onToggled: function(v) { ShellConfig.options.dockAppearance.hoverToReveal = v }
+        }
+
+        ConfigSlider {
+            text: "Taille"
+            value: ShellConfig.options.dockAppearance.iconSize
+            from: 32
+            to: 84
+            decimals: 0
+            valueSuffix: " px"
+            onMoved: function(v) { ShellConfig.options.dockAppearance.iconSize = Math.round(v) }
         }
 
         ConfigSwitch {
-            text: "Révéler au survol"
-            description: "Le Dock apparaît quand le curseur atteint le bord de l'écran"
-            checked: ShellConfig.options.dockAppearance.hoverToReveal
-            onToggled: function(v) { ShellConfig.options.dockAppearance.hoverToReveal = v }
+            text: "Grossissement à l'approche du curseur"
+            checked: ShellConfig.options.dockAppearance.magnificationEnabled
+            onToggled: function(v) { ShellConfig.options.dockAppearance.magnificationEnabled = v }
+        }
+
+        ConfigSlider {
+            text: "Niveau de grossissement"
+            visible: ShellConfig.options.dockAppearance.magnificationEnabled
+            value: ShellConfig.options.dockAppearance.magnification
+            from: 1.0
+            to: 2.0
+            decimals: 2
+            onMoved: function(v) { ShellConfig.options.dockAppearance.magnification = v }
         }
 
         ConfigSwitch {
@@ -29,17 +50,8 @@ ContentPage {
         }
     }
 
-    ContentSection {
-        title: "Apparence"
-
-        ConfigSlider {
-            text: "Hauteur"
-            value: ShellConfig.options.dockAppearance.height
-            from: 40
-            to: 100
-            decimals: 0
-            valueSuffix: " px"
-            onMoved: function(v) { ShellConfig.options.dockAppearance.height = Math.round(v) }
-        }
+    Item {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 20
     }
 }

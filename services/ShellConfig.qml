@@ -29,7 +29,7 @@ import Quickshell.Io
     Usage:
         import qs.services
         ShellConfig.options.dock.pinnedApps
-        ShellConfig.options.topbar.showClock = false
+        ShellConfig.options.topbar.clockVisible = false
 */
 Singleton {
     id: root
@@ -80,12 +80,21 @@ Singleton {
             // système, seulement l'apparence des composants du shell.
             // ---------------------------------------------------------
             property JsonObject topbar: JsonObject {
-                property bool showClock:      true
-                property bool showBattery:    true
+                property bool clockVisible:      true
+                property bool clockTextVisible:  true
+                property bool clockBadgeVisible: true
+
+                property bool batteryVisible:      true
+                property bool batteryTextVisible:  true
+                property bool batteryIconVisible:  true
+
                 property bool showBluetooth:  true
                 property bool showWifi:       true
                 property bool showSystemTray: true
-                property string clockFormat:  "HH:mm"
+                property bool showControlCenter: true
+                property bool showAI:            true
+                property bool showSpotlight:     true
+                property string clockFormat:  "ddd d MMM HH:mm"
                 property int    barHeight:    30
             }
 
@@ -94,6 +103,13 @@ Singleton {
                 property real height:            60
                 property bool hoverToReveal:     true
                 property bool monochromeIcons:   true
+                property int  iconSize:          54
+                property real magnification:     1.50
+                property bool magnificationEnabled: true
+            }
+
+            property JsonObject menuBar: JsonObject {
+                property bool autoHide: false
             }
 
             property JsonObject appearance: JsonObject {
@@ -104,6 +120,37 @@ Singleton {
 
             property JsonObject spotlight: JsonObject {
                 property string hotkey: "Super"
+
+                property JsonObject aliases: JsonObject {
+                    property string calc:     "="
+                    property string search:   "?"
+                    property string wall:     "~"
+                    property string emoji:    ":"
+                    property string sh:       "$"
+                    property string todo:     "+"
+                }
+
+                property JsonObject sources: JsonObject {
+                    property bool applications: true
+                    property bool files:        true
+                    property bool actions:      true
+                    property bool calculator:   true
+                }
+
+                property JsonObject clipboard: JsonObject {
+                    property bool enableText:  true
+                    property bool enableImage: true
+                    property int  maxEntries:  60
+                }
+
+                property JsonObject indexing: JsonObject {
+                    property string wallpaperDir:       "~/Pictures/wallpaper"
+                    property list<string> excludePaths: ["node_modules", "target", "dist", "build", "vendor", "venv", "__pycache__"]
+                    property int fullReindexHours:       24
+                    property int incrementalMinutes:     5
+                }
+
+                property list<string> disabledActions: []
             }
 
             property JsonObject notifications: JsonObject {
@@ -117,7 +164,16 @@ Singleton {
             }
 
             property JsonObject wallpaper: JsonObject {
+                // Wallpaper du bureau normal. Historiquement stocké à
+                // part par SpotlightWindow.qml dans un cache base64
+                // (~/.cache/quickshell/spotlight_wallpaper) : migré ici
+                // pour que ce soit ShellConfig la seule source de vérité
+                // persistée, cohérent avec le reste du shell.
                 property string path: ""
+                // Wallpaper spécifique au lockscreen — volontairement
+                // une image distincte de celle du bureau, pas un simple
+                // alias vers "path" ci-dessus.
+                property string lockscreenPath: ""
             }
 
             property JsonObject controlCenter: JsonObject {

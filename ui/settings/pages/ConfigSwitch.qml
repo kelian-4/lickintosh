@@ -28,7 +28,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         spacing: 12
 
-        Column {
+        ColumnLayout {
             id: _col
             Layout.fillWidth: true
             spacing: 2
@@ -38,7 +38,7 @@ Item {
                 font.pixelSize: 14
                 color: "#fff"
                 elide: Text.ElideRight
-                width: parent.width
+                Layout.fillWidth: true
             }
 
             CFText {
@@ -47,7 +47,7 @@ Item {
                 gray: true
                 visible: root.description.length > 0
                 wrapMode: Text.WordWrap
-                width: parent.width
+                Layout.fillWidth: true
             }
         }
 

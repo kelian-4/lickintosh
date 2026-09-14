@@ -7,19 +7,22 @@ resolve_app_key() {
     local pid="$1"
     local comm="$2"
     local exe_path=""
-    exe_path=$(readlink "/proc/$pid/exe" 2>/dev/null)
     local name=""
+
+    exe_path=$(readlink "/proc/$pid/exe" 2>/dev/null) || true
+
     if [ -n "$exe_path" ]; then
         name="${exe_path##*/}"
-    fi
-    if [ -z "$name" ]; then
+    else
         name="$comm"
     fi
+
     name="${name#.}"
     name="${name%-wrapped}"
     name="${name%.wrapped}"
-    [ -z "$name" ] && name="unknown"
-    echo "$name"
+
+    [ -n "$name" ] || name="unknown"
+    printf '%s\n' "$name"
 }
 
 declare -A CPU_TICKS
@@ -28,18 +31,22 @@ declare -A SWAP_KB
 
 for stat_file in /proc/[0-9]*/stat; do
     [ -r "$stat_file" ] || continue
+
     pid="${stat_file#/proc/}"
     pid="${pid%/stat}"
 
     comm=""
-    IFS= read -r comm < "/proc/$pid/comm" 2>/dev/null
+    IFS= read -r comm < "/proc/$pid/comm" 2>/dev/null || continue
+
     [[ "$comm" =~ $EXCLUDE_REGEX ]] && continue
 
     content=""
-    IFS= read -r content < "$stat_file" 2>/dev/null
-    [ -z "$content" ] && continue
+    IFS= read -r content < "$stat_file" 2>/dev/null || continue
+    [ -n "$content" ] || continue
+
     rest="${content##*) }"
     read -ra f <<< "$rest"
+
     utime="${f[11]:-0}"
     stime="${f[12]:-0}"
 
@@ -50,37 +57,42 @@ for stat_file in /proc/[0-9]*/stat; do
 
     rss_kb=0
     swap_kb=0
+
     if [ -r "/proc/$pid/smaps_rollup" ]; then
-        while IFS= read -r line; do
-            case "$line" in
-                Pss:*)
-                    read -r _ rss_kb _ <<< "$line"
+        while IFS=' ' read -r key value unit _; do
+            case "$key" in
+                Pss:)
+                    rss_kb="${value:-0}"
                     ;;
-                SwapPss:*)
-                    read -r _ swap_kb _ <<< "$line"
+                SwapPss:)
+                    swap_kb="${value:-0}"
                     ;;
             esac
         done < "/proc/$pid/smaps_rollup" 2>/dev/null
     elif [ -r "/proc/$pid/status" ]; then
-        while IFS= read -r line; do
-            case "$line" in
-                VmRSS:*)
-                    read -r _ rss_kb _ <<< "$line"
+        while IFS=' ' read -r key value unit _; do
+            case "$key" in
+                VmRSS:)
+                    rss_kb="${value:-0}"
                     ;;
-                VmSwap:*)
-                    read -r _ swap_kb _ <<< "$line"
+                VmSwap:)
+                    swap_kb="${value:-0}"
                     ;;
             esac
         done < "/proc/$pid/status" 2>/dev/null
     fi
-    [ -z "$rss_kb" ] && rss_kb=0
-    [ -z "$swap_kb" ] && swap_kb=0
 
+    [[ "$rss_kb" =~ ^[0-9]+$ ]] || rss_kb=0
+    [[ "$swap_kb" =~ ^[0-9]+$ ]] || swap_kb=0
 
     MEM_KB[$appkey]=$(( ${MEM_KB[$appkey]:-0} + rss_kb ))
     SWAP_KB[$appkey]=$(( ${SWAP_KB[$appkey]:-0} + swap_kb ))
 done
 
 for appkey in "${!CPU_TICKS[@]}"; do
-    echo "$appkey;${CPU_TICKS[$appkey]};${MEM_KB[$appkey]:-0};${SWAP_KB[$appkey]:-0}"
+    printf '%s;%s;%s;%s\n' \
+        "$appkey" \
+        "${CPU_TICKS[$appkey]}" \
+        "${MEM_KB[$appkey]:-0}" \
+        "${SWAP_KB[$appkey]:-0}"
 done

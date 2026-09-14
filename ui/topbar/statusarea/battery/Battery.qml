@@ -2,10 +2,12 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.VectorImage
 import Quickshell.Services.UPower
+import qs.services
 
 RowLayout {
     id: root
     spacing: 4
+    visible: ShellConfig.options.topbar.batteryVisible
 
     signal toggleBattery(int xPos)
 
@@ -36,6 +38,7 @@ RowLayout {
         width:  22
         height: 22
         Layout.alignment: Qt.AlignVCenter
+        visible: ShellConfig.options.topbar.batteryIconVisible
 
         VectorImage {
             source: "../../../../assets/icons/battery/" + root.batIcon
@@ -59,5 +62,6 @@ RowLayout {
         font.pixelSize: 13
         renderType:     Text.NativeRendering
         Layout.alignment: Qt.AlignVCenter
+        visible: ShellConfig.options.topbar.batteryTextVisible
     }
 }

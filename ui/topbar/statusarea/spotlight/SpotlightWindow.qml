@@ -8,6 +8,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.components.glass
+import qs.services
 import "SpotlightEmojiData.js" as EmojiData
 import "SpotlightCalc.js" as Calc
 
@@ -39,7 +40,20 @@ Scope {
     property var fileIndex:  []
     property bool indexReady: false
 
-    readonly property string findExcludes: "-not -path '*/.*' -not -path '*/node_modules/*' -not -path '*/target/*' -not -path '*/dist/*' -not -path '*/build/*' -not -path '*/vendor/*' -not -path '*/venv/*' -not -path '*/__pycache__/*'"
+    function _safeShellPath(p) {
+        return "'" + String(p).replace(/'/g, "'\\''") + "'"
+    }
+
+    readonly property string findExcludes: {
+        var parts = ["-not -path '*/.*'"]
+        var excludes = ShellConfig.options.spotlight.indexing.excludePaths
+        for (var i = 0; i < excludes.length; i++) {
+            var safe = String(excludes[i]).replace(/'/g, "")
+            if (safe.length === 0) continue
+            parts.push("-not -path '*/" + safe + "/*'")
+        }
+        return parts.join(" ")
+    }
     readonly property string fileIndexCache: "~/.cache/quickshell/spotlight_file_index.txt"
 
     function applyIndexOutput(text) {
@@ -98,7 +112,7 @@ Scope {
     Process {
         id: wallProc
         running: true
-        command: ["sh", "-c", "find ~/Pictures/wallpaper -maxdepth 2 -type f \\( -name '*.jpg' -o -name '*.png' -o -name '*.jpeg' -o -name '*.webp' \\) 2>/dev/null | head -40"]
+        command: ["sh", "-c", "find " + root._safeShellPath(ShellConfig.options.spotlight.indexing.wallpaperDir) + " -maxdepth 2 -type f \\( -name '*.jpg' -o -name '*.png' -o -name '*.jpeg' -o -name '*.webp' \\) 2>/dev/null | head -40"]
         stdout: StdioCollector { id: wallOut }
         onExited: {
             var lines = wallOut.text.trim().split("\n")
@@ -122,14 +136,14 @@ Scope {
     }
 
     Timer {
-        interval: 5 * 60 * 1000
+        interval: ShellConfig.options.spotlight.indexing.incrementalMinutes * 60 * 1000
         running: true
         repeat: true
         onTriggered: incrementalIndexProc.running = true
     }
 
     Timer {
-        interval: 24 * 60 * 60 * 1000
+        interval: ShellConfig.options.spotlight.indexing.fullReindexHours * 60 * 60 * 1000
         running: true
         repeat: true
         onTriggered: indexProc.running = true
@@ -254,7 +268,7 @@ Scope {
         clipListProc.command = ["bash", "-c",
             "dir=" + root.clipDir + "; " +
             "[ -d \"$dir\" ] || exit 0; " +
-            "ls -t \"$dir\" | while IFS= read -r f; do " +
+            "ls -t \"$dir\" | head -n " + ShellConfig.options.spotlight.clipboard.maxEntries + " | while IFS= read -r f; do " +
             "case \"$f\" in " +
             "*.png) printf 'image\\t%s/%s\\t\\n' \"$dir\" \"$f\" ;; " +
             "*.txt) line=$(tr '\\n' ' ' < \"$dir/$f\" | cut -c1-80); printf 'text\\t%s/%s\\t%s\\n' \"$dir\" \"$f\" \"$line\" ;; " +
@@ -320,7 +334,9 @@ Scope {
 
     function refreshUserActions() { userActionsProc.running = true }
 
-    readonly property var allActions: root.systemActions.concat(root.userActions)
+    readonly property var allActions: root.systemActions.concat(root.userActions).filter(function(a) {
+        return ShellConfig.options.spotlight.disabledActions.indexOf(a.title) === -1
+    })
 
     function emojiCdnUrl(emoji) {
         var codes = []
@@ -333,12 +349,12 @@ Scope {
         return "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@15.1.2/img/apple/64/" + codes.join("-") + ".png"
     }
 
-    readonly property var calcAliases:   ["=", "calc "]
-    readonly property var searchAliases: ["?", "search "]
-    readonly property var wallAliases:   ["~", "wall"]
-    readonly property var emojiAliases:  [":", "emoji "]
-    readonly property var shellAliases:  ["$", "sh "]
-    readonly property var todoAliases:   ["+", "todo "]
+    readonly property var calcAliases:   [ShellConfig.options.spotlight.aliases.calc,   "calc "]
+    readonly property var searchAliases: [ShellConfig.options.spotlight.aliases.search, "search "]
+    readonly property var wallAliases:   [ShellConfig.options.spotlight.aliases.wall,   "wall"]
+    readonly property var emojiAliases:  [ShellConfig.options.spotlight.aliases.emoji,  "emoji "]
+    readonly property var shellAliases:  [ShellConfig.options.spotlight.aliases.sh,     "sh "]
+    readonly property var todoAliases:   [ShellConfig.options.spotlight.aliases.todo,   "todo "]
     readonly property var prefixWords:   ["calc ", "search ", "wall", "emoji ", "sh ", "todo "]
 
     function extractRest(sub, aliases) {
@@ -585,34 +601,22 @@ Scope {
 
     Process { id: usageSaveProc; command: ["sh", "-c", "true"] }
 
-    property string currentWallpaper:   ""
-    property string persistedWallpaper: ""
+    // Wallpaper du bureau : persisté via ShellConfig.options.wallpaper.path
+    // (source de vérité unique, cf. ShellConfig.qml), plus dans un cache
+    // base64 séparé (~/.cache/quickshell/spotlight_wallpaper — ancien
+    // mécanisme, supprimé). currentWallpaper reste une propriété locale
+    // distincte de ShellConfig.options.wallpaper.path pour permettre un
+    // aperçu en direct pendant la navigation dans le picker (persist:
+    // false) sans écrire sur le disque à chaque image survolée — seul
+    // persist: true (sélection confirmée) écrit dans ShellConfig.
+    property string currentWallpaper: ShellConfig.options.wallpaper.path
 
     function setWallpaper(path, persist) {
         root.currentWallpaper = path
         if (persist) {
-            root.persistedWallpaper = path
-            var b64 = root.toBase64(path)
-            wallpaperSaveProc.command = ["bash", "-c", "mkdir -p ~/.cache/quickshell && echo " + b64 + " > ~/.cache/quickshell/spotlight_wallpaper"]
-            wallpaperSaveProc.running = true
+            ShellConfig.options.wallpaper.path = path
         }
     }
-
-    Process {
-        id: wallpaperLoadProc
-        running: true
-        command: ["bash", "-c", "cat ~/.cache/quickshell/spotlight_wallpaper 2>/dev/null | base64 -d 2>/dev/null"]
-        stdout: StdioCollector { id: wallpaperLoadOut }
-        onExited: {
-            var p = wallpaperLoadOut.text.trim()
-            if (p !== "") {
-                root.persistedWallpaper = p
-                root.currentWallpaper   = p
-            }
-        }
-    }
-
-    Process { id: wallpaperSaveProc; command: ["true"] }
 
     Variants {
         model: Quickshell.screens
@@ -652,7 +656,19 @@ Scope {
                     source: path !== "" ? "file://" + path : ""
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
-                    cache: false
+                    // cache: true (plutôt que false comme avant) : cette
+                    // fenêtre reste vivante en permanence, donc rebasculer
+                    // vers un wallpaper déjà vu (ex: annuler un aperçu
+                    // dans le picker) sert depuis le cache Qt au lieu de
+                    // redécoder le fichier. sourceSize borne le décodage
+                    // à la taille d'affichage réelle de cet écran plutôt
+                    // que la résolution native du fichier — c'est ce qui
+                    // coûte le plus cher en temps de décodage, largement
+                    // plus que la lecture disque elle-même (même
+                    // stratégie que CachingImage de caelestia).
+                    cache: true
+                    sourceSize: Qt.size(bgWin.width * (bgWin.screen?.devicePixelRatio ?? 1),
+                                         bgWin.height * (bgWin.screen?.devicePixelRatio ?? 1))
                     opacity: 0
 
                     onStatusChanged: if (status === Image.Ready) fadeAnim.start()
@@ -717,7 +733,7 @@ Scope {
                         if (win.answers.length > 0) wallPreviewDebounce.trigger(win.answers[win.currentIdx].path)
                     } else {
                         wallPreviewDebounce.stop()
-                        root.currentWallpaper = root.persistedWallpaper
+                        root.currentWallpaper = ShellConfig.options.wallpaper.path
                     }
                 }
                 onCurrentIdxChanged: {
@@ -770,7 +786,7 @@ Scope {
                     if (sys.length > 0) sections.push({ title: "Actions", items: sys })
 
                     var mathStripped = t.trim().replace(/\b(pi|tau|e|phi)\b/gi, "").replace(/\b(sqrt|cbrt|abs|sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|ln|log2|log|exp|floor|ceil|round|sign|min|max|pow|atan2|hypot)\b/gi, "")
-                    if (/[0-9]/.test(t) && /^[0-9+\-*/^%!().,\s]*$/.test(mathStripped)) {
+                    if (ShellConfig.options.spotlight.sources.calculator && /[0-9]/.test(t) && /^[0-9+\-*/^%!().,\s]*$/.test(mathStripped)) {
                         var calcRes = Calc.evaluate(t)
                         if (calcRes.ok) {
                             sections.push({ title: "Calculatrice", items: [{ title: calcRes.display, description: "Entrée pour copier", icon: "accessories-calculator", isCalc: true, value: calcRes.display }] })
@@ -1005,6 +1021,9 @@ Scope {
                 }
 
                 function clickAction(action) {
+                    if (action === "applications" && !ShellConfig.options.spotlight.sources.applications) return
+                    if (action === "files" && !ShellConfig.options.spotlight.sources.files) return
+                    if (action === "actions" && !ShellConfig.options.spotlight.sources.actions) return
                     hoveredAction  = ""
                     selectedAction = action
                     actionsShown   = false
@@ -1038,9 +1057,11 @@ Scope {
                     for (var i = 0; i < root.clipHistory.length; i++) {
                         var e = root.clipHistory[i]
                         if (e.type === "image") {
+                            if (!ShellConfig.options.spotlight.clipboard.enableImage) continue
                             if (q !== "") continue
                             out.push({ name: "Image copiée", title: "Image copiée", description: "Presse-papier · Image", clipImage: e.ref })
                         } else {
+                            if (!ShellConfig.options.spotlight.clipboard.enableText) continue
                             if (q !== "" && e.preview.toLowerCase().indexOf(q) === -1) continue
                             out.push({ name: e.preview, title: e.preview, description: "Presse-papier · Texte", icon: "edit-paste", clipFile: e.ref })
                         }

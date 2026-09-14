@@ -5,7 +5,71 @@
         "reduceMotion": false
     },
     "battery": {
-        "powerProfile": "balanced"
+        "powerProfile": "performance"
+    },
+    "controlCenter": {
+        "widgetVisibility": [
+            {
+                "id": "wifiWidget",
+                "visible": true
+            },
+            {
+                "id": "btWidget",
+                "visible": true
+            },
+            {
+                "id": "adWidget",
+                "visible": true
+            },
+            {
+                "id": "musicWidget",
+                "visible": true
+            },
+            {
+                "id": "focusWidget",
+                "visible": true
+            },
+            {
+                "id": "stageWidget",
+                "visible": true
+            },
+            {
+                "id": "shareWidget",
+                "visible": true
+            },
+            {
+                "id": "darkWidget",
+                "visible": true
+            },
+            {
+                "id": "calcWidget",
+                "visible": true
+            },
+            {
+                "id": "gameModeWidget",
+                "visible": true
+            },
+            {
+                "id": "displayWidget",
+                "visible": true
+            },
+            {
+                "id": "volumeWidget",
+                "visible": true
+            },
+            {
+                "id": "timerWidget",
+                "visible": false
+            },
+            {
+                "id": "alarmWidget",
+                "visible": false
+            },
+            {
+                "id": "stopwatchWidget",
+                "visible": false
+            }
+        ]
     },
     "dock": {
         "pinnedApps": [
@@ -45,7 +109,13 @@
         "enable": true,
         "height": 60,
         "hoverToReveal": true,
-        "monochromeIcons": true
+        "iconSize": 54,
+        "magnification": 1.5,
+        "magnificationEnabled": true,
+        "monochromeIcons": false
+    },
+    "menuBar": {
+        "autoHide": false
     },
     "notifications": {
         "enable": true,
@@ -60,14 +130,22 @@
     },
     "topbar": {
         "barHeight": 30,
-        "clockFormat": "HH:mm",
-        "showBattery": true,
+        "batteryIconVisible": true,
+        "batteryTextVisible": true,
+        "batteryVisible": true,
+        "clockBadgeVisible": true,
+        "clockFormat": "ddd d MMM HH:mm",
+        "clockTextVisible": true,
+        "clockVisible": true,
+        "showAI": true,
         "showBluetooth": true,
-        "showClock": true,
+        "showControlCenter": true,
+        "showSpotlight": true,
         "showSystemTray": true,
         "showWifi": true
     },
     "wallpaper": {
+        "lockscreenPath": "",
         "path": ""
     }
 }

@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.VectorImage
 import QtQuick.Effects
 import Quickshell
+import qs.services
 import qs.ui.topbar.statusarea.systemtray
 import qs.ui.topbar.statusarea.volume
 import qs.ui.topbar.statusarea.battery
@@ -31,17 +32,31 @@ RowLayout {
         source: "../../../assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf"
     }
 
-    SystemTray {
-        id: systemTray
+    Item {
+        id: systemTrayItem
         Layout.alignment: Qt.AlignVCenter
-        hostWindow: root.hostWindow
-        maxWidth: Math.max(60, root.barWidth / 2 - otherControlsRow.implicitWidth - root.spacing)
+        implicitWidth:  systemTray.implicitWidth
+        implicitHeight: systemTray.implicitHeight
+        visible: ShellConfig.options.topbar.showSystemTray
+
+        SystemTray {
+            id: systemTray
+            anchors.fill: parent
+            hostWindow: root.hostWindow
+            maxWidth: Math.max(60, root.barWidth / 2 - otherControlsRowItem.implicitWidth - root.spacing)
+        }
     }
 
-    RowLayout {
-        id: otherControlsRow
-        spacing: 15
+    Item {
+        id: otherControlsRowItem
         Layout.alignment: Qt.AlignVCenter
+        implicitWidth:  otherControlsRow.implicitWidth
+        implicitHeight: otherControlsRow.implicitHeight
+
+        RowLayout {
+        id: otherControlsRow
+        anchors.fill: parent
+        spacing: 15
 
         BTDeviceTray {
             Layout.alignment: Qt.AlignVCenter
@@ -62,6 +77,7 @@ RowLayout {
         Bluetooth {
             id: btIcon
             Layout.alignment: Qt.AlignVCenter
+            visible: ShellConfig.options.topbar.showBluetooth
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
@@ -72,6 +88,7 @@ RowLayout {
         Wifi {
             id: wifiIcon
             Layout.alignment: Qt.AlignVCenter
+            visible: ShellConfig.options.topbar.showWifi
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
@@ -84,6 +101,7 @@ RowLayout {
             width: 18
             height: 18
             Layout.alignment: Qt.AlignVCenter
+            visible: ShellConfig.options.topbar.showSpotlight
 
             property bool hovered: false
 
@@ -114,6 +132,7 @@ RowLayout {
             Layout.alignment: Qt.AlignVCenter
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+            visible: ShellConfig.options.topbar.showControlCenter
             onClicked: root.toggleCC()
 
             VectorImage {
@@ -135,6 +154,7 @@ RowLayout {
             width: 18
             height: 18
             Layout.alignment: Qt.AlignVCenter
+            visible: ShellConfig.options.topbar.showAI
 
             property bool hovered: false
 
@@ -157,7 +177,8 @@ RowLayout {
         Item {
             id: _clockWrap
             Layout.alignment: Qt.AlignVCenter
-            implicitWidth:  _clock.implicitWidth + (root.notifUnreadCount > 0 ? _badge.width + 4 : 0)
+            visible: ShellConfig.options.topbar.clockVisible
+            implicitWidth:  _clock.implicitWidth + (_badge.visible ? _badge.width + 4 : 0)
             implicitHeight: _clock.implicitHeight
 
             Clock {
@@ -173,7 +194,7 @@ RowLayout {
                 height:  16
                 radius:  8
                 color:   "#FF453A"
-                visible: root.notifUnreadCount > 0
+                visible: root.notifUnreadCount > 0 && ShellConfig.options.topbar.clockBadgeVisible
 
                 Text {
                     id: _badgeTxt
@@ -195,6 +216,7 @@ RowLayout {
                 onEntered:    _clock.color = Qt.rgba(1, 1, 1, 0.70)
                 onExited:     _clock.color = "#FFFFFF"
             }
+        }
         }
     }
 }

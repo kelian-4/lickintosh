@@ -1,0 +1,16 @@
+#%PAM-1.0
+# Stack PAM pour l'authentification par empreinte digitale (fprintd) du
+# lockscreen lickintosh. Chargé directement par Quickshell, en parallèle
+# du mot de passe (voir lickintosh-lock) — LockContext.qml décide quand
+# le tenter.
+#
+# Nécessite le service fprintd (NixOS : services.fprintd.enable = true;)
+# et au moins un doigt enregistré via `fprintd-enroll`. Sans ça,
+# fprintd-list échoue et LockContext ne tente jamais ce module — aucun
+# risque de blocage si vous n'avez pas de lecteur d'empreintes.
+#
+# max-tries=1 : une seule tentative par appel PamContext.start(), c'est
+# LockContext (fprintTries/fprintMaxTries + retry Timer) qui gère les
+# tentatives successives côté QML plutôt que de le laisser au module.
+
+auth required pam_fprintd.so max-tries=1

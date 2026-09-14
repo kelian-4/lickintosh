@@ -12,49 +12,17 @@ import Quickshell.Hyprland
 import qs.ui.topbar.statusarea.controlcenter.panels
 import qs.ui.topbar.statusarea.notifcenter
 import qs.services
-import qs.services
-import qs.services
-import qs.components.glass
 import qs.components
+import qs.components.glass
 
 Scope {
     id: root
 
     property bool opened: false
     signal closing()
-
-    IpcHandler {
-        target: "controlcenter"
-
-        function open(): void {
-            root.opened = true
-        }
-
-        function openEditMode(): void {
-            root.opened = true
-            root.editMode = true
-        }
-    }
-
-    function openSettingsControlCenterPage() {
-        _openSettingsProc.running = true
-    }
-
-    Process {
-        id: _openSettingsProc
-        command: ["sh", "-c",
-            "qs ipc -p \"" + Quickshell.shellDir + "/settings.qml\" call settings openControlCenterPage 2>/dev/null && exit 0; " +
-            "qs -p \"" + Quickshell.shellDir + "/settings.qml\" & " +
-            "for i in 1 2 3 4 5 6; do " +
-            "sleep 0.5; " +
-            "qs ipc -p \"" + Quickshell.shellDir + "/settings.qml\" call settings openControlCenterPage 2>/dev/null && break; " +
-            "done"]
-    }
-
     property bool wifiOpened: false
     property bool btOpened:   false
     property bool timerOpened: false
-    property bool editMode: false
     property bool alarmOpened: false
     property bool stopwatchOpened: false
     property bool subOpened:  wifiOpened || btOpened || timerOpened || alarmOpened || stopwatchOpened
@@ -496,7 +464,6 @@ Scope {
             _ccLoaderActive = true
         } else {
             _ccCloseTimer.restart()
-            root.editMode = false
         }
     }
     Timer {
@@ -2202,40 +2169,6 @@ Scope {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: root.stopwatchOpened = false
                             }
-                        }
-                    }
-                }
-
-                Rectangle {
-                    id: _editButton
-                    width: 66
-                    height: 26
-                    radius: 13
-                    anchors.top: ccContent.bottom
-                    anchors.horizontalCenter: ccContent.horizontalCenter
-                    anchors.topMargin: 10
-                    visible: !root.subOpened && !root.playerExpanded && !root.playerClosing
-                    color: root.editMode ? "#3478f6" : (_editButtonMouse.containsMouse ? "#24ffffff" : "#18ffffff")
-                    border.color: "#14ffffff"
-                    border.width: 1
-                    Behavior on color { ColorAnimation { duration: 150 } }
-
-                    CFText {
-                        anchors.centerIn: parent
-                        text: "Modifier"
-                        font.pixelSize: 11
-                        font.weight: Font.DemiBold
-                        color: "#fff"
-                    }
-
-                    MouseArea {
-                        id: _editButtonMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            root.editMode = true
-                            root.openSettingsControlCenterPage()
                         }
                     }
                 }

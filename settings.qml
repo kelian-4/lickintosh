@@ -7,7 +7,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 import Quickshell
-import Quickshell.Io
 import qs.components.glass
 import qs.components
 import qs.ui.settings.widgets
@@ -54,9 +53,9 @@ FloatingWindow {
                 { name: "IA",                         icon: "ai.svg",                     component: "AiSettingsPage", implemented: true },
                 { name: "Control Center",             icon: "control-center.svg",         component: "ControlCenterPage", implemented: true },
                 { name: "Bureau et Dock",             icon: "settings/dock.svg",          component: "DockPage", implemented: true },
-                { name: "Barre des menus",            icon: "settings/menu bar.svg",      component: "TopBarPage", implemented: true },
-                { name: "Moniteurs",                  icon: "settings/display.svg",       implemented: false },
-                { name: "Spotlight",                  icon: "settings/spotlight.svg",     implemented: false },
+                { name: "Top Bar",                    icon: "settings/menu bar.svg",      component: "TopBarPage", implemented: true },
+                { name: "Moniteurs",                  icon: "settings/display.svg",       component: "MonitorsPage", implemented: true },
+                { name: "Spotlight",                  icon: "settings/spotlight.svg",     component: "SpotlightPage", implemented: true },
                 { name: "Fond d'écran",               icon: "settings/wallpaper.svg",     implemented: false }
             ]
         },
@@ -99,15 +98,6 @@ FloatingWindow {
         }
     }
 
-    IpcHandler {
-        target: "settings"
-
-        function openControlCenterPage(): void {
-            root.goToControlCenterPage()
-            root.visible = true
-            root.minimized = false
-        }
-    }
     readonly property bool canGoForward: _navPos < _navHistory.length - 1
 
     function navigateTo(index) {
@@ -548,6 +538,8 @@ FloatingWindow {
                                 case "GeneralPage":   return _generalComp
                                 case "AiSettingsPage": return _aiComp
                                 case "ControlCenterPage": return _ccPageComp
+                                case "MonitorsPage": return _monitorsComp
+                                case "SpotlightPage": return _spotlightComp
                                 default:              return _placeholderComp
                             }
                         }
@@ -566,4 +558,6 @@ FloatingWindow {
     Component { id: _generalComp; GeneralPage {} }
     Component { id: _aiComp; AiSettingsPage {} }
     Component { id: _ccPageComp; ControlCenterPage {} }
+    Component { id: _monitorsComp; MonitorsPage {} }
+    Component { id: _spotlightComp; SpotlightPage {} }
 }
