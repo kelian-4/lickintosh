@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    name: Lint & validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Verifier la syntaxe des scripts Python
+        id: python
+        run: |
+          fail=0
+          while IFS= read -r -d '' f; do
+            if ! python3 -m py_compile "$f" >> python.log 2>&1; then
+              echo "ERREUR: $f" >> python.log
+              fail=1
+            fi
+          done < <(find tools -name "*.py" -print0)
+          exit $fail
+
+      - name: ShellCheck sur les scripts shell
+        id: shellcheck
+        if: always()
+        run: |
+          find tools -name "*.sh" -exec shellcheck --severity=warning {} + > shellcheck.log 2>&1
+          exit $?
+
+      - name: Ecrire le log de statut
+        if: always()
+        run: |
+          {
+            echo "# CI Status"
+            echo ""
+            echo "Commit: ${{ github.sha }}"
+            echo "Branche: ${{ github.ref_name }}"
+            echo "Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo ""
+            echo "| Etape | Resultat |"
+            echo "|---|---|"
+            echo "| Syntaxe Python | ${{ steps.python.outcome }} |"
+            echo "| ShellCheck | ${{ steps.shellcheck.outcome }} |"
+            echo ""
+            echo "## Log complet - Syntaxe Python"
+            echo '```'
+            cat python.log 2>/dev/null || echo "(aucune erreur)"
+            echo '```'
+            echo ""
+            echo "## Log complet - ShellCheck"
+            echo '```'
+            cat shellcheck.log 2>/dev/null || echo "(aucune erreur)"
+            echo '```'
+          } > ci-status.md
+          rm -f python.log shellcheck.log
+
+      - name: Commit et push le log
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ci-status.md
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: mise a jour ci-status.md [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
