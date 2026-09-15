@@ -12,8 +12,6 @@ Singleton {
     reloadableId: "notchState"
 
     property real topbarZoneWidth: 220
-    property real anchorX: 400
-    property var screen: null
 
     property string visualState: "idle"
 

@@ -756,37 +756,41 @@ Scope {
                     var tl = t.toLowerCase()
                     var sections = []
 
-                    var apps = DesktopEntries.applications.values
-                        .filter(function(a) { return a.name.toLowerCase().indexOf(tl) !== -1 })
-                        .sort(function(a, b) {
-                            var ca = root.appUsage[a.name] || 0, cb = root.appUsage[b.name] || 0
-                            if (ca !== cb) return cb - ca
-                            var ai = a.name.toLowerCase().indexOf(tl), bi = b.name.toLowerCase().indexOf(tl)
-                            return ai !== bi ? ai - bi : a.name.localeCompare(b.name)
-                        })
-                        .slice(0, 5)
+                    var apps = ShellConfig.options.spotlight.sources.applications
+                        ? DesktopEntries.applications.values
+                            .filter(function(a) { return a.name.toLowerCase().indexOf(tl) !== -1 })
+                            .sort(function(a, b) {
+                                var ca = root.appUsage[a.name] || 0, cb = root.appUsage[b.name] || 0
+                                if (ca !== cb) return cb - ca
+                                var ai = a.name.toLowerCase().indexOf(tl), bi = b.name.toLowerCase().indexOf(tl)
+                                return ai !== bi ? ai - bi : a.name.localeCompare(b.name)
+                            })
+                            .slice(0, 5)
+                        : []
                     if (apps.length > 0) sections.push({ title: "Applications", items: apps })
 
-                    var filePaths = root.searchIndex(t, 6)
+                    var filePaths = ShellConfig.options.spotlight.sources.files ? root.searchIndex(t, 6) : []
                     if (filePaths.length > 0) {
                         var fileEntries = []
                         for (var fi = 0; fi < filePaths.length; fi++) fileEntries.push(win.makeFileEntry(filePaths[fi]))
                         sections.push({ title: "Fichiers", items: fileEntries })
                     }
 
-                    var sys = root.allActions.filter(function(a) {
-                        if (a.title.toLowerCase().indexOf(tl) !== -1) return true
-                        if (a.keywords) {
-                            for (var ki = 0; ki < a.keywords.length; ki++) {
-                                if (a.keywords[ki].indexOf(tl) !== -1) return true
+                    var sys = ShellConfig.options.spotlight.sources.actions
+                        ? root.allActions.filter(function(a) {
+                            if (a.title.toLowerCase().indexOf(tl) !== -1) return true
+                            if (a.keywords) {
+                                for (var ki = 0; ki < a.keywords.length; ki++) {
+                                    if (a.keywords[ki].indexOf(tl) !== -1) return true
+                                }
                             }
-                        }
-                        return false
-                    }).slice(0, 4)
+                            return false
+                        }).slice(0, 4)
+                        : []
                     if (sys.length > 0) sections.push({ title: "Actions", items: sys })
 
                     var mathStripped = t.trim().replace(/\b(pi|tau|e|phi)\b/gi, "").replace(/\b(sqrt|cbrt|abs|sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|ln|log2|log|exp|floor|ceil|round|sign|min|max|pow|atan2|hypot)\b/gi, "")
-                    if (ShellConfig.options.spotlight.sources.calculator && /[0-9]/.test(t) && /^[0-9+\-*/^%!().,\s]*$/.test(mathStripped)) {
+                    if (/[0-9]/.test(t) && /^[0-9+\-*/^%!().,\s]*$/.test(mathStripped)) {
                         var calcRes = Calc.evaluate(t)
                         if (calcRes.ok) {
                             sections.push({ title: "Calculatrice", items: [{ title: calcRes.display, description: "Entrée pour copier", icon: "accessories-calculator", isCalc: true, value: calcRes.display }] })
@@ -795,7 +799,9 @@ Scope {
                         }
                     }
 
-                    sections.push({ title: "Web", items: [{ title: "Rechercher '" + t + "'", description: "Recherche", icon: "internet-web-browser", isWeb: true, query: t }] })
+                    if (ShellConfig.options.spotlight.sources.webSearch) {
+                        sections.push({ title: "Web", items: [{ title: "Rechercher '" + t + "'", description: "Recherche", icon: "internet-web-browser", isWeb: true, query: t }] })
+                    }
 
                     return sections
                 }

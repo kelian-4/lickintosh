@@ -134,7 +134,7 @@ Singleton {
                     property bool applications: true
                     property bool files:        true
                     property bool actions:      true
-                    property bool calculator:   true
+                    property bool webSearch:    true
                 }
 
                 property JsonObject clipboard: JsonObject {

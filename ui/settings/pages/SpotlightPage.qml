@@ -53,9 +53,9 @@ ContentPage {
 
         ConfigSwitch {
             Layout.fillWidth: true
-            text: "Calculatrice"
-            checked: ShellConfig.options.spotlight.sources.calculator
-            onToggled: function(v) { ShellConfig.options.spotlight.sources.calculator = v }
+            text: "Recherche web"
+            checked: ShellConfig.options.spotlight.sources.webSearch
+            onToggled: function(v) { ShellConfig.options.spotlight.sources.webSearch = v }
         }
     }
 
@@ -111,6 +111,7 @@ ContentPage {
             RowLayout {
                 id: _aliasRow
                 required property var modelData
+                property string draft: ShellConfig.options.spotlight.aliases[modelData.key]
                 Layout.fillWidth: true
                 spacing: 10
 
@@ -139,13 +140,15 @@ ContentPage {
                         color: "#fff"
                         font.pixelSize: 14
                         maximumLength: 3
-                        text: ShellConfig.options.spotlight.aliases[_aliasRow.modelData.key]
-                        onEditingFinished: {
-                            if (text.length === 0) {
-                                text = ShellConfig.options.spotlight.aliases[_aliasRow.modelData.key]
-                                return
+                        text: _aliasRow.draft
+
+                        onTextChanged: {
+                            _aliasRow.draft = text
+                            if (text.length > 0) {
+                                var updated = Object.assign({}, ShellConfig.options.spotlight.aliases)
+                                updated[_aliasRow.modelData.key] = text
+                                ShellConfig.options.spotlight.aliases = updated
                             }
-                            ShellConfig.options.spotlight.aliases[_aliasRow.modelData.key] = text
                         }
                     }
                 }
