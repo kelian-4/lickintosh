@@ -1,9 +1,9 @@
 # CI Status
 
-Commit: 0088a3c6cb8c4925d009c3147af37dbb08b5fd8e
+Commit: f41fc0f83159c7fb4984b8c81977403e6de0920a
 Branche: dev
-Date: 2026-09-15 11:15:21 UTC
-Run: https://github.com/kelian-4/shell-macos/actions/runs/34962281936
+Date: 2026-09-15 11:24:06 UTC
+Run: https://github.com/kelian-4/shell-macos/actions/runs/34963068779
 
 | Etape | Resultat |
 |---|---|
@@ -24,4 +24,3 @@ In tools/energy-usage/sample-processes.sh line 73:
 For more information:
   https://www.shellcheck.net/wiki/SC2034 -- unit appears unused. Verify use (...
 ```
-Test push - Tue Sep 15 11:23:54 UTC 2026
