@@ -1,6 +1,7 @@
 //@ pragma UseQApplication
 //@ pragma ShellId main-shell
 import Quickshell
+import Quickshell.Hyprland
 import QtQuick
 import Quickshell.Services.Notifications
 import qs.services
@@ -14,7 +15,6 @@ import qs.ui.topbar
 import qs.ui.topbar.statusarea.controlcenter
 import qs.ui.topbar.menubar.applemenu
 import qs.ui.dock
-import qs.ui.topbar.notch
 import qs.ui.topbar.statusarea.spotlight
 import qs.ui.osd
 import qs.ui.lockscreen
@@ -41,7 +41,21 @@ ShellRoot {
 
     readonly property bool anySubmenuOpened: ccOpened || appleMenuOpened || aboutOpened ||
         spotlightOpened || aiOpened || notifCenterOpened || wifiOpened || bluetoothOpened ||
-        batteryOpened || volumeOpened
+        batteryOpened || volumeOpened || NotchState.expanded
+
+    Variants {
+        model: Quickshell.screens
+        PanelWindow {
+            id: topBarExclusionZone
+            required property var modelData
+            screen: modelData
+            anchors { top: true; left: true; right: true }
+            implicitHeight: 32
+            color: "transparent"
+            exclusiveZone: ShellConfig.options.menuBar.autoHide ? 0 : 32
+            mask: Region {}
+        }
+    }
 
     Variants {
         model: Quickshell.screens
@@ -49,11 +63,32 @@ ShellRoot {
             id: topBarWindow
             required property var modelData
             property bool _revealed: true
+            readonly property int barHeight: 32
             screen: modelData
-            anchors { top: true; left: true; right: true }
-            implicitHeight: 32
+            anchors { top: true; bottom: true; left: true; right: true }
             color: "transparent"
-            exclusiveZone: ShellConfig.options.menuBar.autoHide ? 0 : implicitHeight
+            exclusiveZone: 0
+
+            mask: NotchState.visualState === "idle" ? _barMask : _fullMask
+
+            Region {
+                id: _barMask
+                item: _topBarItem
+                Region { item: _topBarTriggerZone }
+            }
+
+            Region {
+                id: _fullMask
+                item: _topBarItem
+                Region { item: _topBarTriggerZone }
+                Region { item: _topBarItem.notchExpandedPanel }
+            }
+
+            HyprlandFocusGrab {
+                active: NotchState.expanded
+                windows: [topBarWindow]
+                onCleared: NotchState.close()
+            }
 
             Connections {
                 target: ShellConfig.options.menuBar
@@ -108,7 +143,8 @@ ShellRoot {
             TopBar {
                 id: _topBarItem
                 hostWindow:       topBarWindow
-                anchors.topMargin: (ShellConfig.options.menuBar.autoHide && !topBarWindow._revealed) ? -implicitHeight : 0
+                notifServer:      _globalNotifServer
+                anchors.topMargin: (ShellConfig.options.menuBar.autoHide && !topBarWindow._revealed) ? -topBarWindow.barHeight : 0
                 Behavior on anchors.topMargin {
                     enabled: ShellConfig.options.menuBar.autoHide
                     NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
@@ -157,9 +193,6 @@ ShellRoot {
         onClosing: appRoot.ccOpened = false
     }
     Dock {}
-    Notch {
-        notifServer: _globalNotifServer
-    }
     SpotlightWindow {
         opened: appRoot.spotlightOpened
         onCloseRequested: appRoot.spotlightOpened = false
