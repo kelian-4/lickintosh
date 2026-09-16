@@ -147,7 +147,7 @@ Rectangle {
 
         Behavior on width  { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
         Behavior on height { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
-        Behavior on radius { NumberAnimation { duration: root._effectsDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._effectsCurve } }
+        Behavior on radius { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
 
         FadeLoader {
             anchors.fill: parent
