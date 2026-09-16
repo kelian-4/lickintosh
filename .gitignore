@@ -7,3 +7,4 @@ venv/
 *.jsc
 .DS_Store
 $HOME/.config/quickshell/core/shell-config.json
+$HOME/.config/quickshell/core/alarms.json
