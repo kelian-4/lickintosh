@@ -52,6 +52,7 @@ ShellRoot {
             anchors { top: true; left: true; right: true }
             implicitHeight: 32
             color: "transparent"
+            exclusionMode: ExclusionMode.Normal
             exclusiveZone: ShellConfig.options.menuBar.autoHide ? 0 : 32
             mask: Region {}
         }
@@ -67,6 +68,7 @@ ShellRoot {
             screen: modelData
             anchors { top: true; bottom: true; left: true; right: true }
             color: "transparent"
+            exclusionMode: ExclusionMode.Normal
             exclusiveZone: 0
 
             mask: NotchState.visualState === "idle" ? _barMask : _fullMask
