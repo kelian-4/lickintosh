@@ -2,6 +2,7 @@
 //@ pragma ShellId main-shell
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Wayland
 import QtQuick
 import Quickshell.Services.Notifications
 import qs.services
@@ -68,6 +69,7 @@ ShellRoot {
             screen: modelData
             anchors { top: true; bottom: true; left: true; right: true }
             color: "transparent"
+            WlrLayershell.layer: WlrLayer.Overlay
             exclusionMode: ExclusionMode.Normal
             exclusiveZone: 0
 
