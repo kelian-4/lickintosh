@@ -111,7 +111,7 @@ Scope {
 
     Process {
         id: wallProc
-        running: true
+        running: false
         command: ["sh", "-c", "find " + root._safeShellPath(ShellConfig.options.spotlight.indexing.wallpaperDir) + " -maxdepth 2 -type f \\( -name '*.jpg' -o -name '*.png' -o -name '*.jpeg' -o -name '*.webp' \\) 2>/dev/null | head -40"]
         stdout: StdioCollector { id: wallOut }
         onExited: {
@@ -123,6 +123,13 @@ Scope {
                 out.push({ title: p.split("/").pop(), description: "Prefix: >~ ou >wall | Fond d'écran", path: p, isWallpaper: true })
             }
             root.wallpaperList = out
+        }
+    }
+
+    Connections {
+        target: ShellConfig
+        function onReadyChanged() {
+            if (ShellConfig.ready) root.refreshWallpaperList()
         }
     }
 
@@ -193,6 +200,8 @@ Scope {
     readonly property string clipDir: "$HOME/.cache/quickshell/spotlight_clip"
 
     Component.onCompleted: {
+        if (ShellConfig.ready) root.refreshWallpaperList()
+
         var textScript =
             "#!/usr/bin/env bash\n" +
             "content=$(cat)\n" +
