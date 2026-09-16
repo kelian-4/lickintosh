@@ -6,3 +6,4 @@ venv/
 *.qmlc
 *.jsc
 .DS_Store
+$HOME/.config/quickshell/core/shell-config.json
