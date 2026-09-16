@@ -5,7 +5,7 @@
         "reduceMotion": false
     },
     "battery": {
-        "powerProfile": "performance"
+        "powerProfile": "balanced"
     },
     "controlCenter": {
         "widgetVisibility": [
@@ -126,7 +126,42 @@
         "showOsd": true
     },
     "spotlight": {
-        "hotkey": "Super"
+        "aliases": {
+            "calc": "=",
+            "emoji": ":",
+            "search": "?",
+            "sh": "$",
+            "todo": "+",
+            "wall": "~"
+        },
+        "clipboard": {
+            "enableImage": true,
+            "enableText": true,
+            "maxEntries": 60
+        },
+        "disabledActions": [
+        ],
+        "hotkey": "Super",
+        "indexing": {
+            "excludePaths": [
+                "node_modules",
+                "target",
+                "dist",
+                "build",
+                "vendor",
+                "venv",
+                "__pycache__"
+            ],
+            "fullReindexHours": 24,
+            "incrementalMinutes": 5,
+            "wallpaperDir": "~/Pictures/wallpaper"
+        },
+        "sources": {
+            "actions": true,
+            "applications": true,
+            "calculator": true,
+            "files": true
+        }
     },
     "topbar": {
         "barHeight": 30,
