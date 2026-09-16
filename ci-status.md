@@ -1,9 +1,9 @@
 # CI Status
 
-Commit: 8d638a68ed13e13f0856bd455b3b38776a14e58a
+Commit: 06b27699e4e71f09c184db576df62e4466d1c5cc
 Branche: dev
-Date: 2026-09-16 06:37:29 UTC
-Run: https://github.com/kelian-4/shell-macos/actions/runs/35064549537
+Date: 2026-09-16 06:39:52 UTC
+Run: https://github.com/kelian-4/shell-macos/actions/runs/35064731746
 
 | Etape | Resultat |
 |---|---|
@@ -17,7 +17,7 @@ Run: https://github.com/kelian-4/shell-macos/actions/runs/35064549537
 ## Log complet - ShellCheck
 ```
 
-In tools/energy-usage/sample-processes.sh line 73:
+In tools/energy-usage/sample-processes copie.sh line 73:
         while IFS=' ' read -r key value unit _; do
                                         ^--^ SC2034 (warning): unit appears unused. Verify use (or export if used externally).
 
