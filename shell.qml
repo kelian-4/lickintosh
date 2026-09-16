@@ -2,7 +2,6 @@
 //@ pragma ShellId main-shell
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Wayland
 import QtQuick
 import Quickshell.Services.Notifications
 import qs.services
@@ -47,31 +46,16 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         PanelWindow {
-            id: topBarExclusionZone
-            required property var modelData
-            screen: modelData
-            anchors { top: true; left: true; right: true }
-            implicitHeight: 32
-            color: "transparent"
-            exclusionMode: ExclusionMode.Normal
-            exclusiveZone: ShellConfig.options.menuBar.autoHide ? 0 : 32
-            mask: Region {}
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        PanelWindow {
             id: topBarWindow
             required property var modelData
             property bool _revealed: true
             readonly property int barHeight: 32
             screen: modelData
-            anchors { top: true; bottom: true; left: true; right: true }
+            anchors { top: true; left: true; right: true }
+            implicitHeight: 420
             color: "transparent"
-            WlrLayershell.layer: WlrLayer.Overlay
             exclusionMode: ExclusionMode.Normal
-            exclusiveZone: 0
+            exclusiveZone: ShellConfig.options.menuBar.autoHide ? 0 : barHeight
 
             mask: NotchState.visualState === "idle" ? _barMask : _fullMask
 
