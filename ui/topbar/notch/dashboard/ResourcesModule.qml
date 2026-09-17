@@ -1,26 +1,30 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.VectorImage
+import QtQuick.Effects
+import Quickshell
 import qs.services
 
 // Calqué sur modules/dashboard/dash/Resources.qml de caelestia : trois
-// jauges circulaires CPU / RAM / Disque. Leur version consomme des
-// services C++ natifs (Caelestia.Services.Cpu/Memory/Storage) qu'on
-// n'a pas ; mêmes définitions, réimplémentées via
-// services/ResourcesState.qml (/proc, df).
+// jauges circulaires CPU / RAM / Disque, avec juste une icône au centre
+// (pas de pourcentage ni de libellé affichés — comme leur composant
+// Resource, qui ne montre que la MaterialIcon). Anneau toujours dessiné
+// via Canvas (QtQuick.Shapes.PathAngleArc donnerait un rendu plus
+// propre mais n'a pas été validé dans cet environnement) — juste
+// épaissi et agrandi par rapport à la version précédente.
 Item {
     id: root
     Layout.fillHeight: true
-    Layout.preferredWidth: 76
+    Layout.preferredWidth: 84
 
     component Ring: Item {
         id: ring
         property real percent: 0
-        property string label: ""
         property string icon: ""
         property color ringColor: "#4ADE80"
 
-        implicitWidth: 56
-        implicitHeight: 56
+        implicitWidth: 68
+        implicitHeight: 68
 
         onPercentChanged: canvas.requestPaint()
         onRingColorChanged: canvas.requestPaint()
@@ -30,23 +34,20 @@ Item {
             radius: width / 2
             color: "transparent"
             border.color: "#2A2A2A"
-            border.width: 4
+            border.width: 6
         }
 
-        // Anneau de progression approximé par un arc via Canvas
-        // (pas de QtQuick.Shapes.ArcItem disponible partout) — simple
-        // et suffisant pour un indicateur de ce format.
         Canvas {
             id: canvas
             anchors.fill: parent
             onPaint: {
                 var ctx = getContext("2d")
                 ctx.reset()
-                var cx = width / 2, cy = height / 2, r = width / 2 - 2
+                var cx = width / 2, cy = height / 2, r = width / 2 - 3
                 var start = -Math.PI / 2
                 var end = start + (Math.PI * 2) * Math.min(1, Math.max(0, ring.percent / 100))
                 ctx.strokeStyle = ring.ringColor
-                ctx.lineWidth = 4
+                ctx.lineWidth = 6
                 ctx.lineCap = "round"
                 ctx.beginPath()
                 ctx.arc(cx, cy, r, start, end)
@@ -54,34 +55,26 @@ Item {
             }
         }
 
-        // Icône + pourcentage empilés au centre (caelestia montre une
-        // icône dans l'anneau plutôt que le seul chiffre) — glyphes
-        // génériques faute d'icônes SVG dédiées CPU/RAM/Disque dans
-        // assets/, à ADAPTER si tu en as de meilleures sous la main.
-        ColumnLayout {
+        VectorImage {
             anchors.centerIn: parent
-            spacing: 0
-            Text { Layout.alignment: Qt.AlignHCenter; text: ring.icon; color: ring.ringColor; font.pixelSize: 13 }
-            Text { Layout.alignment: Qt.AlignHCenter; text: Math.round(ring.percent) + "%"; color: "#FFFFFF"; font.pixelSize: 9; font.family: "SF Pro Rounded" }
-        }
-
-        Text {
-            anchors.top: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 2
-            text: ring.label
-            color: "#8A8A8A"
-            font.pixelSize: 9
-            font.family: "SF Pro Rounded"
+            width: 22
+            height: 22
+            source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/" + ring.icon)
+            preferredRendererType: VectorImage.CurveRenderer
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                colorization: 1
+                colorizationColor: ring.ringColor
+            }
         }
     }
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 16
+        spacing: 18
 
-        Ring { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.cpuPercent;     label: "CPU";  icon: "⚙";  ringColor: "#1C7AFF" }
-        Ring { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.memoryPercent;  label: "RAM";  icon: "▤";  ringColor: "#FBBF24" }
-        Ring { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.storagePercent; label: "DISK"; icon: "▦";  ringColor: "#4ADE80" }
+        Ring { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.cpuPercent;     icon: "cpu.svg";        ringColor: "#8B7CF6" }
+        Ring { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.memoryPercent;  icon: "database.svg";   ringColor: "#EC4899" }
+        Ring { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.storagePercent; icon: "hard-drive.svg"; ringColor: "#3B9EFF" }
     }
 }

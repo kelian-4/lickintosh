@@ -33,6 +33,23 @@ Singleton {
 
     property var forecast: []     // [{ date, weekday, code, tempMax, tempMin }]
 
+    // Fichier SVG (sous assets/icons/weather/ ou notch/, faute de mieux
+    // pour orage/bruine qui n'existent pas dans weather/) correspondant
+    // au code WMO courant — consommé par WeatherModule/WeatherPage.
+    readonly property string iconFile: root._iconFor(root.weatherCode)
+
+    function _iconFor(code) {
+        if (code === 0 || code === 1) return "weather/sun.svg"
+        if (code === 2) return "weather/cloud-sun.svg"
+        if (code === 3 || code === 45 || code === 48) return "weather/clouds.svg"
+        if (code === 51 || code === 53 || code === 55 || code === 56 || code === 57) return "notch/cloud-drizzle.svg"
+        if (code >= 61 && code <= 67) return "weather/cloud-rain.svg"
+        if (code === 80 || code === 81 || code === 82) return "weather/cloud-rain.svg"
+        if ((code >= 71 && code <= 77) || code === 85 || code === 86) return "weather/cloud-snow.svg"
+        if (code === 95 || code === 96 || code === 99) return "notch/cloud-lightning.svg"
+        return "weather/clouds.svg"
+    }
+
     function _get(url, onDone) {
         var xhr = new XMLHttpRequest()
         xhr.onreadystatechange = function() {
