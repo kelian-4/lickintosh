@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.VectorImage
 import QtQuick.Effects
 import Quickshell
