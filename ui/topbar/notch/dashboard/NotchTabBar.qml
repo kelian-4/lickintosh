@@ -1,19 +1,25 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.VectorImage
+import QtQuick.Effects
+import Quickshell
 
 // Barre d'onglets calquée sur modules/dashboard/Tabs.qml de caelestia :
-// 4 onglets, icône + libellé, indicateur actif souligné.
+// 4 onglets, icône réelle (SVG teinté) + libellé, indicateur actif
+// souligné.
 RowLayout {
     id: root
     property int currentIndex: 0
     readonly property var tabs: [
-        { label: "Dashboard",   icon: "▦" },
-        { label: "Media",       icon: "♪" },
-        { label: "Performance", icon: "◈" },
-        { label: "Weather",     icon: "☁" }
+        { label: "Dashboard",   icon: "grid.svg" },
+        { label: "Media",       icon: "music.svg" },
+        { label: "Performance", icon: "bar-chart2.svg" },
+        { label: "Weather",     icon: "cloud.svg" }
     ]
 
     Layout.fillWidth: true
+    Layout.topMargin: 4
+    Layout.bottomMargin: 2
     spacing: 0
 
     Repeater {
@@ -36,20 +42,27 @@ RowLayout {
             ColumnLayout {
                 id: content
                 anchors.fill: parent
-                spacing: 4
+                spacing: 6
 
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    spacing: 5
-                    Text {
-                        text: tabDelegate.modelData.icon
-                        color: root.currentIndex === tabDelegate.index ? "#1C7AFF" : "#8A8A8A"
-                        font.pixelSize: 12
+                    spacing: 6
+
+                    VectorImage {
+                        Layout.preferredWidth: 14
+                        Layout.preferredHeight: 14
+                        source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/" + tabDelegate.modelData.icon)
+                        preferredRendererType: VectorImage.CurveRenderer
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1
+                            colorizationColor: root.currentIndex === tabDelegate.index ? "#1C7AFF" : "#8A8A8A"
+                        }
                     }
                     Text {
                         text: tabDelegate.modelData.label
                         color: root.currentIndex === tabDelegate.index ? "#FFFFFF" : "#8A8A8A"
-                        font.pixelSize: 11
+                        font.pixelSize: 13
                         font.bold: root.currentIndex === tabDelegate.index
                         font.family: "SF Pro Rounded"
                     }

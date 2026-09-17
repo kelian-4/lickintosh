@@ -1,6 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.VectorImage
+import QtQuick.Effects
+import Quickshell
 
 // Calqué sur modules/dashboard/dash/Calendar.qml de caelestia : une
 // vraie grille de mois via les contrôles Qt natifs (MonthGrid /
@@ -11,34 +14,55 @@ Rectangle {
     id: root
     Layout.fillWidth: true
     Layout.fillHeight: true
-    radius: 12
+    radius: 16
     color: "#1A1A1A"
 
     property date displayDate: new Date()
     readonly property date today: new Date()
 
+    component NavIcon: Item {
+        id: navIcon
+        property string icon: ""
+        signal clicked()
+        implicitWidth: 22
+        implicitHeight: 22
+
+        VectorImage {
+            anchors.centerIn: parent
+            width: 12
+            height: 12
+            source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + navIcon.icon)
+            preferredRendererType: VectorImage.CurveRenderer
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                colorization: 1
+                colorizationColor: "#8A8A8A"
+            }
+        }
+
+        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: navIcon.clicked() }
+    }
+
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 10
-        spacing: 4
+        anchors.margins: 14
+        spacing: 8
 
         RowLayout {
             Layout.fillWidth: true
-            Text {
-                text: "◀"
-                color: "#8A8A8A"; font.pixelSize: 11
-                MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: root.displayDate = new Date(root.displayDate.getFullYear(), root.displayDate.getMonth() - 1, 1) }
+            NavIcon {
+                icon: "chevron-left.svg"
+                onClicked: root.displayDate = new Date(root.displayDate.getFullYear(), root.displayDate.getMonth() - 1, 1)
             }
             Text {
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
                 text: Qt.locale("fr_FR").monthName(root.displayDate.getMonth()) + " " + root.displayDate.getFullYear()
-                color: "#FFFFFF"; font.pixelSize: 11; font.bold: true; font.family: "SF Pro Rounded"
+                color: "#FFFFFF"; font.pixelSize: 15; font.bold: true; font.family: "SF Pro Rounded"
             }
-            Text {
-                text: "▶"
-                color: "#8A8A8A"; font.pixelSize: 11
-                MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: root.displayDate = new Date(root.displayDate.getFullYear(), root.displayDate.getMonth() + 1, 1) }
+            NavIcon {
+                icon: "chevron-right.svg"
+                onClicked: root.displayDate = new Date(root.displayDate.getFullYear(), root.displayDate.getMonth() + 1, 1)
             }
         }
 
@@ -48,7 +72,7 @@ Rectangle {
             delegate: Text {
                 text: model.shortName
                 color: "#5A5A5A"
-                font.pixelSize: 9
+                font.pixelSize: 11
                 font.family: "SF Pro Rounded"
                 horizontalAlignment: Text.AlignHCenter
             }
@@ -74,7 +98,7 @@ Rectangle {
                 // dans les captures de caelestia.
                 Canvas {
                     anchors.centerIn: parent
-                    width: Math.min(parent.width, parent.height) - 6
+                    width: Math.min(parent.width, parent.height) - 4
                     height: width
                     visible: parent.isToday
                     onPaint: {
@@ -98,7 +122,7 @@ Rectangle {
                     anchors.centerIn: parent
                     text: model.day
                     color: model.month === grid.month ? "#FFFFFF" : "#4A4A4A"
-                    font.pixelSize: 9
+                    font.pixelSize: 12
                     font.family: "SF Pro Rounded"
                 }
             }
