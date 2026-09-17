@@ -133,6 +133,10 @@ Rectangle {
                                              : root.notchPeek       ? 40
                                                                      : 26
 
+    readonly property real notchTargetRadius: root.notchExpanded ? 26
+                                             : root.notchPeek     ? 20
+                                                                   : 13
+
     Rectangle {
         id: notchPill
         readonly property real _safeHalfWidth: 65
@@ -142,7 +146,7 @@ Rectangle {
         y: (root.themeHeight - 26) / 2
         width:  root.notchTargetWidth
         height: root.notchTargetHeight
-        radius: root.notchExpanded ? 26 : height / 2
+        radius: root.notchTargetRadius
         color:  "#0A0A0A"
 
         Behavior on width  { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
