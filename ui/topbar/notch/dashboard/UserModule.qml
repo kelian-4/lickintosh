@@ -1,42 +1,30 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.VectorImage
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
+import qs.services
 
 /*
-    Calqué sur modules/dashboard/dash/User.qml de caelestia : avatar +
-    badge de session + uptime. Détection de l'avatar reprise à
-    l'identique de ui/lockscreen/LockContext.qml (même ordre de
-    fallback : ~/.face, ~/.face.icon, AccountsService) pour rester
-    cohérent avec ce que le projet fait déjà ailleurs.
+    Calqué sur modules/dashboard/dash/User.qml de caelestia : vignette
+    (fond d'écran actuel plutôt que photo de profil, faute d'avatar
+    utilisateur configuré côté OS) avec un badge "Hyprland" flottant qui
+    chevauche le coin haut-droit, et un badge horloge + uptime qui
+    chevauche le coin bas-gauche — reproduction des MaterialShape
+    (Pill/ClamShell) de caelestia via de simples Rectangle, ce module
+    n'ayant pas accès à leur système M3Shapes.
 */
 Rectangle {
     id: root
     Layout.fillWidth: true
-    Layout.preferredHeight: 56
-    radius: 12
+    Layout.preferredHeight: 64
+    radius: 16
     color: "#1A1A1A"
+    clip: false
 
     readonly property string _home: Quickshell.env("HOME") || ""
-    readonly property string _user: Quickshell.env("USER") || ""
-    property string avatarSource: ""
     property string uptimeText: ""
-
-    Process {
-        running: root._home.length > 0
-        command: ["sh", "-c",
-            "for f in " +
-            "\"" + root._home + "/.face\" " +
-            "\"" + root._home + "/.face.icon\" " +
-            "\"/var/lib/AccountsService/icons/" + root._user + "\"" +
-            "; do [ -r \"$f\" ] && echo \"$f\" && break; done"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const path = text.trim()
-                if (path.length > 0) root.avatarSource = path
-            }
-        }
-    }
 
     Process {
         id: _uptimeProc
@@ -47,59 +35,104 @@ Rectangle {
     }
     Timer { interval: 60000; running: true; repeat: true; triggeredOnStart: true; onTriggered: _uptimeProc.running = true }
 
-    RowLayout {
-        anchors.fill: parent
-        anchors.margins: 10
-        spacing: 10
+    Item {
+        id: thumb
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.margins: 12
+        width: height
 
         Rectangle {
-            Layout.preferredWidth: 34
-            Layout.preferredHeight: 34
-            radius: 17
-            color: "#2A2A2A"
+            id: thumbClip
+            anchors.fill: parent
+            radius: 12
+            color: "#2A2A3A"
             clip: true
+
             Image {
                 anchors.fill: parent
-                source: root.avatarSource ? "file://" + root.avatarSource : ""
+                source: ShellConfig.options.wallpaper.path !== "" ? "file://" + ShellConfig.options.wallpaper.path : ""
                 fillMode: Image.PreserveAspectCrop
-                visible: root.avatarSource !== ""
+                visible: ShellConfig.options.wallpaper.path !== ""
             }
-            Text {
+
+            VectorImage {
                 anchors.centerIn: parent
-                visible: root.avatarSource === ""
-                text: root._user.charAt(0).toUpperCase()
-                color: "#8A8A8A"
-                font.pixelSize: 14
-                font.bold: true
-            }
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 3
-
-            Rectangle {
-                Layout.preferredWidth: badgeRow.implicitWidth + 16
-                Layout.preferredHeight: 16
-                radius: 8
-                color: "#2A2A4A"
-                RowLayout {
-                    id: badgeRow
-                    anchors.centerIn: parent
-                    spacing: 3
-                    Text { text: "✦"; color: "#B39DDB"; font.pixelSize: 8 }
-                    Text { text: "Hyprland"; color: "#B39DDB"; font.pixelSize: 9; font.family: "SF Pro Rounded" }
+                width: 20
+                height: 20
+                visible: ShellConfig.options.wallpaper.path === ""
+                source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/logo.svg")
+                preferredRendererType: VectorImage.CurveRenderer
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1
+                    colorizationColor: "#8A8A8A"
                 }
             }
+        }
 
-            Text {
-                Layout.fillWidth: true
-                text: root.uptimeText !== "" ? ("up " + root.uptimeText) : ""
-                color: "#8A8A8A"
-                font.pixelSize: 9
-                font.family: "SF Pro Rounded"
-                elide: Text.ElideRight
+        // Badge "Hyprland" — chevauche le coin haut-droit de la vignette.
+        Rectangle {
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.rightMargin: -hyprRow.implicitWidth * 0.35
+            anchors.topMargin: -8
+            implicitWidth: hyprRow.implicitWidth + 14
+            implicitHeight: 20
+            radius: 10
+            color: "#2A2A4A"
+            border.color: "#1A1A1A"
+            border.width: 2
+
+            RowLayout {
+                id: hyprRow
+                anchors.centerIn: parent
+                spacing: 3
+                Text { text: "✦"; color: "#B39DDB"; font.pixelSize: 8 }
+                Text { text: "Hyprland"; color: "#B39DDB"; font.pixelSize: 10; font.family: "SF Pro Rounded" }
             }
         }
+
+        // Badge horloge + uptime — chevauche le coin bas-gauche.
+        Rectangle {
+            id: uptimeBadge
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.leftMargin: -10
+            anchors.bottomMargin: -8
+            implicitWidth: 20
+            implicitHeight: 20
+            radius: 10
+            color: "#2A3A2A"
+            border.color: "#1A1A1A"
+            border.width: 2
+
+            VectorImage {
+                anchors.centerIn: parent
+                width: 11
+                height: 11
+                source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/clock.svg")
+                preferredRendererType: VectorImage.CurveRenderer
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1
+                    colorizationColor: "#8FD19E"
+                }
+            }
+        }
+    }
+
+    Text {
+        anchors.left: thumb.right
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin: 14
+        anchors.rightMargin: 12
+        text: root.uptimeText !== "" ? ("up " + root.uptimeText) : ""
+        color: "#B0B0B0"
+        font.pixelSize: 12
+        font.family: "SF Pro Rounded"
+        elide: Text.ElideRight
     }
 }
