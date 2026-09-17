@@ -1,26 +1,35 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.VectorImage
 import QtQuick.Effects
+import QtQuick.VectorImage
 import Quickshell
 import qs.services
 
 /*
-    Calqué sur modules/dashboard/dash/Media.qml de caelestia : pochette,
-    titre/artiste/album, contrôles play/prev/next. Version compacte
-    (sans l'anneau de progression circulaire autour de la pochette ni
-    le bongo cat animé de leur version) — le bongo cat consomme un
-    fichier gif dédié (Config.paths.mediaGif) que ce dépôt n'a pas ;
-    à brancher plus tard sur le même modèle si un asset est fourni
-    (AnimatedImage, playing: MprisState.isPlaying).
+    Port de modules/dashboard/dash/Media.qml + CoverArt.qml (caelestia-
+    dots/shell, GPLv3) :
+    - CircularProgress en demi-cercle (sweepAngle 180, comme
+      Tokens.sizes.dashboard.mediaProgressSweep) autour de la pochette,
+      valeur = position/duree de lecture.
+    - Pochette qui tourne lentement en boucle tant que ca joue (leur
+      CoverArt utilise un blob "Cookie12Sided" de M3Shapes, indisponible
+      ici -> remplace par un simple cercle, meme logique de rotation).
+    - Fallback texte identique a leur logique exacte : "No media" si
+      aucun lecteur actif, "Unknown title/album/artist" si un lecteur
+      est actif mais sans metadonnee sur ce champ precis.
+    - Controles precedent/lecture-pause/suivant.
+    - Pas de bongo cat (AnimatedImage sur Config.paths.mediaGif) : ce
+      depot n'a pas cet asset gif.
 */
-Rectangle {
+Item {
     id: root
     Layout.fillHeight: true
-    Layout.preferredWidth: 150
-    radius: 20
-    color: "#1A1A1A"
-    clip: true
+    Layout.preferredWidth: 130
+
+    readonly property real playerProgress: MprisState.hasPlayer && MprisState.length > 0
+        ? (MprisState.position % MprisState.length) / MprisState.length
+        : 0
+    readonly property real arcCoverGap: 4
 
     component CtrlIcon: Item {
         id: ctrl
@@ -55,42 +64,69 @@ Rectangle {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 12
-        spacing: 8
+        spacing: 6
 
-        Rectangle {
+        Item {
+            id: coverWrap
             Layout.fillWidth: true
-            Layout.preferredHeight: root.width - 24
-            radius: 12
-            color: "#0A0A0A"
-            clip: true
+            Layout.preferredHeight: width
 
-            Image {
-                anchors.fill: parent
-                source: MprisState.artUrl
-                fillMode: Image.PreserveAspectCrop
-                visible: MprisState.artUrl !== ""
+            CircularProgress {
+                id: prog
+                anchors.centerIn: cover
+                implicitSize: cover.width + root.arcCoverGap + strokeWidth * 2
+                fgColour: "#1C7AFF"
+                bgColour: "#2A2A2A"
+                strokeWidth: 6
+                startAngle: -90 - 90
+                sweepAngle: 180
+                value: root.playerProgress
+                hasEndIndicator: MprisState.hasPlayer
             }
 
-            Rectangle {
-                anchors.centerIn: parent
-                visible: MprisState.artUrl === ""
-                width: parent.height * 0.62
+            Item {
+                id: cover
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: prog.strokeWidth + root.arcCoverGap + 6
                 height: width
-                radius: width / 2
-                color: "transparent"
-                border.color: "#2E5A8A"
-                border.width: 2
+
+                Rectangle {
+                    id: coverMask
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: "#2A2A3A"
+                    clip: true
+
+                    Image {
+                        anchors.fill: parent
+                        source: MprisState.artUrl
+                        fillMode: Image.PreserveAspectCrop
+                        visible: MprisState.artUrl !== ""
+                    }
+
+                    NumberAnimation on rotation {
+                        running: MprisState.isPlaying
+                        paused: !MprisState.isPlaying
+                        from: 0
+                        to: 360
+                        duration: 23500
+                        loops: Animation.Infinite
+                    }
+                }
 
                 VectorImage {
                     anchors.centerIn: parent
-                    width: parent.width * 0.5
+                    width: parent.width * 0.35
                     height: width
+                    visible: MprisState.artUrl === ""
                     source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/disc.svg")
                     preferredRendererType: VectorImage.CurveRenderer
                     layer.enabled: true
                     layer.effect: MultiEffect {
                         colorization: 1
-                        colorizationColor: "#5A9BE0"
+                        colorizationColor: "#8A8A8A"
                     }
                 }
             }
@@ -98,29 +134,25 @@ Rectangle {
 
         Text {
             Layout.fillWidth: true
-            text: MprisState.hasPlayer ? MprisState.trackTitle : "Unknown title"
-            color: "#FFFFFF"
-            font.pixelSize: 13
-            font.bold: true
-            font.family: "SF Pro Rounded"
+            text: !MprisState.hasPlayer ? "No media" : (MprisState.trackTitle !== "" ? MprisState.trackTitle : "Unknown title")
+            color: "#1C7AFF"
+            font.pixelSize: 13; font.bold: true; font.family: "SF Pro Rounded"
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
         }
         Text {
             Layout.fillWidth: true
-            text: MprisState.hasPlayer && MprisState.trackAlbum !== "" ? MprisState.trackAlbum : "Unknown album"
-            color: "#8A8A8A"
-            font.pixelSize: 10
-            font.family: "SF Pro Rounded"
+            text: !MprisState.hasPlayer ? "No media" : (MprisState.trackAlbum !== "" ? MprisState.trackAlbum : "Unknown album")
+            color: "#9AA0A6"
+            font.pixelSize: 10; font.family: "SF Pro Rounded"
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
         }
         Text {
             Layout.fillWidth: true
-            text: MprisState.hasPlayer && MprisState.trackArtist !== "" ? MprisState.trackArtist : "Unknown artist"
-            color: "#8A8A8A"
-            font.pixelSize: 10
-            font.family: "SF Pro Rounded"
+            text: !MprisState.hasPlayer ? "No media" : (MprisState.trackArtist !== "" ? MprisState.trackArtist : "Unknown artist")
+            color: "#5B8DEF"
+            font.pixelSize: 10; font.family: "SF Pro Rounded"
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
         }
@@ -130,7 +162,7 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
-            spacing: 20
+            spacing: 18
 
             CtrlIcon { icon: "backward.svg"; enabled_: MprisState.canGoPrevious; onClicked: MprisState.previous() }
             CtrlIcon { icon: MprisState.isPlaying ? "pause.svg" : "play.svg"; enabled_: MprisState.canTogglePlaying; onClicked: MprisState.togglePlaying() }
