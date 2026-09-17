@@ -23,10 +23,9 @@ RowLayout {
         Layout.fillHeight: true
         spacing: 10
 
-        StatusChipsRow {}
-
         RowLayout {
             Layout.fillWidth: true
+            Layout.fillHeight: true
             spacing: 10
             WeatherModule {}
             UserModule {}

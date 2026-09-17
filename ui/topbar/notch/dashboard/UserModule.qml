@@ -26,7 +26,7 @@ import Quickshell.Io
 Item {
     id: root
     Layout.fillWidth: true
-    Layout.preferredHeight: 64
+    Layout.fillHeight: true
 
     readonly property string _home: Quickshell.env("HOME") || ""
     readonly property string _user: Quickshell.env("USER") || ""
