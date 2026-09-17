@@ -11,7 +11,7 @@ import qs.services
 Rectangle {
     id: root
     Layout.fillWidth: true
-    Layout.preferredHeight: 64
+    Layout.fillHeight: true
     radius: 16
     color: "#1A1A1A"
     visible: WeatherState.available
