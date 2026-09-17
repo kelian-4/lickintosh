@@ -5,76 +5,62 @@ import QtQuick.Effects
 import Quickshell
 import qs.services
 
-// Calqué sur modules/dashboard/dash/Resources.qml de caelestia : trois
-// jauges circulaires CPU / RAM / Disque, avec juste une icône au centre
-// (pas de pourcentage ni de libellé affichés — comme leur composant
-// Resource, qui ne montre que la MaterialIcon). Anneau toujours dessiné
-// via Canvas (QtQuick.Shapes.PathAngleArc donnerait un rendu plus
-// propre mais n'a pas été validé dans cet environnement) — juste
-// épaissi et agrandi par rapport à la version précédente.
+/*
+    Port de modules/dashboard/dash/Resources.qml (caelestia-dots/shell,
+    GPLv3) : trois CircularProgress empilées (CPU / RAM / Disque), chacune
+    avec juste une icône centrée (leur composant `Resource` ne montre ni
+    pourcentage ni libellé) — cf. mapping icône/couleur exact de leur
+    ColumnLayout : CPU -> "memory" (m3primary, couleur par defaut),
+    Memory -> "memory_alt" (m3tertiary), Storage -> "hard_disk"
+    (m3secondary). "memory_alt" et "hard_disk" n'existent pas dans le set
+    d'icones feather de ce depot ; substitues par database.svg / hard-drive.svg,
+    les plus proches disponibles.
+*/
 Item {
     id: root
     Layout.fillHeight: true
-    Layout.preferredWidth: 84
+    Layout.preferredWidth: 60
 
-    component Ring: Item {
-        id: ring
-        property real percent: 0
-        property string icon: ""
-        property color ringColor: "#4ADE80"
-
-        implicitWidth: 68
-        implicitHeight: 68
-
-        onPercentChanged: canvas.requestPaint()
-        onRingColorChanged: canvas.requestPaint()
-
-        Rectangle {
-            anchors.fill: parent
-            radius: width / 2
-            color: "transparent"
-            border.color: "#2A2A2A"
-            border.width: 6
-        }
-
-        Canvas {
-            id: canvas
-            anchors.fill: parent
-            onPaint: {
-                var ctx = getContext("2d")
-                ctx.reset()
-                var cx = width / 2, cy = height / 2, r = width / 2 - 3
-                var start = -Math.PI / 2
-                var end = start + (Math.PI * 2) * Math.min(1, Math.max(0, ring.percent / 100))
-                ctx.strokeStyle = ring.ringColor
-                ctx.lineWidth = 6
-                ctx.lineCap = "round"
-                ctx.beginPath()
-                ctx.arc(cx, cy, r, start, end)
-                ctx.stroke()
-            }
-        }
+    component Resource: CircularProgress {
+        id: res
+        required property string icon
+        Layout.fillHeight: true
+        implicitSize: height
+        strokeWidth: 6
 
         VectorImage {
             anchors.centerIn: parent
-            width: 22
-            height: 22
-            source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/" + ring.icon)
+            width: parent.height * 0.32
+            height: width
+            source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/" + res.icon)
             preferredRendererType: VectorImage.CurveRenderer
             layer.enabled: true
             layer.effect: MultiEffect {
                 colorization: 1
-                colorizationColor: ring.ringColor
+                colorizationColor: res.fgColour
             }
         }
     }
 
     ColumnLayout {
-        anchors.centerIn: parent
-        spacing: 18
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        spacing: 12
 
-        Ring { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.cpuPercent;     icon: "cpu.svg";        ringColor: "#8B7CF6" }
-        Ring { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.memoryPercent;  icon: "database.svg";   ringColor: "#EC4899" }
-        Ring { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.storagePercent; icon: "hard-drive.svg"; ringColor: "#3B9EFF" }
+        Resource {
+            icon: "cpu.svg"
+            value: ResourcesState.cpuPercent / 100
+        }
+        Resource {
+            icon: "database.svg"
+            value: ResourcesState.memoryPercent / 100
+            fgColour: "#EC4899"
+        }
+        Resource {
+            icon: "hard-drive.svg"
+            value: ResourcesState.storagePercent / 100
+            fgColour: "#38BDF8"
+        }
     }
 }

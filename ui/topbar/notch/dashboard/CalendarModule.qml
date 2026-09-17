@@ -70,8 +70,9 @@ Rectangle {
             Layout.fillWidth: true
             locale: Qt.locale("fr_FR")
             delegate: Text {
+                required property var model
                 text: model.shortName
-                color: "#5A5A5A"
+                color: (model.day === 0 || model.day === 6) ? "#EC4899" : "#5A5A5A"
                 font.pixelSize: 11
                 font.family: "SF Pro Rounded"
                 horizontalAlignment: Text.AlignHCenter
@@ -121,7 +122,10 @@ Rectangle {
                 Text {
                     anchors.centerIn: parent
                     text: model.day
-                    color: model.month === grid.month ? "#FFFFFF" : "#4A4A4A"
+                    color: parent.isToday
+                           ? "#FFFFFF"
+                           : (model.date.getDay() === 0 || model.date.getDay() === 6) ? "#EC4899" : "#B0B0B0"
+                    opacity: parent.isToday || model.month === grid.month ? 1 : 0.4
                     font.pixelSize: 12
                     font.family: "SF Pro Rounded"
                 }
