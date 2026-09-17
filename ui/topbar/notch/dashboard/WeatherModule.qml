@@ -1,54 +1,53 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.VectorImage
+import QtQuick.Effects
+import Quickshell
 import qs.services
 
-// Calqué sur modules/dashboard/dash/SmallWeather.qml de caelestia :
-// température + description, alimenté par services/WeatherState.qml
-// (Open-Meteo, même source de données qu'eux).
+// Carte météo — restylée sur le modèle de modules/dashboard/dash/
+// SmallWeather.qml de caelestia : icône réelle (pas de badge circulaire
+// coloré derrière), température en grand, description en dessous.
 Rectangle {
     id: root
     Layout.fillWidth: true
-    Layout.preferredHeight: 56
-    radius: 12
+    Layout.preferredHeight: 64
+    radius: 16
     color: "#1A1A1A"
     visible: WeatherState.available
 
     RowLayout {
         anchors.fill: parent
-        anchors.margins: 10
-        spacing: 10
+        anchors.margins: 12
+        spacing: 12
 
-        // Badge circulaire coloré derrière l'icône, façon caelestia
-        // (leurs cartes ont toutes un cercle pastel derrière l'icône,
-        // pas juste l'icône seule).
-        Rectangle {
+        VectorImage {
             Layout.preferredWidth: 34
             Layout.preferredHeight: 34
-            radius: 17
-            color: "#3A2A5A"
-            Text { anchors.centerIn: parent; text: "☁"; color: "#B39DDB"; font.pixelSize: 16 }
+            Layout.alignment: Qt.AlignVCenter
+            source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + WeatherState.iconFile)
+            preferredRendererType: VectorImage.CurveRenderer
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                colorization: 1
+                colorizationColor: "#8AB4F8"
+            }
         }
 
         ColumnLayout {
-            spacing: 1
+            spacing: 2
             Text {
                 text: Math.round(WeatherState.tempC) + "°C"
-                color: "#FFFFFF"; font.pixelSize: 18; font.bold: true; font.family: "SF Pro Rounded"
+                color: "#FFFFFF"; font.pixelSize: 22; font.bold: true; font.family: "SF Pro Rounded"
             }
             Text {
                 text: WeatherState.description
-                color: "#B0B0B0"; font.pixelSize: 10; font.family: "SF Pro Rounded"
+                color: "#B0B0B0"; font.pixelSize: 12; font.family: "SF Pro Rounded"
                 elide: Text.ElideRight
+                Layout.maximumWidth: 130
             }
         }
 
         Item { Layout.fillWidth: true }
-
-        Text {
-            text: WeatherState.city
-            color: "#8A8A8A"; font.pixelSize: 10; font.family: "SF Pro Rounded"
-            elide: Text.ElideRight
-            Layout.maximumWidth: 90
-        }
     }
 }

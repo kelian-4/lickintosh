@@ -7,25 +7,25 @@ import qs.ui.topbar.notch.dashboard
 // DateTime/Resources/Media en colonnes hautes de part et d'autre.
 ColumnLayout {
     id: root
-    spacing: 8
+    spacing: 12
 
     StatusChipsRow {}
 
     RowLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        spacing: 10
+        spacing: 14
 
         DateTimeModule {}
 
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            spacing: 10
+            spacing: 12
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 10
+                spacing: 12
                 WeatherModule {}
                 UserModule {}
             }
