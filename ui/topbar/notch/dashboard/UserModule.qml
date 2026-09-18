@@ -4,25 +4,37 @@ import QtQuick.VectorImage
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
+import qs.services
 
 /*
     Port de modules/dashboard/dash/User.qml (caelestia-dots/shell,
     GPLv3) : icone/logo a gauche (leur "logoShape", forme Gem) chevauche
     par la photo de profil (leur "pfpContainer", forme Pill), un badge
     horloge+uptime (leur "uptimeShape", forme ClamShell) qui chevauche
-    le coin bas-gauche de la photo, et une chaine de deux bulles menant
-    a un badge "nom du WM" (leur "wmContainer") au-dessus.
+    le coin bas-droit de la photo, et un badge "nom du WM" (leur
+    "wmContainer") qui chevauche le coin haut-droit.
 
-    Non repris : les formes M3Shapes (Pill/Gem/ClamShell/Diamond/Sunny)
-    sont un plugin natif Caelestia absent de ce depot -> remplacees par
-    de simples Rectangle radius=hauteur/2 (cercle/pilule), meme
-    composition et memes marges negatives de chevauchement.
+    Simplifie par rapport a la version precedente : la chaine de deux
+    bulles (bubble1/bubble2) menant au badge WM s'etendait vers la
+    droite EN DEHORS de la photo au lieu de la chevaucher (erreur
+    d'ancrage : marges positives depuis pfpContainer.right au lieu de
+    chevaucher son coin) -> badge WM ancre directement sur le coin
+    haut-droit de pfpContainer, meme logique que le badge horloge sur
+    le coin bas-droit.
+
+    Non repris : les formes M3Shapes (Pill/Gem/ClamShell/Diamond) sont
+    un plugin natif Caelestia absent de ce depot -> remplacees par de
+    simples Rectangle radius=hauteur/2, memes marges negatives de
+    chevauchement.
+
+    Uptime et nom du WM : reutilisent le service GeneralState deja
+    existant dans ce depot (GeneralState.uptimePretty / .wmName,
+    alimentes par `uptime -p` / `hyprctl version`) au lieu de dupliquer
+    un Process ici comme la version precedente le faisait par erreur.
 
     Detection de l'avatar reprise telle quelle de la version precedente
-    de ce fichier (meme ordre de fallback ~/.face, ~/.face.icon,
-    AccountsService que ui/lockscreen/LockContext.qml) : c'est ce que
-    pfpContainer affiche chez caelestia (une vraie photo de profil, pas
-    le fond d'ecran), a ne pas re-inventer.
+    de ce fichier (~/.face, ~/.face.icon, AccountsService — identique a
+    ui/lockscreen/LockContext.qml).
 */
 Item {
     id: root
@@ -32,7 +44,6 @@ Item {
     readonly property string _home: Quickshell.env("HOME") || ""
     readonly property string _user: Quickshell.env("USER") || ""
     property string avatarSource: ""
-    property string uptimeText: ""
 
     Process {
         running: root._home.length > 0
@@ -49,15 +60,6 @@ Item {
             }
         }
     }
-
-    Process {
-        id: _uptimeProc
-        command: ["uptime", "-p"]
-        stdout: StdioCollector {
-            onStreamFinished: root.uptimeText = text.trim().replace(/^up /, "")
-        }
-    }
-    Timer { interval: 60000; running: true; repeat: true; triggeredOnStart: true; onTriggered: _uptimeProc.running = true }
 
     // logoShape (Gem) : plus petit, place a x=0.
     Rectangle {
@@ -115,97 +117,74 @@ Item {
                 font.bold: true
             }
         }
-    }
 
-    // uptimeShape (ClamShell) : chevauche le coin bas-gauche de pfpContainer.
-    Rectangle {
-        id: uptimeShape
-        anchors.bottom: parent.bottom
-        anchors.left: pfpContainer.right
-        anchors.bottomMargin: -4
-        anchors.leftMargin: -20
-        width: 24
-        height: 24
-        radius: 12
-        color: "#2A3A2A"
-        border.color: "#1A1A1A"
-        border.width: 2
+        // wmContainer : chevauche le coin HAUT-DROIT de la photo.
+        Rectangle {
+            id: wmContainer
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.rightMargin: -wmLabel.implicitWidth * 0.4
+            anchors.topMargin: -10
+            implicitWidth: wmLabel.implicitWidth + 14
+            implicitHeight: 20
+            radius: 10
+            color: "#2A2A4A"
+            border.color: "#1A1A1A"
+            border.width: 2
 
-        VectorImage {
-            anchors.centerIn: parent
-            width: 12
-            height: 12
-            source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/clock.svg")
-            preferredRendererType: VectorImage.CurveRenderer
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1
-                colorizationColor: "#8FD19E"
+            RowLayout {
+                id: wmLabel
+                anchors.centerIn: parent
+                spacing: 3
+                Text { text: "✦"; color: "#B39DDB"; font.pixelSize: 8 }
+                Text {
+                    text: GeneralState.wmName !== "" ? GeneralState.wmName : "—"
+                    color: "#B39DDB"
+                    font.pixelSize: 10
+                    font.family: "SF Pro Rounded"
+                }
+            }
+        }
+
+        // uptimeShape (ClamShell) : chevauche le coin BAS-DROIT de la photo.
+        Rectangle {
+            id: uptimeShape
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: -10
+            anchors.bottomMargin: -8
+            width: 20
+            height: 20
+            radius: 10
+            color: "#2A3A2A"
+            border.color: "#1A1A1A"
+            border.width: 2
+
+            VectorImage {
+                anchors.centerIn: parent
+                width: 11
+                height: 11
+                source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/clock.svg")
+                preferredRendererType: VectorImage.CurveRenderer
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1
+                    colorizationColor: "#8FD19E"
+                }
             }
         }
     }
 
     Text {
-        anchors.left: uptimeShape.right
+        anchors.left: pfpContainer.right
         anchors.verticalCenter: uptimeShape.verticalCenter
-        anchors.leftMargin: 6
-        text: root.uptimeText !== "" ? ("up " + root.uptimeText) : ""
+        anchors.leftMargin: 14
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        text: GeneralState.uptimePretty !== "" ? ("up " + GeneralState.uptimePretty) : ""
         color: "#B0B0B0"
-        font.pixelSize: 11
+        font.pixelSize: 12
         font.family: "SF Pro Rounded"
         elide: Text.ElideRight
-        width: Math.max(0, root.width - x - 8)
-    }
-
-    // Chaine de bulles (bubble1 -> bubble2 -> wmContainer) menant au
-    // badge "nom du WM" au-dessus de pfpContainer, comme dans l'original.
-    Rectangle {
-        id: bubble1
-        anchors.left: pfpContainer.right
-        anchors.top: bubble2.bottom
-        anchors.leftMargin: 4
-        anchors.topMargin: -3
-        width: 5
-        height: 5
-        radius: 2.5
-        color: "#2A2A4A"
-    }
-
-    Rectangle {
-        id: bubble2
-        anchors.left: bubble1.right
-        anchors.bottom: wmContainer.verticalCenter
-        anchors.leftMargin: 3
-        anchors.bottomMargin: 2
-        width: 7
-        height: 7
-        radius: 3.5
-        color: "#2A2A4A"
-    }
-
-    Rectangle {
-        id: wmContainer
-        anchors.left: bubble2.left
-        anchors.leftMargin: -6
-        y: 2
-        radius: 10
-        color: "#2A2A4A"
-        implicitWidth: wmLabel.implicitWidth + 16
-        implicitHeight: wmLabel.implicitHeight + 8
-
-        Row {
-            id: wmLabel
-            anchors.centerIn: parent
-            spacing: 3
-            Text { text: "✦"; color: "#B39DDB"; font.pixelSize: 8 }
-            Text {
-                text: "Hyprland..."
-                color: "#B39DDB"
-                font.pixelSize: 10
-                font.family: "SF Pro Rounded"
-                width: Math.min(implicitWidth, root.width - wmContainer.x - 24)
-                elide: Text.ElideRight
-            }
-        }
     }
 }
