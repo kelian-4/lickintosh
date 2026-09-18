@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import qs.services
@@ -193,21 +192,69 @@ ContentPage {
             Layout.fillWidth: true
             spacing: 8
 
-            Button {
-                text: "Aléatoire"
+            // Meme pattern que le bouton "Options..." de BluetoothPage.qml
+            // et le bouton "OK" bleu de WifiPage.qml : le Button {} de
+            // QtQuick.Controls n'est utilise nulle part ailleurs dans le
+            // repo et rend un gris plat generique hors charte.
+            Rectangle {
+                id: _randomBtn
+                Layout.preferredWidth: 96
+                Layout.preferredHeight: 28
+                radius: 7
+                opacity: _randomBtn.enabled ? 1 : 0.4
                 enabled: root.shippedList.length + root.userList.length > 0
-                onClicked: root.applyRandom()
+                color: _randomMouse.containsMouse ? Qt.rgba(0.15, 0.51, 1, 1) : "#1C7AFF"
+                Behavior on color { ColorAnimation { duration: 100 } }
+
+                CFText {
+                    anchors.centerIn: parent
+                    text: "Aléatoire"
+                    font.pixelSize: 12
+                    color: "#fff"
+                }
+
+                MouseArea {
+                    id: _randomMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    enabled: _randomBtn.enabled
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.applyRandom()
+                }
             }
 
             // Uniquement pour le lockscreen : la valeur vide y a un sens
             // defini (retour au wallpaper livre, cf. LockContext.qml).
             // Cote bureau elle ne donnerait qu'un fond noir, aussitot
             // reecrase par le fallback de wallProc au scan suivant.
-            Button {
-                text: "Revenir au fond par défaut"
+            Rectangle {
+                id: _resetBtn
+                Layout.preferredWidth: 172
+                Layout.preferredHeight: 28
+                radius: 7
                 visible: root.activeTarget === "lockscreen"
+                opacity: _resetBtn.enabled ? 1 : 0.4
                 enabled: root.currentPath !== ""
-                onClicked: root.apply("")
+                color: _resetMouse.containsMouse ? "#22ffffff" : "#18ffffff"
+                border.color: "#14ffffff"
+                border.width: 1
+                Behavior on color { ColorAnimation { duration: 100 } }
+
+                CFText {
+                    anchors.centerIn: parent
+                    text: "Revenir au fond par défaut"
+                    font.pixelSize: 12
+                    color: "#fff"
+                }
+
+                MouseArea {
+                    id: _resetMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    enabled: _resetBtn.enabled
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.apply("")
+                }
             }
 
             Item { Layout.fillWidth: true }
