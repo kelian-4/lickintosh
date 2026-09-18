@@ -91,8 +91,8 @@ Rectangle {
                 readonly property bool isToday: model.month === root.today.getMonth()
                                                  && model.year === root.today.getFullYear()
                                                  && model.day === root.today.getDate()
-                width: grid.width / 7
-                height: grid.height / 6
+                implicitWidth: implicitHeight
+                implicitHeight: dayText.implicitHeight + 6
 
                 // Badge hexagonal pour aujourd'hui (au lieu d'un simple
                 // rectangle arrondi), approximation de la forme vue
@@ -120,6 +120,7 @@ Rectangle {
                 }
 
                 Text {
+                    id: dayText
                     anchors.centerIn: parent
                     text: model.day
                     color: parent.isToday
