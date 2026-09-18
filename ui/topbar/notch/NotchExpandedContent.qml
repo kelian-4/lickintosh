@@ -47,10 +47,6 @@ Item {
                     default:             return dashboardComp
                 }
             }
-            onStatusChanged: {
-                console.log("[NotchExpandedContent] Loader status =", status, "(0=Null,1=Ready,2=Loading,3=Error) kind =", root.kind)
-                if (status === Loader.Error) console.log("[NotchExpandedContent] ERREUR de chargement du composant")
-            }
         }
     }
 
