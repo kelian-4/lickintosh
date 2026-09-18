@@ -178,7 +178,11 @@ Rectangle {
             cursorShape: Qt.PointingHandCursor
             onEntered: NotchState.setHovered(true)
             onExited:  NotchState.setHovered(false)
-            onClicked: NotchState.toggleExpanded()
+            onClicked: {
+                console.log("[TopBar] clic recu, visualState avant =", NotchState.visualState)
+                NotchState.toggleExpanded()
+                console.log("[TopBar] visualState apres =", NotchState.visualState, "notchExpanded =", root.notchExpanded, "notchDashboard =", root.notchDashboard)
+            }
         }
     }
 
@@ -190,6 +194,12 @@ Rectangle {
 
         active: false
         opacity: 0
+
+        onShouldBeActiveChanged: console.log("[FadeLoader] shouldBeActive ->", fl.shouldBeActive)
+        onStatusChanged: {
+            console.log("[FadeLoader] status ->", fl.status, "(0=Null,1=Ready,2=Loading,3=Error)")
+            if (fl.status === Loader.Error) console.log("[FadeLoader] ERREUR:", fl.sourceComponent)
+        }
 
         states: State {
             name: "active"
