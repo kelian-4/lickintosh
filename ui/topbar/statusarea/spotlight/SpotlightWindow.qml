@@ -40,8 +40,18 @@ Scope {
     property var fileIndex:  []
     property bool indexReady: false
 
+    // Le quoting simple protege des espaces et de l'injection, mais empeche
+    // aussi l'expansion du ~ par le shell ('~/Pictures' est un chemin
+    // litteral). On resout donc le ~ initial cote QML avant de quoter,
+    // via Quickshell.env("HOME") (meme pattern que LockContext.qml).
     function _safeShellPath(p) {
-        return "'" + String(p).replace(/'/g, "'\\''") + "'"
+        var s = String(p)
+        var home = Quickshell.env("HOME") || ""
+        if (home !== "") {
+            if (s === "~") s = home
+            else if (s.indexOf("~/") === 0) s = home + s.slice(1)
+        }
+        return "'" + s.replace(/'/g, "'\\''") + "'"
     }
 
     readonly property string findExcludes: {
@@ -123,6 +133,15 @@ Scope {
                 out.push({ title: p.split("/").pop(), description: "Prefix: >~ ou >wall | Fond d'écran", path: p, isWallpaper: true })
             }
             root.wallpaperList = out
+
+            // Aucun wallpaper n'a jamais ete applique (ShellConfig.options
+            // .wallpaper.path vaut "" par defaut) : le PanelWindow de fond
+            // existe mais reste noir. Des qu'une liste exploitable arrive,
+            // on applique la premiere image et on la persiste, pour que le
+            // shell ait un fond sense des la premiere utilisation.
+            if (root.currentWallpaper === "" && out.length > 0) {
+                root.setWallpaper(out[0].path, true)
+            }
         }
     }
 
