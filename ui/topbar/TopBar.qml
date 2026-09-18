@@ -128,7 +128,7 @@ Rectangle {
                                             : root.notchExpanded   ? 440
                                             : root.notchPeek       ? Math.min(260, root.notchZoneRight - root.notchZoneLeft - 24)
                                                                     : 130
-    readonly property real notchTargetHeight: root.notchDashboard ? 400
+    readonly property real notchTargetHeight: root.notchDashboard ? 380
                                              : root.notchExpanded   ? 300
                                              : root.notchPeek       ? 40
                                                                      : 26
