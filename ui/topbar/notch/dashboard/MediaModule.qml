@@ -106,9 +106,8 @@ Item {
                         visible: MprisState.artUrl !== ""
                     }
 
-                    NumberAnimation on rotation {
+                    RotationAnimation on rotation {
                         running: MprisState.isPlaying
-                        paused: !MprisState.isPlaying
                         from: 0
                         to: 360
                         duration: 23500
