@@ -1,10 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import qs.components
 
 // Vignette d'un fond d'ecran dans la grille de selection.
-// Le decodage est borne par sourceSize a la taille d'affichage reelle :
-// une grille de 40 vignettes decodees en resolution native saturerait la
+// Le decodage affiche est borne par sourceSize a la taille de la
+// vignette : decoder 40+ images en resolution native saturerait la
 // memoire pour rien (meme raison que dans SpotlightWindow.qml).
 Item {
     id: root
@@ -17,6 +18,22 @@ Item {
 
     implicitWidth: 148
     implicitHeight: 104
+
+    // Precharge invisible, a la resolution plein ecran utilisee par le
+    // PanelWindow de fond (bgWin dans SpotlightWindow.qml). Le cache Qt
+    // est indexe par (source, sourceSize) : sans ce second decodage a la
+    // bonne taille, le clic sur la vignette forcerait un premier
+    // decodage a froid en plein ecran, d'ou la latence perceptible.
+    // La vignette elle-meme decode a une taille bien plus petite (voir
+    // plus bas) donc ne remplit pas ce cache.
+    Image {
+        source: root.path !== "" ? "file://" + root.path : ""
+        asynchronous: true
+        cache: true
+        visible: false
+        sourceSize: Qt.size((Screen.width || 1920) * (Screen.devicePixelRatio || 1),
+                             (Screen.height || 1080) * (Screen.devicePixelRatio || 1))
+    }
 
     ColumnLayout {
         anchors.fill: parent
