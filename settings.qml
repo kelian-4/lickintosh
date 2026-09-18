@@ -56,7 +56,7 @@ FloatingWindow {
                 { name: "Top Bar",                    icon: "settings/menu bar.svg",      component: "TopBarPage", implemented: true },
                 { name: "Moniteurs",                  icon: "settings/display.svg",       component: "MonitorsPage", implemented: true },
                 { name: "Spotlight",                  icon: "settings/spotlight.svg",     component: "SpotlightPage", implemented: true },
-                { name: "Fond d'écran",               icon: "settings/wallpaper.svg",     implemented: false }
+                { name: "Fond d'écran",               icon: "settings/wallpaper.svg",     component: "WallpaperPage", implemented: true }
             ]
         },
         {
@@ -540,6 +540,7 @@ FloatingWindow {
                                 case "ControlCenterPage": return _ccPageComp
                                 case "MonitorsPage": return _monitorsComp
                                 case "SpotlightPage": return _spotlightComp
+                                case "WallpaperPage": return _wallpaperComp
                                 default:              return _placeholderComp
                             }
                         }
@@ -560,4 +561,5 @@ FloatingWindow {
     Component { id: _ccPageComp; ControlCenterPage {} }
     Component { id: _monitorsComp; MonitorsPage {} }
     Component { id: _spotlightComp; SpotlightPage {} }
+    Component { id: _wallpaperComp; WallpaperPage {} }
 }
