@@ -177,7 +177,8 @@ Item {
 
     Text {
         anchors.left: pfpContainer.right
-        anchors.verticalCenter: uptimeShape.verticalCenter
+        anchors.verticalCenter: pfpContainer.bottom
+        anchors.verticalCenterOffset: -2
         anchors.leftMargin: 14
         anchors.right: parent.right
         anchors.rightMargin: 10
