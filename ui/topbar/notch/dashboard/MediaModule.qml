@@ -32,8 +32,6 @@ import qs.services
 */
 Item {
     id: root
-    Layout.fillHeight: true
-    Layout.preferredWidth: 130
 
     readonly property real playerProgress: MprisState.hasPlayer && MprisState.length > 0
         ? (MprisState.position % MprisState.length) / MprisState.length

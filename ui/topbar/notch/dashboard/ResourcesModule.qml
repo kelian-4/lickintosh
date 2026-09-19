@@ -18,8 +18,6 @@ import qs.services
 */
 Item {
     id: root
-    Layout.fillHeight: true
-    Layout.preferredWidth: 60
 
     component Resource: CircularProgress {
         id: res

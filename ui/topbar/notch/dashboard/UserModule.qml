@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.VectorImage
 import QtQuick.Effects
 import Quickshell
@@ -51,8 +50,6 @@ import qs.services
 */
 Item {
     id: root
-    Layout.fillWidth: true
-    Layout.fillHeight: true
 
     readonly property string _home: Quickshell.env("HOME") || ""
     readonly property string _user: Quickshell.env("USER") || ""
