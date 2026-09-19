@@ -124,11 +124,11 @@ Rectangle {
     readonly property bool notchExpanded:  NotchState.expanded
     readonly property bool notchDashboard: root.notchExpanded && !NotchState.hasUrgentActivity
 
-    readonly property real notchTargetWidth: root.notchDashboard ? 620
+    readonly property real notchTargetWidth: root.notchDashboard ? 700
                                             : root.notchExpanded   ? 440
                                             : root.notchPeek       ? Math.min(260, root.notchZoneRight - root.notchZoneLeft - 24)
                                                                     : 130
-    readonly property real notchTargetHeight: root.notchDashboard ? 380
+    readonly property real notchTargetHeight: root.notchDashboard ? 410
                                              : root.notchExpanded   ? 300
                                              : root.notchPeek       ? 40
                                                                      : 26
