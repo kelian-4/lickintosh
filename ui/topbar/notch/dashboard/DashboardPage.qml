@@ -33,9 +33,21 @@ import QtQuick.Layouts
     et les hauteurs de Weather/Calendar n'ont pas d'equivalent Tokens
     direct (bases sur l'implicitHeight de leur contenu chez eux) ->
     valeurs raisonnables choisies pour la taille de notch actuelle.
+
+    anchors.fill: parent AJOUTE (absent avant, cause probable de
+    l'immense espace vide signale) : ce GridLayout est charge par un
+    Loader (NotchDashboard.qml) qui a lui-meme Layout.fillWidth/
+    fillHeight — mais un type Layout (GridLayout/ColumnLayout/RowLayout)
+    lie sa propre largeur/hauteur a son implicitWidth/Height calcule
+    depuis ses enfants, ce qui empeche le comportement automatique du
+    Loader ("redimensionner l'item charge a ma propre taille s'il n'en
+    a pas"). Les autres onglets (Media/Performance/Weather) ont un Item
+    simple comme racine, sans ce probleme, d'ou l'ecart visible
+    seulement sur Dashboard.
 */
 GridLayout {
     id: root
+    anchors.fill: parent
     rowSpacing: 10
     columnSpacing: 10
 
@@ -72,7 +84,7 @@ GridLayout {
         Layout.column: 1
         Layout.columnSpan: 3
         Layout.fillWidth: true
-        Layout.preferredHeight: 190
+        Layout.preferredHeight: 210
     }
 
     ResourcesModule {
