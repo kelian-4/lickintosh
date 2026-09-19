@@ -23,9 +23,12 @@ import qs.services
     large (marge interieure du module) 16->10, logoSize/uptimeSize
     30->18.
 
-    Ancrages EXACTEMENT ceux du fichier reel :
-    - pfpContainer.leftMargin = -(largeIncreased+extraLarge)/2 (chevauche
-      logoShape)
+    Ancrages EXACTEMENT ceux du fichier reel, sauf le logo :
+    - logoShape (leur icone "Gem" a gauche de la photo) RETIRE a la
+      demande explicite de l'utilisateur — n'existait pas dans son
+      code d'origine, c'est un ajout de ce portage qu'il ne veut pas.
+      pfpContainer s'ancre donc directement au bord gauche du module
+      (anchors.left: parent.left) au lieu de logoShape.right.
     - uptimeShape : left=pfpContainer.right, leftMargin=-extraLargeIncreased
       (chevauche le bord droit de la photo), bottomMargin=-small
     - bubble1 : left=pfpContainer.right, leftMargin=+small (a l'EXTERIEUR
@@ -75,7 +78,6 @@ Item {
     readonly property int tExtraSmall: 3
     readonly property int tSmall: 5
     readonly property int tMedium: 7
-    readonly property int tLargeIncreased: 12
     readonly property int tExtraLarge: 17
     readonly property int tExtraLargeIncreased: 19
     readonly property int tLarge: 10
@@ -90,8 +92,7 @@ Item {
             id: pfpContainer
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            anchors.left: logoShape.right
-            anchors.leftMargin: -(root.tLargeIncreased + root.tExtraLarge) / 2
+            anchors.left: parent.left
             width: height
 
             Rectangle {
@@ -114,30 +115,6 @@ Item {
                     color: "#8A8A8A"
                     font.pixelSize: parent.height * 0.4
                     font.bold: true
-                }
-            }
-        }
-
-        // logoShape (Gem chez eux) : x=extraSmall, taille=logoSize+small*2.
-        Rectangle {
-            id: logoShape
-            x: root.tExtraSmall
-            anchors.verticalCenter: parent.verticalCenter
-            width: root.tBadgeSize
-            height: root.tBadgeSize
-            radius: width * 0.32
-            color: "#2A2A4A"
-
-            VectorImage {
-                anchors.centerIn: parent
-                width: parent.width * 0.55
-                height: width
-                source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/logo.svg")
-                preferredRendererType: VectorImage.CurveRenderer
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    colorization: 1
-                    colorizationColor: "#B39DDB"
                 }
             }
         }
