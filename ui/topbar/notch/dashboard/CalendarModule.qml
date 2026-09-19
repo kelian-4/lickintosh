@@ -12,8 +12,6 @@ import Quickshell
 // version basée sur khal qui a été abandonnée).
 Rectangle {
     id: root
-    Layout.fillWidth: true
-    Layout.fillHeight: true
     radius: 16
     color: "#1A1A1A"
 
