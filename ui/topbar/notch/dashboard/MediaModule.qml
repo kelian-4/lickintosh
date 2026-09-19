@@ -10,16 +10,25 @@ import qs.services
     dots/shell, GPLv3) :
     - CircularProgress en demi-cercle (sweepAngle 180, comme
       Tokens.sizes.dashboard.mediaProgressSweep) autour de la pochette,
-      valeur = position/duree de lecture.
+      valeur = position/duree de lecture, UNIQUEMENT quand un lecteur est
+      actif. Sans lecteur, un simple anneau plein et vif remplace l'arc
+      (un arc a une valeur proche de 0 serait quasi invisible) — c'est
+      ce que montre l'image de reference (cercle bleu net autour de
+      l'icone de repli, pas un demi-arc discret).
     - Pochette qui tourne lentement en boucle tant que ca joue (leur
       CoverArt utilise un blob "Cookie12Sided" de M3Shapes, indisponible
       ici -> remplace par un simple cercle, meme logique de rotation).
-    - Fallback texte identique a leur logique exacte : "No media" si
-      aucun lecteur actif, "Unknown title/album/artist" si un lecteur
-      est actif mais sans metadonnee sur ce champ precis.
+    - Icone de repli sans pochette : notch/star.svg (le plus proche
+      disponible de l'astérisque bleu de l'image de reference).
+    - Textes de repli "Unknown title/album/artist" dans tous les cas
+      sans metadonnee (conforme a l'image de reference, qui les affiche
+      meme sans lecteur actif — plus simple que la distinction "No
+      media" vs "Unknown X" du vrai fichier source, qui ne correspond
+      pas a ce que montre l'image).
     - Controles precedent/lecture-pause/suivant.
     - Pas de bongo cat (AnimatedImage sur Config.paths.mediaGif) : ce
-      depot n'a pas cet asset gif.
+      depot n'a pas cet asset gif, visible dans l'image de reference en
+      bas de la pochette.
 */
 Item {
     id: root
@@ -71,8 +80,24 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: width
 
+            // Etat "aucune lecture" : simple anneau plein et vif (pas un
+            // arc de progression a une valeur proche de 0, quasi invisible)
+            // -> correspond a l'image de reference (cercle bleu net autour
+            // de l'icone de repli, pas un demi-arc discret).
+            Rectangle {
+                visible: !MprisState.hasPlayer
+                anchors.centerIn: cover
+                width: cover.width + root.arcCoverGap * 2 + 6
+                height: width
+                radius: width / 2
+                color: "transparent"
+                border.color: "#1C7AFF"
+                border.width: 3
+            }
+
             CircularProgress {
                 id: prog
+                visible: MprisState.hasPlayer
                 anchors.centerIn: cover
                 implicitSize: cover.width + root.arcCoverGap + strokeWidth * 2
                 fgColour: "#1C7AFF"
@@ -89,7 +114,7 @@ Item {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.margins: prog.strokeWidth + root.arcCoverGap + 6
+                anchors.margins: 6 + root.arcCoverGap + 6
                 height: width
 
                 Rectangle {
@@ -117,15 +142,15 @@ Item {
 
                 VectorImage {
                     anchors.centerIn: parent
-                    width: parent.width * 0.35
+                    width: parent.width * 0.4
                     height: width
                     visible: MprisState.artUrl === ""
-                    source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/disc.svg")
+                    source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/star.svg")
                     preferredRendererType: VectorImage.CurveRenderer
                     layer.enabled: true
                     layer.effect: MultiEffect {
                         colorization: 1
-                        colorizationColor: "#8A8A8A"
+                        colorizationColor: "#1C7AFF"
                     }
                 }
             }
@@ -133,15 +158,15 @@ Item {
 
         Text {
             Layout.fillWidth: true
-            text: !MprisState.hasPlayer ? "No media" : (MprisState.trackTitle !== "" ? MprisState.trackTitle : "Unknown title")
-            color: "#1C7AFF"
+            text: MprisState.trackTitle !== "" ? MprisState.trackTitle : "Unknown title"
+            color: "#FFFFFF"
             font.pixelSize: 13; font.bold: true; font.family: "SF Pro Rounded"
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
         }
         Text {
             Layout.fillWidth: true
-            text: !MprisState.hasPlayer ? "No media" : (MprisState.trackAlbum !== "" ? MprisState.trackAlbum : "Unknown album")
+            text: MprisState.trackAlbum !== "" ? MprisState.trackAlbum : "Unknown album"
             color: "#9AA0A6"
             font.pixelSize: 10; font.family: "SF Pro Rounded"
             horizontalAlignment: Text.AlignHCenter
@@ -149,8 +174,8 @@ Item {
         }
         Text {
             Layout.fillWidth: true
-            text: !MprisState.hasPlayer ? "No media" : (MprisState.trackArtist !== "" ? MprisState.trackArtist : "Unknown artist")
-            color: "#5B8DEF"
+            text: MprisState.trackArtist !== "" ? MprisState.trackArtist : "Unknown artist"
+            color: "#9AA0A6"
             font.pixelSize: 10; font.family: "SF Pro Rounded"
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
