@@ -34,10 +34,14 @@ ContentPage {
         return "'" + s.replace(/'/g, "'\\''") + "'"
     }
 
-    function _findCmd(dir) {
+    function _findCmd(dir, listFile) {
+        // Le tee vers listFile donne au script de generation un vrai
+        // fichier de chemins bruts a lire (voir plus bas) : ecrire
+        // cette liste directement depuis find/sort evite d'avoir a la
+        // reserialiser cote QML avec un quoting a reconstruire.
         return "find " + root._safeShellPath(dir) +
                " -maxdepth 2 -type f \\( -name '*.jpg' -o -name '*.png' -o -name '*.jpeg' -o -name '*.webp' \\) " +
-               "2>/dev/null | sort | head -60"
+               "2>/dev/null | sort | head -60 | tee " + root._safeShellPath(listFile)
     }
 
     function _parse(text) {
@@ -64,24 +68,91 @@ ContentPage {
         root.apply(all[Math.floor(Math.random() * all.length)])
     }
 
+    // ---------------------------------------------------------------
+    // Cache de miniatures sur disque
+    // ---------------------------------------------------------------
+    // Certains fonds livres avec le shell font jusqu'a 6400x3600 / 12 Mo
+    // (PNG, sans decodage progressif). Qt doit decompresser l'integralite
+    // du fichier avant d'appliquer sourceSize : sur une grille de 20+
+    // images affichees en meme temps, ca sature le pool de threads de
+    // decodage asynchrone de Qt et la grille entiere met du temps a
+    // s'afficher, meme si chaque vignette prise isolement decoderait
+    // vite. On genere donc une fois de vraies miniatures sur disque (296
+    // x164, meme pattern magick/convert + repli que LockContext.qml pour
+    // le lockscreen), et les vignettes pointent vers ces fichiers legers
+    // plutot que vers les originaux.
+    //
+    // Nommage par index plutot que par hash du chemin : plus simple, et
+    // suffisant puisque l'index vient d'une liste triee (find | sort),
+    // donc stable d'un scan a l'autre tant que le contenu du dossier ne
+    // change pas. Deux sous-caches distincts (shipped/user) pour que les
+    // indices des deux listes ne se percutent jamais.
+    //
+    // La generation elle-meme vit dans tools/wallpaper-thumbs/generate.sh
+    // plutot que dans une commande recomposee ici : plusieurs tentatives
+    // de construire cette commande comme une chaine JS (quoting imbrique,
+    // base64 via Qt.btoa qui corrompt l'UTF-8 hors Latin1) se sont
+    // averees fragiles a l'usage. Un vrai fichier .sh recoit ses
+    // arguments proprement (argv, pas de re-echappement), et le fichier
+    // de chemins qu'il lit est ecrit directement par `find | sort | tee`
+    // (_findCmd ci-dessus), jamais reserialise cote QML.
+    readonly property string thumbCacheDir: (Quickshell.env("HOME") || "") + "/.cache/quickshell/wallpaper-thumbs"
+    readonly property string genScript: Quickshell.shellDir + "/tools/wallpaper-thumbs/generate.sh"
+
+    function thumbPathFor(kind, index) {
+        return root.thumbCacheDir + "/" + kind + "-" + index + ".jpg"
+    }
+
     // Le dossier livre avec le shell ne depend pas de la config : il peut
     // etre liste tout de suite. Le dossier utilisateur vient de
     // ShellConfig, donc on attend que le JSON soit lu (cf. ShellConfig
     // .ready, charge de facon asynchrone par FileView).
+    readonly property string shippedListFile: root.thumbCacheDir + "/shipped-list.txt"
+    readonly property string userListFile: root.thumbCacheDir + "/user-list.txt"
+
     Process {
         id: shippedProc
         running: true
-        command: ["sh", "-c", root._findCmd(root.shippedDir)]
+        command: ["sh", "-c", "mkdir -p " + root._safeShellPath(root.thumbCacheDir) + " && " + root._findCmd(root.shippedDir, root.shippedListFile)]
         stdout: StdioCollector { id: shippedOut }
-        onExited: root.shippedList = root._parse(shippedOut.text)
+        onExited: {
+            root.shippedList = root._parse(shippedOut.text)
+            // Args separes (argv), jamais une commande shell recomposee
+            // en texte : le script lit lui-meme le fichier de chemins,
+            // rien a re-echapper cote QML.
+            shippedThumbProc.command = ["bash", root.genScript, root.shippedListFile, "shipped", root.thumbCacheDir]
+            shippedThumbProc.running = true
+        }
     }
 
     Process {
         id: userProc
         running: false
-        command: ["sh", "-c", root._findCmd(root.userDir)]
+        command: ["sh", "-c", "mkdir -p " + root._safeShellPath(root.thumbCacheDir) + " && " + root._findCmd(root.userDir, root.userListFile)]
         stdout: StdioCollector { id: userOut }
-        onExited: root.userList = root._parse(userOut.text)
+        onExited: {
+            root.userList = root._parse(userOut.text)
+            userThumbProc.command = ["bash", root.genScript, root.userListFile, "user", root.thumbCacheDir]
+            userThumbProc.running = true
+        }
+    }
+
+    // Compteurs incrementes quand un batch de generation termine : les
+    // vignettes y sont liees pour re-verifier le cache une fois pret
+    // (elles s'affichent d'abord depuis l'original le temps du batch,
+    // voir WallpaperThumb.qml, puis basculent sur la miniature legere
+    // sans que l'utilisateur ait besoin de rouvrir la page).
+    property int shippedThumbsGen: 0
+    property int userThumbsGen: 0
+
+    Process {
+        id: shippedThumbProc
+        onExited: root.shippedThumbsGen++
+    }
+
+    Process {
+        id: userThumbProc
+        onExited: root.userThumbsGen++
     }
 
     function refreshUser() { if (ShellConfig.ready) userProc.running = true }
@@ -275,8 +346,12 @@ ContentPage {
                 model: root.shippedList
 
                 delegate: WallpaperThumb {
+                    id: _thumb
                     required property string modelData
+                    required property int index
                     path: modelData
+                    thumbPath: root.thumbPathFor("shipped", index)
+                    thumbsGen: root.shippedThumbsGen
                     selected: root.currentPath === modelData
                     onClicked: root.apply(modelData)
                 }
@@ -303,8 +378,12 @@ ContentPage {
                 model: root.userList
 
                 delegate: WallpaperThumb {
+                    id: _thumb
                     required property string modelData
+                    required property int index
                     path: modelData
+                    thumbPath: root.thumbPathFor("user", index)
+                    thumbsGen: root.userThumbsGen
                     selected: root.currentPath === modelData
                     onClicked: root.apply(modelData)
                 }
