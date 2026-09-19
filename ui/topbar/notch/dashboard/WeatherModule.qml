@@ -9,21 +9,19 @@ import qs.services
 // SmallWeather.qml de caelestia : icône réelle (pas de badge circulaire
 // coloré derrière), température en grand, description en dessous.
 //
-// Largeur fixe (Layout.preferredWidth) plutôt que fillWidth : demandé
-// explicitement (le module prenait trop de place face à UserModule,
-// qui a besoin de plus d'espace pour la photo/les badges).
+// Layout.preferredWidth/preferredHeight fixés depuis DashboardPage.qml
+// (le vrai GridLayout de Dash.qml), pas ici : ce module n'a ni
+// fillWidth ni fillHeight (conforme au fichier source reel, qui donne
+// a Weather une largeur ET une hauteur fixes/intrinseques, pas
+// etirees).
 //
-// Toujours visible (contrairement à la version d'avant qui se masquait
-// entièrement via visible: WeatherState.available) : dans une RowLayout
-// avec UserModule, cacher ce module fait que UserModule avale tout
-// l'espace libéré (comportement normal d'un RowLayout avec un sibling
-// masqué), ce qui casse la disposition prévue à deux cartes côte à
-// côte. À la place, état de repli visible quand la météo n'est pas
-// disponible.
+// Toujours visible (contrairement à une version antérieure qui se
+// masquait entièrement via visible: WeatherState.available) : dans une
+// disposition partagée avec UserModule, cacher ce module aurait cassé
+// l'alignement des colonnes de la grille. À la place, état de repli
+// visible quand la météo n'est pas disponible.
 Rectangle {
     id: root
-    Layout.preferredWidth: 150
-    Layout.fillHeight: true
     radius: 16
     color: "#1A1A1A"
 

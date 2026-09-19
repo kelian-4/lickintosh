@@ -13,8 +13,6 @@ import QtQuick.Layouts
 */
 Item {
     id: root
-    Layout.fillHeight: true
-    Layout.preferredWidth: 60
 
     property date now: new Date()
     Timer { interval: 1000; running: true; repeat: true; onTriggered: root.now = new Date() }
