@@ -15,9 +15,16 @@ import qs.services
     (m3secondary). "memory_alt" et "hard_disk" n'existent pas dans le set
     d'icones feather de ce depot ; substitues par database.svg / hard-drive.svg,
     les plus proches disponibles.
+
+    Fond de carte (#1A1A1A, radius) ajouté pour être cohérent avec
+    Calendar/Weather — chaque module du dashboard a le même traitement
+    "bloc" dans le vrai Dash.qml (component Rect: StyledRect partagé),
+    ce module en était dépourvu par erreur.
 */
-Item {
+Rectangle {
     id: root
+    color: "#1A1A1A"
+    radius: 16
 
     component Resource: CircularProgress {
         id: res
@@ -44,6 +51,8 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.bottom: parent.bottom
+        anchors.topMargin: 10
+        anchors.bottomMargin: 10
         spacing: 12
 
         Resource {

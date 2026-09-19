@@ -90,14 +90,17 @@ Rectangle {
                                                  && model.year === root.today.getFullYear()
                                                  && model.day === root.today.getDate()
                 implicitWidth: implicitHeight
-                implicitHeight: dayText.implicitHeight + 6
+                implicitHeight: dayText.implicitHeight + 16
 
                 // Badge hexagonal pour aujourd'hui (au lieu d'un simple
                 // rectangle arrondi), approximation de la forme vue
-                // dans les captures de caelestia.
+                // dans les captures de caelestia. Agrandi (quasi toute
+                // la cellule, plus seulement -4px) : signalé comme trop
+                // petit pour être visible dans une cellule aussi
+                // compacte.
                 Canvas {
                     anchors.centerIn: parent
-                    width: Math.min(parent.width, parent.height) - 4
+                    width: Math.min(parent.width, parent.height)
                     height: width
                     visible: parent.isToday
                     onPaint: {
@@ -125,7 +128,8 @@ Rectangle {
                            ? "#FFFFFF"
                            : (model.date.getDay() === 0 || model.date.getDay() === 6) ? "#EC4899" : "#B0B0B0"
                     opacity: parent.isToday || model.month === grid.month ? 1 : 0.4
-                    font.pixelSize: 12
+                    font.pixelSize: 13
+                    font.bold: parent.isToday
                     font.family: "SF Pro Rounded"
                 }
             }

@@ -10,9 +10,16 @@ import QtQuick.Layouts
     séparateur = m3primary. Reconstruit avec JS Date + Timer (pas de
     singleton Time ici) ; secondes/AM-PM non repris (options de config
     absentes de ce depot).
+
+    Fond de carte (#1A1A1A, radius) ajouté pour être cohérent avec
+    Calendar/Weather — chaque module du dashboard a le même traitement
+    "bloc" dans le vrai Dash.qml (component Rect: StyledRect partagé),
+    ce module en était dépourvu par erreur.
 */
-Item {
+Rectangle {
     id: root
+    color: "#1A1A1A"
+    radius: 16
 
     property date now: new Date()
     Timer { interval: 1000; running: true; repeat: true; onTriggered: root.now = new Date() }
