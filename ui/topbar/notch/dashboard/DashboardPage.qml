@@ -56,6 +56,7 @@ GridLayout {
         Layout.columnSpan: 2
         Layout.preferredWidth: 165
         Layout.preferredHeight: 90
+        Layout.fillHeight: true
     }
 
     UserModule {
@@ -84,6 +85,7 @@ GridLayout {
         Layout.column: 1
         Layout.columnSpan: 3
         Layout.fillWidth: true
+        Layout.fillHeight: true
         Layout.preferredHeight: 210
     }
 
