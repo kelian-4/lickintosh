@@ -29,9 +29,16 @@ import qs.services
     - Pas de bongo cat (AnimatedImage sur Config.paths.mediaGif) : ce
       depot n'a pas cet asset gif, visible dans l'image de reference en
       bas de la pochette.
+
+    Fond de carte (#1A1A1A, radius) ajouté pour être cohérent avec
+    Calendar/Weather — chaque module du dashboard a le même traitement
+    "bloc" dans le vrai Dash.qml (component Rect: StyledRect partagé),
+    ce module en était dépourvu par erreur.
 */
-Item {
+Rectangle {
     id: root
+    color: "#1A1A1A"
+    radius: 20
 
     readonly property real playerProgress: MprisState.hasPlayer && MprisState.length > 0
         ? (MprisState.position % MprisState.length) / MprisState.length

@@ -47,9 +47,16 @@ import qs.services
     Uptime et nom du WM : service GeneralState deja existant dans ce
     depot (GeneralState.uptimePretty / .wmName) plutot qu'une logique
     dupliquee.
+
+    Fond de carte (#1A1A1A, radius) ajouté pour être cohérent avec
+    Calendar/Weather — chaque module du dashboard a le même traitement
+    "bloc" dans le vrai Dash.qml (component Rect: StyledRect partagé),
+    ce module en était dépourvu par erreur.
 */
-Item {
+Rectangle {
     id: root
+    color: "#1A1A1A"
+    radius: 16
 
     readonly property string _home: Quickshell.env("HOME") || ""
     readonly property string _user: Quickshell.env("USER") || ""
