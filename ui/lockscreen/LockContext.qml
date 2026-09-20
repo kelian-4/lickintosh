@@ -142,6 +142,43 @@ Scope {
     // pourrait considérer "prêt" avant même d'avoir essayé.
     property bool wallpaperCacheAttempted: false
 
+    // mtime (epoch, secondes) du fichier de cache au moment ou on l'a
+    // constate pret, utilise pour casser le cache Image de Qt (voir
+    // wallpaperSource plus bas). Necessaire car Qt garde l'etat Error
+    // associe a une URL de facon permanente pour la duree de vie du
+    // processus, meme apres qu'un fichier devenu valide a ete ecrit au
+    // meme chemin (confirme par la doc Qt — "Images are cached and
+    // shared internally... if several Image items have the same
+    // source, only one copy... will be loaded" — et par les forums Qt :
+    // reassigner la meme URL ne redeclenche jamais de rechargement).
+    // Scenario reproduit et confirme par logs reels : le tout premier
+    // essai d'un wallpaper dont la conversion n'a pas encore fini
+    // d'ecrire son fichier au moment ou wallpaperPreloader tente de le
+    // charger termine en Image.Error ; toute reutilisation ulterieure
+    // de cette meme URL (meme apres regeneration reussie du fichier)
+    // reste bloquee sur Error jusqu'au redemarrage du shell.
+    property string wallpaperCacheMtime: ""
+
+    // Chemin cible capturé au moment ou wallpaperConvertProc est
+    // lancee, distinct de root.wallpaperCachePath (qui peut changer
+    // entre-temps si l'utilisateur choisit un nouveau wallpaper avant
+    // la fin de la conversion en cours). Bug reproduit et confirme par
+    // logs reels : Process.command est un binding vivant sur
+    // root.wallpaperCachePath / wallpaperRawPath / wallpaperTargetW/H.
+    // La documentation Quickshell est explicite sur ce point : "If the
+    // property has been changed after starting a process it will
+    // return the new value, not the one for the currently running
+    // process." Donc onExited, qui relisait root.wallpaperCachePath
+    // directement, pouvait declarer "pret" un chemin different de
+    // celui que le process avait reellement ecrit — le fichier cible
+    // du NOUVEAU chemin n'existe alors jamais sur disque, l'Image
+    // termine en Error, rendu noir. En capturant ce chemin dans une
+    // propriete figee au lancement, onExited peut verifier qu'il
+    // correspond encore au chemin courant avant de conclure quoi que
+    // ce soit ; sinon, le resultat est perime et une nouvelle
+    // conversion est relancee pour le chemin actuel.
+    property string wallpaperConvertTargetPath: ""
+
     // Noms de propriétés sans underscore de tête : la syntaxe du handler
     // généré on<Property>Changed pour un nom commençant par un
     // underscore n'est pas documentée comme fiable, donc toute propriété
@@ -165,19 +202,29 @@ Scope {
 
     // 1) Vérifie si le fichier cache existe déjà (évite de relancer une
     //    conversion coûteuse à chaque changement mineur, ex: reload du
-    //    shell) ; 2) si absent, lance la conversion.
+    //    shell) ; 2) si absent, lance la conversion. Recupere aussi le
+    //    mtime du fichier dans le meme appel (voir wallpaperCacheMtime
+    //    plus bas — necessaire pour casser le cache Image de Qt).
     Process {
         id: wallpaperCacheCheckProc
         command: ["sh", "-c",
             "mkdir -p '" + root.wallpaperCacheDir.replace(/'/g, "'\\''") + "'; " +
-            "[ -f '" + root.wallpaperCachePath.replace(/'/g, "'\\''") + "' ] && echo exists || echo missing"]
+            "F='" + root.wallpaperCachePath.replace(/'/g, "'\\''") + "'; " +
+            "if [ -f \"$F\" ]; then echo exists; stat -c %Y \"$F\"; else echo missing; fi"]
         stdout: StdioCollector {
             onStreamFinished: {
-                root.dbg("wallpaperCacheCheckProc result: " + text.trim())
-                if (text.trim() === "exists") {
+                const lines = text.trim().split("\n")
+                root.dbg("wallpaperCacheCheckProc result: " + lines[0])
+                if (lines[0] === "exists") {
+                    root.wallpaperCacheMtime = lines.length > 1 ? lines[1] : ""
                     root.wallpaperCacheReady = true
                     root.wallpaperCacheAttempted = true
                 } else {
+                    // Capture du chemin cible AVANT de lancer le
+                    // process : c'est cette valeur, pas une relecture
+                    // ulterieure de root.wallpaperCachePath, qui sert a
+                    // verifier la fraicheur du resultat dans onExited.
+                    root.wallpaperConvertTargetPath = root.wallpaperCachePath
                     wallpaperConvertProc.running = true
                 }
             }
@@ -196,13 +243,42 @@ Scope {
             "  convert \"$SRC\" -resize " + root.wallpaperTargetWidth + "x" + root.wallpaperTargetHeight + "^ -gravity center -extent " + root.wallpaperTargetWidth + "x" + root.wallpaperTargetHeight + " \"$TMP\" && mv \"$TMP\" \"$DST\"; " +
             "else " +
             "  echo 'NO_IMAGEMAGICK' >&2; exit 42; " +
-            "fi"]
+            "fi; " +
+            "[ -f \"$DST\" ] && stat -c %Y \"$DST\""]
+        stdout: StdioCollector { id: wallpaperConvertOut }
         onExited: code => {
-            root.dbg("wallpaperConvertProc exited with code " + code)
+            root.dbg("wallpaperConvertProc exited with code " + code +
+                " (target=" + root.wallpaperConvertTargetPath +
+                ", current=" + root.wallpaperCachePath + ")")
+
+            // Le chemin a change pendant que cette conversion tournait
+            // (l'utilisateur a choisi un autre wallpaper avant la fin) :
+            // ce resultat concerne un chemin qui n'est plus le bon,
+            // qu'il ait reussi ou non. On ne touche pas
+            // wallpaperCacheReady/Attempted ici — onWallpaperCachePath
+            // Changed s'en est deja charge pour le nouveau chemin (il
+            // les a remis a false et a redeclenche
+            // triggerWallpaperCache), donc une nouvelle verification /
+            // conversion est deja en cours ou en file pour le chemin
+            // actuel. Rien a faire de plus que d'ignorer ce resultat
+            // perime.
+            if (root.wallpaperConvertTargetPath !== root.wallpaperCachePath) {
+                root.dbg("wallpaperConvertProc: resultat perime, ignore")
+                return
+            }
+
             // code 42 = ImageMagick absent : on ne considère pas le
             // cache "prêt", wallpaperSource retombera sur l'original.
             // Tout autre échec (fichier source invalide, etc.) a le
             // même effet, ce qui est le comportement de repli voulu.
+            // mtime mis a jour seulement en cas de succes reel : sur
+            // echec, wallpaperConvertOut.text est vide (le "[ -f ] &&
+            // stat" en fin de commande shell n'a rien affiche), et de
+            // toute facon wallpaperCacheReady=false empeche
+            // wallpaperSource de s'en servir.
+            if (code === 0) {
+                root.wallpaperCacheMtime = wallpaperConvertOut.text.trim()
+            }
             root.wallpaperCacheReady = (code === 0)
             root.wallpaperCacheAttempted = true
         }
@@ -211,8 +287,11 @@ Scope {
     // Source finale effectivement affichée : le fichier caché
     // pré-redimensionné une fois qu'il est prêt, sinon l'original tel
     // quel (comportement de repli, jamais d'écran vide en attendant).
+    // Le fragment #mtime rend chaque nouvelle version du fichier
+    // visible comme une URL differente pour le cache Qt (le fragment
+    // n'affecte jamais la resolution du chemin de fichier reel).
     readonly property url wallpaperSource: root.wallpaperCacheReady && root.wallpaperCachePath.length > 0
-        ? root.toFileUrl(root.wallpaperCachePath)
+        ? Qt.url(root.toFileUrl(root.wallpaperCachePath) + (root.wallpaperCacheMtime.length > 0 ? "#" + root.wallpaperCacheMtime : ""))
         : root.toFileUrl(root.wallpaperRawPath)
 
     // -----------------------------------------------------------------
