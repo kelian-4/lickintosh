@@ -73,10 +73,8 @@ WlSessionLockSurface {
     }
 
     // -----------------------------------------------------------------
-    // Fond : wallpaper courant + blur progressif, identique à l'esprit
-    // macOS (le fond est net au boot de l'écran puis se floute très
-    // légèrement au premier rendu — ici on part flouté direct, plus
-    // simple et sans scintillement).
+    // Fond : wallpaper courant, net (aucun flou), avec un léger zoom
+    // d'entrée qui accompagne l'apparition du contenu.
     //
     // Source calculée dans LockContext (context.wallpaperSource), pas
     // recalculée ici : LockScreen précharge une Image avec cette même
@@ -112,15 +110,14 @@ WlSessionLockSurface {
             asynchronous: true
             cache: true
             smooth: true
-            visible: false
-            layer.enabled: true
             // Décoder l'image à la taille d'affichage réelle plutôt qu'à
             // sa résolution native complète (souvent 4K/5K pour un
             // wallpaper) : c'est ce qui coûte le plus cher en temps de
             // décodage, largement plus que la simple lecture disque.
-            // Comme le fond est de toute façon flouté juste après
-            // (MultiEffect), la perte de netteté est invisible — c'est
-            // exactement la stratégie utilisée par caelestia/CachingImage.
+            // Le fond n'est plus flouté : c'est LockContext qui
+            // pré-redimensionne déjà le wallpaper à la taille exacte de
+            // l'écran (cache), donc décoder à la taille d'affichage ne
+            // coûte pas de netteté dans le cas normal.
             sourceSize: Qt.size(root.width * (root.screen?.devicePixelRatio ?? 1),
                                  root.height * (root.screen?.devicePixelRatio ?? 1))
 
@@ -133,29 +130,16 @@ WlSessionLockSurface {
                     "(0=Null,1=Ready,2=Loading,3=Error) source=" + source + " sourceSize=" + sourceSize)
                 if (status === Image.Ready) background.opacity = 1
             }
-            Component.onCompleted: {
-                console.log("[LockSurface]", Date.now() + "ms:", "wallpaperImage created, initial status =", status,
-                    "source=" + source)
-            }
-        }
-
-        MultiEffect {
-            id: wallpaperBlur
-            anchors.fill: parent
-            source: wallpaperImage
-            autoPaddingEnabled: false
-            blurEnabled: true
-            blur: 1.0
-            blurMax: 48
-            blurMultiplier: 1
-            // Léger zoom d'entrée, style eqsh (backgroundImageBlur.scale
-            // part de "zoom" > 1 et redescend à 1) : accompagne
-            // visuellement l'apparition du contenu plutôt que d'avoir un
-            // fond parfaitement statique pendant que le reste s'anime.
+            // Léger zoom d'entrée, style eqsh : part de 1.04 et redescend
+            // à 1 (porté ici depuis l'ancien MultiEffect de flou).
             scale: root.reduceMotion ? 1 : 1.04
-            Component.onCompleted: wallpaperBlur.scale = 1
             Behavior on scale {
                 NumberAnimation { duration: root.reduceMotion ? 1 : 900; easing.type: Easing.OutCubic }
+            }
+            Component.onCompleted: {
+                wallpaperImage.scale = 1
+                console.log("[LockSurface]", Date.now() + "ms:", "wallpaperImage created, initial status =", status,
+                    "source=" + source)
             }
         }
 
@@ -234,9 +218,9 @@ WlSessionLockSurface {
         }
 
         // --- Heure ----------------------------------------------------
-        // Effet "verre dépoli" façon eqsh : le fond déjà flouté
-        // (wallpaperBlur) est capturé une seconde fois, seulement dans
-        // le rectangle exact occupé par l'horloge, puis reflouté et
+        // Effet "verre dépoli" façon eqsh : le fond (wallpaper net)
+        // est capturé seulement dans le rectangle exact occupé par
+        // l'horloge, puis flouté et
         // masqué par la forme du texte (maskSource: clockRow) — ça donne
         // un texte translucide qui laisse deviner le mouvement du fond
         // en dessous, plutôt qu'un simple texte blanc avec ombre portée.
