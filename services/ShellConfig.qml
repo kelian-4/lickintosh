@@ -36,7 +36,7 @@ Singleton {
 
     reloadableId: "shellConfig"
 
-    readonly property string filePath: "$HOME/.config/quickshell/core/shell-config.json"
+    readonly property string filePath: Quickshell.shellDir + "/services/shell-config.json"
     property alias options: configAdapter
     property bool ready: false
 
