@@ -629,20 +629,39 @@ Scope {
 
     Process { id: usageSaveProc; command: ["sh", "-c", "true"] }
 
-    // Wallpaper du bureau : persisté via ShellConfig.options.wallpaper.path
-    // (source de vérité unique, cf. ShellConfig.qml), plus dans un cache
-    // base64 séparé (~/.cache/quickshell/spotlight_wallpaper — ancien
-    // mécanisme, supprimé). currentWallpaper reste une propriété locale
-    // distincte de ShellConfig.options.wallpaper.path pour permettre un
-    // aperçu en direct pendant la navigation dans le picker (persist:
-    // false) sans écrire sur le disque à chaque image survolée — seul
-    // persist: true (sélection confirmée) écrit dans ShellConfig.
-    property string currentWallpaper: ShellConfig.options.wallpaper.path
+    // Wallpaper du bureau : source de vérité unique = ShellConfig.options
+    // .wallpaper.path (services/shell-config.json). Deux endroits le
+    // modifient : ce Spotlight (setWallpaper(..., true)) et la page
+    // Réglages > Fond d'écran (WallpaperPage.apply). Les deux doivent
+    // se refléter mutuellement sur le bureau.
+    //
+    // Bug corrigé : currentWallpaper était une propriété avec binding
+    // (ShellConfig.options.wallpaper.path) mais setWallpaper() et la
+    // restauration après aperçu lui ASSIGNAIENT une valeur, ce qui casse
+    // définitivement le binding en QML. Dès que Spotlight avait touché au
+    // fond une fois (y compris le fond par défaut appliqué au premier
+    // lancement), un changement fait depuis les Réglages n'atteignait
+    // plus le bureau.
+    //
+    // Maintenant : currentWallpaper est en lecture seule et garde son
+    // binding. L'aperçu en direct du picker (persist: false, sans écrire
+    // sur le disque à chaque image survolée) passe par previewWallpaper,
+    // "" = pas d'aperçu en cours. Seul persist: true écrit dans
+    // ShellConfig.
+    property string previewWallpaper: ""
+
+    readonly property string currentWallpaper: root.previewWallpaper !== ""
+        ? root.previewWallpaper
+        : ShellConfig.options.wallpaper.path
 
     function setWallpaper(path, persist) {
-        root.currentWallpaper = path
         if (persist) {
+            // Écrire la config AVANT d'effacer l'aperçu : sinon
+            // currentWallpaper repasserait un instant par l'ancien chemin.
             ShellConfig.options.wallpaper.path = path
+            root.previewWallpaper = ""
+        } else {
+            root.previewWallpaper = path
         }
     }
 
@@ -761,7 +780,7 @@ Scope {
                         if (win.answers.length > 0) wallPreviewDebounce.trigger(win.answers[win.currentIdx].path)
                     } else {
                         wallPreviewDebounce.stop()
-                        root.currentWallpaper = ShellConfig.options.wallpaper.path
+                        root.previewWallpaper = ""
                     }
                 }
                 onCurrentIdxChanged: {
