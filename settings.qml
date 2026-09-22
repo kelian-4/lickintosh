@@ -62,12 +62,7 @@ FloatingWindow {
         {
             title: "",
             items: [
-                { name: "Notifications",       icon: "settings/notifications.svg", implemented: false },
-                { name: "Son",                  icon: "volume/audio-volume-3.svg", implemented: false },
-                { name: "Focus",                 icon: "dnd.svg",                   implemented: false },
-                { name: "Écran de verrouillage", icon: "settings/lockscreen.svg",    implemented: false },
-                { name: "Confidentialité et sécurité", icon: "lock.svg",            implemented: false },
-                { name: "Touch ID et mot de passe",    icon: "notch/key.svg",       implemented: false }
+                { name: "Écran de verrouillage", icon: "settings/lockscreen.svg",    component: "LockScreenPage", implemented: true }
             ]
         }
     ]
@@ -541,6 +536,7 @@ FloatingWindow {
                                 case "MonitorsPage": return _monitorsComp
                                 case "SpotlightPage": return _spotlightComp
                                 case "WallpaperPage": return _wallpaperComp
+                                case "LockScreenPage": return _lockScreenComp
                                 default:              return _placeholderComp
                             }
                         }
@@ -562,4 +558,5 @@ FloatingWindow {
     Component { id: _monitorsComp; MonitorsPage {} }
     Component { id: _spotlightComp; SpotlightPage {} }
     Component { id: _wallpaperComp; WallpaperPage {} }
+    Component { id: _lockScreenComp; LockScreenPage {} }
 }
