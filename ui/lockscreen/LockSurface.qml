@@ -8,6 +8,7 @@ import Quickshell.Wayland
 import qs.components
 import qs.components.glass
 import qs.services
+import qs.ui.topbar.statusarea.notifcenter
 
 WlSessionLockSurface {
     id: root
@@ -254,7 +255,23 @@ WlSessionLockSurface {
             // bords du masque restent visiblement crénelés.
             layer.smooth: true
 
-            readonly property int digitSize: Math.round(Math.min(root.width * 0.09, 92))
+            // Style choisi dans Réglages > Écran de verrouillage
+            // (services/LockClockStyle.qml). Style 0 + poids 1.0 (les
+            // valeurs par défaut) reproduisent exactement l'ancien rendu
+            // fixe : SF Pro Display, Font.Black, pas d'italique.
+            readonly property var clockCfg: ShellConfig.options.lockscreen
+            readonly property var clockStyle: LockClockStyle.styleAt(clockCfg.clockStyle)
+            readonly property int clockWeightQt: LockClockStyle.weightFor(clockCfg.clockWeight)
+
+            readonly property int baseDigitSize: Math.round(Math.min(root.width * 0.09, 92))
+            readonly property int targetDigitSize: clockCfg.clockLarge ? baseDigitSize : Math.round(baseDigitSize * 0.58)
+            // Propriété normale (animable) suivant targetDigitSize (lui,
+            // en lecture seule car dérivé de root.width) : un Behavior sur
+            // une readonly property n'est pas permis en QML.
+            property int digitSize: targetDigitSize
+            onTargetDigitSizeChanged: digitSize = targetDigitSize
+            Behavior on digitSize { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+
             readonly property var timeParts: root.timeText.split(":")
             // Blanc quasi-opaque (pas #ccffffff comme avant, trop
             // transparent) : le texte doit rester clairement lisible en
@@ -266,21 +283,24 @@ WlSessionLockSurface {
             Text {
                 text: clockRow.timeParts[0] ?? ""
                 color: clockRow.textColor
-                font.family: "SF Pro Display"
+                font.family: clockRow.clockStyle.family
+                font.italic: clockRow.clockStyle.italic
+                font.letterSpacing: clockRow.clockStyle.spacing
                 font.pixelSize: clockRow.digitSize
-                font.weight: Font.Black
+                font.weight: clockRow.clockWeightQt
                 renderType: Text.NativeRendering
             }
 
             Text {
                 text: ":"
                 color: clockRow.textColor
-                font.family: "SF Pro Display"
+                font.family: clockRow.clockStyle.family
+                font.italic: clockRow.clockStyle.italic
                 // Plus large et plus gras que les chiffres pour que le
                 // séparateur soit massif, comme sur l'écran de
                 // verrouillage macOS (référence visuelle du projet).
                 font.pixelSize: Math.round(clockRow.digitSize * 1.12)
-                font.weight: Font.Black
+                font.weight: clockRow.clockWeightQt
                 renderType: Text.NativeRendering
                 topPadding: -Math.round(clockRow.digitSize * 0.06)
             }
@@ -288,9 +308,11 @@ WlSessionLockSurface {
             Text {
                 text: clockRow.timeParts[1] ?? ""
                 color: clockRow.textColor
-                font.family: "SF Pro Display"
+                font.family: clockRow.clockStyle.family
+                font.italic: clockRow.clockStyle.italic
+                font.letterSpacing: clockRow.clockStyle.spacing
                 font.pixelSize: clockRow.digitSize
-                font.weight: Font.Black
+                font.weight: clockRow.clockWeightQt
                 renderType: Text.NativeRendering
             }
         }
@@ -330,15 +352,29 @@ WlSessionLockSurface {
             maskSpreadAtMin: 1.0
         }
 
+        // --- Notifications, au-dessus du mini lecteur ----------------
+        // Ancrée indépendamment (comme LockMediaPlayer ci-dessous) pour
+        // ne jamais perturber le positionnement du reste : quand elle
+        // est masquée (implicitHeight 0), le mini lecteur remonte tout
+        // seul grâce à son propre anchors.bottom: notifStack.top.
+        LockNotifications {
+            id: notifStack
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: mediaPlayer.top
+            anchors.bottomMargin: visible ? 16 : 0
+        }
+
         // --- Mini lecteur média, au-dessus du bloc de connexion ------
         // N'occupe de la place que si un lecteur MPRIS est actif
         // (LockMediaPlayer.implicitHeight vaut 0 sinon) — ancré
         // indépendamment de loginArea pour ne jamais perturber le
         // positionnement de l'avatar/mot de passe selon sa présence.
         LockMediaPlayer {
+            id: mediaPlayer
+            visible: ShellConfig.options.lockscreen.showMediaPlayer
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: loginArea.top
-            anchors.bottomMargin: hasPlayer ? 20 : 0
+            anchors.bottomMargin: (MprisState.hasPlayer && mediaPlayer.visible) ? 20 : 0
         }
 
         // --- Bloc bas : avatar / nom / mot de passe ------------------
