@@ -176,6 +176,25 @@ Singleton {
                 property string lockscreenPath: ""
             }
 
+            // Réglages > Écran de verrouillage : apparence de l'horloge,
+            // notifications et mini lecteur affichés sur le lockscreen.
+            // Lus par LockSurface, LockNotifications, LockMediaPlayer et
+            // par la page de réglages elle-même (LockScreenPage), qui
+            // sont donc toujours synchronisés entre eux.
+            property JsonObject lockscreen: JsonObject {
+                // Index dans LockClockStyle.styles (services/LockClockStyle.qml).
+                property int    clockStyle:  0
+                // 0..1, voir LockClockStyle.weightFor(). 1.0 = Font.Black,
+                // identique à l'ancienne horloge fixe (comportement par
+                // défaut inchangé).
+                property real   clockWeight: 1.0
+                property bool   clockLarge:  true
+
+                property bool   showNotifications:         true
+                property bool   showNotificationPreviews:  true
+                property bool   showMediaPlayer:            true
+            }
+
             property JsonObject controlCenter: JsonObject {
                 property list<var> widgetVisibility: [
                     { "id": "wifiWidget",     "visible": true },
