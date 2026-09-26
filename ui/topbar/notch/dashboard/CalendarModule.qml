@@ -94,27 +94,33 @@ Rectangle {
 
                 // Badge hexagonal pour aujourd'hui (au lieu d'un simple
                 // rectangle arrondi), approximation de la forme vue
-                // dans les captures de caelestia. Agrandi (quasi toute
-                // la cellule, plus seulement -4px) : signalé comme trop
-                // petit pour être visible dans une cellule aussi
-                // compacte.
+                // dans les captures de caelestia. Volontairement plus
+                // grand que la cellule (x1.35, avec un leger halo) :
+                // signale a deux reprises comme trop petit pour etre vu
+                // du premier coup d'oeil dans une cellule aussi compacte.
                 Canvas {
                     anchors.centerIn: parent
-                    width: Math.min(parent.width, parent.height)
+                    width: Math.min(parent.width, parent.height) * 1.35
                     height: width
                     visible: parent.isToday
                     onPaint: {
                         var ctx = getContext("2d")
                         ctx.reset()
                         var cx = width / 2, cy = height / 2, r = width / 2
-                        ctx.beginPath()
-                        for (var i = 0; i < 6; i++) {
-                            var angle = Math.PI / 3 * i - Math.PI / 2
-                            var x = cx + r * Math.cos(angle)
-                            var y = cy + r * Math.sin(angle)
-                            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
+                        function hexPath(radius) {
+                            ctx.beginPath()
+                            for (var i = 0; i < 6; i++) {
+                                var angle = Math.PI / 3 * i - Math.PI / 2
+                                var x = cx + radius * Math.cos(angle)
+                                var y = cy + radius * Math.sin(angle)
+                                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
+                            }
+                            ctx.closePath()
                         }
-                        ctx.closePath()
+                        hexPath(r)
+                        ctx.fillStyle = "rgba(28, 122, 255, 0.35)"
+                        ctx.fill()
+                        hexPath(r * 0.78)
                         ctx.fillStyle = "#1C7AFF"
                         ctx.fill()
                     }
@@ -128,7 +134,7 @@ Rectangle {
                            ? "#FFFFFF"
                            : (model.date.getDay() === 0 || model.date.getDay() === 6) ? "#EC4899" : "#B0B0B0"
                     opacity: parent.isToday || model.month === grid.month ? 1 : 0.4
-                    font.pixelSize: 13
+                    font.pixelSize: parent.isToday ? 15 : 13
                     font.bold: parent.isToday
                     font.family: "SF Pro Rounded"
                 }
