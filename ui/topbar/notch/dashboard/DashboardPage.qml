@@ -44,12 +44,18 @@ import QtQuick.Layouts
     a pas"). Les autres onglets (Media/Performance/Weather) ont un Item
     simple comme racine, sans ce probleme, d'ou l'ecart visible
     seulement sur Dashboard.
+
+    rowSpacing/columnSpacing a 0 (etaient a 10) : espaces noirs visibles
+    entre les cartes signales explicitement, non voulus. Calendar.
+    preferredHeight remonte a 230 (etait 210) pour profiter de l'espace
+    ainsi libere et agrandir l'indicateur du jour actuel, signale trop
+    petit.
 */
 GridLayout {
     id: root
     anchors.fill: parent
-    rowSpacing: 10
-    columnSpacing: 10
+    rowSpacing: 0
+    columnSpacing: 0
 
     WeatherModule {
         Layout.row: 0
@@ -86,7 +92,7 @@ GridLayout {
         Layout.columnSpan: 3
         Layout.fillWidth: true
         Layout.fillHeight: true
-        Layout.preferredHeight: 210
+        Layout.preferredHeight: 230
     }
 
     ResourcesModule {
