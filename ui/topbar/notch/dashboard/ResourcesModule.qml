@@ -30,12 +30,21 @@ Rectangle {
         id: res
         required property string icon
         Layout.fillHeight: true
-        implicitSize: height
+        Layout.alignment: Qt.AlignHCenter
+        // Bug reel signale : implicitSize etait lie uniquement a
+        // "height" (fillHeight divise la hauteur disponible par 3),
+        // sans jamais tenir compte de la largeur de la carte -> les
+        // anneaux debordaient largement de ResourcesModule des que la
+        // carte devenait assez haute (ex. apres l'agrandissement du
+        // calendrier). Le diametre reel doit rester le plus petit des
+        // deux : la part de hauteur allouee, ET la largeur disponible
+        // (moins un peu de marge).
+        implicitSize: Math.min(height, root.width - 16)
         strokeWidth: 6
 
         VectorImage {
             anchors.centerIn: parent
-            width: parent.height * 0.32
+            width: parent.width * 0.32
             height: width
             source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/" + res.icon)
             preferredRendererType: VectorImage.CurveRenderer

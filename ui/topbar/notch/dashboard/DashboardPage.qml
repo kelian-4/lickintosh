@@ -2,54 +2,33 @@ import QtQuick.Layouts
 
 /*
     Port fidele de modules/dashboard/Dash.qml (caelestia-dots/shell,
-    GPLv3), relu integralement (pas depuis la memoire) : un vrai
-    GridLayout a 6 colonnes x 2 lignes, PAS des RowLayout/ColumnLayout
-    imbriques comme la version precedente (qui approximait la
-    disposition mais ne partageait pas la largeur des colonnes entre
-    la ligne du haut et celle du bas -> agrandir la notch faisait
-    grossir UserModule de facon disproportionnee au lieu de profiter a
-    Calendar/Resources, et laissait un enorme espace vide inutilise).
+    GPLv3) a l'origine, largement adapte depuis suite aux retours
+    explicites de l'utilisateur (voir ci-dessous) : la disposition en
+    GridLayout 6 colonnes x 2 lignes est conservee (c'est ce qui a
+    resolu le probleme d'espace disproportionne — cf. historique git),
+    mais son contenu a change :
 
-    Repartition EXACTE du fichier reel (Layout.row/column/columnSpan/
-    rowSpan) :
-      col:      0        1        2   3   4        5
-      row 0:  [--- Weather ---][----- User -----][ Media  ]
-      row 1:  [DateTime][------ Calendar ------][Resources][ (suite) ]
+      col:      0              1   2   3   4        5
+      row 0:  [--- ActiveApp ---][----- User -----][ Media  ]
+      row 1:  [--------- Calendar ---------][Resources][ (suite) ]
 
-    Point crucial verifie sur le fichier source (source de plusieurs
-    erreurs precedentes) : SEUL Calendar a Layout.fillWidth. Tous les
-    autres (Weather, User, DateTime, Resources, Media) ont une largeur
-    FIXE (Layout.preferredWidth), pas fillWidth -> c'est ce qui evite
-    l'espace vide disproportionne et donne a Calendar tout l'espace
-    horizontal restant. Layout.fillHeight : User/DateTime/Resources/
-    Media l'ont, Weather et Calendar ne l'ont PAS (hauteur basee sur
-    leur propre contenu, via Layout.preferredHeight ici plutot que
-    l'implicitHeight de leur contenu interne comme chez eux, plus
-    previsible sans environnement de rendu pour verifier).
+    Changements demandes explicitement :
+    - DateTimeModule RETIRE (plus dans la grille, fichier supprime du
+      depot — plus aucune reference nulle part). Calendar recupere cette
+      colonne (columnSpan 3 -> 4, column 1 -> 0) au lieu de laisser un
+      trou.
+    - WeatherModule REMPLACE par ActiveAppModule ("le mode actuellement
+      actif" = l'application/fenetre active, comme le montre deja
+      ui/topbar/menubar/activewindows/ActiveWindow.qml dans la topbar).
+      WeatherModule.qml n'est pas supprime (toujours utilise par l'onglet
+      Weather separement, WeatherPage.qml), seulement retire d'ici.
 
-    Valeurs de largeur/hauteur mises a l'echelle (x0.6, meme facteur
-    qu'UserModule) depuis les vraies valeurs Tokens.sizes.dashboard :
-    userWidth 340->205, weatherWidth 275->165. DateTime/Resources/Media
-    et les hauteurs de Weather/Calendar n'ont pas d'equivalent Tokens
-    direct (bases sur l'implicitHeight de leur contenu chez eux) ->
-    valeurs raisonnables choisies pour la taille de notch actuelle.
-
-    anchors.fill: parent AJOUTE (absent avant, cause probable de
-    l'immense espace vide signale) : ce GridLayout est charge par un
-    Loader (NotchDashboard.qml) qui a lui-meme Layout.fillWidth/
-    fillHeight — mais un type Layout (GridLayout/ColumnLayout/RowLayout)
-    lie sa propre largeur/hauteur a son implicitWidth/Height calcule
-    depuis ses enfants, ce qui empeche le comportement automatique du
-    Loader ("redimensionner l'item charge a ma propre taille s'il n'en
-    a pas"). Les autres onglets (Media/Performance/Weather) ont un Item
-    simple comme racine, sans ce probleme, d'ou l'ecart visible
-    seulement sur Dashboard.
-
-    rowSpacing/columnSpacing a 0 (etaient a 10) : espaces noirs visibles
-    entre les cartes signales explicitement, non voulus. Calendar.
-    preferredHeight remonte a 230 (etait 210) pour profiter de l'espace
-    ainsi libere et agrandir l'indicateur du jour actuel, signale trop
-    petit.
+    Point crucial toujours valable (verifie sur le fichier source reel,
+    a l'origine de plusieurs erreurs precedentes) : SEUL Calendar a
+    Layout.fillWidth parmi les modules de la grille. anchors.fill: parent
+    sur la racine reste necessaire (un GridLayout charge par un Loader ne
+    se redimensionne pas tout seul, contrairement a un Item simple).
+    rowSpacing/columnSpacing a 0 : espaces noirs entre cartes non voulus.
 */
 GridLayout {
     id: root
@@ -57,7 +36,7 @@ GridLayout {
     rowSpacing: 0
     columnSpacing: 0
 
-    WeatherModule {
+    ActiveAppModule {
         Layout.row: 0
         Layout.columnSpan: 2
         Layout.preferredWidth: 165
@@ -80,16 +59,10 @@ GridLayout {
         Layout.fillHeight: true
     }
 
-    DateTimeModule {
-        Layout.row: 1
-        Layout.preferredWidth: 70
-        Layout.fillHeight: true
-    }
-
     CalendarModule {
         Layout.row: 1
-        Layout.column: 1
-        Layout.columnSpan: 3
+        Layout.column: 0
+        Layout.columnSpan: 4
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.preferredHeight: 230
