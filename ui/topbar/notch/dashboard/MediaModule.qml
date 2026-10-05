@@ -1,49 +1,26 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import QtQuick.VectorImage
+import QtQuick.Effects
 import Quickshell
 import qs.services
 
 /*
-    Port de modules/dashboard/dash/Media.qml + CoverArt.qml (caelestia-
-    dots/shell, GPLv3) :
-    - CircularProgress en demi-cercle (sweepAngle 180, comme
-      Tokens.sizes.dashboard.mediaProgressSweep) autour de la pochette,
-      valeur = position/duree de lecture, UNIQUEMENT quand un lecteur est
-      actif. Sans lecteur, un simple anneau plein et vif remplace l'arc
-      (un arc a une valeur proche de 0 serait quasi invisible) — c'est
-      ce que montre l'image de reference (cercle bleu net autour de
-      l'icone de repli, pas un demi-arc discret).
-    - Pochette qui tourne lentement en boucle tant que ca joue (leur
-      CoverArt utilise un blob "Cookie12Sided" de M3Shapes, indisponible
-      ici -> remplace par un simple cercle, meme logique de rotation).
-    - Icone de repli sans pochette : notch/star.svg (le plus proche
-      disponible de l'astérisque bleu de l'image de reference).
-    - Textes de repli "Unknown title/album/artist" dans tous les cas
-      sans metadonnee (conforme a l'image de reference, qui les affiche
-      meme sans lecteur actif — plus simple que la distinction "No
-      media" vs "Unknown X" du vrai fichier source, qui ne correspond
-      pas a ce que montre l'image).
-    - Controles precedent/lecture-pause/suivant.
-    - Pas de bongo cat (AnimatedImage sur Config.paths.mediaGif) : ce
-      depot n'a pas cet asset gif, visible dans l'image de reference en
-      bas de la pochette.
+    Refonte complete demandee par l'utilisateur, calquee sur l'app
+    macOS "Nook" (captures fournies) plutot que sur caelestia : plus
+    de carte avec fond/bordure propre, juste la pochette + les textes +
+    les controles, sur le fond continu du dashboard (separation par un
+    simple trait vertical gere par DashboardPage, pas ici).
 
-    Fond de carte (#1A1A1A, radius) ajouté pour être cohérent avec
-    Calendar/Weather — chaque module du dashboard a le même traitement
-    "bloc" dans le vrai Dash.qml (component Rect: StyledRect partagé),
-    ce module en était dépourvu par erreur.
+    Pochette carree arrondie (pas de cercle ni d'arc de progression
+    autour, absents des captures de reference), petit badge rond en bas
+    a droite avec le nom du lecteur (Spotify/Apple Music/etc, generique
+    puisqu'on n'a pas d'icone par service precise dans ce depot).
 */
-Rectangle {
+Item {
     id: root
-    color: "#1A1A1A"
-    radius: 20
-
-    readonly property real playerProgress: MprisState.hasPlayer && MprisState.length > 0
-        ? (MprisState.position % MprisState.length) / MprisState.length
-        : 0
-    readonly property real arcCoverGap: 4
+    Layout.preferredWidth: 200
+    Layout.fillHeight: true
 
     component CtrlIcon: Item {
         id: ctrl
@@ -75,127 +52,104 @@ Rectangle {
         }
     }
 
-    ColumnLayout {
+    RowLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 6
+        spacing: 12
 
         Item {
-            id: coverWrap
-            Layout.fillWidth: true
-            Layout.preferredHeight: width
+            Layout.preferredWidth: 64
+            Layout.preferredHeight: 64
+            Layout.alignment: Qt.AlignVCenter
 
-            // Etat "aucune lecture" : simple anneau plein et vif (pas un
-            // arc de progression a une valeur proche de 0, quasi invisible)
-            // -> correspond a l'image de reference (cercle bleu net autour
-            // de l'icone de repli, pas un demi-arc discret).
             Rectangle {
-                visible: !MprisState.hasPlayer
-                anchors.centerIn: cover
-                width: cover.width + root.arcCoverGap * 2 + 6
-                height: width
-                radius: width / 2
-                color: "transparent"
-                border.color: "#1C7AFF"
-                border.width: 3
-            }
+                id: artClip
+                anchors.fill: parent
+                radius: 12
+                color: "#2A2A3A"
+                clip: true
 
-            CircularProgress {
-                id: prog
-                visible: MprisState.hasPlayer
-                anchors.centerIn: cover
-                implicitSize: cover.width + root.arcCoverGap + strokeWidth * 2
-                fgColour: "#1C7AFF"
-                bgColour: "#2A2A2A"
-                strokeWidth: 6
-                startAngle: -90 - 90
-                sweepAngle: 180
-                value: root.playerProgress
-                hasEndIndicator: MprisState.hasPlayer
-            }
-
-            Item {
-                id: cover
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.margins: 6 + root.arcCoverGap + 6
-                height: width
-
-                Rectangle {
-                    id: coverMask
+                Image {
                     anchors.fill: parent
-                    radius: width / 2
-                    color: "#2A2A3A"
-                    clip: true
-
-                    Image {
-                        anchors.fill: parent
-                        source: MprisState.artUrl
-                        fillMode: Image.PreserveAspectCrop
-                        visible: MprisState.artUrl !== ""
-                    }
-
-                    RotationAnimation on rotation {
-                        running: MprisState.isPlaying
-                        from: 0
-                        to: 360
-                        duration: 23500
-                        loops: Animation.Infinite
-                    }
+                    source: MprisState.artUrl
+                    fillMode: Image.PreserveAspectCrop
+                    visible: MprisState.artUrl !== ""
                 }
-
                 VectorImage {
                     anchors.centerIn: parent
                     width: parent.width * 0.4
                     height: width
                     visible: MprisState.artUrl === ""
-                    source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/star.svg")
+                    source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/music.svg")
                     preferredRendererType: VectorImage.CurveRenderer
                     layer.enabled: true
                     layer.effect: MultiEffect {
                         colorization: 1
-                        colorizationColor: "#1C7AFF"
+                        colorizationColor: "#8A8A8A"
+                    }
+                }
+            }
+
+            Rectangle {
+                visible: MprisState.identity !== ""
+                anchors.right: artClip.right
+                anchors.bottom: artClip.bottom
+                anchors.margins: -4
+                width: 20
+                height: 20
+                radius: 10
+                color: "#E91E63"
+                border.color: "#1A1A1A"
+                border.width: 2
+
+                VectorImage {
+                    anchors.centerIn: parent
+                    width: 11
+                    height: 11
+                    source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/music.svg")
+                    preferredRendererType: VectorImage.CurveRenderer
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1
+                        colorizationColor: "#FFFFFF"
                     }
                 }
             }
         }
 
-        Text {
+        ColumnLayout {
             Layout.fillWidth: true
-            text: MprisState.trackTitle !== "" ? MprisState.trackTitle : "Unknown title"
-            color: "#FFFFFF"
-            font.pixelSize: 13; font.bold: true; font.family: "SF Pro Rounded"
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight
-        }
-        Text {
-            Layout.fillWidth: true
-            text: MprisState.trackAlbum !== "" ? MprisState.trackAlbum : "Unknown album"
-            color: "#9AA0A6"
-            font.pixelSize: 10; font.family: "SF Pro Rounded"
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight
-        }
-        Text {
-            Layout.fillWidth: true
-            text: MprisState.trackArtist !== "" ? MprisState.trackArtist : "Unknown artist"
-            color: "#9AA0A6"
-            font.pixelSize: 10; font.family: "SF Pro Rounded"
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight
-        }
+            Layout.alignment: Qt.AlignVCenter
+            spacing: 3
 
-        Item { Layout.fillHeight: true }
+            Text {
+                Layout.fillWidth: true
+                text: MprisState.trackTitle !== "" ? MprisState.trackTitle : "Unknown title"
+                color: "#FFFFFF"
+                font.pixelSize: 14; font.bold: true; font.family: "SF Pro Rounded"
+                elide: Text.ElideRight
+            }
+            Text {
+                Layout.fillWidth: true
+                text: MprisState.trackAlbum !== "" ? MprisState.trackAlbum : "Unknown album"
+                color: "#C0C0C0"
+                font.pixelSize: 11; font.family: "SF Pro Rounded"
+                elide: Text.ElideRight
+            }
+            Text {
+                Layout.fillWidth: true
+                text: MprisState.trackArtist !== "" ? MprisState.trackArtist : "Unknown artist"
+                color: "#8A8A8A"
+                font.pixelSize: 11; font.family: "SF Pro Rounded"
+                elide: Text.ElideRight
+            }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
-            spacing: 18
-
-            CtrlIcon { icon: "backward.svg"; enabled_: MprisState.canGoPrevious; onClicked: MprisState.previous() }
-            CtrlIcon { icon: MprisState.isPlaying ? "pause.svg" : "play.svg"; enabled_: MprisState.canTogglePlaying; onClicked: MprisState.togglePlaying() }
-            CtrlIcon { icon: "forward.svg"; enabled_: MprisState.canGoNext; onClicked: MprisState.next() }
+            RowLayout {
+                Layout.topMargin: 4
+                spacing: 16
+                CtrlIcon { icon: "backward.svg"; enabled_: MprisState.canGoPrevious; onClicked: MprisState.previous() }
+                CtrlIcon { icon: MprisState.isPlaying ? "pause.svg" : "play.svg"; enabled_: MprisState.canTogglePlaying; onClicked: MprisState.togglePlaying() }
+                CtrlIcon { icon: "forward.svg"; enabled_: MprisState.canGoNext; onClicked: MprisState.next() }
+            }
         }
     }
 }

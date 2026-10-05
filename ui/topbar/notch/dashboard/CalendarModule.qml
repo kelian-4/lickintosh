@@ -1,143 +1,105 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
-import QtQuick.VectorImage
-import QtQuick.Effects
-import Quickshell
+import qs.services
 
-// Calqué sur modules/dashboard/dash/Calendar.qml de caelestia : une
-// vraie grille de mois via les contrôles Qt natifs (MonthGrid /
-// DayOfWeekRow), sans dépendance externe (pas de CalDAV/khal — plus
-// simple et plus robuste, cf. retour d'expérience avec la première
-// version basée sur khal qui a été abandonnée).
-Rectangle {
+/*
+    Refonte complete demandee par l'utilisateur, calquee sur l'app
+    macOS "Nook" (captures fournies) : plus de grille de mois complete
+    (MonthGrid), juste une bande de quelques jours centree sur
+    aujourd'hui (jour de la semaine + numero), aujourd'hui mis en
+    evidence, week-end en rose/rouge — puis une ligne d'agenda en
+    dessous ("Rien de prevu aujourd'hui" ou le prochain evenement),
+    alimentee par le service CalendarState deja existant dans ce depot
+    (best-effort via khal, ne plante jamais si indisponible).
+*/
+Item {
     id: root
-    radius: 16
-    color: "#1A1A1A"
+    Layout.fillWidth: true
+    Layout.fillHeight: true
 
-    property date displayDate: new Date()
     readonly property date today: new Date()
+    readonly property int daySpan: 2 // jours affiches de chaque cote d'aujourd'hui
 
-    component NavIcon: Item {
-        id: navIcon
-        property string icon: ""
-        signal clicked()
-        implicitWidth: 22
-        implicitHeight: 22
-
-        VectorImage {
-            anchors.centerIn: parent
-            width: 12
-            height: 12
-            source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + navIcon.icon)
-            preferredRendererType: VectorImage.CurveRenderer
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1
-                colorizationColor: "#8A8A8A"
-            }
-        }
-
-        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: navIcon.clicked() }
+    function dayAt(offset) {
+        var d = new Date(root.today)
+        d.setDate(d.getDate() + offset)
+        return d
     }
+
+    readonly property var nextEvent: CalendarState.available && CalendarState.events.length > 0
+                                      ? CalendarState.events[0] : null
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 14
-        spacing: 8
+        spacing: 10
 
         RowLayout {
             Layout.fillWidth: true
-            NavIcon {
-                icon: "chevron-left.svg"
-                onClicked: root.displayDate = new Date(root.displayDate.getFullYear(), root.displayDate.getMonth() - 1, 1)
-            }
+            spacing: 14
+
             Text {
-                Layout.fillWidth: true
-                horizontalAlignment: Text.AlignHCenter
-                text: Qt.locale("fr_FR").monthName(root.displayDate.getMonth()) + " " + root.displayDate.getFullYear()
-                color: "#FFFFFF"; font.pixelSize: 15; font.bold: true; font.family: "SF Pro Rounded"
-            }
-            NavIcon {
-                icon: "chevron-right.svg"
-                onClicked: root.displayDate = new Date(root.displayDate.getFullYear(), root.displayDate.getMonth() + 1, 1)
-            }
-        }
-
-        DayOfWeekRow {
-            Layout.fillWidth: true
-            locale: Qt.locale("fr_FR")
-            delegate: Text {
-                required property var model
-                text: model.shortName
-                color: (model.day === 0 || model.day === 6) ? "#EC4899" : "#5A5A5A"
-                font.pixelSize: 11
+                text: Qt.locale("fr_FR").standaloneMonthName(root.today.getMonth(), Locale.ShortFormat)
+                color: "#FFFFFF"
+                font.pixelSize: 26
+                font.bold: true
                 font.family: "SF Pro Rounded"
-                horizontalAlignment: Text.AlignHCenter
             }
-        }
 
-        MonthGrid {
-            id: grid
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            month: root.displayDate.getMonth()
-            year: root.displayDate.getFullYear()
-            locale: Qt.locale("fr_FR")
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                spacing: 14
 
-            delegate: Item {
-                readonly property bool isToday: model.month === root.today.getMonth()
-                                                 && model.year === root.today.getFullYear()
-                                                 && model.day === root.today.getDate()
-                implicitWidth: implicitHeight
-                implicitHeight: dayText.implicitHeight + 16
+                Repeater {
+                    model: root.daySpan * 2 + 1
 
-                // Badge hexagonal pour aujourd'hui (au lieu d'un simple
-                // rectangle arrondi), approximation de la forme vue
-                // dans les captures de caelestia. Volontairement plus
-                // grand que la cellule (x1.35, avec un leger halo) :
-                // signale a deux reprises comme trop petit pour etre vu
-                // du premier coup d'oeil dans une cellule aussi compacte.
-                Canvas {
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width, parent.height) * 1.35
-                    height: width
-                    visible: parent.isToday
-                    onPaint: {
-                        var ctx = getContext("2d")
-                        ctx.reset()
-                        var cx = width / 2, cy = height / 2, r = width / 2
-                        function hexPath(radius) {
-                            ctx.beginPath()
-                            for (var i = 0; i < 6; i++) {
-                                var angle = Math.PI / 3 * i - Math.PI / 2
-                                var x = cx + radius * Math.cos(angle)
-                                var y = cy + radius * Math.sin(angle)
-                                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
-                            }
-                            ctx.closePath()
+                    delegate: ColumnLayout {
+                        required property int index
+                        readonly property date cellDate: root.dayAt(index - root.daySpan)
+                        readonly property bool isToday: index === root.daySpan
+                        readonly property bool isWeekend: cellDate.getDay() === 0 || cellDate.getDay() === 6
+
+                        spacing: 2
+                        Layout.alignment: Qt.AlignHCenter
+
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: Qt.locale("fr_FR").standaloneDayName(parent.cellDate.getDay(), Locale.NarrowFormat).toUpperCase()
+                            color: parent.isToday ? "#1C7AFF" : (parent.isWeekend ? "#EC4899" : "#8A8A8A")
+                            font.pixelSize: 10
+                            font.bold: parent.isToday
+                            font.family: "SF Pro Rounded"
                         }
-                        hexPath(r)
-                        ctx.fillStyle = "rgba(28, 122, 255, 0.35)"
-                        ctx.fill()
-                        hexPath(r * 0.78)
-                        ctx.fillStyle = "#1C7AFF"
-                        ctx.fill()
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: parent.cellDate.getDate()
+                            color: parent.isToday ? "#1C7AFF" : (parent.isWeekend ? "#EC4899" : "#FFFFFF")
+                            font.pixelSize: parent.isToday ? 18 : 15
+                            font.bold: parent.isToday
+                            font.family: "SF Pro Rounded"
+                        }
                     }
                 }
 
-                Text {
-                    id: dayText
-                    anchors.centerIn: parent
-                    text: model.day
-                    color: parent.isToday
-                           ? "#FFFFFF"
-                           : (model.date.getDay() === 0 || model.date.getDay() === 6) ? "#EC4899" : "#B0B0B0"
-                    opacity: parent.isToday || model.month === grid.month ? 1 : 0.4
-                    font.pixelSize: parent.isToday ? 15 : 13
-                    font.bold: parent.isToday
-                    font.family: "SF Pro Rounded"
-                }
+                Item { Layout.fillWidth: true }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+            Text {
+                text: "🗓"
+                font.pixelSize: 11
+                opacity: 0.6
+            }
+            Text {
+                Layout.fillWidth: true
+                text: root.nextEvent ? (root.nextEvent.time + " · " + root.nextEvent.title) : "Rien de prévu aujourd'hui"
+                color: "#8A8A8A"
+                font.pixelSize: 12
+                font.family: "SF Pro Rounded"
+                elide: Text.ElideRight
             }
         }
     }

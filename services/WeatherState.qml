@@ -35,7 +35,7 @@ Singleton {
 
     // Fichier SVG (sous assets/icons/weather/ ou notch/, faute de mieux
     // pour orage/bruine qui n'existent pas dans weather/) correspondant
-    // au code WMO courant — consommé par WeatherModule/WeatherPage.
+    // au code WMO courant — consommé par WeatherPage.
     readonly property string iconFile: root._iconFor(root.weatherCode)
 
     function _iconFor(code) {
