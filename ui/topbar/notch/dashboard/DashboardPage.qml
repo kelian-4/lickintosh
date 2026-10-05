@@ -1,77 +1,60 @@
+import QtQuick
 import QtQuick.Layouts
 
 /*
-    Port fidele de modules/dashboard/Dash.qml (caelestia-dots/shell,
-    GPLv3) a l'origine, largement adapte depuis suite aux retours
-    explicites de l'utilisateur (voir ci-dessous) : la disposition en
-    GridLayout 6 colonnes x 2 lignes est conservee (c'est ce qui a
-    resolu le probleme d'espace disproportionne — cf. historique git),
-    mais son contenu a change :
+    Refonte complete demandee par l'utilisateur (resultat juge decevant
+    de la version precedente, inspiree de caelestia-dots/shell) : cette
+    fois calquee sur l'app macOS "Nook" (captures fournies). Changement
+    fondamental de philosophie : plus de GridLayout a 6 colonnes avec
+    des cartes individuelles (fond + coins arrondis) par module — juste
+    un fond continu (celui du dashboard/de la notch) avec de simples
+    traits verticaux semi-transparents pour separer les sections,
+    comme sur les captures de reference.
 
-      col:      0              1   2   3   4        5
-      row 0:  [--- ActiveApp ---][----- User -----][ Media  ]
-      row 1:  [--------- Calendar ---------][Resources][ (suite) ]
+    Trois sections, de gauche a droite :
+    - MediaModule (pochette + titre/album/artiste + controles)
+    - CalendarModule (bande de jours centree sur aujourd'hui + agenda)
+    - ProfilePhotoModule (photo de profil circulaire, seule a
+      l'extremite droite comme sur "Nook" — pas de badges/texte autour,
+      contrairement a l'ancien UserModule retire)
 
-    Changements demandes explicitement :
-    - DateTimeModule RETIRE (plus dans la grille, fichier supprime du
-      depot — plus aucune reference nulle part). Calendar recupere cette
-      colonne (columnSpan 3 -> 4, column 1 -> 0) au lieu de laisser un
-      trou.
-    - WeatherModule REMPLACE par ActiveAppModule ("le mode actuellement
-      actif" = l'application/fenetre active, comme le montre deja
-      ui/topbar/menubar/activewindows/ActiveWindow.qml dans la topbar).
-      WeatherModule.qml n'est pas supprime (toujours utilise par l'onglet
-      Weather separement, WeatherPage.qml), seulement retire d'ici.
-
-    Point crucial toujours valable (verifie sur le fichier source reel,
-    a l'origine de plusieurs erreurs precedentes) : SEUL Calendar a
-    Layout.fillWidth parmi les modules de la grille. anchors.fill: parent
-    sur la racine reste necessaire (un GridLayout charge par un Loader ne
-    se redimensionne pas tout seul, contrairement a un Item simple).
-    rowSpacing/columnSpacing a 0 : espaces noirs entre cartes non voulus.
+    Modules retires de cette page (plus dans les captures de reference,
+    demande explicite "on retire les widgets actuels") : WeatherModule,
+    ActiveAppModule, UserModule (version avec badges), ResourcesModule,
+    StatusChipsRow (deja inutilise avant ce changement) — fichiers
+    supprimes du depot, plus rien ne les utilise. Verifie explicitement
+    que WeatherModule n'etait PAS repris par l'onglet Weather
+    (WeatherPage.qml a sa propre logique independante) avant de le
+    supprimer, pour ne pas casser cet onglet par erreur.
 */
-GridLayout {
+Item {
     id: root
-    anchors.fill: parent
-    rowSpacing: 0
-    columnSpacing: 0
 
-    ActiveAppModule {
-        Layout.row: 0
-        Layout.columnSpan: 2
-        Layout.preferredWidth: 165
-        Layout.preferredHeight: 90
-        Layout.fillHeight: true
-    }
+    RowLayout {
+        anchors.fill: parent
+        anchors.margins: 16
+        spacing: 16
 
-    UserModule {
-        Layout.column: 2
-        Layout.columnSpan: 3
-        Layout.preferredWidth: 205
-        Layout.fillHeight: true
-    }
+        MediaModule {}
 
-    MediaModule {
-        Layout.row: 0
-        Layout.column: 5
-        Layout.rowSpan: 2
-        Layout.preferredWidth: 150
-        Layout.fillHeight: true
-    }
+        Rectangle {
+            Layout.preferredWidth: 1
+            Layout.fillHeight: true
+            Layout.topMargin: 4
+            Layout.bottomMargin: 4
+            color: "#262626"
+        }
 
-    CalendarModule {
-        Layout.row: 1
-        Layout.column: 0
-        Layout.columnSpan: 4
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        Layout.preferredHeight: 230
-    }
+        CalendarModule {}
 
-    ResourcesModule {
-        Layout.row: 1
-        Layout.column: 4
-        Layout.preferredWidth: 60
-        Layout.fillHeight: true
+        Rectangle {
+            Layout.preferredWidth: 1
+            Layout.fillHeight: true
+            Layout.topMargin: 4
+            Layout.bottomMargin: 4
+            color: "#262626"
+        }
+
+        ProfilePhotoModule {}
     }
 }
