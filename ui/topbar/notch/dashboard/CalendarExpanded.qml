@@ -65,6 +65,8 @@ Item {
 
         ColumnLayout {
             Layout.preferredWidth: 170
+            Layout.maximumWidth: 170
+            Layout.fillWidth: false
             Layout.fillHeight: true
             spacing: 2
 
@@ -103,6 +105,7 @@ Item {
         Item {
             id: gridArea
             Layout.fillWidth: true
+            Layout.preferredWidth: 1
             Layout.fillHeight: true
 
             readonly property real cellH: gridArea.height / (root.rows + 1)
@@ -181,7 +184,9 @@ Item {
         Divider {}
 
         ColumnLayout {
-            Layout.preferredWidth: 200
+            Layout.preferredWidth: 190
+            Layout.maximumWidth: 190
+            Layout.fillWidth: false
             Layout.fillHeight: true
             spacing: 6
 

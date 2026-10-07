@@ -7,7 +7,15 @@ Item {
     Layout.preferredWidth: 168
     Layout.fillHeight: true
 
+    signal activated()
+
     readonly property var visibleTasks: TasksState.pending.slice(0, 3)
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.activated()
+    }
 
     ColumnLayout {
         anchors.fill: parent
