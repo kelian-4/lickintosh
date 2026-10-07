@@ -4,18 +4,20 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    property bool calendarOpen: false
-    property real calendarX: 0
-    property real calendarWidth: 0
-    property real progress: root.calendarOpen ? 1 : 0
+    property string expandedKind: ""
+    property bool expandedOpen: false
+    property real originX: 0
+    property real originWidth: 0
+    property real progress: root.expandedOpen ? 1 : 0
 
     Behavior on progress { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
 
-    function openCalendar() {
-        var p = calendar.mapToItem(root, 0, 0)
-        root.calendarX = p.x
-        root.calendarWidth = calendar.width
-        root.calendarOpen = true
+    function openExpanded(kind, source) {
+        var p = source.mapToItem(root, 0, 0)
+        root.originX = p.x
+        root.originWidth = source.width
+        root.expandedKind = kind
+        root.expandedOpen = true
     }
 
     component Divider: Rectangle {
@@ -33,9 +35,9 @@ Item {
 
         MediaModule {}
         Divider {}
-        CalendarModule { id: calendar; onActivated: root.openCalendar() }
+        CalendarModule { id: calendar; onActivated: root.openExpanded("calendar", calendar) }
         Divider {}
-        TasksModule {}
+        TasksModule { id: tasks; onActivated: root.openExpanded("tasks", tasks) }
         Divider {}
         FocusModule {}
         Divider {}
@@ -47,8 +49,8 @@ Item {
         visible: root.progress > 0
         opacity: Math.min(1, root.progress * 2.5)
         clip: true
-        x: root.calendarX * (1 - root.progress)
-        width: root.calendarWidth + (root.width - root.calendarWidth) * root.progress
+        x: root.originX * (1 - root.progress)
+        width: root.originWidth + (root.width - root.originWidth) * root.progress
         height: root.height
 
         Rectangle {
@@ -61,10 +63,19 @@ Item {
         }
 
         CalendarExpanded {
+            visible: root.expandedKind === "calendar"
             x: -overlay.x
             width: root.width
             height: root.height
-            onCloseRequested: root.calendarOpen = false
+            onCloseRequested: root.expandedOpen = false
+        }
+
+        TasksExpanded {
+            visible: root.expandedKind === "tasks"
+            x: -overlay.x
+            width: root.width
+            height: root.height
+            onCloseRequested: root.expandedOpen = false
         }
     }
 }
