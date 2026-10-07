@@ -532,51 +532,11 @@ Scope {
         return Qt.btoa(bytes)
     }
 
-    property var todos: []
+    readonly property var todos: TasksState.tasks
 
-    Process {
-        id: todoLoadProc
-        running: true
-        command: ["bash", "-c", "cat ~/.cache/quickshell/spotlight_todos.json 2>/dev/null || echo '[]'"]
-        stdout: StdioCollector { id: todoLoadOut }
-        onExited: {
-            try { root.todos = JSON.parse(todoLoadOut.text.trim() || "[]") } catch(e) { root.todos = [] }
-        }
-    }
-
-    Process { id: todoSaveProc; command: ["true"] }
-
-    function saveTodos() {
-        var b64 = root.toBase64(JSON.stringify(root.todos))
-        todoSaveProc.command = ["bash", "-c", "mkdir -p ~/.cache/quickshell && echo " + b64 + " | base64 -d > ~/.cache/quickshell/spotlight_todos.json"]
-        todoSaveProc.running = true
-    }
-
-    function addTodo(text) {
-        var list = root.todos.slice()
-        list.unshift({ id: Date.now(), text: text, done: false })
-        root.todos = list
-        root.saveTodos()
-    }
-
-    function toggleTodo(id) {
-        var list = []
-        for (var i = 0; i < root.todos.length; i++) {
-            var t = root.todos[i]
-            list.push(t.id === id ? { id: t.id, text: t.text, done: !t.done } : t)
-        }
-        root.todos = list
-        root.saveTodos()
-    }
-
-    function removeTodo(id) {
-        var list = []
-        for (var i = 0; i < root.todos.length; i++) {
-            if (root.todos[i].id !== id) list.push(root.todos[i])
-        }
-        root.todos = list
-        root.saveTodos()
-    }
+    function addTodo(text)  { TasksState.addTask(text) }
+    function toggleTodo(id) { TasksState.toggleTask(id) }
+    function removeTodo(id) { TasksState.removeTask(id) }
 
     Process { id: shellExecProc; command: ["true"] }
 

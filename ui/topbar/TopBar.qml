@@ -124,14 +124,20 @@ Rectangle {
     readonly property bool notchExpanded:  NotchState.expanded
     readonly property bool notchDashboard: root.notchExpanded && !NotchState.hasUrgentActivity
 
-    readonly property real notchTargetWidth: root.notchDashboard ? 884
+    readonly property real notchTargetWidth: root.notchDashboard ? 912
                                             : root.notchExpanded   ? 440
                                             : root.notchPeek       ? Math.min(260, root.notchZoneRight - root.notchZoneLeft - 24)
                                                                     : 130
-    readonly property real notchTargetHeight: root.notchDashboard ? 215
+    readonly property real notchTargetHeight: root.notchDashboard ? 200
                                              : root.notchExpanded   ? 300
                                              : root.notchPeek       ? 40
                                                                      : 26
+
+    property real expandedWidth: 912
+    property real expandedHeight: 200
+
+    Binding { target: root; property: "expandedWidth";  value: root.notchTargetWidth;  when: root.notchExpanded }
+    Binding { target: root; property: "expandedHeight"; value: root.notchTargetHeight; when: root.notchExpanded }
 
     readonly property real notchTargetRadius: root.notchExpanded ? 26
                                              : root.notchPeek     ? 20
@@ -148,6 +154,7 @@ Rectangle {
         height: root.notchTargetHeight
         radius: root.notchTargetRadius
         color:  "#0A0A0A"
+        clip:   true
 
         Behavior on width  { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
         Behavior on height { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
@@ -163,8 +170,11 @@ Rectangle {
         }
 
         FadeLoader {
-            anchors.fill: parent
-            anchors.margins: 16
+            width: root.expandedWidth - 32
+            height: root.expandedHeight - 32
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 16
             shouldBeActive: root.notchExpanded
             fadeDuration: root._effectsDuration
             fadeCurve: root._effectsCurve
