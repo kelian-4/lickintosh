@@ -8,6 +8,8 @@ Item {
     Layout.preferredWidth: 168
     Layout.fillHeight: true
 
+    signal activated()
+
     readonly property date today: new Date()
     readonly property int daySpan: 1
     readonly property var upcoming: CalendarState.available ? CalendarState.events.slice(0, 2) : []
@@ -105,5 +107,11 @@ Item {
         }
 
         Item { Layout.fillHeight: true }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.activated()
     }
 }

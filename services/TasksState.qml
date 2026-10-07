@@ -10,47 +10,61 @@ Singleton {
 
     reloadableId: "tasksState"
 
-    readonly property string filePath: "$HOME/.config/quickshell/core/tasks.json"
-    property alias tasks: tasksAdapter.list
+    readonly property string cacheDir: Quickshell.env("HOME") + "/.cache/quickshell"
+    readonly property string filePath: root.cacheDir + "/spotlight_todos.json"
+
+    property var tasks: []
 
     readonly property var pending: root.tasks.filter(function(t) { return !t.done })
     readonly property var done:    root.tasks.filter(function(t) { return t.done })
 
-    FileView {
-        id: tasksFileView
-        path: root.filePath
-        watchChanges: true
-        onFileChanged: reload()
-        onAdapterUpdated: writeAdapter()
-        onLoadFailed: function(error) {
-            if (error === FileViewError.FileNotFound) writeAdapter()
+    function parse(raw) {
+        try {
+            var data = JSON.parse(raw && raw.trim() !== "" ? raw : "[]")
+            root.tasks = Array.isArray(data) ? data : []
+        } catch (e) {
+            root.tasks = []
         }
+    }
 
-        JsonAdapter {
-            id: tasksAdapter
-            property list<var> list: []
-        }
+    function save() {
+        tasksFile.setText(JSON.stringify(root.tasks))
     }
 
     function addTask(text) {
         if (!text || text.trim() === "") return
         var list = root.tasks.slice()
-        list.push({ id: "task_" + Date.now(), text: text, done: false, createdAt: Date.now() })
+        list.unshift({ id: Date.now(), text: text, done: false })
         root.tasks = list
+        root.save()
     }
 
     function toggleTask(id) {
-        var list = root.tasks.slice()
-        for (var i = 0; i < list.length; i++) {
-            if (list[i].id === id) {
-                list[i] = Object.assign({}, list[i], { done: !list[i].done })
-                root.tasks = list
-                return
-            }
+        var list = []
+        for (var i = 0; i < root.tasks.length; i++) {
+            var t = root.tasks[i]
+            list.push(t.id === id ? { id: t.id, text: t.text, done: !t.done } : t)
         }
+        root.tasks = list
+        root.save()
     }
 
     function removeTask(id) {
         root.tasks = root.tasks.filter(function(t) { return t.id !== id })
+        root.save()
+    }
+
+    Process {
+        running: true
+        command: ["mkdir", "-p", root.cacheDir]
+    }
+
+    FileView {
+        id: tasksFile
+        path: root.filePath
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.parse(text())
+        onLoadFailed: root.tasks = []
     }
 }
