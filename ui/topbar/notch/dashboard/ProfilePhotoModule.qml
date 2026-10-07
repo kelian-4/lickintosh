@@ -14,7 +14,7 @@ import Quickshell.Io
 */
 Item {
     id: root
-    Layout.preferredWidth: 56
+    Layout.preferredWidth: 100
     Layout.fillHeight: true
 
     readonly property string _home: Quickshell.env("HOME") || ""
@@ -40,8 +40,8 @@ Item {
     Rectangle {
         id: photoClip
         anchors.centerIn: parent
-        width: 48
-        height: 48
+        width: 88
+        height: 88
         radius: width / 2
         color: "#2A2A3A"
         clip: true
@@ -57,7 +57,7 @@ Item {
             visible: root.avatarSource === ""
             text: root._user.charAt(0).toUpperCase()
             color: "#8A8A8A"
-            font.pixelSize: 18
+            font.pixelSize: 32
             font.bold: true
         }
     }
