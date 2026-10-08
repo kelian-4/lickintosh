@@ -24,26 +24,77 @@ ShellRoot {
     }
 
     PanelWindow {
-        id: panel
+        id: fullWin
         WlrLayershell.layer: WlrLayer.Top
-        WlrLayershell.namespace: "lgtest:panel"
+        WlrLayershell.namespace: "lgtest:full"
         exclusiveZone: -1
-        implicitWidth: 330
-        implicitHeight: 330
+        anchors { top: true; left: true; right: true; bottom: true }
         color: "transparent"
+        mask: Region {}
+
+        LiquidGlassBackdrop {
+            id: fullBackdrop
+            wallpaperPath: appRoot.bgPath
+            screenSize: Qt.size(fullWin.screen.width, fullWin.screen.height)
+            windowPosition: Qt.point(0, 0)
+            captureWindows: true
+            monitorName: fullWin.screen.name
+        }
 
         LiquidGlass {
-            anchors.fill: parent
-            screenSize: Qt.size(panel.screen.width, panel.screen.height)
-            screenPosition: Qt.point((panel.screen.width - width) / 2, (panel.screen.height - height) / 2)
-            backdropPath: appRoot.bgPath
-            captureWindows: true
-            monitorName: panel.screen.name
-            powerFactor: 3.0
-            blurRadius: 2.0
-            blurDownscale: 0.5
+            backdrop: fullBackdrop
+            width: 330
+            height: 330
+            x: (fullWin.width - width) / 2
+            y: (fullWin.height - height) / 2
             noise: 0.1
-            fPower: 1.0
+            glowWeight: 0.3
+            glowBias: 0.0
+            glowEdge0: 0.06
+            glowEdge1: 0.0
+        }
+
+        LiquidGlass {
+            backdrop: fullBackdrop
+            width: 110
+            height: 44
+            x: 120
+            y: 520
+            noise: 0.1
+            glowWeight: 0.3
+            glowBias: 0.0
+            glowEdge0: 0.06
+            glowEdge1: 0.0
+        }
+    }
+
+    PanelWindow {
+        id: dockWin
+        WlrLayershell.layer: WlrLayer.Top
+        WlrLayershell.namespace: "lgtest:dock"
+        exclusiveZone: 0
+        anchors { bottom: true; left: true; right: true }
+        implicitHeight: 140
+        color: "transparent"
+        mask: Region {}
+
+        LiquidGlassBackdrop {
+            id: dockBackdrop
+            wallpaperPath: appRoot.bgPath
+            screenSize: Qt.size(dockWin.screen.width, dockWin.screen.height)
+            windowPosition: Qt.point(0, dockWin.screen.height - dockWin.height)
+            captureWindows: true
+            monitorName: dockWin.screen.name
+            captureRegion: Qt.rect(0, dockWin.screen.height - dockWin.height, dockWin.screen.width, dockWin.height)
+        }
+
+        LiquidGlass {
+            backdrop: dockBackdrop
+            width: 520
+            height: 72
+            x: (dockWin.width - width) / 2
+            y: dockWin.height - height - 24
+            noise: 0.06
             glowWeight: 0.3
             glowBias: 0.0
             glowEdge0: 0.06
