@@ -7,6 +7,7 @@ Item {
 
     property string monitorName: ""
     property int refreshInterval: 500
+    property rect region: Qt.rect(0, 0, 100000, 100000)
 
     readonly property var monitorObject: {
         var ms = Hyprland.monitors.values
@@ -63,6 +64,11 @@ Item {
                 && modelData.workspace.active
                 && ipc.hidden !== true
                 && ipc.mapped !== false
+                && ipc.at !== undefined && ipc.size !== undefined
+                && (ipc.at[0] - root.monitorX) < (root.region.x + root.region.width)
+                && (ipc.at[0] - root.monitorX + ipc.size[0]) > root.region.x
+                && (ipc.at[1] - root.monitorY) < (root.region.y + root.region.height)
+                && (ipc.at[1] - root.monitorY + ipc.size[1]) > root.region.y
             readonly property real rank: ipc && ipc.focusHistoryID !== undefined ? ipc.focusHistoryID : 0
 
             captureSource: shown ? modelData.wayland : null
