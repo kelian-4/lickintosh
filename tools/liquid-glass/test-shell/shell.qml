@@ -37,6 +37,8 @@ ShellRoot {
             screenSize: Qt.size(panel.screen.width, panel.screen.height)
             screenPosition: Qt.point((panel.screen.width - width) / 2, (panel.screen.height - height) / 2)
             backdropPath: appRoot.bgPath
+            captureWindows: true
+            monitorName: panel.screen.name
             powerFactor: 3.0
             blurRadius: 2.0
             blurDownscale: 0.5

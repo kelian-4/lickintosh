@@ -24,11 +24,13 @@ Item {
     property real blurDownscale: 0.5
     property real aa: 1
 
+    property bool captureWindows: false
+    property string monitorName: ""
+
     readonly property string shaderDir: Quickshell.shellDir + "/assets/shaders/liquidglass/"
 
     Item {
         id: scene
-        visible: false
         width: root.screenSize.width
         height: root.screenSize.height
 
@@ -39,12 +41,21 @@ Item {
             cache: true
             sourceSize: Qt.size(scene.width, scene.height)
         }
+
+        Loader {
+            anchors.fill: parent
+            active: root.captureWindows
+            sourceComponent: GlassWindows {
+                monitorName: root.monitorName
+            }
+        }
     }
 
     ShaderEffectSource {
         id: fb
         visible: false
         sourceItem: scene
+        hideSource: true
         textureSize: Qt.size(root.screenSize.width * root.aa, root.screenSize.height * root.aa)
     }
 
