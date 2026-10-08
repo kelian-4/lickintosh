@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Io
 import qs.services
+import qs.components.glass
 
 Scope {
     id: dockRoot
@@ -609,6 +610,16 @@ Scope {
 
                 mask: Region { item: dockMouseArea }
 
+                LiquidGlassBackdrop {
+                    id: dockBackdrop
+                    wallpaperPath: ShellConfig.options.wallpaper.path
+                    screenSize: Qt.size(dockWin.screen.width, dockWin.screen.height)
+                    windowPosition: Qt.point(0, dockWin.screen.height - dockWin.height)
+                    captureWindows: true
+                    monitorName: dockWin.screen.name
+                    captureRegion: Qt.rect(0, dockWin.screen.height - dockWin.height, dockWin.screen.width, dockWin.height)
+                }
+
                 MouseArea {
                     id: dockMouseArea
                     height: parent.height
@@ -695,19 +706,15 @@ Scope {
                             z:            500
                         }
 
-                        Rectangle {
+                        LiquidGlass {
                             anchors.fill: parent
-                            radius:       dockRoot.dockRadius
-                            color:        "#22ffffff"
-                            border.color: "#38ffffff"
-                            border.width: 1
-                            Rectangle {
-                                anchors {
-                                    top: parent.top; left: parent.left; right: parent.right
-                                    leftMargin: 28; rightMargin: 28; topMargin: 1
-                                }
-                                height: 1; radius: 1; color: "#55ffffff"
-                            }
+                            backdrop:     dockBackdrop
+                            powerFactor:  6.0
+                            noise:        0.03
+                            glowWeight:   0.3
+                            glowBias:     0.0
+                            glowEdge0:    0.06
+                            glowEdge1:    0.0
                         }
 
                         Row {
