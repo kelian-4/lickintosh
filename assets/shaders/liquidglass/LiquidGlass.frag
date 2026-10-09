@@ -43,6 +43,20 @@ float sdRoundedBox(vec2 p, vec2 b, float r) {
 	return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
 }
 
+vec2 sdRoundedBoxNormal(vec2 p, vec2 b, float r) {
+	vec2 s = vec2(p.x < 0.0 ? -1.0 : 1.0, p.y < 0.0 ? -1.0 : 1.0);
+	vec2 q = abs(p) - b + r;
+	vec2 n;
+	if (q.x > 0.0 && q.y > 0.0) {
+		n = normalize(q);
+	} else if (q.x > q.y) {
+		n = vec2(1.0, 0.0);
+	} else {
+		n = vec2(0.0, 1.0);
+	}
+	return n * s;
+}
+
 const float M_E = 2.718281828459045;
 const float M_TAU = 6.28318530718;
 
@@ -63,19 +77,32 @@ vec4 LiquidGlass() {
 	vec2 p = (v_TexCoord - center) * 2;
 	float r = 1;
 	float d;
+	float coverage = 1.0;
+	vec2 halfSize = u_size * 0.5;
+	float m = min(halfSize.x, halfSize.y);
+	vec2 normalDir = vec2(0.0);
 	if (u_cornerRadius < 0.0) {
 		d = sdSuperellipse(p, u_powerFactor, r);
+		if (d > 0)
+			discard;
 	} else {
-		vec2 halfSize = u_size * 0.5;
-		float m = min(halfSize.x, halfSize.y);
-		d = sdRoundedBox(p * halfSize, halfSize, min(u_cornerRadius, m)) / m;
+		vec2 pPx = p * halfSize;
+		float cr = min(u_cornerRadius, m);
+		d = sdRoundedBox(pPx, halfSize, cr) / m;
+		coverage = clamp(0.5 - d * m, 0.0, 1.0);
+		if (coverage <= 0.0)
+			discard;
+		normalDir = sdRoundedBoxNormal(pPx, halfSize, cr);
 	}
 
-	if (d > 0)
-		discard;
-
 	float dist = -d;
-	vec2 sampleP = p * pow(f(dist), u_fPower);
+	vec2 sampleP;
+	if (u_cornerRadius < 0.0) {
+		sampleP = p * pow(f(dist), u_fPower);
+	} else {
+		float shift = (1.0 - pow(f(dist), u_fPower)) * (1.0 - dist) * m;
+		sampleP = p - normalDir * shift / halfSize;
+	}
 
 	vec2 targetNDC = sampleP * v_QuadNDC2ScreenNDCScale + v_MidPoint.xy;
 	vec2 coord = targetNDC * 0.5 + vec2(0.5);
@@ -87,7 +114,7 @@ vec4 LiquidGlass() {
 
 	vec4 color = texture(u_Slots5, vec2(coord.x, 1.0 - coord.y)) + noise * u_noise;
 	float mul = Glow() * u_glowWeight * smoothstep(u_glowEdge0, u_glowEdge1, dist) + 1 + u_glowBias;
-	return color * vec4(vec3(mul), 1.0);
+	return color * vec4(vec3(mul), 1.0) * coverage;
 }
 
 void main()

@@ -27,7 +27,15 @@ Modification non syntaxique (demandee explicitement par le proprietaire de licki
     Sinon la forme est un rectangle arrondi a rayon constant en pixels : sdRoundedBox (SDF classique
     d'Inigo Quilez, https://iquilezles.org/articles/distfunctions2d/), distance divisee par la moitie du
     plus petit cote pour rester dans les unites normalisees attendues par f(dist). Aucune autre formule
-    (refraction, flou, bruit, lueur) n'est modifiee. Deux uniforms ajoutes : u_size et u_cornerRadius.
+    (flou, bruit, lueur) n'est modifiee. Deux uniforms ajoutes : u_size et u_cornerRadius.
+  - Meme chemin (u_cornerRadius >= 0) : la refraction est locale au bord. L'original calcule
+    sampleP = p * pow(f(dist), u_fPower), un zoom radial autour du centre normalise axe par axe, qui
+    etire le contenu aux extremites d'une forme allongee. Ici l'echantillon est deplace le long de la
+    normale du bord (sdRoundedBoxNormal) de (1 - pow(f(dist), u_fPower)) * (1 - dist) * m, avec m la
+    moitie du plus petit cote. f, u_fPower et dist sont ceux de l'original. Pour un cercle p est radial
+    et |p| = 1 - dist : la formule coincide avec celle d'origine (raisonnement, non verifie numeriquement).
+  - Meme chemin : couverture anti-aliasee du bord (coverage = clamp(0.5 - d * m, 0, 1)) a la place du
+    discard sec. Le chemin superellipse d'origine (u_cornerRadius < 0) reste inchange, discard compris.
 
 Licence d'origine :
 
