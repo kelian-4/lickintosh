@@ -10,6 +10,8 @@ layout(std140, binding = 0) uniform buf {
     float qt_Opacity;
     vec2 v_MidPoint;
     vec2 v_QuadNDC2ScreenNDCScale;
+    vec2 u_size;
+    float u_cornerRadius;
     float u_powerFactor;
     float u_a;
     float u_b;
@@ -36,6 +38,11 @@ float sdSuperellipse(vec2 p, float n, float r) {
     return numerator / denominator;
 }
 
+float sdRoundedBox(vec2 p, vec2 b, float r) {
+	vec2 q = abs(p) - b + r;
+	return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+}
+
 const float M_E = 2.718281828459045;
 const float M_TAU = 6.28318530718;
 
@@ -55,7 +62,14 @@ vec4 LiquidGlass() {
 	vec2 center = vec2(0.5);
 	vec2 p = (v_TexCoord - center) * 2;
 	float r = 1;
-	float d = sdSuperellipse(p, u_powerFactor, r);
+	float d;
+	if (u_cornerRadius < 0.0) {
+		d = sdSuperellipse(p, u_powerFactor, r);
+	} else {
+		vec2 halfSize = u_size * 0.5;
+		float m = min(halfSize.x, halfSize.y);
+		d = sdRoundedBox(p * halfSize, halfSize, min(u_cornerRadius, m)) / m;
+	}
 
 	if (d > 0)
 		discard;

@@ -82,24 +82,25 @@ Environnement : VM QEMU (TCG, 1 CPU) avec Hyprland headless et Quickshell préco
 - Seules les toplevels sont capturées (exigence de la doc Quickshell : protocole `hyprland-toplevel-export-v1`). La barre, le dock et les autres panneaux ne sont pas dans ce que le verre réfracte.
 - `lastIpcObject` n'est pas poussé par Hyprland (doc Quickshell) : `GlassWindows` appelle `refreshToplevels()` sur événement IPC et toutes les 500 ms. Une fenêtre déplacée à la souris peut être en retard.
 - Le wallpaper du verre suit `ShellConfig.options.wallpaper.path`, pas l'aperçu temporaire de `SpotlightWindow`.
-- Forme : le superellipse de l'original est normalisé par le quad, donc une barre large donne des extrémités en lentille. `powerFactor: 6.0` sur le dock atténue le problème (angles plus serrés, mais anisotropes) sans le supprimer. Une forme à rayon constant demanderait de modifier la SDF, donc les formules d'origine : décision à prendre.
+- Forme : le superellipse de l'original est normalisé par le quad, donc une barre large donne des extrémités en lentille. Sur demande du propriétaire, un chemin « rectangle arrondi à rayon constant » a été ajouté (`u_cornerRadius ≥ 0`, voir § 11). Le chemin d'origine reste disponible (`cornerRadius: -1`).
 - Syntaxe `hyprctl dispatch` de ce Hyprland (config Lua) : `hl.dsp.window.*({ ..., window = "address:0x..." })`. Les anciens dispatchers `movewindowpixel` etc. échouent.
 
 ## 7. Compatibilité avec l'API de BoxGlass
 
-| BoxGlass | LiquidGlass | Remarque |
-| --- | --- | --- |
-| `color` (teinte translucide) | aucun équivalent | L'original n'a pas de teinte. Ajouter un mélange dans le shader ajoute une ligne de logique : à décider. |
-| `radius` | aucun équivalent fidèle | Voir § 6, forme. `powerFactor` est le seul levier existant. |
-| `light`, `lightDir`, `rimSize`, `rimStrength`, `highlightEnabled` | `glowWeight`, `glowBias`, `glowEdge0/1` | La lueur d'origine est une sinusoïde unique selon l'angle ; `lightDir` n'a pas d'équivalent. |
-| `transparent` | aucun | Inutile : le verre n'a pas de fond propre. |
+`BoxGlass.qml` garde exactement son API publique. Le verre réfractant est ajouté sous le `GlassRim` existant, qui continue de dessiner la teinte (`color`) et la lueur de bord (`light`, `lightDir`, `rimSize`, `highlightEnabled`).
 
-Migration en masse : non entamée. La question de la teinte et de la forme doit être tranchée avant.
+| BoxGlass | Comportement |
+| --- | --- |
+| `radius` | Rayon constant du verre, plafonné à la moitié du plus petit côté comme dans `GlassRim` (donc `999` donne une pilule). |
+| `color`, `light`, `lightDir`, `rimSize`, `rimStrength`, `highlightEnabled`, `transparent` | Inchangés, toujours rendus par `GlassRim`. |
+| `animationSpeed`, `animationSpeed2`, `negLight`, `highlight`, `shadowOpacity` | Conservés, sans effet nouveau. |
+
+Le verre n'est affiché que si `GlassSettings.enabled`, `transparent` est faux, `GlassSettings.minAlpha < color.a < 0.99` (un fond opaque ou nul n'a rien à réfracter) et le plus petit côté vaut au moins `GlassSettings.minSize` (28 px). Ces seuils sont mes choix, à ajuster.
 
 ## 8. Prochaines étapes proposées
 
-1. Décider teinte et forme (§ 7).
-2. Valider un second écran réel (control center : fenêtre plein écran à `(0,0)`, `exclusiveZone: -1`).
+1. Relire visuellement chaque panneau sur ta machine et ajuster `GlassSettings`.
+2. Traiter les fenêtres non layer-shell (voir § 11).
 3. Mesurer sur un vrai GPU : mémoire par fenêtre, coût du flou avec et sans capture.
 4. Ne capturer que quand un verre est visible (dock masqué, control center fermé).
 5. Gérer `devicePixelRatio` et le multi-écrans.
@@ -120,3 +121,30 @@ Sondes : `tools/liquid-glass/research/client` (fenêtre colorée) et `tools/liqu
 - Quickshell, `QsWindow` : https://quickshell.org/docs/types/Quickshell/QsWindow
 - Hyprland, dispatchers (Lua) : https://wiki.hypr.land/0.56.0/Configuring/Basics/Dispatchers/
 - Projet d'origine : https://github.com/OverShifted/LiquidGlass
+
+## 11. Mise en œuvre à l'échelle du shell
+
+Changements :
+
+- `assets/shaders/liquidglass/LiquidGlass.frag` : chemin « rectangle arrondi à rayon constant » activé par `u_cornerRadius ≥ 0` (SDF classique d'Inigo Quilez). Seule la SDF de forme est remplacée ; refraction, flou, bruit, lueur sont inchangés. Modification non syntaxique, demandée explicitement ; elle est listée dans `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
+- `components/glass/BoxGlass.qml` : verre sous `GlassRim`, backdrop créé automatiquement au premier verre d'une fenêtre (retrouvé ensuite par `objectName`). Les ~22 fichiers qui l'utilisent ne sont pas modifiés.
+- `components/glass/GlassLayers.qml` (singleton) : lit `hyprctl layers -j`, rafraîchi sur événement Hyprland (avec délai de 60 ms) et toutes les 3 s tant qu'un backdrop existe. Une fenêtre est retrouvée par moniteur et taille (±1 px). Un seul rafraîchissement des toplevels pour tout le shell, au lieu d'un par fenêtre.
+- `components/glass/GlassSettings.qml` (singleton) : `enabled`, `captureWindows`, `blurRadius`, `noise`, `glowWeight`, `minAlpha`, `minSize`. Pour comparer vite, mettre `enabled: false` ou `captureWindows: false`.
+- `ui/dock/Dock.qml` : verre à rayon constant (`dockRadius` plafonné à la moitié de la hauteur), avec le `Rectangle` d'origine (teinte `#22ffffff`, bordure, filet du haut) conservé par-dessus. Backdrop explicite avec position calculée à partir des ancres.
+
+Testé (VM Hyprland + Quickshell, vrai `ControlCenter`, `SpotlightWindow` et `Dock`, fenêtre flottante dessous, `hyprctl` dans le `PATH`) :
+
+- Les tuiles, sliders et boutons du control center réfractent la fenêtre et le fond, avec leurs formes d'origine (pilules, rectangles arrondis).
+- La barre de spotlight garde sa forme de pilule et sa teinte, avec le contenu réfracté dessous.
+- Le dock a un fond à rayon constant, avec sa teinte et sa bordure d'origine.
+- Sans `hyprctl` dans le `PATH` (cas de la VM au premier essai), `GlassLayers` n'a pas de position : les panneaux gardent leur ancien rendu sans erreur.
+- `hyprctl layers -j` : structure `{moniteur: {levels: {n: [{x, y, w, h, namespace, ...}]}}}` confirmée ; `quickshell:dock` à `y=634, h=166` (800 − 166), identique au calcul à partir des ancres.
+
+Non testé : notifications (popups, pile, centre), OSD, écran de verrouillage, menus et sous-menus, fenêtres `AiWindow`, `AppleMenu`, `AboutWindow`, `settings.qml`, révélation animée du dock, multi-écrans (le décalage de moniteur appliqué aux coordonnées des layers suppose qu'elles sont globales), GPU réel, performances.
+
+Limites propres à cette étape :
+
+- Les `PopupWindow` (xdg_popup), les `FloatingWindow` et le verrouillage de session n'apparaissent pas dans `hyprctl layers` : leurs `BoxGlass` gardent l'ancien rendu.
+- Pendant une animation d'échelle ou de zoom d'un parent, la taille du verre dans le shader n'applique pas la transformation (position oui, taille non) : léger décalage possible.
+- Les refractions de petits éléments sous `minSize` sont désactivées (choix de design de ma part).
+- Chaque fenêtre qui contient un verre a son backdrop (wallpaper, flou, et capture de fenêtres si `captureWindows`). Sur le control center et spotlight (plein écran) la capture est donc plein écran ; aucune mesure de coût.

@@ -6,7 +6,6 @@ Item {
     id: root
 
     property string monitorName: ""
-    property int refreshInterval: 500
     property rect region: Qt.rect(0, 0, 100000, 100000)
 
     readonly property var monitorObject: {
@@ -20,32 +19,8 @@ Item {
     readonly property real monitorX: monitorObject && monitorObject.lastIpcObject ? (monitorObject.lastIpcObject.x ?? 0) : 0
     readonly property real monitorY: monitorObject && monitorObject.lastIpcObject ? (monitorObject.lastIpcObject.y ?? 0) : 0
 
-    Connections {
-        target: Hyprland
-
-        function onRawEvent(event) {
-            settleTimer.restart()
-        }
-    }
-
-    Timer {
-        id: settleTimer
-        interval: 40
-        onTriggered: {
-            Hyprland.refreshMonitors()
-            Hyprland.refreshToplevels()
-        }
-    }
-
-    Timer {
-        interval: root.refreshInterval
-        running: true
-        repeat: true
-        onTriggered: {
-            Hyprland.refreshMonitors()
-            Hyprland.refreshToplevels()
-        }
-    }
+    Component.onCompleted: GlassLayers.captureUsers++
+    Component.onDestruction: GlassLayers.captureUsers--
 
     Repeater {
         model: Hyprland.toplevels

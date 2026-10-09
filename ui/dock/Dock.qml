@@ -709,12 +709,26 @@ Scope {
                         LiquidGlass {
                             anchors.fill: parent
                             backdrop:     dockBackdrop
-                            powerFactor:  6.0
+                            cornerRadius: Math.min(height / 2, dockRoot.dockRadius)
                             noise:        0.03
-                            glowWeight:   0.3
+                            glowWeight:   0.0
                             glowBias:     0.0
                             glowEdge0:    0.06
                             glowEdge1:    0.0
+                        }
+                        Rectangle {
+                            anchors.fill: parent
+                            radius:       dockRoot.dockRadius
+                            color:        "#22ffffff"
+                            border.color: "#38ffffff"
+                            border.width: 1
+                            Rectangle {
+                                anchors {
+                                    top: parent.top; left: parent.left; right: parent.right
+                                    leftMargin: 28; rightMargin: 28; topMargin: 1
+                                }
+                                height: 1; radius: 1; color: "#55ffffff"
+                            }
                         }
 
                         Row {

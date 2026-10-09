@@ -15,12 +15,16 @@ Item {
     property real blurRadius: 2.0
     property real blurDownscale: 0.5
     property real aa: 1
+    property bool ready: true
 
     readonly property Item blurSource: blurFinal
     readonly property string shaderDir: Quickshell.shellDir + "/assets/shaders/liquidglass/"
 
     width: 0
     height: 0
+
+    Component.onCompleted: GlassLayers.users++
+    Component.onDestruction: GlassLayers.users--
 
     Item {
         id: scene
@@ -29,7 +33,7 @@ Item {
 
         Image {
             anchors.fill: parent
-            source: root.wallpaperPath !== "" ? "file://" + root.wallpaperPath : ""
+            source: root.ready && root.wallpaperPath !== "" ? "file://" + root.wallpaperPath : ""
             fillMode: Image.PreserveAspectCrop
             cache: true
             sourceSize: Qt.size(scene.width, scene.height)
@@ -48,6 +52,7 @@ Item {
     ShaderEffectSource {
         id: fb
         visible: false
+        live: root.ready
         sourceItem: scene
         hideSource: true
         textureSize: Qt.size(root.screenSize.width * root.aa, root.screenSize.height * root.aa)
