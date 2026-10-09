@@ -6,6 +6,7 @@ Item {
 
     property Item backdrop: null
 
+    property real cornerRadius: -1
     property real powerFactor: 3.0
     property real a: 0.7
     property real b: 2.3
@@ -54,7 +55,7 @@ Item {
     ShaderEffect {
         anchors.fill: parent
         blending: true
-        visible: root.backdrop !== null && root.width > 0 && root.height > 0
+        visible: root.backdrop !== null && root.backdrop.ready && root.width > 0 && root.height > 0
 
         property variant u_Slots5: root.backdrop ? root.backdrop.blurSource : null
         property vector2d v_MidPoint: Qt.vector2d(
@@ -65,6 +66,8 @@ Item {
             root.width / root.screenSize.width,
             root.height / root.screenSize.height
         )
+        property vector2d u_size: Qt.vector2d(root.width, root.height)
+        property real u_cornerRadius: root.cornerRadius
         property real u_powerFactor: root.powerFactor
         property real u_a: root.a
         property real u_b: root.b

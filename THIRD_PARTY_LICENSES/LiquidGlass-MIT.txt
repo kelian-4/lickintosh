@@ -21,6 +21,14 @@ Adaptations (syntaxe Qt / Vulkan-style uniquement, aucune formule modifiee) :
     32 slots, macros EPSILON/INT_NOT. rand() du fragment du verre est conserve (bruit).
   - Commentaires retires (regle du projet lickintosh).
 
+Modification non syntaxique (demandee explicitement par le proprietaire de lickintosh) :
+  - assets/shaders/liquidglass/LiquidGlass.frag : la ligne "float d = sdSuperellipse(p, u_powerFactor, r);"
+    est remplacee par un choix. Si u_cornerRadius < 0, l'appel d'origine est conserve a l'identique.
+    Sinon la forme est un rectangle arrondi a rayon constant en pixels : sdRoundedBox (SDF classique
+    d'Inigo Quilez, https://iquilezles.org/articles/distfunctions2d/), distance divisee par la moitie du
+    plus petit cote pour rester dans les unites normalisees attendues par f(dist). Aucune autre formule
+    (refraction, flou, bruit, lueur) n'est modifiee. Deux uniforms ajoutes : u_size et u_cornerRadius.
+
 Licence d'origine :
 
 MIT License
