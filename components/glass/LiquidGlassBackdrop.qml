@@ -18,6 +18,7 @@ Item {
     property bool ready: true
 
     readonly property Item blurSource: blurFinal
+    readonly property bool captureSettled: !captureWindows || (windowsLoader.item !== null && windowsLoader.item.latched)
     readonly property string shaderDir: Quickshell.shellDir + "/assets/shaders/liquidglass/"
 
     width: 0
@@ -40,6 +41,7 @@ Item {
         }
 
         Loader {
+            id: windowsLoader
             anchors.fill: parent
             active: root.captureWindows
             sourceComponent: GlassWindows {

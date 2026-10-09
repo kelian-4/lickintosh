@@ -616,6 +616,7 @@ Scope {
                     screenSize: Qt.size(dockWin.screen.width, dockWin.screen.height)
                     windowPosition: Qt.point(0, dockWin.screen.height - dockWin.height)
                     captureWindows: true
+                    blurRadius: GlassSettings.blurRadius
                     monitorName: dockWin.screen.name
                     captureRegion: Qt.rect(0, dockWin.screen.height - dockWin.height, dockWin.screen.width, dockWin.height)
                 }
@@ -707,28 +708,28 @@ Scope {
                         }
 
                         LiquidGlass {
+                            id:           dockGlass
                             anchors.fill: parent
                             backdrop:     dockBackdrop
                             cornerRadius: Math.min(height / 2, dockRoot.dockRadius)
-                            noise:        0.03
-                            glowWeight:   0.0
+                            noise:        GlassSettings.noise
+                            glowWeight:   GlassSettings.glowWeight
                             glowBias:     0.0
                             glowEdge0:    0.06
                             glowEdge1:    0.0
                         }
                         Rectangle {
                             anchors.fill: parent
+                            radius:       Math.min(height / 2, dockRoot.dockRadius)
+                            color:        Qt.rgba(1, 1, 1, GlassSettings.veil * dockGlass.level)
+                            visible:      dockGlass.level > 0
+                        }
+                        GlassRim {
+                            anchors.fill: parent
                             radius:       dockRoot.dockRadius
-                            color:        "#22ffffff"
-                            border.color: "#38ffffff"
-                            border.width: 1
-                            Rectangle {
-                                anchors {
-                                    top: parent.top; left: parent.left; right: parent.right
-                                    leftMargin: 28; rightMargin: 28; topMargin: 1
-                                }
-                                height: 1; radius: 1; color: "#55ffffff"
-                            }
+                            baseColor:    dockGlass.level > 0 ? "transparent" : "#22ffffff"
+                            glowColor:    "#a0ffffff"
+                            glowEdgeBand: 0.01
                         }
 
                         Row {

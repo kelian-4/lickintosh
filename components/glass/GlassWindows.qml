@@ -19,11 +19,53 @@ Item {
     readonly property real monitorX: monitorObject && monitorObject.lastIpcObject ? (monitorObject.lastIpcObject.x ?? 0) : 0
     readonly property real monitorY: monitorObject && monitorObject.lastIpcObject ? (monitorObject.lastIpcObject.y ?? 0) : 0
 
+    property int pending: 0
+    property bool graceDone: false
+    property bool timedOut: false
+    property bool latched: false
+
+    function recount() {
+        var n = 0
+        for (var i = 0; i < windowsRepeater.count; i++) {
+            var it = windowsRepeater.itemAt(i)
+            if (it && it.pending)
+                n++
+        }
+        root.pending = n
+        root.check()
+    }
+
+    function check() {
+        if (!root.latched && root.graceDone && (root.pending === 0 || root.timedOut))
+            root.latched = true
+    }
+
+    Timer {
+        interval: 150
+        running: true
+        onTriggered: {
+            root.graceDone = true
+            root.check()
+        }
+    }
+
+    Timer {
+        interval: 800
+        running: true
+        onTriggered: {
+            root.timedOut = true
+            root.check()
+        }
+    }
+
     Component.onCompleted: GlassLayers.captureUsers++
     Component.onDestruction: GlassLayers.captureUsers--
 
     Repeater {
+        id: windowsRepeater
         model: Hyprland.toplevels
+        onItemAdded: root.recount()
+        onItemRemoved: root.recount()
 
         ScreencopyView {
             id: view
@@ -45,6 +87,9 @@ Item {
                 && (ipc.at[1] - root.monitorY) < (root.region.y + root.region.height)
                 && (ipc.at[1] - root.monitorY + ipc.size[1]) > root.region.y
             readonly property real rank: ipc && ipc.focusHistoryID !== undefined ? ipc.focusHistoryID : 0
+
+            readonly property bool pending: shown && !hasContent
+            onPendingChanged: root.recount()
 
             captureSource: shown ? modelData.wayland : null
             live: true

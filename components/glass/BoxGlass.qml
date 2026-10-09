@@ -95,7 +95,10 @@ Item {
         }
     }
 
+    readonly property real glassLevel: box.glassWanted && box.backdrop !== null ? liquid.level : 0
+
     LiquidGlass {
+        id: liquid
         anchors.fill: parent
         visible: box.glassWanted && box.backdrop !== null
         backdrop: box.backdrop
@@ -107,10 +110,22 @@ Item {
         glowEdge1: 0.0
     }
 
+    Rectangle {
+        anchors.fill: parent
+        radius: box.glassCorner
+        color: Qt.rgba(1, 1, 1, GlassSettings.veil * box.glassLevel)
+        visible: box.glassLevel > 0
+    }
+
     GlassRim {
         id: boxContainer
         anchors.fill: parent
-        baseColor: box.transparent ? "transparent" : box.color
+        baseColor: box.transparent ? "transparent" : Qt.rgba(
+            box.color.r,
+            box.color.g,
+            box.color.b,
+            box.color.a * (1 - (1 - GlassSettings.tintScale) * box.glassLevel)
+        )
         radius: box.radius
         glowColor: box.highlightEnabled ? box.light : "#00000000"
         lightDir: box.lightDir

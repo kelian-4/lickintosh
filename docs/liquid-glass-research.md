@@ -148,3 +148,19 @@ Limites propres à cette étape :
 - Pendant une animation d'échelle ou de zoom d'un parent, la taille du verre dans le shader n'applique pas la transformation (position oui, taille non) : léger décalage possible.
 - Les refractions de petits éléments sous `minSize` sont désactivées (choix de design de ma part).
 - Chaque fenêtre qui contient un verre a son backdrop (wallpaper, flou, et capture de fenêtres si `captureWindows`). Sur le control center et spotlight (plein écran) la capture est donc plein écran ; aucune mesure de coût.
+
+## 12. Retour de test : clarté du verre, rim, flash
+
+Retours du propriétaire après un premier test sur sa machine : rim du dock mal fait, control center à rapprocher d'une référence macOS (verre clair, couleurs vives), et fond d'écran visible une fraction de seconde à l'ouverture des éléments.
+
+Causes identifiées sur capture :
+
+- Rim du dock : l'ancien `Rectangle` (bordure, filet du haut) gardé par-dessus un verre dont le rayon était calculé à part. Les deux formes ne coïncidaient pas. Le dock utilise maintenant `GlassRim`, comme `BoxGlass`, avec le même plafonnement du rayon.
+- Aspect gris et granuleux : flou 2,0, teinte noire de 12 % (`glassColor` du control center), grain 0,03. Mesuré sur un banc de test : le verre était plus sombre que le fond (102 contre 116) et deux fois plus granuleux (gradient local 2,37 contre 1,22).
+- Contenu étiré aux extrémités des formes allongées : la réfraction d'origine est un zoom radial autour du centre. Voir `THIRD_PARTY_LICENSES` : le chemin « rayon constant » déplace maintenant l'échantillon le long de la normale du bord.
+
+Changements : `GlassSettings` (flou 0,8, grain 0, lueur 0, `tintScale` 0,25, `veil` 0,06, `fadeDuration` 160 ms), voile blanc et teinte atténuée dans `BoxGlass`, anti-aliasing du bord.
+
+Flash : le verre apparaît en fondu seulement quand les fenêtres capturées sous lui sont prêtes (`latched` dans `GlassWindows`, délai de grâce 150 ms, plafond 800 ms). Correctif écrit, **non vérifié** : l'hypothèse sur la cause (les fenêtres ne sont pas encore capturées à l'ouverture, donc seul le fond d'écran est réfracté) n'est pas confirmée par des logs.
+
+Problème observé dans la VM, non résolu : avec une grande fenêtre entièrement sous le dock, le verre du dock réfracte le fond d'écran et pas la fenêtre, alors que le control center et spotlight voient cette fenêtre. Cause inconnue (limite de captures simultanées de la même toplevel, ou fenêtre dépassant le bas de l'écran ; deux hypothèses non testées). Si la cause est la même que pour le flash, celui-ci peut être durable dans certains cas.

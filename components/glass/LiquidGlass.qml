@@ -21,6 +21,11 @@ Item {
 
     property point screenPosition: Qt.point(0, 0)
 
+    readonly property bool active: backdrop !== null && backdrop.ready && backdrop.captureSettled
+    property real level: active ? 1 : 0
+
+    Behavior on level { NumberAnimation { duration: GlassSettings.fadeDuration; easing.type: Easing.InOutSine } }
+
     readonly property string shaderDir: Quickshell.shellDir + "/assets/shaders/liquidglass/"
     readonly property size screenSize: backdrop ? backdrop.screenSize : Qt.size(1, 1)
 
@@ -55,7 +60,8 @@ Item {
     ShaderEffect {
         anchors.fill: parent
         blending: true
-        visible: root.backdrop !== null && root.backdrop.ready && root.width > 0 && root.height > 0
+        visible: root.level > 0 && root.width > 0 && root.height > 0
+        opacity: root.level
 
         property variant u_Slots5: root.backdrop ? root.backdrop.blurSource : null
         property vector2d v_MidPoint: Qt.vector2d(
