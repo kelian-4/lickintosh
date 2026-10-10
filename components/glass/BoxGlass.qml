@@ -103,11 +103,14 @@ Item {
         visible: box.glassWanted && box.backdrop !== null
         backdrop: box.backdrop
         cornerRadius: box.glassCorner
+        b: GlassSettings.refractionB
+        d: GlassSettings.refractionD
+        fPower: GlassSettings.refractionPower
         noise: GlassSettings.noise
         glowWeight: GlassSettings.glowWeight
         glowBias: 0.0
-        glowEdge0: 0.06
-        glowEdge1: 0.0
+        glowEdge0: GlassSettings.glowEdge0
+        glowEdge1: GlassSettings.glowEdge1
     }
 
     Rectangle {

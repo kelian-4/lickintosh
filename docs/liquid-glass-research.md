@@ -179,3 +179,13 @@ Correctifs dans `GlassWindows.qml` :
 Vérifié dans la VM sur le scénario qui échouait (control center, spotlight et dock ouverts, fenêtre déplacée et redimensionnée sous eux) : les trois verres réfractent la fenêtre ; les logs montrent une perte de contenu suivie d'un redémarrage par le chien de garde puis du retour de `hasContent`. Un seul essai concluant, dans une VM lente.
 
 Coûts et limites de ce choix, non mesurés : chaque fenêtre qui contient du verre capture en continu toutes les fenêtres visibles du moniteur (une vidéo lue quelque part fait recalculer tous les backdrops) ; le chien de garde peut laisser un verre sans la fenêtre pendant jusqu'à 10 s après une perte. `GlassSettings.captureWindows: false` désactive la capture.
+
+## 13. Retour de test : épaisseur du verre
+
+Précision du propriétaire : « garder la forme de base » signifie garder les formes des composants (rond, carré, rectangle arrondi), pas rendre le verre discret. Le réglage précédent (réfraction d'origine, flou léger, teinte faible) donnait des composants plats.
+
+Cause : avec les paramètres d'origine (`a 0.7`, `b 2.3`, `c 5.2`, `d 6.9`, `fPower 1.0`), la bande de déformation `f(x) = 1 - b (c e)^(-d x - a)` ne couvre qu'environ 15 % du demi-côté, soit quelques pixels : on ne voit presque que le contour.
+
+Changement : profil de réfraction plus épais et lueur de bord étroite, réglables dans `GlassSettings` : `refractionB 3.2`, `refractionD 2.5`, `refractionPower 1.1`, `glowWeight 0.4`, `glowEdge0 0.15`, `glowEdge1 0.0`. Valeurs choisies à l'œil sur un banc de test comparant quatre profils sur quatre formes (rond, carré arrondi, pilule, tuile) : un profil plus fort (`b 3.5`, `d 2.2`) devient une loupe trop marquée, une lueur de bande large (`0.35`) rend le verre laiteux, une lueur à `0.7` brûle sur fond clair. `GlassRim` (rim, teinte) est inchangé. Les formes restent celles de chaque composant (rayon plafonné à la moitié du côté court).
+
+Vérifié dans la VM (vrai control center, spotlight, dock) : les ronds, pilules et tuiles courbent le fond en bordure avec un reflet clair en haut à gauche et un bord plus sombre en bas à droite. Non vérifié sur ta machine ni avec ton fond d'écran : les valeurs sont un point de départ.
