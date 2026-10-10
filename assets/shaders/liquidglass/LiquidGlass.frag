@@ -12,6 +12,11 @@ layout(std140, binding = 0) uniform buf {
     vec2 v_QuadNDC2ScreenNDCScale;
     vec2 u_size;
     float u_cornerRadius;
+    vec2 u_lightDir;
+    float u_rimWidth;
+    float u_rimStrength;
+    float u_sheenWidth;
+    float u_sheenStrength;
     float u_powerFactor;
     float u_a;
     float u_b;
@@ -114,7 +119,18 @@ vec4 LiquidGlass() {
 
 	vec4 color = texture(u_Slots5, vec2(coord.x, 1.0 - coord.y)) + noise * u_noise;
 	float mul = Glow() * u_glowWeight * smoothstep(u_glowEdge0, u_glowEdge1, dist) + 1 + u_glowBias;
-	return color * vec4(vec3(mul), 1.0) * coverage;
+	vec4 lit = color * vec4(vec3(mul), 1.0);
+	if (u_cornerRadius >= 0.0) {
+		float inner = max(-d * m, 0.0);
+		float lobe = abs(dot(normalDir, normalize(u_lightDir)));
+		float angular = 0.45 + 0.55 * lobe;
+		float rimW = max(u_rimWidth, 1.0);
+		float rim = 1.0 - smoothstep(0.0, rimW, abs(inner - rimW * 0.5));
+		float sheenW = max(min(u_sheenWidth, m * 0.6), 1.0);
+		float sheen = 1.0 - smoothstep(0.0, sheenW, inner);
+		lit.rgb += vec3(rim * u_rimStrength + sheen * sheen * u_sheenStrength) * angular;
+	}
+	return lit * coverage;
 }
 
 void main()

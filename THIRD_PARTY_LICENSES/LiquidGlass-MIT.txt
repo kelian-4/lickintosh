@@ -37,6 +37,13 @@ Modification non syntaxique (demandee explicitement par le proprietaire de licki
   - Meme chemin : couverture anti-aliasee du bord (coverage = clamp(0.5 - d * m, 0, 1)) a la place du
     discard sec. Le chemin superellipse d'origine (u_cornerRadius < 0) reste inchange, discard compris.
 
+  - Meme chemin (u_cornerRadius >= 0) : ajout d'un rim lisse et d'un degrade clair interieur additifs,
+    absents de l'original (uniforms u_lightDir, u_rimWidth, u_rimStrength, u_sheenWidth, u_sheenStrength).
+    Le rim est un filet de u_rimWidth pixels au profil lisse (smoothstep), module par
+    0.45 + 0.55 * |dot(normale, lumiere)| ; le degrade est (1 - smoothstep(0, u_sheenWidth, distance au bord))^2.
+    Les deux s'ajoutent a la couleur (jamais de multiplication ni d'assombrissement). La lueur d'origine
+    Glow() reste disponible (u_glowWeight) mais est reglee a 0 dans lickintosh car sa partie negative assombrit.
+
 Licence d'origine :
 
 MIT License

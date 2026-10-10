@@ -111,6 +111,13 @@ Item {
         glowBias: 0.0
         glowEdge0: GlassSettings.glowEdge0
         glowEdge1: GlassSettings.glowEdge1
+        lightDir: Qt.vector2d(box.lightDir.x, -box.lightDir.y)
+        rimWidth: GlassSettings.rimWidth
+        rimStrength: box.highlightEnabled
+            ? GlassSettings.rimStrength * box.rimStrength * Math.max(0, Math.min(1.6, box.light.a / 0.5))
+            : 0
+        sheenWidth: GlassSettings.sheenWidth
+        sheenStrength: box.highlightEnabled ? GlassSettings.sheenStrength : 0
     }
 
     Rectangle {
@@ -130,7 +137,9 @@ Item {
             box.color.a * (1 - (1 - GlassSettings.tintScale) * box.glassLevel)
         )
         radius: box.radius
-        glowColor: box.highlightEnabled ? box.light : "#00000000"
+        glowColor: box.highlightEnabled
+            ? Qt.rgba(box.light.r, box.light.g, box.light.b, box.light.a * (1 - box.glassLevel))
+            : "#00000000"
         lightDir: box.lightDir
         glowEdgeBand: box.rimSize
     }

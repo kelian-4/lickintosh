@@ -7,6 +7,11 @@ Item {
     property Item backdrop: null
 
     property real cornerRadius: -1
+    property vector2d lightDir: Qt.vector2d(-1, 1)
+    property real rimWidth: 1.6
+    property real rimStrength: 0.0
+    property real sheenWidth: 10
+    property real sheenStrength: 0.0
     property real powerFactor: 3.0
     property real a: 0.7
     property real b: 2.3
@@ -74,6 +79,11 @@ Item {
         )
         property vector2d u_size: Qt.vector2d(root.width, root.height)
         property real u_cornerRadius: root.cornerRadius
+        property vector2d u_lightDir: root.lightDir
+        property real u_rimWidth: root.rimWidth
+        property real u_rimStrength: root.rimStrength
+        property real u_sheenWidth: root.sheenWidth
+        property real u_sheenStrength: root.sheenStrength
         property real u_powerFactor: root.powerFactor
         property real u_a: root.a
         property real u_b: root.b
