@@ -163,4 +163,19 @@ Changements : `GlassSettings` (flou 0,8, grain 0, lueur 0, `tintScale` 0,25, `ve
 
 Flash : le verre apparaît en fondu seulement quand les fenêtres capturées sous lui sont prêtes (`latched` dans `GlassWindows`, délai de grâce 150 ms, plafond 800 ms). Correctif écrit, **non vérifié** : l'hypothèse sur la cause (les fenêtres ne sont pas encore capturées à l'ouverture, donc seul le fond d'écran est réfracté) n'est pas confirmée par des logs.
 
-Problème observé dans la VM, non résolu : avec une grande fenêtre entièrement sous le dock, le verre du dock réfracte le fond d'écran et pas la fenêtre, alors que le control center et spotlight voient cette fenêtre. Cause inconnue (limite de captures simultanées de la même toplevel, ou fenêtre dépassant le bas de l'écran ; deux hypothèses non testées). Si la cause est la même que pour le flash, celui-ci peut être durable dans certains cas.
+Problème observé dans la VM : quand une fenêtre est déplacée puis redimensionnée sous plusieurs verres, le verre d'un des panneaux (le dock une fois, le control center une autre) cessait de la réfracter et montrait le fond d'écran. Les logs montrent `hasContent` repassant à `false` pour un flux de capture qui ne revient pas seul.
+
+Diagnostic (sondes dans `tools/liquid-glass/research/reattach`) :
+
+- Détacher puis rattacher `captureSource` fonctionne : le flux revient en 3 à 6 s dans la VM (très lente), y compris en basculant aussi `visible`. L'hypothèse « le rattachement bloque » est donc réfutée.
+- Un flux maintenu en permanence (opacité 0, source constante) garde `hasContent` à `true`.
+- La victime change d'un essai à l'autre : la perte vient du redimensionnement de la fenêtre pendant plusieurs captures simultanées. La cause exacte (Quickshell ou Hyprland) n'est pas établie.
+
+Correctifs dans `GlassWindows.qml` :
+
+- Les flux de toutes les fenêtres du workspace actif restent attachés ; la région de verre ne sert qu'à décider quoi attendre avant d'afficher le verre. Cela évite les redémarrages à chaque entrée dans une région.
+- Chien de garde : un flux visible resté sans contenu pendant 10 s est redémarré (`captureSource` mis à `null` puis rétabli).
+
+Vérifié dans la VM sur le scénario qui échouait (control center, spotlight et dock ouverts, fenêtre déplacée et redimensionnée sous eux) : les trois verres réfractent la fenêtre ; les logs montrent une perte de contenu suivie d'un redémarrage par le chien de garde puis du retour de `hasContent`. Un seul essai concluant, dans une VM lente.
+
+Coûts et limites de ce choix, non mesurés : chaque fenêtre qui contient du verre capture en continu toutes les fenêtres visibles du moniteur (une vidéo lue quelque part fait recalculer tous les backdrops) ; le chien de garde peut laisser un verre sans la fenêtre pendant jusqu'à 10 s après une perte. `GlassSettings.captureWindows: false` désactive la capture.

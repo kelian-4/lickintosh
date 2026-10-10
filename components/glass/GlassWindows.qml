@@ -82,16 +82,37 @@ Item {
                 && ipc.hidden !== true
                 && ipc.mapped !== false
                 && ipc.at !== undefined && ipc.size !== undefined
+            readonly property bool inRegion: shown
                 && (ipc.at[0] - root.monitorX) < (root.region.x + root.region.width)
                 && (ipc.at[0] - root.monitorX + ipc.size[0]) > root.region.x
                 && (ipc.at[1] - root.monitorY) < (root.region.y + root.region.height)
                 && (ipc.at[1] - root.monitorY + ipc.size[1]) > root.region.y
             readonly property real rank: ipc && ipc.focusHistoryID !== undefined ? ipc.focusHistoryID : 0
 
-            readonly property bool pending: shown && !hasContent
+            readonly property bool pending: inRegion && !hasContent
             onPendingChanged: root.recount()
 
-            captureSource: shown ? modelData.wayland : null
+            property bool restarting: false
+
+            function restart() {
+                restarting = true
+                restartTimer.start()
+            }
+
+            Timer {
+                id: restartTimer
+                interval: 80
+                onTriggered: view.restarting = false
+            }
+
+            Timer {
+                interval: 10000
+                running: view.shown && !view.hasContent
+                repeat: true
+                onTriggered: view.restart()
+            }
+
+            captureSource: shown && !restarting ? modelData.wayland : null
             live: true
             visible: shown
             x: ipc && ipc.at ? ipc.at[0] - root.monitorX : 0
