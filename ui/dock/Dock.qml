@@ -720,6 +720,11 @@ Scope {
                             glowBias:     0.0
                             glowEdge0:    GlassSettings.glowEdge0
                             glowEdge1:    GlassSettings.glowEdge1
+                            lightDir:     Qt.vector2d(1, -1)
+                            rimWidth:     GlassSettings.rimWidth
+                            rimStrength:  GlassSettings.rimStrength
+                            sheenWidth:   GlassSettings.sheenWidth
+                            sheenStrength: GlassSettings.sheenStrength
                         }
                         Rectangle {
                             anchors.fill: parent
@@ -731,7 +736,7 @@ Scope {
                             anchors.fill: parent
                             radius:       dockRoot.dockRadius
                             baseColor:    dockGlass.level > 0 ? "transparent" : "#22ffffff"
-                            glowColor:    "#a0ffffff"
+                            glowColor:    Qt.rgba(1, 1, 1, 0.63 * (1 - dockGlass.level))
                             glowEdgeBand: 0.01
                         }
 

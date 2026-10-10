@@ -189,3 +189,18 @@ Cause : avec les paramètres d'origine (`a 0.7`, `b 2.3`, `c 5.2`, `d 6.9`, `fPo
 Changement : profil de réfraction plus épais et lueur de bord étroite, réglables dans `GlassSettings` : `refractionB 3.2`, `refractionD 2.5`, `refractionPower 1.1`, `glowWeight 0.4`, `glowEdge0 0.15`, `glowEdge1 0.0`. Valeurs choisies à l'œil sur un banc de test comparant quatre profils sur quatre formes (rond, carré arrondi, pilule, tuile) : un profil plus fort (`b 3.5`, `d 2.2`) devient une loupe trop marquée, une lueur de bande large (`0.35`) rend le verre laiteux, une lueur à `0.7` brûle sur fond clair. `GlassRim` (rim, teinte) est inchangé. Les formes restent celles de chaque composant (rayon plafonné à la moitié du côté court).
 
 Vérifié dans la VM (vrai control center, spotlight, dock) : les ronds, pilules et tuiles courbent le fond en bordure avec un reflet clair en haut à gauche et un bord plus sombre en bas à droite. Non vérifié sur ta machine ni avec ton fond d'écran : les valeurs sont un point de départ.
+
+## 14. Retour de test : bords perlés et bande sombre
+
+Constat du propriétaire (recadrages de son écran) : les bords du verre montrent des « limites » ; la référence attendue est un bord lisse, net et volumineux.
+
+Causes identifiées (sur recadrages agrandis et sur le GLSL extrait du `.qsb` de `GlassRim`) :
+
+- Rim perlé : le profil de `GlassRim` est `1 - cos(edge * pi / 2)` avec `edge = smoothstep(rimSize * 100, 0, |dist|)`. Pour `rimSize = 0.01` la bande vaut 1 px et la courbe la rétrécit encore : le filet effectif est plus étroit qu'un pixel et scintille en escalier sur les courbes. Son intensité `|n . lightDir|` tombe à zéro sur certaines orientations, et sa forme est calculée sur `taille + 2` pixels.
+- Bande sombre : la lueur d'origine `Glow()` multiplie la couleur par `1 + glow`, partie négative incluse, donc assombrit le bord bas-droite (réglée à 0,4 à l'étape précédente).
+
+Changement : le rim est maintenant dessiné dans le shader du verre (chemin « rayon constant ») avec le même SDF en pixels et le même anti-aliasing que le bord du verre. Filet de 1,6 px au profil lisse, intensité jamais nulle (`0.45 + 0.55 |n . L|`, reflets en haut à gauche et en bas à droite), plus un dégradé clair additif de 10 px à l'intérieur pour le volume. Aucune partie sombre. `glowWeight` revient à 0. L'ancien `GlassRim` fond quand le nouveau apparaît (il reste le rim de repli quand le verre est inactif). `highlightEnabled: false` coupe le nouveau rim, `light` (alpha) et `rimStrength` de `BoxGlass` en modulent l'intensité, `lightDir` donne l'axe (Y retourné entre écran et shader). Réfraction ramenée à `refractionB 2.8` pour atténuer la discontinuité du bord. Réglages dans `GlassSettings` : `rimStrength 0.6`, `rimWidth 1.6`, `sheenStrength 0.2`, `sheenWidth 10`.
+
+Vérifié : banc Xvfb (comparaison avec l'état précédent et avec des variantes), VM (vrai control center, spotlight, dock) : rim continu, dégradé intérieur doux, plus de croissant sombre. Valeurs choisies à l'œil, à ajuster.
+
+Observation de VM, sans rapport avec le rendu : juste après le déplacement d'une fenêtre, une capture montrait des backdrops encore sur l'ancienne image (spotlight affichant les tuiles de la fenêtre à son ancienne position). Une capture prise ensuite dans la même session était correcte. Cause retenue : retard de rendu logiciel (un CPU émulé, plusieurs backdrops plein écran qui rejouent scène et deux passes de flou). Non mesuré, hypothèse vérifiée seulement par ce second instantané.
