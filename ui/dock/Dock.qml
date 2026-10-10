@@ -712,11 +712,14 @@ Scope {
                             anchors.fill: parent
                             backdrop:     dockBackdrop
                             cornerRadius: Math.min(height / 2, dockRoot.dockRadius)
+                            b:            GlassSettings.refractionB
+                            d:            GlassSettings.refractionD
+                            fPower:       GlassSettings.refractionPower
                             noise:        GlassSettings.noise
                             glowWeight:   GlassSettings.glowWeight
                             glowBias:     0.0
-                            glowEdge0:    0.06
-                            glowEdge1:    0.0
+                            glowEdge0:    GlassSettings.glowEdge0
+                            glowEdge1:    GlassSettings.glowEdge1
                         }
                         Rectangle {
                             anchors.fill: parent
