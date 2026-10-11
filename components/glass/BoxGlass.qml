@@ -72,7 +72,10 @@ Item {
             property var hostWindow: null
 
             readonly property string monitor: hostWindow && hostWindow.screen ? hostWindow.screen.name : ""
-            readonly property var layerPos: GlassLayers.lookup(
+            readonly property bool fullScreen: hostWindow !== null && hostWindow.screen !== null
+                && hostWindow.width >= hostWindow.screen.width - 1
+                && hostWindow.height >= hostWindow.screen.height - 1
+            readonly property var layerPos: fullScreen ? ({ x: 0, y: 0 }) : GlassLayers.lookup(
                 monitor,
                 hostWindow ? hostWindow.width : 0,
                 hostWindow ? hostWindow.height : 0,

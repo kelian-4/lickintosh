@@ -204,3 +204,32 @@ Changement : le rim est maintenant dessiné dans le shader du verre (chemin « r
 Vérifié : banc Xvfb (comparaison avec l'état précédent et avec des variantes), VM (vrai control center, spotlight, dock) : rim continu, dégradé intérieur doux, plus de croissant sombre. Valeurs choisies à l'œil, à ajuster.
 
 Observation de VM, sans rapport avec le rendu : juste après le déplacement d'une fenêtre, une capture montrait des backdrops encore sur l'ancienne image (spotlight affichant les tuiles de la fenêtre à son ancienne position). Une capture prise ensuite dans la même session était correcte. Cause retenue : retard de rendu logiciel (un CPU émulé, plusieurs backdrops plein écran qui rejouent scène et deux passes de flou). Non mesuré, hypothèse vérifiée seulement par ce second instantané.
+
+## 15. Retour de test : réactivité de la capture
+
+Constat du propriétaire : le rim convient, mais ce qui se trouve derrière le verre se met à jour trop lentement.
+
+Sources de retard identifiées dans le code :
+
+- La géométrie des fenêtres était lue toutes les 500 ms. Hyprland n'émet aucun événement pendant un déplacement ou un redimensionnement : seul un sondage de son IPC permet de suivre une fenêtre. Le verre pouvait donc être en retard de jusqu'à une demi-seconde.
+- Le démarrage d'un panneau enchaînait un délai de 60 ms, le lancement de `hyprctl layers`, le démarrage des flux, 150 ms de grâce et 160 ms de fondu.
+- Chaque événement Hyprland, y compris un changement de titre, relançait un processus `hyprctl layers`.
+
+Changements (`GlassLayers`, `GlassWindows`, `BoxGlass`, `GlassSettings`) :
+
+- Sondage adaptatif des toplevels : `captureFastInterval` (40 ms) tant que la signature des fenêtres change ou après un événement de géométrie, `captureIdleInterval` (200 ms) au repos.
+- Événements déclencheurs restreints : `openwindow`, `closewindow`, `movewindow(v2)`, `fullscreen`, `changefloatingmode`, `workspace(v2)`, `pin`, `minimized`. `hyprctl layers` n'est relancé que sur `openlayer`/`closelayer`, immédiatement quand un backdrop apparaît, et toutes les 3 s.
+- Une fenêtre plein écran est placée en `(0,0)` sans attendre `hyprctl layers`.
+- Délai de grâce 60 ms, plafond 500 ms, fondu 120 ms (`fadeDuration`).
+- Chien de garde de redémarrage d'un flux sans contenu : 8 s.
+
+Vérifié dans la VM : les trois panneaux (control center, spotlight, dock) réfractent bien la fenêtre déplacée dessous, sur deux captures prises à plusieurs minutes d'écart.
+
+Non vérifié :
+
+- Aucun gain de latence n'est mesuré. Une mesure en VM (dock seul, ancien contre nouveau sondage, six déplacements chronométrés chacun) donne 7 à 34 s dans les deux cas et plusieurs mises à jour absentes dans l'ancienne version : la VM (un CPU émulé, rendu logiciel) bloque le fil principal de Quickshell et ses chiffres ne disent rien des intervalles de sondage.
+- Le coût du sondage à 40 ms (requête IPC, analyse JSON, réévaluation des liaisons) n'est pas mesuré, ni sur de nombreuses fenêtres, ni sur un vrai GPU.
+- Une tentative avec un chien de garde à 3 s a montré, sur une capture, deux tuiles du control center réfractant le fond d'écran au lieu de la fenêtre ; avec 8 s la même scène est correcte. Hypothèse (non prouvée) : dans la VM un flux redémarré met 3 à 6 s à revenir, donc un chien de garde trop court le relance avant la fin. La durée de redémarrage d'un flux sur du matériel réel n'est pas connue.
+- Trois exécutions de test ont produit des captures vides ou en retard de rendu avant restriction des événements déclencheurs ; le lien avec le sondage rapide n'est pas établi.
+
+Limite de conception non traitée : chaque fenêtre qui contient du verre ouvre ses propres flux pour toutes les fenêtres visibles du workspace, ce qui multiplie le travail de capture et peut rester le goulot indépendamment du sondage. Pistes : restreindre la capture aux rectangles de verre réels, baisser la résolution du backdrop, ne capturer que lorsqu'un verre est visible.

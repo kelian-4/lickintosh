@@ -12,6 +12,9 @@ Singleton {
     property int revision: 0
     property int users: 0
     property int captureUsers: 0
+    property bool fast: false
+    readonly property var geometryEvents: ["openwindow", "closewindow", "movewindow", "movewindowv2", "fullscreen", "changefloatingmode", "workspace", "workspacev2", "pin", "minimized"]
+    property string lastSignature: ""
 
     function lookup(monitor, w, h, rev) {
         if (monitor === "" || w <= 0 || h <= 0)
@@ -54,6 +57,23 @@ Singleton {
         root.revision++
     }
 
+    function signature() {
+        var v = Hyprland.toplevels.values
+        var parts = []
+        for (var i = 0; i < v.length; i++) {
+            var o = v[i].lastIpcObject
+            if (!o)
+                continue
+            parts.push((o.address ?? "") + ":" + (o.at ? o.at.join(",") : "") + ":" + (o.size ? o.size.join(",") : "") + ":" + (o.hidden ? 1 : 0) + ":" + (o.workspace ? o.workspace.id : ""))
+        }
+        return parts.join("|")
+    }
+
+    function markActive() {
+        root.fast = true
+        fastOff.restart()
+    }
+
     function refreshLayers() {
         if (!layersProc.running)
             layersProc.running = true
@@ -76,19 +96,38 @@ Singleton {
         target: Hyprland
 
         function onRawEvent(event) {
-            settle.restart()
+            var n = event.name
+            if (n === "openlayer" || n === "closelayer") {
+                layerSettle.restart()
+            } else if (root.geometryEvents.indexOf(n) !== -1) {
+                root.markActive()
+                windowSettle.restart()
+            }
         }
     }
 
     Timer {
-        id: settle
-        interval: 60
+        id: layerSettle
+        interval: 25
         onTriggered: {
             if (root.users > 0)
                 root.refreshLayers()
+        }
+    }
+
+    Timer {
+        id: windowSettle
+        interval: 25
+        onTriggered: {
             if (root.captureUsers > 0)
                 root.refreshWindows()
         }
+    }
+
+    Timer {
+        id: fastOff
+        interval: 1500
+        onTriggered: root.fast = false
     }
 
     Timer {
@@ -99,14 +138,21 @@ Singleton {
     }
 
     Timer {
-        interval: 500
+        interval: root.fast ? GlassSettings.captureFastInterval : GlassSettings.captureIdleInterval
         running: root.captureUsers > 0
         repeat: true
-        onTriggered: root.refreshWindows()
+        onTriggered: {
+            var sig = root.signature()
+            if (sig !== root.lastSignature) {
+                root.lastSignature = sig
+                root.markActive()
+            }
+            root.refreshWindows()
+        }
     }
 
     onUsersChanged: {
         if (users > 0)
-            settle.restart()
+            refreshLayers()
     }
 }
