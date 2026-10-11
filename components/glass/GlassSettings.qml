@@ -14,9 +14,9 @@ Singleton {
     property real glowWeight: 0.0
     property real glowEdge0: 0.15
     property real glowEdge1: 0.0
-    property real rimStrength: 0.6
-    property real rimWidth: 1.6
-    property real sheenStrength: 0.2
+    property real rimStrength: 0.35
+    property real rimWidth: 1.4
+    property real sheenStrength: 0.16
     property real sheenWidth: 10
     property real tintScale: 0.25
     property real veil: 0.06
