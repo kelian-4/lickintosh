@@ -41,7 +41,7 @@ Item {
     }
 
     Timer {
-        interval: 150
+        interval: 60
         running: true
         onTriggered: {
             root.graceDone = true
@@ -50,7 +50,7 @@ Item {
     }
 
     Timer {
-        interval: 800
+        interval: 500
         running: true
         onTriggered: {
             root.timedOut = true
@@ -106,7 +106,7 @@ Item {
             }
 
             Timer {
-                interval: 10000
+                interval: 8000
                 running: view.shown && !view.hasContent
                 repeat: true
                 onTriggered: view.restart()

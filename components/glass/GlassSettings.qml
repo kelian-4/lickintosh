@@ -20,7 +20,9 @@ Singleton {
     property real sheenWidth: 10
     property real tintScale: 0.25
     property real veil: 0.06
-    property real fadeDuration: 160
+    property real fadeDuration: 120
+    property int captureFastInterval: 40
+    property int captureIdleInterval: 200
     property real minAlpha: 0.02
     property real minSize: 28
 }
