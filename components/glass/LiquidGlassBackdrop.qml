@@ -18,7 +18,21 @@ Item {
     property bool ready: true
 
     readonly property Item blurSource: blurFinal
-    readonly property bool captureSettled: !captureWindows || (windowsLoader.item !== null && windowsLoader.item.latched)
+    property bool warm: false
+    readonly property bool captureSettled: warm && (!captureWindows || (windowsLoader.item !== null && windowsLoader.item.latched))
+
+    onReadyChanged: {
+        warm = false
+        if (ready)
+            warmTimer.restart()
+    }
+
+    Timer {
+        id: warmTimer
+        interval: 50
+        running: root.ready
+        onTriggered: root.warm = true
+    }
     readonly property string shaderDir: Quickshell.shellDir + "/assets/shaders/liquidglass/"
 
     width: 0

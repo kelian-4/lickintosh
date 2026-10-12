@@ -40,7 +40,18 @@ Item {
             root.latched = true
     }
 
+    function restartGate(grace) {
+        root.latched = false
+        root.graceDone = false
+        root.timedOut = false
+        graceTimer.interval = grace
+        graceTimer.restart()
+        timeoutTimer.restart()
+        root.recount()
+    }
+
     Timer {
+        id: graceTimer
         interval: 60
         running: true
         onTriggered: {
@@ -50,11 +61,20 @@ Item {
     }
 
     Timer {
-        interval: 500
+        id: timeoutTimer
+        interval: 2000
         running: true
         onTriggered: {
             root.timedOut = true
             root.check()
+        }
+    }
+
+    Connections {
+        target: GlassLayers
+
+        function onTransitionEpochChanged() {
+            root.restartGate(180)
         }
     }
 
@@ -115,6 +135,7 @@ Item {
             captureSource: shown && !restarting ? modelData.wayland : null
             live: true
             visible: shown
+            opacity: hasContent ? 1 : 0
             x: ipc && ipc.at ? ipc.at[0] - root.monitorX : 0
             y: ipc && ipc.at ? ipc.at[1] - root.monitorY : 0
             width: ipc && ipc.size ? ipc.size[0] : 0

@@ -13,7 +13,9 @@ Singleton {
     property int users: 0
     property int captureUsers: 0
     property bool fast: false
-    readonly property var geometryEvents: ["openwindow", "closewindow", "movewindow", "movewindowv2", "fullscreen", "changefloatingmode", "workspace", "workspacev2", "pin", "minimized"]
+    property int transitionEpoch: 0
+    readonly property var transitionEvents: ["workspace", "workspacev2", "activespecial", "activespecialv2", "focusedmon", "focusedmonv2"]
+    readonly property var geometryEvents: ["openwindow", "closewindow", "movewindow", "movewindowv2", "fullscreen", "changefloatingmode", "workspace", "workspacev2", "activespecial", "activespecialv2", "focusedmon", "focusedmonv2", "pin", "minimized"]
     property string lastSignature: ""
 
     function lookup(monitor, w, h, rev) {
@@ -100,6 +102,8 @@ Singleton {
             if (n === "openlayer" || n === "closelayer") {
                 layerSettle.restart()
             } else if (root.geometryEvents.indexOf(n) !== -1) {
+                if (root.transitionEvents.indexOf(n) !== -1)
+                    root.transitionEpoch++
                 root.markActive()
                 windowSettle.restart()
             }
