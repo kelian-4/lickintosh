@@ -114,13 +114,7 @@ Item {
         glowBias: 0.0
         glowEdge0: GlassSettings.glowEdge0
         glowEdge1: GlassSettings.glowEdge1
-        lightDir: Qt.vector2d(box.lightDir.x, -box.lightDir.y)
-        rimWidth: GlassSettings.rimWidth
-        rimStrength: box.highlightEnabled
-            ? GlassSettings.rimStrength * box.rimStrength * Math.max(0, Math.min(1.6, box.light.a / 0.5))
-            : 0
-        sheenWidth: GlassSettings.sheenWidth
-        sheenStrength: box.highlightEnabled ? GlassSettings.sheenStrength : 0
+        refractionMode: GlassSettings.refractionMode
     }
 
     Rectangle {

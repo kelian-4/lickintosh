@@ -192,6 +192,8 @@ Vérifié dans la VM (vrai control center, spotlight, dock) : les ronds, pilules
 
 ## 14. Retour de test : bords perlés et bande sombre
 
+Note : le rim et le dégradé intérieur décrits ici ont été retirés (voir § 16). Les causes identifiées restent valables.
+
 Constat du propriétaire (recadrages de son écran) : les bords du verre montrent des « limites » ; la référence attendue est un bord lisse, net et volumineux.
 
 Causes identifiées (sur recadrages agrandis et sur le GLSL extrait du `.qsb` de `GlassRim`) :
@@ -233,3 +235,30 @@ Non vérifié :
 - Trois exécutions de test ont produit des captures vides ou en retard de rendu avant restriction des événements déclencheurs ; le lien avec le sondage rapide n'est pas établi.
 
 Limite de conception non traitée : chaque fenêtre qui contient du verre ouvre ses propres flux pour toutes les fenêtres visibles du workspace, ce qui multiplie le travail de capture et peut rester le goulot indépendamment du sondage. Pistes : restreindre la capture aux rectangles de verre réels, baisser la résolution du backdrop, ne capturer que lorsqu'un verre est visible.
+
+## 16. Retour de test : rim artificiel, fenêtres noires, workspaces, formule
+
+Retours du propriétaire :
+
+- Le rim est trop prononcé : sur ses références, le bord vient de l'environnement (le fond qui se courbe), pas d'un trait dessiné.
+- Les panneaux s'ouvrent noirs puis passent au clair.
+- Au changement de workspace, le fond d'écran est capturé un instant.
+- Je me suis éloigné de la formule de réfraction du repo, et elle est parfois appliquée de façon bizarre.
+
+Changements :
+
+- Rim et dégradé intérieur supprimés du shader et des réglages. L'ancien rim de `GlassRim` fond toujours quand le verre apparaît. La lueur d'origine du repo revient (`glowWeight 0.25`, `glowEdge0 0.5`, `glowEdge1 -0.5`).
+- Réfraction : le déplacement le long de la normale est supprimé (la normale s'inverse sur les diagonales d'un carré, ce qui plie le résultat). `u_refractionMode` : 0 = formule d'origine telle quelle, 1 (défaut) = la même formule autour du cœur de la forme. Pour un rond ou un carré arrondi c'est identique à l'original ; la forme allongée n'étire plus ses extrémités. Sur le banc, le mode 0 montre des lignes répétées aux extrémités d'une pilule. Paramètres de réfraction conservés : `refractionB 2.8`, `refractionD 2.5`, `refractionPower 1.1` (les valeurs d'origine donnent des composants plats).
+- Fenêtres noires : hypothèse (non vérifiée) : une `ScreencopyView` dessine du noir tant qu'elle n'a pas reçu sa première image. Chaque vue est maintenant invisible tant que `hasContent` est faux, un délai de 50 ms laisse les textures du backdrop se rendre avant le fondu, et le plafond d'attente passe de 500 ms à 2 s (le verre n'apparaît plus avant l'arrivée des fenêtres).
+- Workspaces : mon hypothèse est que, au changement, les fenêtres du nouveau workspace démarrent leur capture à zéro et le backdrop ne montre que le fond d'écran. Le verre se remet donc en repli (teinte d'origine) sur `workspace`, `workspacev2`, `activespecial(v2)` et `focusedmon(v2)`, puis revient en fondu quand les flux sont prêts.
+
+Vérifié :
+
+- Banc de test : mode 1 sans rim (bords uniquement par réfraction), comparaison avec le mode 0 et avec les paramètres d'origine.
+- VM : après un aller-retour de workspace (fenêtre sur le workspace 1, passage au 2, retour au 1), la capture finale est identique au pixel près à celle d'avant le départ (0 pixel différent sur 1 024 000), donc le verre retrouve la fenêtre et ne reste pas bloqué sur le fond d'écran.
+
+Non vérifié :
+
+- Les fenêtres noires et le flash du fond au changement de workspace n'ont pas pu être observés dans la VM (instants de quelques dizaines de millisecondes, VM lente) : les correctifs reposent sur les hypothèses ci-dessus.
+- Sur le workspace 2, après 60 s, la barre spotlight était encore en repli (luminosité 64 contre 134 avant). Je n'ai pas établi si c'est le fondu de transition ou le retard de rendu de la VM.
+- Sur un fond uniforme sombre (terminal), un verre sans rim n'a plus que la lueur d'origine pour définir son bord : il peut paraître plat. `glowWeight` augmente le contraste du bord.

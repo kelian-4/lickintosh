@@ -720,11 +720,7 @@ Scope {
                             glowBias:     0.0
                             glowEdge0:    GlassSettings.glowEdge0
                             glowEdge1:    GlassSettings.glowEdge1
-                            lightDir:     Qt.vector2d(1, -1)
-                            rimWidth:     GlassSettings.rimWidth
-                            rimStrength:  GlassSettings.rimStrength
-                            sheenWidth:   GlassSettings.sheenWidth
-                            sheenStrength: GlassSettings.sheenStrength
+                            refractionMode: GlassSettings.refractionMode
                         }
                         Rectangle {
                             anchors.fill: parent
