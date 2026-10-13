@@ -260,5 +260,5 @@ Vérifié :
 Non vérifié :
 
 - Les fenêtres noires et le flash du fond au changement de workspace n'ont pas pu être observés dans la VM (instants de quelques dizaines de millisecondes, VM lente) : les correctifs reposent sur les hypothèses ci-dessus.
-- Sur le workspace 2, après 60 s, la barre spotlight était encore en repli (luminosité 64 contre 134 avant). Je n'ai pas établi si c'est le fondu de transition ou le retard de rendu de la VM.
+- Sur le workspace 2, une première capture 60 s après le changement montrait la barre spotlight encore en repli (luminosité 64 contre 134 avant). Un second essai avec des journaux montre la porte de gating réinitialisée quatre fois (quatre événements Hyprland pour un changement) puis verrouillée environ 40 s plus tard dans la VM, alors que sa grâce est de 180 ms : le fil principal de Quickshell est saturé dans cette VM. La capture suivante montre le verre revenu (luminosité 134,4). Pas de défaut de logique constaté ; le délai réel sur matériel réel n'est pas mesuré.
 - Sur un fond uniforme sombre (terminal), un verre sans rim n'a plus que la lueur d'origine pour définir son bord : il peut paraître plat. `glowWeight` augmente le contraste du bord.
