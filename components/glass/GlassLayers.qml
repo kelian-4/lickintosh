@@ -14,8 +14,8 @@ Singleton {
     property int captureUsers: 0
     property bool fast: false
     property int transitionEpoch: 0
-    readonly property var transitionEvents: ["workspace", "workspacev2", "activespecial", "activespecialv2", "focusedmon", "focusedmonv2"]
-    readonly property var geometryEvents: ["openwindow", "closewindow", "movewindow", "movewindowv2", "fullscreen", "changefloatingmode", "workspace", "workspacev2", "activespecial", "activespecialv2", "focusedmon", "focusedmonv2", "pin", "minimized"]
+    readonly property var transitionEvents: ["workspace", "workspacev2", "activespecial", "activespecialv2"]
+    readonly property var geometryEvents: ["openwindow", "closewindow", "movewindow", "movewindowv2", "fullscreen", "changefloatingmode", "workspace", "workspacev2", "activespecial", "activespecialv2", "pin", "minimized"]
     property string lastSignature: ""
 
     function lookup(monitor, w, h, rev) {

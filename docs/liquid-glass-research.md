@@ -262,3 +262,17 @@ Non vérifié :
 - Les fenêtres noires et le flash du fond au changement de workspace n'ont pas pu être observés dans la VM (instants de quelques dizaines de millisecondes, VM lente) : les correctifs reposent sur les hypothèses ci-dessus.
 - Sur le workspace 2, une première capture 60 s après le changement montrait la barre spotlight encore en repli (luminosité 64 contre 134 avant). Un second essai avec des journaux montre la porte de gating réinitialisée quatre fois (quatre événements Hyprland pour un changement) puis verrouillée environ 40 s plus tard dans la VM, alors que sa grâce est de 180 ms : le fil principal de Quickshell est saturé dans cette VM. La capture suivante montre le verre revenu (luminosité 134,4). Pas de défaut de logique constaté ; le délai réel sur matériel réel n'est pas mesuré.
 - Sur un fond uniforme sombre (terminal), un verre sans rim n'a plus que la lueur d'origine pour définir son bord : il peut paraître plat. `glowWeight` augmente le contraste du bord.
+
+## 17. Retour de test : verre noir uniforme après le commit précédent
+
+Le propriétaire a signalé, avec capture, que le control center affichait toutes ses tuiles en noir opaque et uniforme (« la capture est cassée »), et précisé que le « noir » signalé plus tôt n'était pas un trou de capture mais le thème sombre du repli qui s'éclaircit à l'arrivée du verre.
+
+Diagnostic de la capture : le noir est opaque et uniforme, alors que le repli de ces tuiles ne teinte qu'à 12 % de noir : le verre était donc actif et échantillonnait du noir. Le seul changement du commit précédent capable de produire cela sur un autre pilote que le mien est la lueur d'origine, `smoothstep(0.5, -0.5, dist)`, dont les bornes sont inversées (indéfini selon la spécification GLSL). Dans les versions testées avant, les bornes étaient dans l'ordre. Mon rendu logiciel calcule la formule prévue, mais un autre pilote peut renvoyer NaN, affiché en noir. Hypothèse non reproduite.
+
+Changements :
+
+- `GlowEdge()` calcule la même valeur sans comportement indéfini : si `edge0 > edge1`, `1 - smoothstep(edge1, edge0, x)`, identique mathématiquement. Vérifié sur un banc : 0 pixel de différence avec le rendu fait avec l'appel inversé.
+- Teinte réduite et voile blanc appliqués immédiatement dès que le verre est voulu, au lieu de suivre le fondu du verre : l'élément est clair dès la première image, seule la réfraction apparaît ensuite en fondu. Cela supprime la phase sombre qui s'éclaircissait, et fait que l'attente (jusqu'à 2 s) ne se voit plus.
+- `focusedmon(v2)` retiré des déclencheurs de transition : fréquent sur une configuration multi-écrans, il pouvait réinitialiser sans cesse la porte de gating et empêcher le verre de se stabiliser. Autre cause possible du verre inactif, non vérifiée.
+
+Vérifié dans la VM : le shell charge sans erreur et le control center, spotlight et le dock rendent comme attendu. Non vérifié : le noir lui-même n'a pas pu être reproduit, la correction repose sur l'hypothèse ci-dessus ; aucun test sur le GPU du propriétaire.

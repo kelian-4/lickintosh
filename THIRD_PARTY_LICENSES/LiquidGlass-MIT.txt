@@ -39,6 +39,10 @@ Modification non syntaxique (demandee explicitement par le proprietaire de licki
     forme allongee, les extremites se comportent comme des lentilles rondes au lieu d'aller chercher leur
     contenu a plusieurs dizaines de pixels (verifie visuellement sur un banc de test, pas par mesure).
     f, u_fPower et dist (SDF divisee par m) sont ceux de l'original.
+  - Bornes inversees de la lueur : l'original appelle smoothstep(u_glowEdge0, u_glowEdge1, dist) avec edge0 > edge1
+    (0.5, -0.5), indefini selon la specification GLSL (un pilote peut renvoyer NaN, donc du noir). GlowEdge() calcule
+    la meme valeur sans comportement indefini : si edge0 > edge1, 1 - smoothstep(edge1, edge0, x), identique
+    mathematiquement car smoothstep(1 - t) = 1 - smoothstep(t).
   - Aucun rim ni degrade interieur ajoutes : les bords ne viennent que de la refraction et de la lueur
     d'origine Glow() (u_glowWeight, u_glowEdge0, u_glowEdge1).
 
