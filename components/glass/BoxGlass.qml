@@ -98,7 +98,7 @@ Item {
         }
     }
 
-    readonly property real glassLevel: box.glassWanted && box.backdrop !== null ? liquid.level : 0
+    readonly property real glassLevel: box.glassWanted && box.backdrop !== null ? 1 : 0
 
     LiquidGlass {
         id: liquid

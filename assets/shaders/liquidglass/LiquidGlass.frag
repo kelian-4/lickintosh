@@ -59,6 +59,12 @@ float Glow() {
 	return sin(atan(v_TexCoord.y * 2 - 1, v_TexCoord.x * 2 - 1) - 0.5);
 }
 
+float GlowEdge(float x) {
+	if (u_glowEdge0 <= u_glowEdge1)
+		return smoothstep(u_glowEdge0, u_glowEdge1, x);
+	return 1.0 - smoothstep(u_glowEdge1, u_glowEdge0, x);
+}
+
 vec4 LiquidGlass() {
 	vec2 center = vec2(0.5);
 	vec2 p = (v_TexCoord - center) * 2;
@@ -100,7 +106,7 @@ vec4 LiquidGlass() {
 	vec4 noise = vec4(vec3(rand(gl_FragCoord.xy * 1e-3) - 0.5), 0.0);
 
 	vec4 color = texture(u_Slots5, vec2(coord.x, 1.0 - coord.y)) + noise * u_noise;
-	float mul = Glow() * u_glowWeight * smoothstep(u_glowEdge0, u_glowEdge1, dist) + 1 + u_glowBias;
+	float mul = Glow() * u_glowWeight * GlowEdge(dist) + 1 + u_glowBias;
 	return color * vec4(vec3(mul), 1.0) * coverage;
 }
 
