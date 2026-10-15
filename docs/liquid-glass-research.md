@@ -276,3 +276,21 @@ Changements :
 - `focusedmon(v2)` retiré des déclencheurs de transition : fréquent sur une configuration multi-écrans, il pouvait réinitialiser sans cesse la porte de gating et empêcher le verre de se stabiliser. Autre cause possible du verre inactif, non vérifiée.
 
 Vérifié dans la VM : le shell charge sans erreur et le control center, spotlight et le dock rendent comme attendu. Non vérifié : le noir lui-même n'a pas pu être reproduit, la correction repose sur l'hypothèse ci-dessus ; aucun test sur le GPU du propriétaire.
+
+## 18. Analyse d'une vidéo d'écran du propriétaire (ffmpeg)
+
+Vidéo `recording.mkv` : 1366x768, 21,6 s, 1116 images (cadence moyenne 51,7 i/s, intervalle médian 17 ms, quelques trous de ~100 ms). Méthode : décodage sans duplication d'images (`-fps_mode passthrough`), détection des instants d'activité par différence entre images, puis luminosité moyenne de la zone du panneau image par image.
+
+Constats :
+
+- Popup batterie (ouverture à t0 = 6,05 s) : luminosité de la zone 130 avant ouverture, minimum 81,6 à +0,20 s, puis 121,8 à +0,30 s. Le popup est d'abord un gris-violet sombre et translucide, sans floutage (fond d'écran net à travers), pendant ~170 ms, puis le verre arrive d'un coup (saut de ~38 niveaux en ~60 ms).
+- Spotlight (t0 = 14,15 s) : 141,8 → minimum 82,9 à +0,27 s → 131,8 à +0,37 s. Même schéma, ~200 ms de phase sombre.
+- Control center : pas de creux, mais un saut de +6 à +0,27 s à l'activation du verre.
+- Popup Wi-Fi : luminosité croissante sans creux. Dock : deux pics (+9 puis retour), les icônes montent sans fond pendant ~100 ms avant l'arrivée du fond en verre.
+- Les deux bascules de workspace de la vidéo (0,8 s et 20,8 s) se font sans panneau ouvert : elles ne permettent pas d'observer le flash du fond d'écran dans le verre.
+
+Cause dans le code (version qui précède ce correctif) : dans `BoxGlass`, la teinte atténuée dépendait de `backdrop !== null` ; or le backdrop n'est créé que lorsque la fenêtre est connue (relance toutes les 100 ms). Tant qu'il n'existe pas, l'élément garde sa teinte sombre complète, ce qui correspond à la durée mesurée. Le dock liait sa teinte, son voile et son ancien rim au niveau de fondu du verre, d'où le saut.
+
+Changements : la teinte atténuée et le voile blanc ne dépendent plus que de `GlassSettings.enabled` et des propriétés de l'élément (couleur, transparence, taille) ; seule la réfraction apparaît en fondu. La taille nulle à la création n'écarte plus l'élément. Le backdrop est recherché dès qu'une taille, une visibilité ou une fenêtre change, avec une relance toutes les 16 ms. Le dock garde un voile constant et un rim d'origine désactivé quand le verre est actif.
+
+Vérifié : rendu en régime stable identique au pixel près avant et après (0 pixel différent sur 1 024 000) dans la VM, chargement sans erreur. Non vérifié : la disparition de la phase sombre n'a pas pu être reproduite dans la VM (phénomène de quelques centaines de millisecondes) ; elle devra être confirmée en refaisant la même mesure sur une nouvelle vidéo. Je ne sais pas quelle révision tournait lors de l'enregistrement.

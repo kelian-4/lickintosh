@@ -33,7 +33,7 @@ Item {
         && !transparent
         && color.a > GlassSettings.minAlpha
         && color.a < 0.99
-        && Math.min(width, height) >= GlassSettings.minSize
+        && (width <= 0 || height <= 0 || Math.min(width, height) >= GlassSettings.minSize)
 
     Behavior on color { PropertyAnimation { duration: animationSpeed; easing.type: Easing.InSine } }
 
@@ -56,8 +56,12 @@ Item {
     onGlassWantedChanged: ensureBackdrop()
     Component.onCompleted: ensureBackdrop()
 
+    onWidthChanged: ensureBackdrop()
+    onHeightChanged: ensureBackdrop()
+    onVisibleChanged: ensureBackdrop()
+
     Timer {
-        interval: 100
+        interval: 16
         repeat: true
         running: box.glassWanted && box.backdrop === null
         onTriggered: box.ensureBackdrop()
@@ -98,7 +102,7 @@ Item {
         }
     }
 
-    readonly property real glassLevel: box.glassWanted && box.backdrop !== null ? 1 : 0
+    readonly property real glassLevel: box.glassWanted ? 1 : 0
 
     LiquidGlass {
         id: liquid

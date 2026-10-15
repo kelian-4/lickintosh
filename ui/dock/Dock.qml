@@ -725,14 +725,14 @@ Scope {
                         Rectangle {
                             anchors.fill: parent
                             radius:       Math.min(height / 2, dockRoot.dockRadius)
-                            color:        Qt.rgba(1, 1, 1, GlassSettings.veil * dockGlass.level)
-                            visible:      dockGlass.level > 0
+                            color:        Qt.rgba(1, 1, 1, GlassSettings.veil)
+                            visible:      GlassSettings.enabled
                         }
                         GlassRim {
                             anchors.fill: parent
                             radius:       dockRoot.dockRadius
-                            baseColor:    dockGlass.level > 0 ? "transparent" : "#22ffffff"
-                            glowColor:    Qt.rgba(1, 1, 1, 0.63 * (1 - dockGlass.level))
+                            baseColor:    GlassSettings.enabled ? "transparent" : "#22ffffff"
+                            glowColor:    GlassSettings.enabled ? "transparent" : Qt.rgba(1, 1, 1, 0.63)
                             glowEdgeBand: 0.01
                         }
 
