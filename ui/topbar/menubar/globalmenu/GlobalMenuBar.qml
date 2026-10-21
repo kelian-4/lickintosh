@@ -2,12 +2,21 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
 import qs.ui.topbar.menubar.globalmenu
+import qs.services
 
 RowLayout {
     id: root
     spacing: 16
     visible: GlobalMenuService.hasWindow
     property int openIndex: -1
+
+    Connections {
+        target: WorkspaceWatcher
+
+        function onChanged() {
+            root.openIndex = -1
+        }
+    }
     property int overflowStart: 999
     property int reservedLeft: 140
     property int reservedRight: 260

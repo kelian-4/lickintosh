@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import qs.ui.topbar.statusarea
+import qs.services
 
 MouseArea {
     id: root
@@ -14,6 +15,14 @@ MouseArea {
     property bool showLabel: false
     property bool hovered: false
     property bool contextMenuOpen: false
+
+    Connections {
+        target: WorkspaceWatcher
+
+        function onChanged() {
+            root.contextMenuOpen = false
+        }
+    }
     property int contextMenuX: 0
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton

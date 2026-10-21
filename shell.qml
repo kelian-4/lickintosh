@@ -39,6 +39,23 @@ ShellRoot {
     property bool volumeOpened:      false
     property int  volumeX:           0
 
+    Connections {
+        target: WorkspaceWatcher
+
+        function onChanged() {
+            appRoot.ccOpened          = false
+            appRoot.appleMenuOpened   = false
+            appRoot.spotlightOpened   = false
+            appRoot.aiOpened          = false
+            appRoot.notifCenterOpened = false
+            appRoot.wifiOpened        = false
+            appRoot.bluetoothOpened   = false
+            appRoot.batteryOpened     = false
+            appRoot.volumeOpened      = false
+            NotchState.close()
+        }
+    }
+
     readonly property bool anySubmenuOpened: ccOpened || appleMenuOpened || aboutOpened ||
         spotlightOpened || aiOpened || notifCenterOpened || wifiOpened || bluetoothOpened ||
         batteryOpened || volumeOpened || NotchState.expanded

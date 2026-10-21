@@ -3,11 +3,20 @@ import QtQuick.Layouts
 import Quickshell
 import qs.components.glass
 import qs.components
+import qs.services
 
 Item {
     id: root
 
     property bool  visible_: false
+
+    Connections {
+        target: WorkspaceWatcher
+
+        function onChanged() {
+            root.close()
+        }
+    }
     property real  menuX: 0
     property real  menuY: 0
     property var   notification: null
