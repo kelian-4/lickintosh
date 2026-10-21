@@ -207,12 +207,21 @@ Scope {
         }
     }
 
+    property bool _spotlightLoaded: false
+
     onOpenedChanged: {
         if (root.opened) {
+            const wasLoaded = spotlightLoader.item !== null
+            root._spotlightLoaded = true
+            if (wasLoaded) spotlightLoader.item.reopen()
             recentXbelProc.running = true
             root.refreshClipHistory()
             root.refreshUserActions()
             root.refreshWallpaperList()
+        } else if (spotlightLoader.item) {
+            spotlightLoader.item.closeGracefully()
+        } else {
+            root._spotlightLoaded = false
         }
     }
 
@@ -700,7 +709,7 @@ Scope {
 
     Loader {
         id: spotlightLoader
-        active: root.opened
+        active: root._spotlightLoaded
         sourceComponent: Component {
             PanelWindow {
                 id: win
@@ -722,6 +731,7 @@ Scope {
                 anchors { top: true; left: true; right: true; bottom: true }
 
                 property bool   actionsShown:   false
+                property bool   closing:        false
                 property string selectedAction: ""
                 property string hoveredAction:  ""
                 property int    currentIdx:     0
@@ -1046,6 +1056,7 @@ Scope {
                 }
 
                 function doClose() {
+                    win.closing      = true
                     searchField.text = ""
                     actionsShown     = false
                     hoveredAction    = ""
@@ -1054,9 +1065,21 @@ Scope {
                     fileAnswers      = []
                     clipAnswers      = []
                     root.closeRequested()
+                    root._spotlightLoaded = false
                 }
 
-                function closeGracefully() { hideAnim.start() }
+                function closeGracefully() {
+                    if (win.closing) return
+                    win.closing = true
+                    showAnim.stop()
+                    hideAnim.start()
+                }
+
+                function reopen() {
+                    win.closing = false
+                    hideAnim.stop()
+                    showAnim.start()
+                }
 
                 function refreshClipboard(query) {
                     var q = query.toLowerCase()
@@ -1117,13 +1140,13 @@ Scope {
                 SequentialAnimation {
                     id: hideAnim
                     ParallelAnimation {
-                        PropertyAnimation { target: bgPanel; property: "opacity";  from: 1; to: 0;   duration: 200 }
-                        PropertyAnimation { target: bgPanel; property: "bgScaleX"; from: 1; to: 1.1; duration: 130 }
+                        PropertyAnimation { target: bgPanel; property: "opacity";  to: 0;   duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                        PropertyAnimation { target: bgPanel; property: "bgScaleX"; to: 1.1; duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                     }
                     ScriptAction { script: win.doClose() }
                 }
 
-                MouseArea { anchors.fill: parent; onClicked: hideAnim.start() }
+                MouseArea { anchors.fill: parent; onClicked: win.closeGracefully() }
 
                 BoxGlass {
                     id: bgPanel
@@ -1289,7 +1312,7 @@ Scope {
                                     Keys.onPressed: function(event) {
                                         if (event.key === Qt.Key_Escape) {
                                             if (win.showingShellOutput) { win.showingShellOutput = false; event.accepted = true; return }
-                                            hideAnim.start(); event.accepted = true; return
+                                            win.closeGracefully(); event.accepted = true; return
                                         }
                                         if (event.key === Qt.Key_Tab) {
                                             var t = searchField.text
@@ -1352,7 +1375,7 @@ Scope {
                                     mode:          win.selectedAction === "applications" ? "apps" : "files"
                                     fontFamily:       sfRounded.name
                                     fontFamilyMedium: sfRoundedMedium.name
-                                    onItemClicked: function(data) { root.recordAppUsage(data); hideAnim.start() }
+                                    onItemClicked: function(data) { root.recordAppUsage(data); win.closeGracefully() }
                                 }
 
                                 SpotlightResults {
@@ -1369,18 +1392,18 @@ Scope {
                                     onHoveredIdx:     function(idx) { win.currentIdx = idx }
                                     onItemClicked:    function(data) {
                                         if (data.isWallpaper) { root.setWallpaper(data.path, true) } else { root.recordAppUsage(data) }
-                                        if (data.instantClose) { win.doClose() } else { hideAnim.start() }
+                                        if (data.instantClose) { win.doClose() } else { win.closeGracefully() }
                                     }
                                     onReindexRequested: root.startReindex()
                                     onShellCmdRequested: function(cmd) {
                                         if (/^\s*sudo\b/.test(cmd)) {
                                             root.runShellCommand(cmd)
-                                            hideAnim.start()
+                                            win.closeGracefully()
                                         } else {
                                             win.runInlineShell(cmd)
                                         }
                                     }
-                                    onTodoAddRequested: function(text) { root.addTodo(text); hideAnim.start() }
+                                    onTodoAddRequested: function(text) { root.addTodo(text); win.closeGracefully() }
                                     onTodoItemActivated: function(id, done) {
                                         if (done) root.removeTodo(id); else root.toggleTodo(id)
                                     }
@@ -1488,10 +1511,10 @@ Scope {
 
                 Item {
                     anchors.fill: parent
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:0;action:"applications";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/applications.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:1;action:"files";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/files.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:2;action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:3;iconSize:36;action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:0;action:"applications";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/applications.svg");actionsShown:win.actionsShown;isOpen:root.opened&&!win.closing;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:1;action:"files";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/files.svg");actionsShown:win.actionsShown;isOpen:root.opened&&!win.closing;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:2;action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");actionsShown:win.actionsShown;isOpen:root.opened&&!win.closing;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:3;iconSize:36;action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");actionsShown:win.actionsShown;isOpen:root.opened&&!win.closing;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
                 }
             }
         }
@@ -1511,7 +1534,8 @@ Scope {
         signal hovered(string action)
         signal selected(string action)
         width: 58; height: 58
-        x: btn.screenW / 2 + 170 + 10 + (68 * btn.position)
+        x: (btn.actionsShown && btn.isOpen) ? (btn.screenW / 2 + 170 + 10 + (68 * btn.position)) : btn.screenW / 2
+        Behavior on x { NumberAnimation { duration: ShellMotion.effects(1.25) } }
         BoxGlass {
             anchors.fill:parent;radius:30;color:btn.glassColor;rimStrength:0.2
             light:"#20ffffff";lightDir:Qt.vector2d(1,1);layer.enabled:true
