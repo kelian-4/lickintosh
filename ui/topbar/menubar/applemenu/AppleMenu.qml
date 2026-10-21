@@ -250,9 +250,9 @@ Item {
     transformOrigin: Item.TopLeft
 
     Behavior on opacity {
-        NumberAnimation { duration: ShellMotion.effects(0.7); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+        NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
     }
     Behavior on scale {
-        NumberAnimation { duration: ShellMotion.effects(0.7); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+        NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
     }
 }

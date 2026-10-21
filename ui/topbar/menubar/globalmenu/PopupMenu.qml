@@ -101,8 +101,8 @@ Scope {
                     opacity:         (root.opened && panel.entered) ? 1 : 0
                     scale:           (root.opened && panel.entered) ? 1 : 0.95
                     transformOrigin: Item.Top
-                    Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.7); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                    Behavior on scale { NumberAnimation { duration: ShellMotion.effects(0.7); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                    Behavior on scale { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     ColumnLayout {
                         id: itemsColumn
