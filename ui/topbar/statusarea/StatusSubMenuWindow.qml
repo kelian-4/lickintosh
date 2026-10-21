@@ -2,6 +2,8 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import qs.components.glass
+import qs.components
+import qs.services
 
 Scope {
     id: root
@@ -11,9 +13,11 @@ Scope {
     property bool needsKeyboard: false
     signal closeRequested()
 
+    Presence { id: presence; wanted: root.opened }
+
     Loader {
         id: loader
-        active: root.opened
+        active: presence.present
         sourceComponent: null
         onLoaded: {
             if (item) {
@@ -29,9 +33,13 @@ Scope {
     }
 
     Loader {
-        active: root.opened
+        active: presence.present
         sourceComponent: Component {
             PanelWindow {
+                id: panel
+                property bool entered: false
+                Component.onCompleted: panel.entered = true
+
                 anchors {
                     top:   true
                     left:  true
@@ -64,6 +72,11 @@ Scope {
                     color:       Qt.rgba(0.08, 0.08, 0.08, 0.75)
                     rimStrength: 1.7
                     light:       "#20ffffff"
+                    opacity:         (root.opened && panel.entered) ? 1 : 0
+                    scale:           (root.opened && panel.entered) ? 1 : 0.95
+                    transformOrigin: Item.Top
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.7); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                    Behavior on scale { NumberAnimation { duration: ShellMotion.effects(0.7); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     Binding {
                         target:   loader.item
