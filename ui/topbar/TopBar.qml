@@ -40,11 +40,6 @@ Rectangle {
     anchors.left:  parent.left
     anchors.right: parent.right
 
-    readonly property var _spatialCurve: [0.38, 1.21, 0.22, 1, 1, 1]
-    readonly property int  _spatialDuration: 500
-    readonly property var  _effectsCurve: [0.34, 0.8, 0.34, 1, 1, 1]
-    readonly property int  _effectsDuration: 200
-
     FontLoader {
         id: macFont
         source: "../../../assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf"
@@ -156,16 +151,16 @@ Rectangle {
         color:  "#0A0A0A"
         clip:   true
 
-        Behavior on width  { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
-        Behavior on height { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
-        Behavior on radius { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
+        Behavior on width  { NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
+        Behavior on height { NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
+        Behavior on radius { NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
 
         FadeLoader {
             anchors.fill: parent
             anchors.margins: 4
             shouldBeActive: !root.notchExpanded
-            fadeDuration: root._effectsDuration
-            fadeCurve: root._effectsCurve
+            fadeDuration: ShellMotion.effects()
+            fadeCurve: ShellMotion.effectsCurve
             sourceComponent: NotchPill { peek: root.notchPeek }
         }
 
@@ -176,8 +171,8 @@ Rectangle {
             anchors.top: parent.top
             anchors.topMargin: 16
             shouldBeActive: root.notchExpanded
-            fadeDuration: root._effectsDuration
-            fadeCurve: root._effectsCurve
+            fadeDuration: ShellMotion.effects()
+            fadeCurve: ShellMotion.effectsCurve
             sourceComponent: NotchExpandedContent {}
         }
 
