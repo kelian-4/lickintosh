@@ -132,7 +132,7 @@ Item {
                     radius: 2
                     color: "#50ffffff"
                     opacity: _vbar.pressed ? 0.9 : (_vbar.hovered ? 0.7 : 0.0)
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75) } }
                 }
                 background: Item {}
             }
@@ -214,7 +214,7 @@ Item {
                         icon:     "chevron-right.svg"
                         size:     14
                         rotation: _otherHeader._shown ? 90 : 0
-                        Behavior on rotation { NumberAnimation { duration: 200 } }
+                        Behavior on rotation { NumberAnimation { duration: ShellMotion.effects() } }
                     }
 
                     MouseArea {
@@ -294,7 +294,7 @@ Item {
 
         height: _showPassword ? rowHeight + (_showError ? 68 : 48) : rowHeight
         Behavior on height {
-            NumberAnimation { duration: 180; easing.type: Easing.OutBack; easing.overshoot: 0.5 }
+            NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
         }
 
         Rectangle {
@@ -366,7 +366,7 @@ Item {
             height:              _nr._showError ? 64 : 44
             visible:             _nr._showPassword
             opacity:             _nr._showPassword ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 160 } }
+            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.8) } }
 
             CFText {
                 id: _errorText
