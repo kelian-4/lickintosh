@@ -44,18 +44,18 @@ Scope {
     property bool alarmClosing:  false
     property bool stopwatchClosing: false
 
-    Timer { id: _wifiGrowTimer;  interval: root.animationDur*0.65; onTriggered: root.wifiGrowReady = true }
-    Timer { id: _wifiCloseTimer; interval: root.animationDur*1.3;  onTriggered: root.wifiClosing = false }
-    Timer { id: _btGrowTimer;    interval: root.animationDur*0.65; onTriggered: root.btGrowReady = true }
-    Timer { id: _btCloseTimer;   interval: root.animationDur*1.3;  onTriggered: root.btClosing = false }
-    Timer { id: _playerGrowTimer;  interval: root.animationDur*0.65; onTriggered: root.playerGrowReady = true }
-    Timer { id: _playerCloseTimer; interval: root.animationDur*1.3;  onTriggered: root.playerClosing = false }
-    Timer { id: _timerGrowTimer;   interval: root.animationDur*0.65; onTriggered: root.timerGrowReady = true }
-    Timer { id: _timerCloseTimer;  interval: root.animationDur*1.3;  onTriggered: root.timerClosing = false }
-    Timer { id: _alarmGrowTimer;   interval: root.animationDur*0.65; onTriggered: root.alarmGrowReady = true }
-    Timer { id: _alarmCloseTimer;  interval: root.animationDur*1.3;  onTriggered: root.alarmClosing = false }
-    Timer { id: _stopwatchGrowTimer;  interval: root.animationDur*0.65; onTriggered: root.stopwatchGrowReady = true }
-    Timer { id: _stopwatchCloseTimer; interval: root.animationDur*1.3;  onTriggered: root.stopwatchClosing = false }
+    Timer { id: _wifiGrowTimer;  interval: ShellMotion.effects(); onTriggered: root.wifiGrowReady = true }
+    Timer { id: _wifiCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.wifiClosing = false }
+    Timer { id: _btGrowTimer;    interval: ShellMotion.effects(); onTriggered: root.btGrowReady = true }
+    Timer { id: _btCloseTimer;   interval: ShellMotion.spatial();  onTriggered: root.btClosing = false }
+    Timer { id: _playerGrowTimer;  interval: ShellMotion.effects(); onTriggered: root.playerGrowReady = true }
+    Timer { id: _playerCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.playerClosing = false }
+    Timer { id: _timerGrowTimer;   interval: ShellMotion.effects(); onTriggered: root.timerGrowReady = true }
+    Timer { id: _timerCloseTimer;  interval: ShellMotion.spatial();  onTriggered: root.timerClosing = false }
+    Timer { id: _alarmGrowTimer;   interval: ShellMotion.effects(); onTriggered: root.alarmGrowReady = true }
+    Timer { id: _alarmCloseTimer;  interval: ShellMotion.spatial();  onTriggered: root.alarmClosing = false }
+    Timer { id: _stopwatchGrowTimer;  interval: ShellMotion.effects(); onTriggered: root.stopwatchGrowReady = true }
+    Timer { id: _stopwatchCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.stopwatchClosing = false }
 
     onWifiOpenedChanged: {
         if (wifiOpened) {
@@ -134,7 +134,7 @@ Scope {
     readonly property int boxMargin:  10
     readonly property int gridW:      4
     readonly property int gridH:      8
-    readonly property int animationDur: 300
+    readonly property int animationDur: ShellMotion.effects(1.5)
 
     readonly property int gridImplicitWidth:  ((box*gridW)+(boxMargin*gridW)+boxMargin)
     readonly property int gridImplicitHeight: ((box*gridH)+(boxMargin*gridH)+boxMargin)
@@ -529,7 +529,8 @@ Scope {
                     Behavior on showProgress {
                         NumberAnimation {
                             duration: root.animationDur
-                            easing.type: Easing.OutCubic
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: ShellMotion.effectsCurve
                         }
                     }
                     Component.onCompleted: showProgress = 1
@@ -609,13 +610,13 @@ Scope {
                         // -> ici on anime simplement, sans pause imbriquée.
                         Behavior on anchors.leftMargin {
                             enabled: !boxbutton.overwriteXFromRight
-                            NumberAnimation { duration: root.animationDur*1.3; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                         }
                         Behavior on anchors.topMargin {
-                            NumberAnimation { duration: root.animationDur*1.3; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                         }
                         Behavior on opacity {
-                            NumberAnimation { duration: root.animationDur*0.35; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: ShellMotion.effects(0.5); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                         }
                         Behavior on scale {
                             NumberAnimation {
@@ -625,13 +626,13 @@ Scope {
                             }
                         }
                         Behavior on width {
-                            NumberAnimation { duration: root.animationDur*1.3; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                         }
                         Behavior on height {
-                            NumberAnimation { duration: root.animationDur*1.3; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                         }
                         Behavior on radius {
-                            NumberAnimation { duration: root.animationDur*1.3; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                         }
 
                         light: boxbutton.forceTransparentRim ? "transparent" : root.glassRimColor
@@ -721,7 +722,7 @@ Scope {
                                 visible: opacity > 0
                                 opacity: root.wifiGrowReady ? 1 : 0
                                 Behavior on opacity {
-                                    NumberAnimation { duration: root.animationDur*0.8; easing.type: Easing.OutCubic }
+                                    NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                 }
 
                                 BoxGlass {
@@ -755,7 +756,7 @@ Scope {
                                 visible: opacity > 0
                                 opacity: (!root.wifiOpened && !root.wifiClosing) ? 1 : 0
                                 Behavior on opacity {
-                                    NumberAnimation { duration: root.animationDur*0.5; easing.type: Easing.OutCubic }
+                                    NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                 }
                                 CFClippingRect {
                                     id: wifiCircle
@@ -839,9 +840,9 @@ Scope {
                         light: btWidget.forceTransparentRim ? "transparent" : (btWidget.enabled ? "transparent" : root.glassRimColor)
                         rimStrength: btWidget.forceTransparentRim ? 0 : (btWidget.enabled ? 0 : root.glassRimStrength)
                         color: btWidget.forceTransparentRim ? "transparent" : (btWidget.enabled ? "#fff" : root.glassColor)
-                        Behavior on color { ColorAnimation { duration: root.animationDur*0.5 } }
-                        Behavior on light { ColorAnimation { duration: root.animationDur*0.5 } }
-                        Behavior on rimStrength { NumberAnimation { duration: root.animationDur*0.5 } }
+                        Behavior on color { ColorAnimation { duration: ShellMotion.effects(0.75) } }
+                        Behavior on light { ColorAnimation { duration: ShellMotion.effects(0.75) } }
+                        Behavior on rimStrength { NumberAnimation { duration: ShellMotion.effects(0.75) } }
 
                             CFClippingRect {
                                 anchors.fill: parent
@@ -849,7 +850,7 @@ Scope {
                                 visible: opacity > 0
                                 opacity: root.btGrowReady ? 1 : 0
                                 Behavior on opacity {
-                                    NumberAnimation { duration: root.animationDur*0.8; easing.type: Easing.OutCubic }
+                                    NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                 }
 
                                 BoxGlass {
@@ -883,19 +884,19 @@ Scope {
                                 visible: opacity > 0
                                 opacity: (!root.btOpened && !root.btClosing) ? 1 : 0
                                 Behavior on opacity {
-                                    NumberAnimation { duration: root.animationDur*0.5; easing.type: Easing.OutCubic }
+                                    NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                 }
                             CFClippingRect {
                                 anchors.centerIn: parent
                                 width: 38; height: 38; radius: 19
                                 color: btWidget.enabled ? "#fff" : Qt.rgba(1,1,1,0.18)
-                                Behavior on color { ColorAnimation { duration: root.animationDur*0.5 } }
+                                Behavior on color { ColorAnimation { duration: ShellMotion.effects(0.75) } }
                                 CFVI {
                                     anchors.centerIn: parent
                                     width: 30; height: 30
                                     icon: "bluetooth/bluetooth.svg"
                                     color: btWidget.enabled ? "#1C7AFF" : "#fff"
-                                    Behavior on color { ColorAnimation { duration: root.animationDur*0.5 } }
+                                    Behavior on color { ColorAnimation { duration: ShellMotion.effects(0.75) } }
                                 }
                             }
                             }
@@ -974,7 +975,7 @@ Scope {
                             visible: opacity > 0
                             opacity: (!root.playerExpanded && !root.playerClosing) ? 1 : 0
                             Behavior on opacity {
-                                NumberAnimation { duration: root.animationDur*0.5; easing.type: Easing.OutCubic }
+                                NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                             }
 
                             MouseArea {
@@ -1087,7 +1088,7 @@ Scope {
                             visible: opacity > 0
                             opacity: root.playerGrowReady ? 1 : 0
                             Behavior on opacity {
-                                NumberAnimation { duration: root.animationDur*0.8; easing.type: Easing.OutCubic }
+                                NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                             }
 
                             MouseArea {
@@ -1693,7 +1694,9 @@ Scope {
                         enabled: TimerState.running || TimerState.firing
 
                         CFVI {
-                            visible: !root.timerOpened && !root.timerClosing
+                            opacity: (!root.timerOpened && !root.timerClosing) ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                             anchors.centerIn: parent
                             width: 22
                             height: 22
@@ -1701,7 +1704,9 @@ Scope {
                             color: (TimerState.running || TimerState.firing) ? "#1C7AFF" : "#fff"
                         }
                         Rectangle {
-                            visible: !root.timerOpened && !root.timerClosing && (TimerState.running || TimerState.firing)
+                            opacity: (!root.timerOpened && !root.timerClosing && (TimerState.running || TimerState.firing)) ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                             width: 8
                             height: 8
                             radius: 4
@@ -1714,7 +1719,9 @@ Scope {
                         Item {
                             anchors.fill: parent
                             anchors.margins: 14
-                            visible: root.timerGrowReady
+                            opacity: root.timerGrowReady ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                             ColumnLayout {
                                 anchors.fill: parent
@@ -1836,7 +1843,9 @@ Scope {
                         }
 
                         Rectangle {
-                            visible: root.timerGrowReady
+                            opacity: root.timerGrowReady ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                             width: 26
                             height: 26
                             radius: 13
@@ -1876,7 +1885,9 @@ Scope {
                         enabled: AlarmState.alarms.filter(function(a) { return a.enabled }).length > 0
 
                         CFVI {
-                            visible: !root.alarmOpened && !root.alarmClosing
+                            opacity: (!root.alarmOpened && !root.alarmClosing) ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                             anchors.centerIn: parent
                             width: 22
                             height: 22
@@ -1887,7 +1898,9 @@ Scope {
                         Item {
                             anchors.fill: parent
                             anchors.margins: 14
-                            visible: root.alarmGrowReady
+                            opacity: root.alarmGrowReady ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                             ColumnLayout {
                                 anchors.fill: parent
@@ -2019,7 +2032,9 @@ Scope {
                         }
 
                         Rectangle {
-                            visible: root.alarmGrowReady
+                            opacity: root.alarmGrowReady ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                             width: 26
                             height: 26
                             radius: 13
@@ -2059,7 +2074,9 @@ Scope {
                         enabled: StopwatchState.running
 
                         CFVI {
-                            visible: !root.stopwatchOpened && !root.stopwatchClosing
+                            opacity: (!root.stopwatchOpened && !root.stopwatchClosing) ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                             anchors.centerIn: parent
                             width: 22
                             height: 22
@@ -2070,7 +2087,9 @@ Scope {
                         Item {
                             anchors.fill: parent
                             anchors.margins: 14
-                            visible: root.stopwatchGrowReady
+                            opacity: root.stopwatchGrowReady ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                             ColumnLayout {
                                 anchors.fill: parent
@@ -2148,7 +2167,9 @@ Scope {
                         }
 
                         Rectangle {
-                            visible: root.stopwatchGrowReady
+                            opacity: root.stopwatchGrowReady ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                             width: 26
                             height: 26
                             radius: 13
