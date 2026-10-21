@@ -102,7 +102,7 @@ Item {
                     radius: 2
                     color: "#50ffffff"
                     opacity: _btVbar.pressed ? 0.9 : (_btVbar.hovered ? 0.7 : 0.0)
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75) } }
                 }
                 background: Item {}
             }
