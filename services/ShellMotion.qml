@@ -12,17 +12,25 @@ Singleton {
 
     property int spatialDuration: 500
     property int effectsDuration: 200
-    property int tileDuration: 300
-    property real tileOvershoot: 0.5
-    property real moveOvershoot: 1.0
+    property int enterDuration: 500
+    property int exitDuration: 400
+    property int fadeDuration: 300
     property real speed: 1.0
 
     function spatial(factor) {
         return Math.round(root.spatialDuration * root.speed * (factor === undefined ? 1 : factor))
     }
 
-    function tile(factor) {
-        return Math.round(root.tileDuration * root.speed * (factor === undefined ? 1 : factor))
+    function enter(factor) {
+        return Math.round(root.enterDuration * root.speed * (factor === undefined ? 1 : factor))
+    }
+
+    function exit(factor) {
+        return Math.round(root.exitDuration * root.speed * (factor === undefined ? 1 : factor))
+    }
+
+    function fade(factor) {
+        return Math.round(root.fadeDuration * root.speed * (factor === undefined ? 1 : factor))
     }
 
     function effects(factor) {
