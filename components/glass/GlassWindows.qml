@@ -6,7 +6,8 @@ Item {
     id: root
 
     property string monitorName: ""
-    property rect region: Qt.rect(0, 0, 100000, 100000)
+    property rect region: Qt.rect(0, 0, 0, 0)
+    property real attachMargin: GlassSettings.captureMargin
 
     readonly property var monitorObject: {
         var ms = Hyprland.monitors.values
@@ -93,7 +94,7 @@ Item {
             required property var modelData
 
             readonly property var ipc: modelData.lastIpcObject
-            readonly property bool shown: ipc !== undefined && ipc !== null
+            readonly property bool onScreen: ipc !== undefined && ipc !== null
                 && modelData.wayland !== null
                 && modelData.monitor !== null
                 && modelData.monitor.name === root.monitorName
@@ -102,6 +103,12 @@ Item {
                 && ipc.hidden !== true
                 && ipc.mapped !== false
                 && ipc.at !== undefined && ipc.size !== undefined
+            readonly property bool shown: onScreen
+                && root.region.width > 0 && root.region.height > 0
+                && (ipc.at[0] - root.monitorX) < (root.region.x + root.region.width + root.attachMargin)
+                && (ipc.at[0] - root.monitorX + ipc.size[0]) > (root.region.x - root.attachMargin)
+                && (ipc.at[1] - root.monitorY) < (root.region.y + root.region.height + root.attachMargin)
+                && (ipc.at[1] - root.monitorY + ipc.size[1]) > (root.region.y - root.attachMargin)
             readonly property bool inRegion: shown
                 && (ipc.at[0] - root.monitorX) < (root.region.x + root.region.width)
                 && (ipc.at[0] - root.monitorX + ipc.size[0]) > root.region.x

@@ -11,7 +11,6 @@ layout(std140, binding = 0) uniform buf {
     vec2 v_MidPoint;
     vec2 v_QuadNDC2ScreenNDCScale;
     vec2 u_size;
-    float u_cornerRadius;
     float u_refractionMode;
     float u_powerFactor;
     float u_a;
@@ -39,11 +38,6 @@ float sdSuperellipse(vec2 p, float n, float r) {
     return numerator / denominator;
 }
 
-float sdRoundedBox(vec2 p, vec2 b, float r) {
-	vec2 q = abs(p) - b + r;
-	return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
-}
-
 const float M_E = 2.718281828459045;
 const float M_TAU = 6.28318530718;
 
@@ -69,29 +63,19 @@ vec4 LiquidGlass() {
 	vec2 center = vec2(0.5);
 	vec2 p = (v_TexCoord - center) * 2;
 	float r = 1;
-	float d;
-	float coverage = 1.0;
-	vec2 halfSize = u_size * 0.5;
-	float m = min(halfSize.x, halfSize.y);
-	vec2 localP = vec2(0.0);
-	if (u_cornerRadius < 0.0) {
-		d = sdSuperellipse(p, u_powerFactor, r);
-		if (d > 0)
-			discard;
-	} else {
-		vec2 pPx = p * halfSize;
-		float cr = min(u_cornerRadius, m);
-		d = sdRoundedBox(pPx, halfSize, cr) / m;
-		coverage = clamp(0.5 - d * m, 0.0, 1.0);
-		if (coverage <= 0.0)
-			discard;
-		vec2 core = max(halfSize - vec2(m), vec2(0.0));
-		localP = pPx - clamp(pPx, -core, core);
-	}
+	float d = sdSuperellipse(p, u_powerFactor, r);
+
+	if (d > 0)
+		discard;
 
 	float dist = -d;
 	vec2 sampleP;
-	if (u_cornerRadius >= 0.0 && u_refractionMode > 0.5) {
+	if (u_refractionMode > 0.5) {
+		vec2 halfSize = u_size * 0.5;
+		float m = min(halfSize.x, halfSize.y);
+		vec2 pPx = p * halfSize;
+		vec2 core = max(halfSize - vec2(m), vec2(0.0));
+		vec2 localP = pPx - clamp(pPx, -core, core);
 		sampleP = p - localP * (1.0 - pow(f(dist), u_fPower)) / halfSize;
 	} else {
 		sampleP = p * pow(f(dist), u_fPower);
@@ -107,7 +91,7 @@ vec4 LiquidGlass() {
 
 	vec4 color = texture(u_Slots5, vec2(coord.x, 1.0 - coord.y)) + noise * u_noise;
 	float mul = Glow() * u_glowWeight * GlowEdge(dist) + 1 + u_glowBias;
-	return color * vec4(vec3(mul), 1.0) * coverage;
+	return color * vec4(vec3(mul), 1.0);
 }
 
 void main()

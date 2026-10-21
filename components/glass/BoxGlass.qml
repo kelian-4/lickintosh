@@ -28,7 +28,12 @@ Item {
 
     property Item backdrop: null
 
-    readonly property real glassCorner: Math.min(Math.min(width, height) / 2, radius)
+    readonly property real shapeRatio: Math.max(0, Math.min(1, radius / (Math.max(1, Math.min(width, height)) / 2)))
+    readonly property real shapeAspect: Math.max(width, height) / Math.max(1, Math.min(width, height))
+    readonly property real shapePower: Math.max(
+        2 + (GlassSettings.squarePower - 2) * Math.pow(1 - shapeRatio, 1.5),
+        2 + (GlassSettings.barPower - 2) * (1 - 1 / Math.max(1, shapeAspect))
+    )
     readonly property bool glassWanted: GlassSettings.enabled
         && !transparent
         && color.a > GlassSettings.minAlpha
@@ -92,12 +97,6 @@ Item {
             windowPosition: layerPos ? Qt.point(layerPos.x, layerPos.y) : Qt.point(0, 0)
             monitorName: monitor
             captureWindows: GlassSettings.captureWindows && ready
-            captureRegion: Qt.rect(
-                windowPosition.x,
-                windowPosition.y,
-                hostWindow ? hostWindow.width : 0,
-                hostWindow ? hostWindow.height : 0
-            )
             blurRadius: GlassSettings.blurRadius
         }
     }
@@ -109,23 +108,18 @@ Item {
         anchors.fill: parent
         visible: box.glassWanted && box.backdrop !== null
         backdrop: box.backdrop
-        cornerRadius: box.glassCorner
+        powerFactor: box.shapePower
+        refractionMode: GlassSettings.refractionMode
+        a: GlassSettings.refractionA
         b: GlassSettings.refractionB
+        c: GlassSettings.refractionC
         d: GlassSettings.refractionD
         fPower: GlassSettings.refractionPower
         noise: GlassSettings.noise
         glowWeight: GlassSettings.glowWeight
-        glowBias: 0.0
+        glowBias: GlassSettings.veil
         glowEdge0: GlassSettings.glowEdge0
         glowEdge1: GlassSettings.glowEdge1
-        refractionMode: GlassSettings.refractionMode
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        radius: box.glassCorner
-        color: Qt.rgba(1, 1, 1, GlassSettings.veil * box.glassLevel)
-        visible: box.glassLevel > 0
     }
 
     GlassRim {

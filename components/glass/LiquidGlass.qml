@@ -6,9 +6,8 @@ Item {
 
     property Item backdrop: null
 
-    property real cornerRadius: -1
-    property real refractionMode: 1
     property real powerFactor: 3.0
+    property real refractionMode: 0
     property real a: 0.7
     property real b: 2.3
     property real c: 5.2
@@ -41,13 +40,48 @@ Item {
             root.screenPosition = Qt.point(nx, ny)
     }
 
-    onBackdropChanged: updatePosition()
+    property Item registeredBackdrop: null
+
+    function syncRegistration() {
+        if (root.registeredBackdrop === root.backdrop)
+            return
+        if (root.registeredBackdrop)
+            root.registeredBackdrop.unregisterQuad(root)
+        root.registeredBackdrop = root.backdrop
+        if (root.backdrop)
+            root.backdrop.registerQuad(root)
+    }
+
+    function invalidate() {
+        if (root.backdrop)
+            root.backdrop.invalidateRegion()
+    }
+
+    onBackdropChanged: {
+        syncRegistration()
+        updatePosition()
+    }
     onXChanged: updatePosition()
     onYChanged: updatePosition()
-    onWidthChanged: updatePosition()
-    onHeightChanged: updatePosition()
+    onWidthChanged: {
+        updatePosition()
+        invalidate()
+    }
+    onHeightChanged: {
+        updatePosition()
+        invalidate()
+    }
     onParentChanged: updatePosition()
-    Component.onCompleted: updatePosition()
+    onVisibleChanged: invalidate()
+    onScreenPositionChanged: invalidate()
+    Component.onCompleted: {
+        syncRegistration()
+        updatePosition()
+    }
+    Component.onDestruction: {
+        if (root.registeredBackdrop)
+            root.registeredBackdrop.unregisterQuad(root)
+    }
 
     Connections {
         target: root.Window.window
@@ -74,7 +108,6 @@ Item {
             root.height / root.screenSize.height
         )
         property vector2d u_size: Qt.vector2d(root.width, root.height)
-        property real u_cornerRadius: root.cornerRadius
         property real u_refractionMode: root.refractionMode
         property real u_powerFactor: root.powerFactor
         property real u_a: root.a
