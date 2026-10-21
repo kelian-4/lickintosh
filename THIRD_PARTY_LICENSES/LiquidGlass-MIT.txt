@@ -21,30 +21,22 @@ Adaptations (syntaxe Qt / Vulkan-style uniquement, aucune formule modifiee) :
     32 slots, macros EPSILON/INT_NOT. rand() du fragment du verre est conserve (bruit).
   - Commentaires retires (regle du projet lickintosh).
 
-Modification non syntaxique (demandee explicitement par le proprietaire de lickintosh) :
-  - assets/shaders/liquidglass/LiquidGlass.frag : la ligne "float d = sdSuperellipse(p, u_powerFactor, r);"
-    est remplacee par un choix. Si u_cornerRadius < 0, l'appel d'origine est conserve a l'identique.
-    Sinon la forme est un rectangle arrondi a rayon constant en pixels : sdRoundedBox (SDF classique
-    d'Inigo Quilez, https://iquilezles.org/articles/distfunctions2d/), distance divisee par la moitie du
-    plus petit cote pour rester dans les unites normalisees attendues par f(dist). Aucune autre formule
-    (flou, bruit, lueur) n'est modifiee. Deux uniforms ajoutes : u_size et u_cornerRadius.
-  - Meme chemin (u_cornerRadius >= 0) : couverture anti-aliasee du bord (coverage = clamp(0.5 - d * m, 0, 1))
-    a la place du discard sec. Le chemin superellipse d'origine (u_cornerRadius < 0) reste inchange, discard
-    compris.
-  - u_refractionMode, meme chemin. Mode 0 : formule d'origine appliquee telle quelle,
-    sampleP = p * pow(f(dist), u_fPower), zoom radial autour du centre normalise axe par axe. Mode 1 : la
-    meme formule autour du coeur de la forme : core = max(halfSize - m, 0), localP = pPx - clamp(pPx, -core,
-    core), sampleP = p - localP * (1 - pow(f(dist), u_fPower)) / halfSize, avec m la moitie du plus petit
-    cote. Pour un cercle ou un carre arrondi core vaut 0, donc le resultat est celui de l'original ; pour une
-    forme allongee, les extremites se comportent comme des lentilles rondes au lieu d'aller chercher leur
-    contenu a plusieurs dizaines de pixels (verifie visuellement sur un banc de test, pas par mesure).
-    f, u_fPower et dist (SDF divisee par m) sont ceux de l'original.
-  - Bornes inversees de la lueur : l'original appelle smoothstep(u_glowEdge0, u_glowEdge1, dist) avec edge0 > edge1
-    (0.5, -0.5), indefini selon la specification GLSL (un pilote peut renvoyer NaN, donc du noir). GlowEdge() calcule
-    la meme valeur sans comportement indefini : si edge0 > edge1, 1 - smoothstep(edge1, edge0, x), identique
-    mathematiquement car smoothstep(1 - t) = 1 - smoothstep(t).
-  - Aucun rim ni degrade interieur ajoutes : les bords ne viennent que de la refraction et de la lueur
-    d'origine Glow() (u_glowWeight, u_glowEdge0, u_glowEdge1).
+Ecarts de calcul par rapport au projet d'origine (les deux seuls) :
+  - assets/shaders/liquidglass/LiquidGlass.frag : sdSuperellipse, f, rand, Glow, ainsi que la logique de
+    LiquidGlass() (forme, distance, deplacement p * pow(f(dist), u_fPower), echantillonnage, bruit, lueur) sont
+    ceux de BatchRenderer2D.glsl, texte compare fonction par fonction apres suppression des commentaires. Pas de
+    SDF alternative, pas d'anti-aliasing, pas de rim ni de degrade interieur.
+  - Bornes inversees de la lueur : l'original appelle smoothstep(u_glowEdge0, u_glowEdge1, dist) avec
+    edge0 > edge1 (0.5, -0.5), indefini selon la specification GLSL (un pilote peut renvoyer NaN, donc du noir).
+    GlowEdge() calcule la meme valeur sans comportement indefini : si edge0 > edge1,
+    1 - smoothstep(edge1, edge0, x), identique mathematiquement car smoothstep(1 - t) = 1 - smoothstep(t).
+
+Option, desactivee par defaut (u_refractionMode = 0 : formule d'origine) :
+  - u_refractionMode = 1 applique la meme formule de deplacement autour du coeur de la forme : core =
+    max(halfSize - m, 0), localP = pPx - clamp(pPx, -core, core), sampleP = p - localP * (1 - pow(f(dist),
+    u_fPower)) / halfSize, avec m la moitie du plus petit cote et u_size la taille du quad en pixels. Pour un
+    cercle ou un carre core vaut 0 : resultat identique a l'original ; pour une forme allongee, les extremites se
+    comportent comme des lentilles rondes au lieu d'etirer le contenu (verifie visuellement, pas par mesure).
 
 Licence d'origine :
 

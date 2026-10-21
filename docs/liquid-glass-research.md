@@ -294,3 +294,32 @@ Cause dans le code (version qui précède ce correctif) : dans `BoxGlass`, la te
 Changements : la teinte atténuée et le voile blanc ne dépendent plus que de `GlassSettings.enabled` et des propriétés de l'élément (couleur, transparence, taille) ; seule la réfraction apparaît en fondu. La taille nulle à la création n'écarte plus l'élément. Le backdrop est recherché dès qu'une taille, une visibilité ou une fenêtre change, avec une relance toutes les 16 ms. Le dock garde un voile constant et un rim d'origine désactivé quand le verre est actif.
 
 Vérifié : rendu en régime stable identique au pixel près avant et après (0 pixel différent sur 1 024 000) dans la VM, chargement sans erreur. Non vérifié : la disparition de la phase sombre n'a pas pu être reproduite dans la VM (phénomène de quelques centaines de millisecondes) ; elle devra être confirmée en refaisant la même mesure sur une nouvelle vidéo. Je ne sais pas quelle révision tournait lors de l'enregistrement.
+
+## 19. Retour : retour aux calculs du repo, capture plus rapide, fermeture au changement de workspace
+
+Retour du propriétaire : le verre s'est beaucoup trop éloigné des calculs du repo ; il faut encore accélérer la capture de l'arrière-plan ; ajouter la fermeture de tous les composants au changement de workspace, comme le fait le control center.
+
+Fidélité au repo :
+
+- Le shader du verre est celui du repo. `sdSuperellipse`, `f`, `rand` et `Glow` sont identiques (comparés fonction par fonction), ainsi que la logique de `LiquidGlass()`, aux adaptations de syntaxe Qt près (bloc `std140`, un sampler, inversion du Y, `qt_Opacity`) et à la fonction `GlowEdge()` (valeur identique, sans comportement indéfini pour des bornes inversées).
+- Supprimés : SDF à rayon constant, anti-aliasing du shader, rim, dégradé intérieur, déplacement par la normale, voile en rectangle arrondi.
+- Paramètres de formule remis à ceux du repo dans `GlassSettings` : `refractionA 0.7`, `B 2.3`, `C 5.2`, `D 6.9`, `refractionPower 1.0`, lueur `0.25 / 0.5 / -0.5`. Réglages de rendu laissés à mes valeurs : `blurRadius 0.8` (repo : 2.0), `noise 0` (repo : 0.06) ; `backdropScale 0.5` réduit la résolution du backdrop (équivalence visuelle vérifiée sur le banc). Le voile blanc passe par le paramètre du repo `u_glowBias`.
+- Forme : l'original n'a qu'un superellipse (`u_powerFactor`). `BoxGlass` en déduit l'exposant du rayon du composant (rond : 2 ; carré légèrement arrondi : jusqu'à `squarePower` 6) et de son allongement (`barPower` 4), de sorte qu'une barre reste une barre arrondie. Sans cela la formule d'origine, qui dessine un superellipse normalisé par le quad, donne une ellipse.
+- Conséquence assumée de la formule exacte : sur un quad allongé, le déplacement `p * f(dist)` est un zoom radial autour du centre normalisé axe par axe, ce qui étire le contenu aux extrémités. `refractionMode 1` (option, désactivée) applique la même formule autour du cœur de la forme. Sans rim ni voile, un verre posé sur un fond uniforme sombre est presque invisible ; le dock garde une teinte claire constante (`#10ffffff`).
+
+Capture :
+
+- Chaque verre déclare son rectangle au backdrop de sa fenêtre ; la région à capturer est l'enveloppe des rectangles visibles. Les flux de fenêtres ne sont ouverts que pour les fenêtres qui touchent cette région agrandie de `captureMargin` (200 px) ; sans fenêtre à proximité, aucun flux n'est ouvert. Avant : toutes les fenêtres du workspace.
+- Résolution du backdrop réduite (`backdropScale 0.5`, soit 4 fois moins de pixels pour la scène et le flou).
+- Je n'ai mesuré aucun gain de temps ; le gain est de travail évité, non chronométré.
+- Un anti-aliasing MSAA au niveau QML (`layer.samples`) n'a eu aucun effet visible sur le banc : retiré.
+
+Fermeture au changement de workspace :
+
+- Nouveau service `services/WorkspaceWatcher.qml`, piloté par les événements Hyprland `workspace`, `workspacev2`, `activespecial` et `activespecialv2`, qui émet `changed()`.
+- `shell.qml` (bloc `Connections` unique) ferme le control center, le menu Apple, spotlight, l'assistant, le centre de notifications, les panneaux Wi-Fi, Bluetooth, batterie, volume et le notch. `GlobalMenuBar`, `SysTrayItem`, `DashboardPage` et `NotifContextMenu` ferment leur état local. La fenêtre « À propos » n'est pas fermée : c'est une vraie fenêtre rattachée à son workspace.
+- Le control center n'interroge plus `hyprctl activeworkspace` toutes les 300 ms : il écoute le même signal.
+
+Vérifié : sur le banc, les formes (rond, carré, pilule, barre, tuile) en mode 0 ; en VM, le service émet `changed` à chaque changement de workspace et le control center reçoit sa demande de fermeture environ 10 ms après l'événement ; le vrai `shell.qml` modifié se charge sans erreur (les avertissements viennent des services absents de la VM).
+
+Non vérifié : la fermeture de chacun des autres panneaux (aucun n'a pu être ouvert dans la VM : leurs états sont des propriétés remises à `false`, vérifiées uniquement par lecture) ; le rendu avec ton fond d'écran et ton GPU ; le temps de capture.

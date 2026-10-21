@@ -618,7 +618,6 @@ Scope {
                     captureWindows: true
                     blurRadius: GlassSettings.blurRadius
                     monitorName: dockWin.screen.name
-                    captureRegion: Qt.rect(0, dockWin.screen.height - dockWin.height, dockWin.screen.width, dockWin.height)
                 }
 
                 MouseArea {
@@ -711,27 +710,23 @@ Scope {
                             id:           dockGlass
                             anchors.fill: parent
                             backdrop:     dockBackdrop
-                            cornerRadius: Math.min(height / 2, dockRoot.dockRadius)
+                            powerFactor:  Math.max(2 + (GlassSettings.squarePower - 2) * Math.pow(1 - Math.max(0, Math.min(1, dockRoot.dockRadius / (height / 2))), 1.5), 2 + (GlassSettings.barPower - 2) * (1 - height / Math.max(1, width)))
+                            refractionMode: GlassSettings.refractionMode
+                            a:            GlassSettings.refractionA
                             b:            GlassSettings.refractionB
+                            c:            GlassSettings.refractionC
                             d:            GlassSettings.refractionD
                             fPower:       GlassSettings.refractionPower
                             noise:        GlassSettings.noise
                             glowWeight:   GlassSettings.glowWeight
-                            glowBias:     0.0
+                            glowBias:     GlassSettings.veil
                             glowEdge0:    GlassSettings.glowEdge0
                             glowEdge1:    GlassSettings.glowEdge1
-                            refractionMode: GlassSettings.refractionMode
-                        }
-                        Rectangle {
-                            anchors.fill: parent
-                            radius:       Math.min(height / 2, dockRoot.dockRadius)
-                            color:        Qt.rgba(1, 1, 1, GlassSettings.veil)
-                            visible:      GlassSettings.enabled
                         }
                         GlassRim {
                             anchors.fill: parent
                             radius:       dockRoot.dockRadius
-                            baseColor:    GlassSettings.enabled ? "transparent" : "#22ffffff"
+                            baseColor:    GlassSettings.enabled ? "#10ffffff" : "#22ffffff"
                             glowColor:    GlassSettings.enabled ? "transparent" : Qt.rgba(1, 1, 1, 0.63)
                             glowEdgeBand: 0.01
                         }

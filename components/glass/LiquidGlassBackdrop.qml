@@ -10,11 +10,13 @@ Item {
 
     property bool captureWindows: false
     property string monitorName: ""
-    property rect captureRegion: Qt.rect(0, 0, screenSize.width, screenSize.height)
+    property rect captureRegion: glassRegion
+    property rect glassRegion: Qt.rect(0, 0, 0, 0)
+    property var quads: []
 
     property real blurRadius: 2.0
     property real blurDownscale: 0.5
-    property real aa: 1
+    property real aa: GlassSettings.backdropScale
     property bool ready: true
 
     readonly property Item blurSource: blurFinal
@@ -34,6 +36,50 @@ Item {
         onTriggered: root.warm = true
     }
     readonly property string shaderDir: Quickshell.shellDir + "/assets/shaders/liquidglass/"
+
+    function registerQuad(q) {
+        if (root.quads.indexOf(q) === -1)
+            root.quads.push(q)
+        regionTimer.restart()
+    }
+
+    function unregisterQuad(q) {
+        var i = root.quads.indexOf(q)
+        if (i !== -1)
+            root.quads.splice(i, 1)
+        regionTimer.restart()
+    }
+
+    function invalidateRegion() {
+        regionTimer.restart()
+    }
+
+    function recomputeRegion() {
+        var x0 = 1e9
+        var y0 = 1e9
+        var x1 = -1e9
+        var y1 = -1e9
+        var any = false
+        for (var i = 0; i < root.quads.length; i++) {
+            var q = root.quads[i]
+            if (!q.visible || q.width <= 0 || q.height <= 0)
+                continue
+            any = true
+            x0 = Math.min(x0, q.screenPosition.x)
+            y0 = Math.min(y0, q.screenPosition.y)
+            x1 = Math.max(x1, q.screenPosition.x + q.width)
+            y1 = Math.max(y1, q.screenPosition.y + q.height)
+        }
+        var r = any ? Qt.rect(x0, y0, x1 - x0, y1 - y0) : Qt.rect(0, 0, 0, 0)
+        if (r.x !== root.glassRegion.x || r.y !== root.glassRegion.y || r.width !== root.glassRegion.width || r.height !== root.glassRegion.height)
+            root.glassRegion = r
+    }
+
+    Timer {
+        id: regionTimer
+        interval: 16
+        onTriggered: root.recomputeRegion()
+    }
 
     width: 0
     height: 0
