@@ -28,9 +28,6 @@ Scope {
     property bool subOpened:  wifiOpened || btOpened || timerOpened || alarmOpened || stopwatchOpened
     property bool playerExpanded: false
 
-    // Ces flags pilotent les animations (taille/position/contenu étendu).
-    // Ils ne passent à true qu'après le délai du Timer correspondant, donc
-    // plus aucune dépendance à un timing d'animation imbriqué.
     property bool wifiGrowReady:   false
     property bool btGrowReady:     false
     property bool playerGrowReady: false
@@ -44,88 +41,76 @@ Scope {
     property bool alarmClosing:  false
     property bool stopwatchClosing: false
 
-    Timer { id: _wifiGrowTimer;  interval: ShellMotion.effects(); onTriggered: root.wifiGrowReady = true }
-    Timer { id: _wifiCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.wifiClosing = false }
-    Timer { id: _btGrowTimer;    interval: ShellMotion.effects(); onTriggered: root.btGrowReady = true }
-    Timer { id: _btCloseTimer;   interval: ShellMotion.spatial();  onTriggered: root.btClosing = false }
-    Timer { id: _playerGrowTimer;  interval: ShellMotion.effects(); onTriggered: root.playerGrowReady = true }
-    Timer { id: _playerCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.playerClosing = false }
-    Timer { id: _timerGrowTimer;   interval: ShellMotion.effects(); onTriggered: root.timerGrowReady = true }
-    Timer { id: _timerCloseTimer;  interval: ShellMotion.spatial();  onTriggered: root.timerClosing = false }
-    Timer { id: _alarmGrowTimer;   interval: ShellMotion.effects(); onTriggered: root.alarmGrowReady = true }
-    Timer { id: _alarmCloseTimer;  interval: ShellMotion.spatial();  onTriggered: root.alarmClosing = false }
-    Timer { id: _stopwatchGrowTimer;  interval: ShellMotion.effects(); onTriggered: root.stopwatchGrowReady = true }
-    Timer { id: _stopwatchCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.stopwatchClosing = false }
+    Timer { id: _wifiCloseTimer; interval: ShellMotion.tile();  onTriggered: root.wifiClosing = false }
+    Timer { id: _btCloseTimer;   interval: ShellMotion.tile();  onTriggered: root.btClosing = false }
+    Timer { id: _playerCloseTimer; interval: ShellMotion.tile();  onTriggered: root.playerClosing = false }
+    Timer { id: _timerCloseTimer;  interval: ShellMotion.tile();  onTriggered: root.timerClosing = false }
+    Timer { id: _alarmCloseTimer;  interval: ShellMotion.tile();  onTriggered: root.alarmClosing = false }
+    Timer { id: _stopwatchCloseTimer; interval: ShellMotion.tile();  onTriggered: root.stopwatchClosing = false }
 
     onWifiOpenedChanged: {
         if (wifiOpened) {
-            wifiGrowReady = false
             _wifiCloseTimer.stop()
-            _wifiGrowTimer.restart()
+            wifiClosing = false
+            wifiGrowReady = true
         } else {
             wifiGrowReady = false
             wifiClosing = true
-            _wifiGrowTimer.stop()
             _wifiCloseTimer.restart()
         }
     }
     onBtOpenedChanged: {
         if (btOpened) {
-            btGrowReady = false
             _btCloseTimer.stop()
-            _btGrowTimer.restart()
+            btClosing = false
+            btGrowReady = true
         } else {
             btGrowReady = false
             btClosing = true
-            _btGrowTimer.stop()
             _btCloseTimer.restart()
         }
     }
     onPlayerExpandedChanged: {
         if (playerExpanded) {
-            playerGrowReady = false
             _playerCloseTimer.stop()
-            _playerGrowTimer.restart()
+            playerClosing = false
+            playerGrowReady = true
         } else {
             playerGrowReady = false
             playerClosing = true
-            _playerGrowTimer.stop()
             _playerCloseTimer.restart()
         }
     }
     onTimerOpenedChanged: {
         if (timerOpened) {
-            timerGrowReady = false
             _timerCloseTimer.stop()
-            _timerGrowTimer.restart()
+            timerClosing = false
+            timerGrowReady = true
         } else {
             timerGrowReady = false
             timerClosing = true
-            _timerGrowTimer.stop()
             _timerCloseTimer.restart()
         }
     }
     onAlarmOpenedChanged: {
         if (alarmOpened) {
-            alarmGrowReady = false
             _alarmCloseTimer.stop()
-            _alarmGrowTimer.restart()
+            alarmClosing = false
+            alarmGrowReady = true
         } else {
             alarmGrowReady = false
             alarmClosing = true
-            _alarmGrowTimer.stop()
             _alarmCloseTimer.restart()
         }
     }
     onStopwatchOpenedChanged: {
         if (stopwatchOpened) {
-            stopwatchGrowReady = false
             _stopwatchCloseTimer.stop()
-            _stopwatchGrowTimer.restart()
+            stopwatchClosing = false
+            stopwatchGrowReady = true
         } else {
             stopwatchGrowReady = false
             stopwatchClosing = true
-            _stopwatchGrowTimer.stop()
             _stopwatchCloseTimer.restart()
         }
     }
@@ -134,7 +119,7 @@ Scope {
     readonly property int boxMargin:  10
     readonly property int gridW:      4
     readonly property int gridH:      8
-    readonly property int animationDur: ShellMotion.effects(1.5)
+    readonly property int animationDur: ShellMotion.tile()
 
     readonly property int gridImplicitWidth:  ((box*gridW)+(boxMargin*gridW)+boxMargin)
     readonly property int gridImplicitHeight: ((box*gridH)+(boxMargin*gridH)+boxMargin)
@@ -545,7 +530,7 @@ Scope {
                         NumberAnimation {
                             duration: root.animationDur
                             easing.type: Easing.OutBack
-                            easing.overshoot: 0.5
+                            easing.overshoot: ShellMotion.tileOvershoot
                         }
                     }
 
@@ -601,38 +586,31 @@ Scope {
                             topMargin: boxbutton.overwriteY ? boxbutton.overwriteYPos : ccContent.gridY(boxbutton.yPos)
                         }
 
-                        // Ancrage dérivé de la largeur (pas d'anim propre nécessaire : elle suit
-                        // déjà width image par image, donc désactivée pour éviter un décalage).
-                        // Explicitement désactivé pour les boutons qui ne bougent jamais (pas de
-                        // overwriteX/Y) afin d'exclure toute possibilité de mouvement résiduel.
-                        // Le délai avant croissance est géré en amont par un Timer qui ne fait
-                        // passer la valeur cible à sa taille finale qu'après le fondu des voisins
-                        // -> ici on anime simplement, sans pause imbriquée.
                         Behavior on anchors.leftMargin {
                             enabled: !boxbutton.overwriteXFromRight
-                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
+                            NumberAnimation { duration: ShellMotion.tile(); easing.type: Easing.OutBack; easing.overshoot: ShellMotion.moveOvershoot }
                         }
                         Behavior on anchors.topMargin {
-                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
+                            NumberAnimation { duration: ShellMotion.tile(); easing.type: Easing.OutBack; easing.overshoot: ShellMotion.moveOvershoot }
                         }
                         Behavior on opacity {
-                            NumberAnimation { duration: ShellMotion.effects(0.5); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                            NumberAnimation { duration: ShellMotion.tile(0.5) }
                         }
                         Behavior on scale {
                             NumberAnimation {
                                 duration: root.animationDur
                                 easing.type: Easing.OutBack
-                                easing.overshoot: 0.5
+                                easing.overshoot: ShellMotion.tileOvershoot
                             }
                         }
                         Behavior on width {
-                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
+                            NumberAnimation { duration: ShellMotion.tile(); easing.type: Easing.OutBack; easing.overshoot: ShellMotion.tileOvershoot }
                         }
                         Behavior on height {
-                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
+                            NumberAnimation { duration: ShellMotion.tile(); easing.type: Easing.OutBack; easing.overshoot: ShellMotion.tileOvershoot }
                         }
                         Behavior on radius {
-                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
+                            NumberAnimation { duration: ShellMotion.tile() }
                         }
 
                         light: boxbutton.forceTransparentRim ? "transparent" : root.glassRimColor
@@ -722,7 +700,7 @@ Scope {
                                 visible: opacity > 0
                                 opacity: root.wifiGrowReady ? 1 : 0
                                 Behavior on opacity {
-                                    NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                                    NumberAnimation { duration: ShellMotion.tile() }
                                 }
 
                                 BoxGlass {
@@ -756,7 +734,7 @@ Scope {
                                 visible: opacity > 0
                                 opacity: (!root.wifiOpened && !root.wifiClosing) ? 1 : 0
                                 Behavior on opacity {
-                                    NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                                    NumberAnimation { duration: ShellMotion.tile() }
                                 }
                                 CFClippingRect {
                                     id: wifiCircle
@@ -840,9 +818,9 @@ Scope {
                         light: btWidget.forceTransparentRim ? "transparent" : (btWidget.enabled ? "transparent" : root.glassRimColor)
                         rimStrength: btWidget.forceTransparentRim ? 0 : (btWidget.enabled ? 0 : root.glassRimStrength)
                         color: btWidget.forceTransparentRim ? "transparent" : (btWidget.enabled ? "#fff" : root.glassColor)
-                        Behavior on color { ColorAnimation { duration: ShellMotion.effects(0.75) } }
-                        Behavior on light { ColorAnimation { duration: ShellMotion.effects(0.75) } }
-                        Behavior on rimStrength { NumberAnimation { duration: ShellMotion.effects(0.75) } }
+                        Behavior on color { ColorAnimation { duration: ShellMotion.tile() } }
+                        Behavior on light { ColorAnimation { duration: ShellMotion.tile() } }
+                        Behavior on rimStrength { NumberAnimation { duration: ShellMotion.tile() } }
 
                             CFClippingRect {
                                 anchors.fill: parent
@@ -850,7 +828,7 @@ Scope {
                                 visible: opacity > 0
                                 opacity: root.btGrowReady ? 1 : 0
                                 Behavior on opacity {
-                                    NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                                    NumberAnimation { duration: ShellMotion.tile() }
                                 }
 
                                 BoxGlass {
@@ -884,19 +862,19 @@ Scope {
                                 visible: opacity > 0
                                 opacity: (!root.btOpened && !root.btClosing) ? 1 : 0
                                 Behavior on opacity {
-                                    NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                                    NumberAnimation { duration: ShellMotion.tile() }
                                 }
                             CFClippingRect {
                                 anchors.centerIn: parent
                                 width: 38; height: 38; radius: 19
                                 color: btWidget.enabled ? "#fff" : Qt.rgba(1,1,1,0.18)
-                                Behavior on color { ColorAnimation { duration: ShellMotion.effects(0.75) } }
+                                Behavior on color { ColorAnimation { duration: ShellMotion.tile() } }
                                 CFVI {
                                     anchors.centerIn: parent
                                     width: 30; height: 30
                                     icon: "bluetooth/bluetooth.svg"
                                     color: btWidget.enabled ? "#1C7AFF" : "#fff"
-                                    Behavior on color { ColorAnimation { duration: ShellMotion.effects(0.75) } }
+                                    Behavior on color { ColorAnimation { duration: ShellMotion.tile() } }
                                 }
                             }
                             }
@@ -975,7 +953,7 @@ Scope {
                             visible: opacity > 0
                             opacity: (!root.playerExpanded && !root.playerClosing) ? 1 : 0
                             Behavior on opacity {
-                                NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                                NumberAnimation { duration: ShellMotion.tile() }
                             }
 
                             MouseArea {
@@ -1088,7 +1066,7 @@ Scope {
                             visible: opacity > 0
                             opacity: root.playerGrowReady ? 1 : 0
                             Behavior on opacity {
-                                NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                                NumberAnimation { duration: ShellMotion.tile() }
                             }
 
                             MouseArea {
@@ -1696,7 +1674,7 @@ Scope {
                         CFVI {
                             opacity: (!root.timerOpened && !root.timerClosing) ? 1 : 0
                             visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.tile() } }
                             anchors.centerIn: parent
                             width: 22
                             height: 22
@@ -1706,7 +1684,7 @@ Scope {
                         Rectangle {
                             opacity: (!root.timerOpened && !root.timerClosing && (TimerState.running || TimerState.firing)) ? 1 : 0
                             visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.tile() } }
                             width: 8
                             height: 8
                             radius: 4
@@ -1721,7 +1699,7 @@ Scope {
                             anchors.margins: 14
                             opacity: root.timerGrowReady ? 1 : 0
                             visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.tile() } }
 
                             ColumnLayout {
                                 anchors.fill: parent
@@ -1845,7 +1823,7 @@ Scope {
                         Rectangle {
                             opacity: root.timerGrowReady ? 1 : 0
                             visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.tile() } }
                             width: 26
                             height: 26
                             radius: 13
@@ -1887,7 +1865,7 @@ Scope {
                         CFVI {
                             opacity: (!root.alarmOpened && !root.alarmClosing) ? 1 : 0
                             visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.tile() } }
                             anchors.centerIn: parent
                             width: 22
                             height: 22
@@ -1900,7 +1878,7 @@ Scope {
                             anchors.margins: 14
                             opacity: root.alarmGrowReady ? 1 : 0
                             visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.tile() } }
 
                             ColumnLayout {
                                 anchors.fill: parent
@@ -2034,7 +2012,7 @@ Scope {
                         Rectangle {
                             opacity: root.alarmGrowReady ? 1 : 0
                             visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.tile() } }
                             width: 26
                             height: 26
                             radius: 13
@@ -2076,7 +2054,7 @@ Scope {
                         CFVI {
                             opacity: (!root.stopwatchOpened && !root.stopwatchClosing) ? 1 : 0
                             visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.tile() } }
                             anchors.centerIn: parent
                             width: 22
                             height: 22
@@ -2089,7 +2067,7 @@ Scope {
                             anchors.margins: 14
                             opacity: root.stopwatchGrowReady ? 1 : 0
                             visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.tile() } }
 
                             ColumnLayout {
                                 anchors.fill: parent
@@ -2169,7 +2147,7 @@ Scope {
                         Rectangle {
                             opacity: root.stopwatchGrowReady ? 1 : 0
                             visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                            Behavior on opacity { NumberAnimation { duration: ShellMotion.tile() } }
                             width: 26
                             height: 26
                             radius: 13
