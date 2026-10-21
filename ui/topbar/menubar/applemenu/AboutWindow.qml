@@ -54,7 +54,7 @@ Scope {
                     height: root.winHeight
                     anchors.centerIn: parent
                     opacity: (root.opened && panel.entered) ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     MouseArea {
                         anchors.fill: parent
