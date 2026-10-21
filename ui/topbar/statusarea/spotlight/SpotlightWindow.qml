@@ -732,6 +732,8 @@ Scope {
 
                 property bool   actionsShown:   false
                 property bool   closing:        false
+                property real   split:          (actionsShown && !closing) ? 1 : 0
+                Behavior on split { NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                 property string selectedAction: ""
                 property string hoveredAction:  ""
                 property int    currentIdx:     0
@@ -1133,15 +1135,15 @@ Scope {
                 SequentialAnimation {
                     id: showAnim
                     ParallelAnimation {
-                        PropertyAnimation { target: bgPanel; property: "opacity";  from: 0;   to: 1;   duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 }
-                        PropertyAnimation { target: bgPanel; property: "bgScaleX"; from: 1.3; to: 1.0; duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 }
+                        PropertyAnimation { target: bgPanel; property: "opacity";  from: 0;   to: 1;   duration: ShellMotion.enter(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                        PropertyAnimation { target: bgPanel; property: "bgScaleX"; from: 1.3; to: 1.0; duration: ShellMotion.enter(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                     }
                 }
                 SequentialAnimation {
                     id: hideAnim
                     ParallelAnimation {
-                        PropertyAnimation { target: bgPanel; property: "opacity";  to: 0;   duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
-                        PropertyAnimation { target: bgPanel; property: "bgScaleX"; to: 1.1; duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                        PropertyAnimation { target: bgPanel; property: "opacity";  to: 0;   duration: ShellMotion.exit(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                        PropertyAnimation { target: bgPanel; property: "bgScaleX"; to: 1.1; duration: ShellMotion.exit(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                     }
                     ScriptAction { script: win.doClose() }
                 }
@@ -1156,7 +1158,7 @@ Scope {
                     anchors.topMargin:        200
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: (win.gridMode || win.showingShellOutput) ? 680 : (win.actionsShown ? 340 : 540)
-                    Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutBack; easing.overshoot: 2 } }
+                    Behavior on width { NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                     implicitHeight: panelCol.implicitHeight + 8
                     radius: 30; color: root.glassColor; rimStrength: 1.7
                     light: "#20ffffff"; lightDir: Qt.vector2d(1, 1); layer.enabled: true
@@ -1361,7 +1363,7 @@ Scope {
                                     : win.gridMode
                                         ? 480
                                         : (win.answers.length > 0 ? Math.min(400, results.implicitHeight + 20) : 0)
-                                Behavior on Layout.preferredHeight { NumberAnimation { duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 } }
+                                Behavior on Layout.preferredHeight { NumberAnimation { duration: ShellMotion.spatial(0.8); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                                 clip: true
 
                                 SpotlightCategoryGrid {
@@ -1511,10 +1513,10 @@ Scope {
 
                 Item {
                     anchors.fill: parent
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:0;action:"applications";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/applications.svg");actionsShown:win.actionsShown;isOpen:root.opened&&!win.closing;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:1;action:"files";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/files.svg");actionsShown:win.actionsShown;isOpen:root.opened&&!win.closing;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:2;action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");actionsShown:win.actionsShown;isOpen:root.opened&&!win.closing;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:3;iconSize:36;action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");actionsShown:win.actionsShown;isOpen:root.opened&&!win.closing;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:0;action:"applications";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/applications.svg");split:win.split;barRight:bgPanel.x+bgPanel.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:1;action:"files";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/files.svg");split:win.split;barRight:bgPanel.x+bgPanel.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:2;action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");split:win.split;barRight:bgPanel.x+bgPanel.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:3;iconSize:36;action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");split:win.split;barRight:bgPanel.x+bgPanel.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
                 }
             }
         }
@@ -1525,26 +1527,23 @@ Scope {
         required property int    position
         required property string action
         required property url    iconSrc
-        required property bool   actionsShown
-        required property bool   isOpen
+        required property real   split
+        required property real   barRight
         required property color  glassColor
         required property color  textColor
-        required property real   screenW
+        readonly property bool   active: btn.split > 0.5
         property int iconSize: 30
         signal hovered(string action)
         signal selected(string action)
         width: 58; height: 58
-        x: (btn.actionsShown && btn.isOpen) ? (btn.screenW / 2 + 170 + 10 + (68 * btn.position)) : btn.screenW / 2
-        Behavior on x { NumberAnimation { duration: ShellMotion.effects(1.25) } }
+        x: btn.barRight - btn.width + btn.split * (btn.width + 10 + 68 * btn.position)
         BoxGlass {
             anchors.fill:parent;radius:30;color:btn.glassColor;rimStrength:0.2
             light:"#20ffffff";lightDir:Qt.vector2d(1,1);layer.enabled:true
-            scale:   btn.actionsShown && btn.isOpen ? 1.0 : 0.0
-            opacity: btn.actionsShown && btn.isOpen ? 1.0 : 0.0
-            Behavior on scale   { NumberAnimation { duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 } }
-            Behavior on opacity { NumberAnimation { duration: 200 } }
+            scale:   Math.max(0, Math.min(1, btn.split))
+            opacity: Math.max(0, Math.min(1, btn.split * 2))
             VectorImage { anchors.centerIn:parent;width:btn.iconSize;height:btn.iconSize;source:btn.iconSrc;preferredRendererType:VectorImage.CurveRenderer;layer.enabled:true;layer.effect:MultiEffect{colorization:1;colorizationColor:btn.textColor} }
         }
-        MouseArea { anchors.fill:parent;enabled:btn.actionsShown&&btn.isOpen;hoverEnabled:true;cursorShape:Qt.PointingHandCursor;onEntered:btn.hovered(btn.actionsShown&&btn.isOpen?btn.action:"");onExited:btn.hovered("");onClicked:btn.selected(btn.action) }
+        MouseArea { anchors.fill:parent;enabled:btn.active;hoverEnabled:true;cursorShape:Qt.PointingHandCursor;onEntered:btn.hovered(btn.active?btn.action:"");onExited:btn.hovered("");onClicked:btn.selected(btn.action) }
     }
 }
