@@ -20,7 +20,7 @@ Scope {
 
     Timer {
         id: _unload
-        interval: ShellMotion.effects()
+        interval: ShellMotion.fade()
         onTriggered: popupLoader.active = false
     }
 
@@ -76,7 +76,7 @@ Scope {
             BoxGlass {
                 anchors.fill: parent
                 opacity: (popupWindow.entered && !root.dismissing) ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.7); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                 radius: 14
                 color: root.failed ? "#30ff4444" : "#18000000"
                 light: "#20ffffff"

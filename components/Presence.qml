@@ -6,7 +6,7 @@ Scope {
     id: root
 
     property bool wanted: false
-    property int exitDuration: ShellMotion.effects()
+    property int exitDuration: ShellMotion.fade()
     property bool present: false
 
     onWantedChanged: {
