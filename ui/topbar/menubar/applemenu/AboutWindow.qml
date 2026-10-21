@@ -4,6 +4,8 @@ import Quickshell.Io
 import QtQuick
 import QtQuick.VectorImage
 import qs.components.glass
+import qs.components
+import qs.services
 
 Scope {
     id: root
@@ -13,10 +15,16 @@ Scope {
     readonly property int winWidth:  340
     readonly property int winHeight: 520
 
+    Presence { id: presence; wanted: root.opened }
+
     Loader {
-        active: root.opened
+        active: presence.present
         sourceComponent: Component {
             PanelWindow {
+                id: panel
+                property bool entered: false
+                Component.onCompleted: panel.entered = true
+
                 anchors {
                     top: true
                     left: true
@@ -45,6 +53,8 @@ Scope {
                     width: root.winWidth
                     height: root.winHeight
                     anchors.centerIn: parent
+                    opacity: (root.opened && panel.entered) ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     MouseArea {
                         anchors.fill: parent
