@@ -1513,10 +1513,10 @@ Scope {
 
                 Item {
                     anchors.fill: parent
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:0;action:"applications";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/applications.svg");shown:win.splitTarget;masterOpacity:bgPanel.opacity;barRight:bgPanel.x+bgPanel.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:1;action:"files";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/files.svg");shown:win.splitTarget;masterOpacity:bgPanel.opacity;barRight:bgPanel.x+bgPanel.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:2;action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");shown:win.splitTarget;masterOpacity:bgPanel.opacity;barRight:bgPanel.x+bgPanel.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:3;iconSize:36;action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");shown:win.splitTarget;masterOpacity:bgPanel.opacity;barRight:bgPanel.x+bgPanel.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:0;action:"applications";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/applications.svg");shown:win.splitTarget;masterOpacity:bgPanel.opacity;barRight:win.width/2+170;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:1;action:"files";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/files.svg");shown:win.splitTarget;masterOpacity:bgPanel.opacity;barRight:win.width/2+170;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:2;action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");shown:win.splitTarget;masterOpacity:bgPanel.opacity;barRight:win.width/2+170;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:3;iconSize:36;action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");shown:win.splitTarget;masterOpacity:bgPanel.opacity;barRight:win.width/2+170;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
                 }
             }
         }
@@ -1539,7 +1539,7 @@ Scope {
         signal hovered(string action)
         signal selected(string action)
         width: 58; height: 58
-        x: btn.barRight - btn.width + btn.progress * (btn.width + 10 + 68 * btn.position)
+        x: btn.barRight + 10 + 68 * btn.position
         onShownChanged: delay.restart()
         Timer {
             id: delay
@@ -1550,7 +1550,8 @@ Scope {
         BoxGlass {
             anchors.fill:parent;radius:30;color:btn.glassColor;rimStrength:0.2
             light:"#20ffffff";lightDir:Qt.vector2d(1,1);layer.enabled:true
-            opacity: Math.min(1, btn.progress * 6) * btn.masterOpacity
+            scale:   0.15 + 0.85 * btn.progress
+            opacity: Math.min(1, btn.progress * 4) * btn.masterOpacity
             VectorImage { anchors.centerIn:parent;width:btn.iconSize;height:btn.iconSize;source:btn.iconSrc;preferredRendererType:VectorImage.CurveRenderer;layer.enabled:true;layer.effect:MultiEffect{colorization:1;colorizationColor:btn.textColor} }
         }
         MouseArea { anchors.fill:parent;enabled:btn.active;hoverEnabled:true;cursorShape:Qt.PointingHandCursor;onEntered:btn.hovered(btn.active?btn.action:"");onExited:btn.hovered("");onClicked:btn.selected(btn.action) }
