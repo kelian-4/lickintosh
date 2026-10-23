@@ -15,7 +15,7 @@ Singleton {
     property int enterDuration: 500
     property int exitDuration: 400
     property int fadeDuration: 300
-    property int splitDuration: 500
+    property int splitDuration: 400
     property int splitStagger: 0
     property real speed: 1.0
 
