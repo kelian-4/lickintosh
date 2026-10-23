@@ -29,12 +29,17 @@ Scope {
     property bool playerExpanded: false
 
     property bool wifiGrowReady:   false
+    property bool wifiContentReady: false
     property bool btGrowReady:     false
+    property bool btContentReady: false
     property bool playerGrowReady: false
     property bool playerContentReady: false
     property bool timerGrowReady:  false
+    property bool timerContentReady: false
     property bool alarmGrowReady:  false
+    property bool alarmContentReady: false
     property bool stopwatchGrowReady: false
+    property bool stopwatchContentReady: false
     property bool wifiClosing:   false
     property bool btClosing:     false
     property bool playerClosing: false
@@ -42,12 +47,17 @@ Scope {
     property bool alarmClosing:  false
     property bool stopwatchClosing: false
 
+    Timer { id: _wifiContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.wifiContentReady = true }
     Timer { id: _wifiCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.wifiClosing = false }
+    Timer { id: _btContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.btContentReady = true }
     Timer { id: _btCloseTimer;   interval: ShellMotion.spatial();  onTriggered: root.btClosing = false }
     Timer { id: _playerContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.playerContentReady = true }
     Timer { id: _playerCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.playerClosing = false }
+    Timer { id: _timerContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.timerContentReady = true }
     Timer { id: _timerCloseTimer;  interval: ShellMotion.spatial();  onTriggered: root.timerClosing = false }
+    Timer { id: _alarmContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.alarmContentReady = true }
     Timer { id: _alarmCloseTimer;  interval: ShellMotion.spatial();  onTriggered: root.alarmClosing = false }
+    Timer { id: _stopwatchContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.stopwatchContentReady = true }
     Timer { id: _stopwatchCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.stopwatchClosing = false }
 
     onWifiOpenedChanged: {
@@ -55,7 +65,10 @@ Scope {
             _wifiCloseTimer.stop()
             wifiClosing = false
             wifiGrowReady = true
+            _wifiContentTimer.restart()
         } else {
+            _wifiContentTimer.stop()
+            wifiContentReady = false
             wifiGrowReady = false
             wifiClosing = true
             _wifiCloseTimer.restart()
@@ -66,7 +79,10 @@ Scope {
             _btCloseTimer.stop()
             btClosing = false
             btGrowReady = true
+            _btContentTimer.restart()
         } else {
+            _btContentTimer.stop()
+            btContentReady = false
             btGrowReady = false
             btClosing = true
             _btCloseTimer.restart()
@@ -91,7 +107,10 @@ Scope {
             _timerCloseTimer.stop()
             timerClosing = false
             timerGrowReady = true
+            _timerContentTimer.restart()
         } else {
+            _timerContentTimer.stop()
+            timerContentReady = false
             timerGrowReady = false
             timerClosing = true
             _timerCloseTimer.restart()
@@ -102,7 +121,10 @@ Scope {
             _alarmCloseTimer.stop()
             alarmClosing = false
             alarmGrowReady = true
+            _alarmContentTimer.restart()
         } else {
+            _alarmContentTimer.stop()
+            alarmContentReady = false
             alarmGrowReady = false
             alarmClosing = true
             _alarmCloseTimer.restart()
@@ -113,7 +135,10 @@ Scope {
             _stopwatchCloseTimer.stop()
             stopwatchClosing = false
             stopwatchGrowReady = true
+            _stopwatchContentTimer.restart()
         } else {
+            _stopwatchContentTimer.stop()
+            stopwatchContentReady = false
             stopwatchGrowReady = false
             stopwatchClosing = true
             _stopwatchCloseTimer.restart()
@@ -703,7 +728,7 @@ Scope {
                                 anchors.fill: parent
                                 radius: 12
                                 visible: opacity > 0
-                                opacity: root.wifiGrowReady ? 1 : 0
+                                opacity: root.wifiContentReady ? 1 : 0
                                 Behavior on opacity {
                                     NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                 }
@@ -831,7 +856,7 @@ Scope {
                                 anchors.fill: parent
                                 radius: 12
                                 visible: opacity > 0
-                                opacity: root.btGrowReady ? 1 : 0
+                                opacity: root.btContentReady ? 1 : 0
                                 Behavior on opacity {
                                     NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                 }
@@ -1702,7 +1727,7 @@ Scope {
                         Item {
                             anchors.fill: parent
                             anchors.margins: 14
-                            opacity: root.timerGrowReady ? 1 : 0
+                            opacity: root.timerContentReady ? 1 : 0
                             visible: opacity > 0
                             Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
@@ -1826,7 +1851,7 @@ Scope {
                         }
 
                         Rectangle {
-                            opacity: root.timerGrowReady ? 1 : 0
+                            opacity: root.timerContentReady ? 1 : 0
                             visible: opacity > 0
                             Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                             width: 26
@@ -1881,7 +1906,7 @@ Scope {
                         Item {
                             anchors.fill: parent
                             anchors.margins: 14
-                            opacity: root.alarmGrowReady ? 1 : 0
+                            opacity: root.alarmContentReady ? 1 : 0
                             visible: opacity > 0
                             Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
@@ -2015,7 +2040,7 @@ Scope {
                         }
 
                         Rectangle {
-                            opacity: root.alarmGrowReady ? 1 : 0
+                            opacity: root.alarmContentReady ? 1 : 0
                             visible: opacity > 0
                             Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                             width: 26
@@ -2070,7 +2095,7 @@ Scope {
                         Item {
                             anchors.fill: parent
                             anchors.margins: 14
-                            opacity: root.stopwatchGrowReady ? 1 : 0
+                            opacity: root.stopwatchContentReady ? 1 : 0
                             visible: opacity > 0
                             Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
@@ -2150,7 +2175,7 @@ Scope {
                         }
 
                         Rectangle {
-                            opacity: root.stopwatchGrowReady ? 1 : 0
+                            opacity: root.stopwatchContentReady ? 1 : 0
                             visible: opacity > 0
                             Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                             width: 26
