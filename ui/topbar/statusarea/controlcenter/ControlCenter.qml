@@ -31,6 +31,7 @@ Scope {
     property bool wifiGrowReady:   false
     property bool btGrowReady:     false
     property bool playerGrowReady: false
+    property bool playerContentReady: false
     property bool timerGrowReady:  false
     property bool alarmGrowReady:  false
     property bool stopwatchGrowReady: false
@@ -43,6 +44,7 @@ Scope {
 
     Timer { id: _wifiCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.wifiClosing = false }
     Timer { id: _btCloseTimer;   interval: ShellMotion.spatial();  onTriggered: root.btClosing = false }
+    Timer { id: _playerContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.playerContentReady = true }
     Timer { id: _playerCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.playerClosing = false }
     Timer { id: _timerCloseTimer;  interval: ShellMotion.spatial();  onTriggered: root.timerClosing = false }
     Timer { id: _alarmCloseTimer;  interval: ShellMotion.spatial();  onTriggered: root.alarmClosing = false }
@@ -75,7 +77,10 @@ Scope {
             _playerCloseTimer.stop()
             playerClosing = false
             playerGrowReady = true
+            _playerContentTimer.restart()
         } else {
+            _playerContentTimer.stop()
+            playerContentReady = false
             playerGrowReady = false
             playerClosing = true
             _playerCloseTimer.restart()
@@ -1064,7 +1069,7 @@ Scope {
                         Item {
                             anchors.fill: parent
                             visible: opacity > 0
-                            opacity: root.playerGrowReady ? 1 : 0
+                            opacity: root.playerContentReady ? 1 : 0
                             Behavior on opacity {
                                 NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                             }
