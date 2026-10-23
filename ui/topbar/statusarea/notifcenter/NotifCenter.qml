@@ -7,6 +7,7 @@ import Quickshell.Io
 import Quickshell.Services.Notifications
 import qs.components.glass
 import qs.components
+import qs.services
 import qs.ui.topbar.statusarea.notifcenter
 
 Scope {
@@ -21,7 +22,6 @@ Scope {
     readonly property int panelWidth:   320
     readonly property int panelMarginR: 10
     readonly property int topOffset:    48
-    readonly property int animDur:      320
 
     property real   lat:          0
     property real   lon:          0
@@ -117,8 +117,14 @@ Scope {
         onTriggered: _geoProc.running = true
     }
 
+    Presence {
+        id: presence
+        wanted: root.opened
+        exitDuration: ShellMotion.enter()
+    }
+
     Loader {
-        active: root.opened
+        active: presence.present
         sourceComponent: Component {
             PanelWindow {
                 id: ncWin
@@ -153,21 +159,26 @@ Scope {
                     anchors.topMargin:   root.topOffset
                     anchors.rightMargin: root.panelMarginR
 
-                    property bool vis: root.opened
+                    property bool vis: false
+                    Component.onCompleted: panel.vis = root.opened
+                    Connections {
+                        target: root
+                        function onOpenedChanged() { panel.vis = root.opened }
+                    }
 
                     transform: Translate {
                         x: panel.vis ? 0 : root.panelWidth + root.panelMarginR
                         Behavior on x {
                             NumberAnimation {
-                                duration: root.animDur
-                                easing.type: Easing.OutBack
-                                easing.overshoot: 0.55
+                                duration: ShellMotion.enter()
+                                easing.type: Easing.BezierSpline
+                                easing.bezierCurve: ShellMotion.spatialCurve
                             }
                         }
                     }
                     opacity: panel.vis ? 1 : 0
                     Behavior on opacity {
-                        NumberAnimation { duration: root.animDur / 2 }
+                        NumberAnimation { duration: ShellMotion.enter(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                     }
 
                     MouseArea {
@@ -195,7 +206,7 @@ Scope {
 
                                 SequentialAnimation {
                                     id: _clearAnim
-                                    NumberAnimation { target: _notifsBlock; property: "opacity"; to: 0; duration: 220; easing.type: Easing.InCubic }
+                                    NumberAnimation { target: _notifsBlock; property: "opacity"; to: 0; duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                     ScriptAction { script: NotifService.dismissAll() }
                                     PauseAnimation { duration: 20 }
                                     NumberAnimation { target: _notifsBlock; property: "opacity"; to: 1; duration: 1 }
