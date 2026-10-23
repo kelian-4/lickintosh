@@ -15,8 +15,8 @@ Singleton {
     property int enterDuration: 500
     property int exitDuration: 400
     property int fadeDuration: 300
-    property int splitDuration: 800
-    property int splitStagger: 80
+    property int splitDuration: 600
+    property int splitStagger: 260
     property real speed: 1.0
 
     function spatial(factor) {
