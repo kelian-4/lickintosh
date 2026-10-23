@@ -72,7 +72,7 @@ Scope {
     Presence {
         id: presence
         wanted: root.opened
-        exitDuration: ShellMotion.enter()
+        exitDuration: ShellMotion.fade()
     }
 
     Loader {
@@ -106,7 +106,7 @@ Scope {
 
                 property real showProgress: 0
                 Behavior on showProgress {
-                    NumberAnimation { duration: ShellMotion.enter(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                    NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                 }
                 Connections {
                     target: root
@@ -344,7 +344,8 @@ Scope {
                     height: Math.min(panelCol.implicitHeight, parent.height - anchors.topMargin - 10)
                     z: 1
                     opacity: win.showProgress
-                    transform: Translate { y: -24 * (1 - win.showProgress) }
+                    scale: 0.95 + 0.05 * win.showProgress
+                    transformOrigin: Item.TopRight
 
                     MouseArea {
                         anchors.fill: parent
