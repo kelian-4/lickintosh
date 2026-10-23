@@ -149,7 +149,7 @@ Scope {
     readonly property int boxMargin:  10
     readonly property int gridW:      4
     readonly property int gridH:      8
-    readonly property int animationDur: ShellMotion.enter()
+    readonly property int animationDur: ShellMotion.fade()
 
     readonly property int gridImplicitWidth:  ((box*gridW)+(boxMargin*gridW)+boxMargin)
     readonly property int gridImplicitHeight: ((box*gridH)+(boxMargin*gridH)+boxMargin)
@@ -534,10 +534,10 @@ Scope {
                     height: root._visibleGridHeight
                     anchors.top: parent.top
                     anchors.right: parent.right
-                    anchors.topMargin: 30 - (1 - showProgress) * 24
+                    anchors.topMargin: 30
                     anchors.rightMargin: 10
                     transformOrigin: Item.TopRight
-                    scale: 1.0
+                    scale: 0.95 + 0.05 * showProgress
                     opacity: showProgress
 
                     property real showProgress: 0
@@ -553,14 +553,6 @@ Scope {
                         target: root
                         function onOpenedChanged() {
                             if (!root.opened) ccContent.showProgress = 0
-                        }
-                    }
-
-                    Behavior on scale {
-                        NumberAnimation {
-                            duration: ShellMotion.spatial()
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: ShellMotion.spatialCurve
                         }
                     }
 
