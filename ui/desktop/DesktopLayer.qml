@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import qs.services
@@ -14,6 +15,7 @@ Scope {
 
         WlrLayershell.namespace: "quickshell:desktop"
         WlrLayershell.layer: WlrLayer.Bottom
+        WlrLayershell.keyboardFocus: DesktopFiles.renaming !== "" ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
         exclusionMode: ExclusionMode.Ignore
         color: "transparent"
         anchors { top: true; right: true; bottom: true; left: true }
@@ -21,8 +23,8 @@ Scope {
         Item {
             id: stage
             anchors.fill: parent
-            anchors.topMargin: 44
-            anchors.leftMargin: 16
+            anchors.topMargin: WidgetState.desktopOffsetY
+            anchors.leftMargin: WidgetState.desktopOffsetX
             anchors.rightMargin: 16
             anchors.bottomMargin: 16
 
@@ -47,9 +49,10 @@ Scope {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onPressed: function(mouse) {
                     DesktopFiles.selected = ""
+                    DesktopFiles.renaming = ""
                     if (mouse.button === Qt.RightButton) {
-                        menu.target = ""
-                        menu.openAt(mouse.x + stage.x, mouse.y + stage.y, WidgetState.menuEntries("desktop", null))
+                        menu.target = { kind: "desktop" }
+                        menu.openAt(mouse.x + stage.x, mouse.y + stage.y, DesktopFiles.desktopMenu())
                     }
                 }
             }
@@ -64,6 +67,8 @@ Scope {
                     required property string fileName
                     required property string filePath
                     required property bool fileIsDir
+                    required property var fileSize
+                    required property var fileModified
 
                     readonly property var saved: WidgetState.iconPosition(iconSlot.fileName)
                     readonly property real homeX: stage.width - (Math.floor(iconSlot.index / stage.iconRows) + 1) * stage.iconW
@@ -85,9 +90,28 @@ Scope {
                             fileIsDir: iconSlot.fileIsDir
                         }
 
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.RightButton
+                            onPressed: function(mouse) {
+                                DesktopFiles.selected = iconSlot.filePath
+                                menu.target = {
+                                    kind: "icon",
+                                    path: iconSlot.filePath,
+                                    name: iconSlot.fileName,
+                                    isDir: iconSlot.fileIsDir,
+                                    size: iconSlot.fileSize,
+                                    modified: iconSlot.fileModified
+                                }
+                                var p = mapToItem(menu, mouse.x, mouse.y)
+                                menu.openAt(p.x, p.y, DesktopFiles.fileMenu())
+                            }
+                        }
+
                         DragHandler {
                             target: iconMover
                             acceptedButtons: Qt.LeftButton
+                            enabled: DesktopFiles.renaming !== iconSlot.filePath
                             onActiveChanged: {
                                 if (active) return
                                 var nx = Math.round((iconSlot.x + iconMover.x) / stage.iconW) * stage.iconW
@@ -143,9 +167,87 @@ Scope {
                             anchors.fill: parent
                             acceptedButtons: Qt.RightButton
                             onPressed: function(mouse) {
-                                menu.target = slot.modelData.id
+                                menu.target = { kind: "widget", id: slot.modelData.id }
                                 var p = mapToItem(menu, mouse.x, mouse.y)
                                 menu.openAt(p.x, p.y, WidgetState.menuEntries("desktop", slot.modelData))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Item {
+            id: infoLayer
+            anchors.fill: parent
+            visible: DesktopFiles.infoTarget !== null
+            z: 900
+
+            MouseArea {
+                anchors.fill: parent
+                onPressed: DesktopFiles.infoTarget = null
+            }
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: 320
+                height: infoColumn.implicitHeight + 36
+                radius: 18
+                color: Qt.rgba(0.16, 0.16, 0.18, 0.97)
+                border.width: 1
+                border.color: Qt.rgba(1, 1, 1, 0.12)
+
+                MouseArea {
+                    anchors.fill: parent
+                }
+
+                ColumnLayout {
+                    id: infoColumn
+                    anchors.fill: parent
+                    anchors.margins: 18
+                    spacing: 8
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: DesktopFiles.infoTarget ? DesktopFiles.labelFor(DesktopFiles.infoTarget.name) : ""
+                        elide: Text.ElideMiddle
+                        color: "#ffffff"
+                        font.pixelSize: 16
+                        font.weight: Font.Bold
+                        font.family: "SF Pro Rounded"
+                        renderType: Text.NativeRendering
+                    }
+
+                    Repeater {
+                        model: DesktopFiles.infoTarget ? [
+                            { key: "Kind", value: DesktopFiles.kindFor(DesktopFiles.infoTarget.name, DesktopFiles.infoTarget.isDir) },
+                            { key: "Size", value: DesktopFiles.infoTarget.isDir ? "—" : DesktopFiles.formatSize(DesktopFiles.infoTarget.size) },
+                            { key: "Modified", value: Qt.formatDateTime(DesktopFiles.infoTarget.modified, "d MMM yyyy, HH:mm") },
+                            { key: "Where", value: DesktopFiles.infoTarget.path.slice(0, DesktopFiles.infoTarget.path.lastIndexOf("/")) }
+                        ] : []
+
+                        delegate: RowLayout {
+                            required property var modelData
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            Text {
+                                Layout.preferredWidth: 64
+                                text: modelData.key
+                                color: Qt.rgba(1, 1, 1, 0.55)
+                                font.pixelSize: 12
+                                font.family: "SF Pro Rounded"
+                                renderType: Text.NativeRendering
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: modelData.value
+                                elide: Text.ElideMiddle
+                                color: "#ffffff"
+                                font.pixelSize: 12
+                                font.family: "SF Pro Rounded"
+                                renderType: Text.NativeRendering
                             }
                         }
                     }
@@ -156,10 +258,11 @@ Scope {
         WidgetContextMenu {
             id: menu
 
-            property string target: ""
+            property var target: ({ kind: "desktop" })
 
             onChosen: function(action) {
-                WidgetState.applyAction("desktop", menu.target, action)
+                if (menu.target.kind === "widget") WidgetState.applyAction("desktop", menu.target.id, action)
+                else DesktopFiles.handle(action, menu.target)
             }
         }
     }

@@ -15,6 +15,8 @@ Singleton {
     property alias desktop: widgetsAdapter.desktop
     property alias notifCenter: widgetsAdapter.notifCenter
     property alias iconPositions: widgetsAdapter.iconPositions
+    property alias desktopSort: widgetsAdapter.desktopSort
+    property alias showHidden: widgetsAdapter.showHidden
 
     property string galleryZone: ""
     property int areaWidth: 1280
@@ -23,6 +25,8 @@ Singleton {
     readonly property int cell: 153
     readonly property int gap: 14
     readonly property int step: root.cell + root.gap
+    readonly property int desktopOffsetX: 16
+    readonly property int desktopOffsetY: 44
 
     FileView {
         id: widgetsFile
@@ -41,6 +45,8 @@ Singleton {
                 { "id": "w_default_weather", "type": "weather", "size": "m", "x": 0, "y": 0 }
             ]
             property list<var> iconPositions: []
+            property string desktopSort: "name"
+            property bool showHidden: false
         }
     }
 
@@ -102,6 +108,24 @@ Singleton {
         }
         list.push(entry)
         root.setList(zone, list)
+    }
+
+    function addWidgetAt(zone, type, size, x, y) {
+        if (zone !== "desktop") {
+            root.addWidget(zone, type, size)
+            return
+        }
+        var list = root.listOf("desktop")
+        var d = root.sizeOf(size)
+        var nx = Math.max(0, Math.min(Math.round(x / root.step) * root.step, root.areaWidth - d.w))
+        var ny = Math.max(0, Math.min(Math.round(y / root.step) * root.step, root.areaHeight - d.h))
+        if (root.collides(list, "", nx, ny, d.w, d.h)) {
+            var p = root.freeSlot(list, "", size)
+            nx = p.x
+            ny = p.y
+        }
+        list.push({ id: "w_" + Date.now(), type: type, size: size, x: nx, y: ny })
+        root.setList("desktop", list)
     }
 
     function removeWidget(zone, id) {
