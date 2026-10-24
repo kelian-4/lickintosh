@@ -182,6 +182,7 @@ ShellRoot {
         opened: appRoot.ccOpened
         onClosing: appRoot.ccOpened = false
     }
+    ControlGallery {}
     DesktopLayer {}
     WidgetGallery {}
     Dock {}

@@ -24,7 +24,7 @@ Item {
         Text {
             text: StopwatchState.formatElapsed(StopwatchState.elapsedMs)
             color: "#ffffff"
-            font.pixelSize: root.size === "s" ? 30 : 44
+            font.pixelSize: root.size === "s" ? 26 : 40
             font.weight: Font.Light
             font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering
