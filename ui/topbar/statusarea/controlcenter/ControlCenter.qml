@@ -14,6 +14,7 @@ import qs.ui.topbar.statusarea.notifcenter
 import qs.services
 import qs.components
 import qs.components.glass
+import qs.ui.widgets
 
 Scope {
     id: root
@@ -154,42 +155,16 @@ Scope {
     readonly property int gridImplicitWidth:  ((box*gridW)+(boxMargin*gridW)+boxMargin)
     readonly property int gridImplicitHeight: ((box*gridH)+(boxMargin*gridH)+boxMargin)
 
-    readonly property var _fixedWidgetBottomRows: [
-        { id: "wifiWidget",     row: 0 },
-        { id: "btWidget",       row: 1 },
-        { id: "adWidget",       row: 1 },
-        { id: "musicWidget",    row: 1 },
-        { id: "focusWidget",    row: 2 },
-        { id: "stageWidget",    row: 2 },
-        { id: "shareWidget",    row: 2 },
-        { id: "displayWidget",  row: 3 },
-        { id: "volumeWidget",   row: 4 }
-    ]
-
-    readonly property int _packStartRow: ControlCatalog.packStartRow
-
     readonly property var _packedLayout: ControlCatalog.packedLayout
 
     function packedX(id) {
         return root._packedLayout[id] ? root._packedLayout[id].xPos : 0
     }
     function packedY(id) {
-        return root._packedLayout[id] ? root._packedLayout[id].yPos : root._packStartRow
+        return root._packedLayout[id] ? root._packedLayout[id].yPos : 0
     }
 
-    readonly property int _lastVisibleRow: {
-        var maxRow = 0
-        for (var i = 0; i < root._fixedWidgetBottomRows.length; i++) {
-            var w = root._fixedWidgetBottomRows[i]
-            if (ShellConfig.ccWidgetVisible(w.id) && w.row > maxRow) maxRow = w.row
-        }
-        var packedKeys = Object.keys(root._packedLayout)
-        for (var j = 0; j < packedKeys.length; j++) {
-            var p = root._packedLayout[packedKeys[j]]
-            if (p.yPos > maxRow) maxRow = p.yPos
-        }
-        return maxRow
-    }
+    readonly property int _lastVisibleRow: ControlCatalog.shownRows - 1
 
     readonly property int _visibleGridHeight: (box*(_lastVisibleRow+1)) + (boxMargin*(_lastVisibleRow+1)) + boxMargin
 
@@ -499,9 +474,34 @@ Scope {
                             root.wifiOpened = false
                             root.btOpened   = false
                             root.playerExpanded = false
-                        } else {
+                        } else if (!ControlCatalog.galleryOpen) {
                             root.closing()
                         }
+                    }
+                }
+
+                Rectangle {
+                    id: ccGhost
+                    property bool shown: false
+                    property var info: null
+                    width: ccGhost.info ? ccGhost.info.w * root.box + (ccGhost.info.w - 1) * root.boxMargin : root.box
+                    height: ccGhost.info ? ccGhost.info.h * root.box + (ccGhost.info.h - 1) * root.boxMargin : root.box
+                    radius: Math.min(width, height) / 2
+                    color: "#99303034"
+                    border.width: 1
+                    border.color: "#60ffffff"
+                    visible: ccGhost.shown
+                    z: 100
+                    enabled: false
+                }
+
+                WidgetContextMenu {
+                    id: ccMenu
+
+                    property string target: ""
+
+                    onChosen: function(action) {
+                        if (action === "remove") ControlCatalog.remove(ccMenu.target)
                     }
                 }
 
@@ -530,6 +530,22 @@ Scope {
                         target: root
                         function onOpenedChanged() {
                             if (!root.opened) ccContent.showProgress = 0
+                        }
+                    }
+
+                    Repeater {
+                        model: ControlCatalog.emptySlots
+
+                        delegate: Rectangle {
+                            required property var modelData
+                            x: ccContent.gridX(modelData.x)
+                            y: ccContent.gridY(modelData.y)
+                            width: root.box
+                            height: root.box
+                            radius: root.box / 2
+                            color: "#26ffffff"
+                            border.width: 1
+                            border.color: "#18ffffff"
                         }
                     }
 
@@ -645,6 +661,73 @@ Scope {
                             NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                         }
 
+                        readonly property bool editing: ControlCatalog.galleryOpen && boxbutton.widgetId !== ""
+
+                        Rectangle {
+                            id: removeBadge
+                            x: -6
+                            y: -6
+                            z: 60
+                            width: 22
+                            height: 22
+                            radius: 11
+                            color: "#e0303034"
+                            border.width: 1
+                            border.color: "#50ffffff"
+                            visible: boxbutton.editing
+                            scale: removeArea.pressed ? 0.9 : 1
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 10
+                                height: 2
+                                radius: 1
+                                color: "#ffffff"
+                            }
+
+                            MouseArea {
+                                id: removeArea
+                                anchors.fill: parent
+                                anchors.margins: -4
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: ControlCatalog.remove(boxbutton.widgetId)
+                            }
+                        }
+
+                        MouseArea {
+                            id: editOverlay
+                            anchors.fill: parent
+                            z: 50
+                            visible: boxbutton.editing
+                            enabled: boxbutton.editing
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                            onPressed: function(mouse) {
+                                if (mouse.button !== Qt.RightButton) return
+                                ccMenu.target = boxbutton.widgetId
+                                var p = mapToItem(ccMenu, mouse.x, mouse.y)
+                                ccMenu.openAt(p.x, p.y, [{ label: "Remove", action: "remove", danger: true }])
+                            }
+
+                            DragHandler {
+                                target: null
+                                acceptedButtons: Qt.LeftButton
+                                onActiveChanged: {
+                                    if (active) {
+                                        ccGhost.info = ControlCatalog.infoOf(boxbutton.widgetId)
+                                        ccGhost.shown = true
+                                        return
+                                    }
+                                    ccGhost.shown = false
+                                    ControlCatalog.dropAt(boxbutton.widgetId, ccGhost.x + ccGhost.width / 2, ccGhost.y + ccGhost.height / 2)
+                                }
+                                onCentroidChanged: {
+                                    if (!active) return
+                                    ccGhost.x = centroid.scenePosition.x - ccGhost.width / 2
+                                    ccGhost.y = centroid.scenePosition.y - ccGhost.height / 2
+                                }
+                            }
+                        }
+
                         light: boxbutton.forceTransparentRim ? "transparent" : root.glassRimColor
                         rimStrength: boxbutton.forceTransparentRim ? 0 : root.glassRimStrength
                         color: boxbutton.forceTransparentRim ? "transparent" : root.glassColor
@@ -711,8 +794,8 @@ Scope {
                     BoxButton {
                         id: wifiWidget
                         widgetId: "wifiWidget"
-                        xPos: 0
-                        yPos: 0
+                        xPos: root.packedX("wifiWidget")
+                        yPos: root.packedY("wifiWidget")
                         width: root.wifiGrowReady ? root.gridImplicitWidth : root.box*2+root.boxMargin
                         height: root.wifiGrowReady ? _wPanel.implicitHeight : root.box
                         radius: root.wifiGrowReady ? 12 : 40
@@ -832,8 +915,8 @@ Scope {
                     BoxButton {
                         id: btWidget
                         widgetId: "btWidget"
-                        xPos: 0
-                        yPos: 1
+                        xPos: root.packedX("btWidget")
+                        yPos: root.packedY("btWidget")
                         width: root.btGrowReady ? root.gridImplicitWidth : root.box
                         height: root.btGrowReady ? _btPanel.implicitHeight : root.box
                         radius: root.btGrowReady ? 12 : 40
@@ -935,8 +1018,8 @@ Scope {
                     BoxButton {
                         id: adWidget
                         widgetId: "adWidget"
-                        xPos: 1
-                        yPos: 1
+                        xPos: root.packedX("adWidget")
+                        yPos: root.packedY("adWidget")
                         width: root.box
                         height: root.box
                         radius: 40
@@ -964,15 +1047,15 @@ Scope {
                     BoxButton {
                         id: musicWidget
                         widgetId: "musicWidget"
-                        xPos: 2
-                        yPos: 0
+                        xPos: root.packedX("musicWidget")
+                        yPos: root.packedY("musicWidget")
                         width: root.playerGrowReady ? root.gridImplicitWidth : root.box*2+root.boxMargin
                         height: root.playerGrowReady ? expCol.implicitHeight + 32 : root.box*2+root.boxMargin
                         radius: root.playerGrowReady ? 24 : 25
                         hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing
                         overwriteY: root.playerGrowReady
                         overwriteXFromRight: root.playerExpanded || root.playerClosing
-                        overwriteRightPos: ccContent.gridX(2) + (root.box*2+root.boxMargin)
+                        overwriteRightPos: ccContent.gridX(root.packedX("musicWidget")) + (root.box*2+root.boxMargin)
                         overwriteYPos: root.boxMargin
                         z: (root.playerExpanded || root.playerClosing) ? 100 : 0
                         forceTransparentRim: false
@@ -1323,8 +1406,8 @@ Scope {
                     BoxButton {
                         id: focusWidget
                         widgetId: "focusWidget"
-                        xPos: 0
-                        yPos: 2
+                        xPos: root.packedX("focusWidget")
+                        yPos: root.packedY("focusWidget")
                         width: root.box*2+root.boxMargin
                         height: root.box
                         radius: 40
@@ -1372,8 +1455,8 @@ Scope {
                     BoxButton {
                         id: stageWidget
                         widgetId: "stageWidget"
-                        xPos: 2
-                        yPos: 2
+                        xPos: root.packedX("stageWidget")
+                        yPos: root.packedY("stageWidget")
                         width: root.box
                         height: root.box
                         radius: 22
@@ -1399,8 +1482,8 @@ Scope {
                     BoxButton {
                         id: shareWidget
                         widgetId: "shareWidget"
-                        xPos: 3
-                        yPos: 2
+                        xPos: root.packedX("shareWidget")
+                        yPos: root.packedY("shareWidget")
                         width: root.box
                         height: root.box
                         radius: 22
@@ -1433,8 +1516,8 @@ Scope {
                     BoxButton {
                         id: displayWidget
                         widgetId: "displayWidget"
-                        xPos: 0
-                        yPos: 3
+                        xPos: root.packedX("displayWidget")
+                        yPos: root.packedY("displayWidget")
                         width: root.box*4+root.boxMargin*3
                         height: root.box
                         radius: 25
@@ -1470,8 +1553,8 @@ Scope {
                     BoxButton {
                         id: volumeWidget
                         widgetId: "volumeWidget"
-                        xPos: 0
-                        yPos: 4
+                        xPos: root.packedX("volumeWidget")
+                        yPos: root.packedY("volumeWidget")
                         width: root.box*4+root.boxMargin*3
                         height: root.box
                         radius: 25
