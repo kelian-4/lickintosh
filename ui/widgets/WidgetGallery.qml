@@ -46,6 +46,17 @@ Scope {
                     onClicked: WidgetState.closeGallery()
                 }
 
+                WidgetView {
+                    id: ghost
+                    property bool shown: false
+                    property var spec: ({ id: "ghost", type: "clock", size: "s" })
+                    widgetData: ghost.spec
+                    visible: ghost.shown
+                    opacity: 0.9
+                    z: 100
+                    enabled: false
+                }
+
                 Rectangle {
                     id: panel
                     anchors.centerIn: parent
@@ -72,7 +83,9 @@ Scope {
                         function onOpenedChanged() { panel.vis = root.opened }
                     }
 
-                    opacity: panel.vis ? 1 : 0
+                    property bool dragging: false
+
+                    opacity: panel.vis ? (panel.dragging ? 0.25 : 1) : 0
                     scale: panel.vis ? 1 : 0.96
                     Behavior on opacity {
                         NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
@@ -303,6 +316,32 @@ Scope {
                                                                 cursorShape: Qt.PointingHandCursor
                                                                 onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData)
                                                             }
+
+                                                            DragHandler {
+                                                                target: null
+                                                                onActiveChanged: {
+                                                                    if (active) {
+                                                                        ghost.spec = ({ id: "ghost", type: section.modelData.type, size: tile.modelData })
+                                                                        ghost.shown = true
+                                                                        panel.dragging = true
+                                                                        return
+                                                                    }
+                                                                    var cx = ghost.x + ghost.width / 2
+                                                                    var cy = ghost.y + ghost.height / 2
+                                                                    var inside = cx >= panel.x && cx <= panel.x + panel.width && cy >= panel.y && cy <= panel.y + panel.height
+                                                                    ghost.shown = false
+                                                                    panel.dragging = false
+                                                                    if (!inside) {
+                                                                        WidgetState.addWidgetAt(WidgetState.galleryZone, section.modelData.type, tile.modelData,
+                                                                            ghost.x - WidgetState.desktopOffsetX, ghost.y - WidgetState.desktopOffsetY)
+                                                                    }
+                                                                }
+                                                                onCentroidChanged: {
+                                                                    if (!active) return
+                                                                    ghost.x = centroid.scenePosition.x - ghost.width / 2
+                                                                    ghost.y = centroid.scenePosition.y - ghost.height / 2
+                                                                }
+                                                            }
                                                         }
 
                                                         Text {
@@ -336,7 +375,7 @@ Scope {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: "Click a widget to add it to " + root.zoneTitle + "."
+                                    text: "Click or drag a widget to add it to " + root.zoneTitle + "."
                                     elide: Text.ElideRight
                                     color: Qt.rgba(1, 1, 1, 0.75)
                                     font.pixelSize: 12
