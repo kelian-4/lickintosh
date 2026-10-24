@@ -28,7 +28,7 @@ Item {
         Text {
             text: TimerState.firing ? "Done" : (root.active ? TimerState.formatRemaining(TimerState.remainingMs) : "0:00")
             color: TimerState.firing ? "#ff9f0a" : "#ffffff"
-            font.pixelSize: root.size === "s" ? 38 : 50
+            font.pixelSize: root.size === "s" ? 34 : 44
             font.weight: Font.Light
             font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering

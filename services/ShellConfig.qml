@@ -196,6 +196,7 @@ Singleton {
             }
 
             property JsonObject controlCenter: JsonObject {
+                property list<var> packOrder: []
                 property list<var> widgetVisibility: [
                     { "id": "wifiWidget",     "visible": true },
                     { "id": "btWidget",       "visible": true },
