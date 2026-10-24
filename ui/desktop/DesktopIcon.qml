@@ -9,10 +9,18 @@ Item {
     required property bool fileIsDir
 
     readonly property bool selected: DesktopFiles.selected === root.filePath
+    readonly property bool editing: DesktopFiles.renaming === root.filePath
     readonly property bool thumbnail: !root.fileIsDir && DesktopFiles.isImage(root.fileName)
 
     width: 96
     height: 104
+
+    onEditingChanged: {
+        if (!root.editing) return
+        renameInput.text = root.fileName
+        renameInput.forceActiveFocus()
+        renameInput.selectAll()
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -42,6 +50,7 @@ Item {
         anchors.right: parent.right
         anchors.leftMargin: 4
         anchors.rightMargin: 4
+        visible: !root.editing
         horizontalAlignment: Text.AlignHCenter
         text: DesktopFiles.labelFor(root.fileName)
         wrapMode: Text.Wrap
@@ -55,8 +64,39 @@ Item {
         renderType: Text.NativeRendering
     }
 
+    Rectangle {
+        anchors.top: glyph.bottom
+        anchors.topMargin: 2
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 22
+        radius: 5
+        color: "#ffffff"
+        visible: root.editing
+
+        TextInput {
+            id: renameInput
+            anchors.fill: parent
+            anchors.leftMargin: 4
+            anchors.rightMargin: 4
+            verticalAlignment: TextInput.AlignVCenter
+            color: "#1c1c1f"
+            clip: true
+            selectByMouse: true
+            font.pixelSize: 12
+            font.family: "SF Pro Rounded"
+            renderType: Text.NativeRendering
+            onAccepted: {
+                DesktopFiles.rename(root.filePath, renameInput.text)
+                DesktopFiles.renaming = ""
+            }
+            Keys.onEscapePressed: DesktopFiles.renaming = ""
+        }
+    }
+
     MouseArea {
         anchors.fill: parent
+        enabled: !root.editing
         onPressed: DesktopFiles.selected = root.filePath
         onDoubleClicked: DesktopFiles.open(root.filePath, root.fileName)
     }
