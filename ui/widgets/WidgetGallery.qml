@@ -10,7 +10,7 @@ Scope {
     id: root
 
     readonly property bool opened: WidgetState.galleryZone !== ""
-    readonly property string zoneTitle: WidgetState.galleryZone === "desktop" ? "Desktop" : "Notification Center"
+    readonly property string zoneTitle: WidgetState.galleryZone === "desktop" ? "the Desktop" : "the Notification Center"
 
     Presence {
         id: presence
@@ -36,6 +36,7 @@ Scope {
 
                 WlrLayershell.namespace: "quickshell:widgetgallery"
                 WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
                 color: "transparent"
                 exclusiveZone: -1
                 anchors { top: true; right: true; bottom: true; left: true }
@@ -48,12 +49,21 @@ Scope {
                 Rectangle {
                     id: panel
                     anchors.centerIn: parent
-                    width: Math.min(720, parent.width - 48)
-                    height: Math.min(560, parent.height - 96)
+                    width: Math.min(700, parent.width - 48)
+                    height: Math.min(580, parent.height - 96)
                     radius: 26
-                    color: Qt.rgba(0.11, 0.11, 0.13, 0.96)
+                    color: Qt.rgba(0.13, 0.13, 0.15, 0.97)
                     border.width: 1
                     border.color: Qt.rgba(1, 1, 1, 0.10)
+                    clip: true
+
+                    property string category: "all"
+                    property string query: ""
+                    readonly property var filtered: WidgetRegistry.types.filter(function(t) {
+                        var inCategory = panel.category === "all" || t.type === panel.category
+                        var inQuery = panel.query === "" || t.title.toLowerCase().indexOf(panel.query.toLowerCase()) >= 0
+                        return inCategory && inQuery
+                    })
 
                     property bool vis: false
                     Component.onCompleted: panel.vis = root.opened
@@ -76,147 +86,284 @@ Scope {
                         onClicked: function(e) { e.accepted = true }
                     }
 
-                    ColumnLayout {
+                    RowLayout {
                         anchors.fill: parent
-                        anchors.margins: 22
-                        spacing: 14
+                        spacing: 0
 
-                        RowLayout {
-                            Layout.fillWidth: true
+                        Rectangle {
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 196
+                            color: Qt.rgba(0, 0, 0, 0.18)
 
                             ColumnLayout {
-                                spacing: 0
+                                anchors.fill: parent
+                                anchors.margins: 10
+                                spacing: 8
 
-                                Text {
-                                    text: "Widgets"
-                                    color: "#ffffff"
-                                    font.pixelSize: 20
-                                    font.weight: Font.Bold
-                                    font.family: "SF Pro Rounded"
-                                    renderType: Text.NativeRendering
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 30
+                                    radius: 10
+                                    color: Qt.rgba(1, 1, 1, 0.08)
+                                    border.width: searchInput.activeFocus ? 2 : 1
+                                    border.color: searchInput.activeFocus ? "#a35cf0" : Qt.rgba(1, 1, 1, 0.12)
+
+                                    TextInput {
+                                        id: searchInput
+                                        focus: true
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 10
+                                        anchors.rightMargin: 10
+                                        verticalAlignment: TextInput.AlignVCenter
+                                        color: "#ffffff"
+                                        clip: true
+                                        selectByMouse: true
+                                        font.pixelSize: 13
+                                        font.family: "SF Pro Rounded"
+                                        renderType: Text.NativeRendering
+                                        onTextChanged: panel.query = searchInput.text
+                                        Keys.onEscapePressed: WidgetState.closeGallery()
+
+                                        Text {
+                                            anchors.fill: parent
+                                            verticalAlignment: Text.AlignVCenter
+                                            visible: searchInput.text === "" && !searchInput.preeditText
+                                            text: "Search Widgets"
+                                            color: Qt.rgba(1, 1, 1, 0.45)
+                                            font: searchInput.font
+                                            renderType: Text.NativeRendering
+                                        }
+                                    }
                                 }
 
-                                Text {
-                                    text: "Add to " + root.zoneTitle
-                                    color: Qt.rgba(1, 1, 1, 0.55)
-                                    font.pixelSize: 12
-                                    font.family: "SF Pro Rounded"
-                                    renderType: Text.NativeRendering
+                                Repeater {
+                                    model: [{ type: "all", title: "All Widgets", icon: "notch/columns.svg", tint: "#8e8e93" }].concat(WidgetRegistry.types)
+
+                                    delegate: Rectangle {
+                                        id: category
+                                        required property var modelData
+
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 34
+                                        radius: 10
+                                        color: panel.category === category.modelData.type ? Qt.rgba(1, 1, 1, 0.14) : (catArea.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : "transparent")
+
+                                        RowLayout {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 8
+                                            anchors.rightMargin: 8
+                                            spacing: 10
+
+                                            Rectangle {
+                                                Layout.preferredWidth: 22
+                                                Layout.preferredHeight: 22
+                                                radius: 6
+                                                color: category.modelData.tint
+
+                                                CFVI {
+                                                    anchors.centerIn: parent
+                                                    size: 14
+                                                    icon: category.modelData.icon
+                                                    colorized: category.modelData.type !== "weather"
+                                                }
+                                            }
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: category.modelData.title
+                                                elide: Text.ElideRight
+                                                color: "#ffffff"
+                                                font.pixelSize: 13
+                                                font.weight: Font.Medium
+                                                font.family: "SF Pro Rounded"
+                                                renderType: Text.NativeRendering
+                                            }
+                                        }
+
+                                        MouseArea {
+                                            id: catArea
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: panel.category = category.modelData.type
+                                        }
+                                    }
                                 }
-                            }
 
-                            Item { Layout.fillWidth: true }
-
-                            Rectangle {
-                                Layout.preferredWidth: 64
-                                Layout.preferredHeight: 28
-                                radius: 14
-                                color: ShellConfig.options.appearance.accentColor
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Done"
-                                    color: "#ffffff"
-                                    font.pixelSize: 13
-                                    font.weight: Font.Medium
-                                    font.family: "SF Pro Rounded"
-                                    renderType: Text.NativeRendering
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: WidgetState.closeGallery()
-                                }
+                                Item { Layout.fillHeight: true }
                             }
                         }
 
-                        Flickable {
+                        ColumnLayout {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            contentWidth: width
-                            contentHeight: sections.implicitHeight
-                            clip: true
-                            boundsBehavior: Flickable.StopAtBounds
+                            spacing: 0
 
-                            ColumnLayout {
-                                id: sections
-                                width: parent.width
-                                spacing: 18
+                            Flickable {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                Layout.margins: 18
+                                contentWidth: width
+                                contentHeight: sections.implicitHeight
+                                clip: true
+                                boundsBehavior: Flickable.StopAtBounds
 
-                                Repeater {
-                                    model: WidgetRegistry.types
+                                ColumnLayout {
+                                    id: sections
+                                    width: parent.width
+                                    spacing: 20
 
-                                    delegate: ColumnLayout {
-                                        id: section
-                                        required property var modelData
+                                    Text {
                                         Layout.fillWidth: true
-                                        spacing: 8
+                                        visible: panel.filtered.length === 0
+                                        horizontalAlignment: Text.AlignHCenter
+                                        text: "No Widgets Found"
+                                        color: Qt.rgba(1, 1, 1, 0.5)
+                                        font.pixelSize: 14
+                                        font.family: "SF Pro Rounded"
+                                        renderType: Text.NativeRendering
+                                    }
 
-                                        Text {
-                                            text: section.modelData.title
-                                            color: "#ffffff"
-                                            font.pixelSize: 14
-                                            font.weight: Font.Bold
-                                            font.family: "SF Pro Rounded"
-                                            renderType: Text.NativeRendering
-                                        }
+                                    Repeater {
+                                        model: panel.filtered
 
-                                        Flow {
+                                        delegate: ColumnLayout {
+                                            id: section
+                                            required property var modelData
                                             Layout.fillWidth: true
-                                            spacing: WidgetState.gap
+                                            spacing: 8
 
-                                            Repeater {
-                                                model: section.modelData.sizes
+                                            Text {
+                                                text: section.modelData.title
+                                                color: "#ffffff"
+                                                font.pixelSize: 13
+                                                font.weight: Font.Bold
+                                                font.family: "SF Pro Rounded"
+                                                renderType: Text.NativeRendering
+                                            }
 
-                                                delegate: Item {
-                                                    id: tile
-                                                    required property string modelData
-                                                    readonly property var dims: WidgetState.sizeOf(tile.modelData)
+                                            Rectangle {
+                                                Layout.fillWidth: true
+                                                Layout.preferredHeight: 1
+                                                color: Qt.rgba(1, 1, 1, 0.10)
+                                            }
 
-                                                    width: tile.dims.w
-                                                    height: tile.dims.h
+                                            Flow {
+                                                Layout.fillWidth: true
+                                                spacing: WidgetState.gap
 
-                                                    WidgetView {
-                                                        widgetData: ({ id: "preview", type: section.modelData.type, size: tile.modelData })
-                                                    }
+                                                Repeater {
+                                                    model: section.modelData.sizes
 
-                                                    Rectangle {
-                                                        anchors.fill: parent
-                                                        radius: 22
-                                                        color: tileArea.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent"
-                                                    }
+                                                    delegate: Column {
+                                                        id: tile
+                                                        required property string modelData
+                                                        readonly property var dims: WidgetState.sizeOf(tile.modelData)
 
-                                                    Rectangle {
-                                                        anchors.top: parent.top
-                                                        anchors.right: parent.right
-                                                        anchors.margins: 8
-                                                        width: 24
-                                                        height: 24
-                                                        radius: 12
-                                                        color: ShellConfig.options.appearance.accentColor
-                                                        visible: tileArea.containsMouse
+                                                        spacing: 6
+
+                                                        Item {
+                                                            width: tile.dims.w
+                                                            height: tile.dims.h
+
+                                                            WidgetView {
+                                                                widgetData: ({ id: "preview", type: section.modelData.type, size: tile.modelData })
+                                                            }
+
+                                                            Rectangle {
+                                                                anchors.fill: parent
+                                                                radius: 22
+                                                                color: tileArea.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent"
+                                                            }
+
+                                                            Rectangle {
+                                                                anchors.top: parent.top
+                                                                anchors.right: parent.right
+                                                                anchors.margins: 8
+                                                                width: 24
+                                                                height: 24
+                                                                radius: 12
+                                                                color: "#a35cf0"
+                                                                visible: tileArea.containsMouse
+
+                                                                Text {
+                                                                    anchors.centerIn: parent
+                                                                    text: "+"
+                                                                    color: "#ffffff"
+                                                                    font.pixelSize: 18
+                                                                    font.family: "SF Pro Rounded"
+                                                                    renderType: Text.NativeRendering
+                                                                }
+                                                            }
+
+                                                            MouseArea {
+                                                                id: tileArea
+                                                                anchors.fill: parent
+                                                                hoverEnabled: true
+                                                                cursorShape: Qt.PointingHandCursor
+                                                                onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData)
+                                                            }
+                                                        }
 
                                                         Text {
-                                                            anchors.centerIn: parent
-                                                            text: "+"
-                                                            color: "#ffffff"
-                                                            font.pixelSize: 18
+                                                            width: tile.dims.w
+                                                            horizontalAlignment: Text.AlignHCenter
+                                                            text: WidgetRegistry.sizeLabels[tile.modelData]
+                                                            color: Qt.rgba(1, 1, 1, 0.55)
+                                                            font.pixelSize: 11
                                                             font.family: "SF Pro Rounded"
                                                             renderType: Text.NativeRendering
                                                         }
                                                     }
-
-                                                    MouseArea {
-                                                        id: tileArea
-                                                        anchors.fill: parent
-                                                        hoverEnabled: true
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData)
-                                                    }
                                                 }
                                             }
                                         }
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 1
+                                color: Qt.rgba(1, 1, 1, 0.10)
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 52
+                                Layout.leftMargin: 18
+                                Layout.rightMargin: 18
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "Click a widget to add it to " + root.zoneTitle + "."
+                                    elide: Text.ElideRight
+                                    color: Qt.rgba(1, 1, 1, 0.75)
+                                    font.pixelSize: 12
+                                    font.family: "SF Pro Rounded"
+                                    renderType: Text.NativeRendering
+                                }
+
+                                Rectangle {
+                                    Layout.preferredWidth: 68
+                                    Layout.preferredHeight: 28
+                                    radius: 14
+                                    color: "#a35cf0"
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "Done"
+                                        color: "#ffffff"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        font.family: "SF Pro Rounded"
+                                        renderType: Text.NativeRendering
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: WidgetState.closeGallery()
                                     }
                                 }
                             }

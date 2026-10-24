@@ -13,7 +13,7 @@ Scope {
         screen: Quickshell.screens[0]
 
         WlrLayershell.namespace: "quickshell:desktop"
-        WlrLayershell.layer: WlrLayer.Background
+        WlrLayershell.layer: WlrLayer.Bottom
         exclusionMode: ExclusionMode.Ignore
         color: "transparent"
         anchors { top: true; right: true; bottom: true; left: true }
