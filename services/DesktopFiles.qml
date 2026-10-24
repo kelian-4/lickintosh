@@ -4,15 +4,27 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Qt.labs.folderlistmodel
 import Quickshell
+import Quickshell.Io
 
 Singleton {
     id: root
 
     reloadableId: "desktopFiles"
 
-    readonly property string dir: Quickshell.env("HOME") + "/Desktop"
+    property string dir: Quickshell.env("HOME") + "/Desktop"
     property alias model: folderModel
     property string selected: ""
+
+    Process {
+        running: true
+        command: ["xdg-user-dir", "DESKTOP"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var path = text.trim()
+                if (path !== "" && path !== Quickshell.env("HOME")) root.dir = path
+            }
+        }
+    }
 
     FolderListModel {
         id: folderModel
