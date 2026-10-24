@@ -145,9 +145,9 @@ Scope {
         }
     }
 
-    readonly property int box:        65
-    readonly property int boxMargin:  10
-    readonly property int gridW:      4
+    readonly property int box:        ControlCatalog.box
+    readonly property int boxMargin:  ControlCatalog.boxMargin
+    readonly property int gridW:      ControlCatalog.gridW
     readonly property int gridH:      8
     readonly property int animationDur: ShellMotion.fade()
 
@@ -166,33 +166,9 @@ Scope {
         { id: "volumeWidget",   row: 4 }
     ]
 
-    readonly property var _packableWidgets: [
-        { id: "darkWidget",      wUnits: 2, hUnits: 1 },
-        { id: "calcWidget",      wUnits: 1, hUnits: 1 },
-        { id: "gameModeWidget",  wUnits: 1, hUnits: 1 },
-        { id: "timerWidget",     wUnits: 1, hUnits: 1 },
-        { id: "alarmWidget",     wUnits: 1, hUnits: 1 },
-        { id: "stopwatchWidget", wUnits: 1, hUnits: 1 }
-    ]
+    readonly property int _packStartRow: ControlCatalog.packStartRow
 
-    readonly property int _packStartRow: 5
-
-    readonly property var _packedLayout: {
-        var layout = {}
-        var cursorX = 0
-        var cursorY = root._packStartRow
-        for (var i = 0; i < root._packableWidgets.length; i++) {
-            var w = root._packableWidgets[i]
-            if (!ShellConfig.ccWidgetVisible(w.id)) continue
-            if (cursorX + w.wUnits > root.gridW) {
-                cursorX = 0
-                cursorY++
-            }
-            layout[w.id] = { xPos: cursorX, yPos: cursorY, wUnits: w.wUnits, hUnits: w.hUnits }
-            cursorX += w.wUnits
-        }
-        return layout
-    }
+    readonly property var _packedLayout: ControlCatalog.packedLayout
 
     function packedX(id) {
         return root._packedLayout[id] ? root._packedLayout[id].xPos : 0
@@ -478,6 +454,7 @@ Scope {
             _ccCloseTimer.stop()
             _ccLoaderActive = true
         } else {
+            ControlCatalog.galleryOpen = false
             _ccCloseTimer.restart()
         }
     }
@@ -553,6 +530,39 @@ Scope {
                         target: root
                         function onOpenedChanged() {
                             if (!root.opened) ccContent.showProgress = 0
+                        }
+                    }
+
+                    Binding { target: ControlCatalog; property: "panelX"; value: ccContent.x }
+                    Binding { target: ControlCatalog; property: "panelY"; value: ccContent.y }
+                    Binding { target: ControlCatalog; property: "panelWidth"; value: ccContent.width }
+                    Binding { target: ControlCatalog; property: "panelHeight"; value: ccContent.height }
+
+                    Rectangle {
+                        y: ccContent.height + 10
+                        anchors.right: parent.right
+                        width: _editControlsLabel.implicitWidth + 28
+                        height: 28
+                        radius: 14
+                        color: "#40000000"
+                        border.width: 1
+                        border.color: "#30ffffff"
+
+                        Text {
+                            id: _editControlsLabel
+                            anchors.centerIn: parent
+                            text: "Edit Controls…"
+                            color: "#ffffff"
+                            font.pixelSize: 12
+                            font.weight: Font.Medium
+                            font.family: "SF Pro Rounded"
+                            renderType: Text.NativeRendering
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: ControlCatalog.galleryOpen = true
                         }
                     }
 
