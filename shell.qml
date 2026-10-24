@@ -18,6 +18,7 @@ import qs.ui.dock
 import qs.ui.topbar.statusarea.spotlight
 import qs.ui.osd
 import qs.ui.lockscreen
+import qs.ui.widgets
 
 
 ShellRoot {
@@ -180,6 +181,7 @@ ShellRoot {
         opened: appRoot.ccOpened
         onClosing: appRoot.ccOpened = false
     }
+    WidgetGallery {}
     Dock {}
     SpotlightWindow {
         opened: appRoot.spotlightOpened
