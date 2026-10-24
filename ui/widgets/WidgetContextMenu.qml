@@ -104,7 +104,7 @@ Item {
                         anchors.rightMargin: 26
                         anchors.verticalCenter: parent.verticalCenter
                         visible: !row.isSeparator
-                        text: row.modelData.label
+                        text: row.modelData.label !== undefined ? row.modelData.label : ""
                         elide: Text.ElideRight
                         color: row.isDisabled ? Qt.rgba(1, 1, 1, 0.35) : (row.modelData.danger === true && !area.containsMouse ? "#ff6961" : "#ffffff")
                         font.pixelSize: 13
