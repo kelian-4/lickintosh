@@ -18,6 +18,7 @@ import qs.ui.dock
 import qs.ui.topbar.statusarea.spotlight
 import qs.ui.osd
 import qs.ui.lockscreen
+import qs.ui.desktop
 import qs.ui.widgets
 
 
@@ -181,6 +182,7 @@ ShellRoot {
         opened: appRoot.ccOpened
         onClosing: appRoot.ccOpened = false
     }
+    DesktopLayer {}
     WidgetGallery {}
     Dock {}
     SpotlightWindow {
