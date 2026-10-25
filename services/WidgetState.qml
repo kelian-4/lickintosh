@@ -99,9 +99,9 @@ Singleton {
         return { x: 0, y: 0 }
     }
 
-    function addWidget(zone, type, size, variant) {
+    function addWidget(zone, type, size) {
         var list = root.listOf(zone)
-        var entry = { id: "w_" + Date.now(), type: type, variant: variant || "", size: size, x: 0, y: 0 }
+        var entry = { id: "w_" + Date.now(), type: type, size: size, x: 0, y: 0 }
         if (zone === "desktop") {
             var p = root.freeSlot(list, "", size)
             entry.x = p.x
@@ -120,14 +120,14 @@ Singleton {
         return { x: nx, y: ny }
     }
 
-    function addWidgetAt(zone, type, size, variant, x, y) {
+    function addWidgetAt(zone, type, size, x, y) {
         if (zone !== "desktop") {
-            root.addWidget(zone, type, size, variant)
+            root.addWidget(zone, type, size)
             return
         }
         var list = root.listOf("desktop")
         var p = root.snap(size, x, y)
-        list.push({ id: "w_" + Date.now(), type: type, variant: variant || "", size: size, x: p.x, y: p.y })
+        list.push({ id: "w_" + Date.now(), type: type, size: size, x: p.x, y: p.y })
         root.setList("desktop", list)
     }
 
@@ -196,7 +196,7 @@ Singleton {
         var entries = []
         if (widget) {
             entries.push({ label: "Remove Widget", action: "remove" })
-            var sizes = WidgetRegistry.sizesOf(WidgetRegistry.resolve(widget).type, WidgetRegistry.resolve(widget).variant)
+            var sizes = WidgetRegistry.sizesOf(widget.type)
             if (sizes.length > 1) {
                 for (var i = 0; i < sizes.length; i++) {
                     entries.push({
