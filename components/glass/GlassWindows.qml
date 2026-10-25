@@ -7,7 +7,7 @@ Item {
 
     property string monitorName: ""
     property rect region: Qt.rect(0, 0, 0, 0)
-    property real attachMargin: GlassSettings.captureMargin
+    property real attachMargin: GlassTracker.captureMargin
 
     readonly property var monitorObject: {
         var ms = Hyprland.monitors.values
@@ -72,15 +72,15 @@ Item {
     }
 
     Connections {
-        target: GlassLayers
+        target: GlassTracker
 
         function onTransitionEpochChanged() {
             root.restartGate(180)
         }
     }
 
-    Component.onCompleted: GlassLayers.captureUsers++
-    Component.onDestruction: GlassLayers.captureUsers--
+    Component.onCompleted: GlassTracker.captureUsers++
+    Component.onDestruction: GlassTracker.captureUsers--
 
     Repeater {
         id: windowsRepeater

@@ -13,28 +13,15 @@ Item {
     property rect captureRegion: glassRegion
     property rect glassRegion: Qt.rect(0, 0, 0, 0)
     property var quads: []
+    property bool ready: true
+    property bool warm: false
 
     property real blurRadius: 2.0
     property real blurDownscale: 0.5
-    property real aa: GlassSettings.backdropScale
-    property bool ready: true
+    property real aa: GlassTracker.backdropScale
 
     readonly property Item blurSource: blurFinal
-    property bool warm: false
     readonly property bool captureSettled: warm && (!captureWindows || (windowsLoader.item !== null && windowsLoader.item.latched))
-
-    onReadyChanged: {
-        warm = false
-        if (ready)
-            warmTimer.restart()
-    }
-
-    Timer {
-        id: warmTimer
-        interval: 50
-        running: root.ready
-        onTriggered: root.warm = true
-    }
     readonly property string shaderDir: Quickshell.shellDir + "/assets/shaders/liquidglass/"
 
     function registerQuad(q) {
@@ -75,17 +62,27 @@ Item {
             root.glassRegion = r
     }
 
+    onReadyChanged: {
+        warm = false
+        if (ready)
+            warmTimer.restart()
+    }
+
     Timer {
         id: regionTimer
         interval: 16
         onTriggered: root.recomputeRegion()
     }
 
+    Timer {
+        id: warmTimer
+        interval: 50
+        running: root.ready
+        onTriggered: root.warm = true
+    }
+
     width: 0
     height: 0
-
-    Component.onCompleted: GlassLayers.users++
-    Component.onDestruction: GlassLayers.users--
 
     Item {
         id: scene
@@ -94,7 +91,7 @@ Item {
 
         Image {
             anchors.fill: parent
-            source: root.ready && root.wallpaperPath !== "" ? "file://" + root.wallpaperPath : ""
+            source: root.wallpaperPath !== "" ? "file://" + root.wallpaperPath : ""
             fillMode: Image.PreserveAspectCrop
             cache: true
             sourceSize: Qt.size(scene.width, scene.height)
