@@ -19,6 +19,7 @@ Singleton {
     property alias showHidden: widgetsAdapter.showHidden
 
     property string galleryZone: ""
+    property bool typing: false
     property int areaWidth: 1280
     property int areaHeight: 720
 
