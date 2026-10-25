@@ -64,11 +64,25 @@ Singleton {
         return DesktopEntries.byId(name.slice(0, -8))
     }
 
+    // First name of `names` that exists in the icon theme, or the theme's
+    // "missing" icon when none does. Avoids the missing-texture checkerboard
+    // when a theme lacks the generic file icons (MacTahoe-dark ships only the
+    // symbolic ones unless the base MacTahoe theme is installed next to it).
+    function firstThemeIcon(names) {
+        for (var i = 0; i < names.length; i++) {
+            if (!names[i]) continue
+            var p = Quickshell.iconPath(names[i], true)
+            if (p !== "") return p
+        }
+        return Quickshell.iconPath("image-missing")
+    }
+
     function iconPathFor(name, isDir) {
         if (isDir) return Quickshell.iconPath("folder", "inode-directory")
         var entry = root.entryFor(name)
-        if (entry && entry.icon !== "") return Quickshell.iconPath(entry.icon, "application-x-executable")
-        return Quickshell.iconPath("text-x-generic", "application-x-executable")
+        if (entry && entry.icon !== "")
+            return root.firstThemeIcon([entry.icon, "application-x-executable", "application-x-executable-symbolic", "unknown"])
+        return root.firstThemeIcon(["text-x-generic", "text-x-generic-symbolic", "application-x-executable", "unknown"])
     }
 
     function labelFor(name) {
