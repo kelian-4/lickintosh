@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components.glass
 import qs.services
 
 Item {
@@ -11,12 +12,12 @@ Item {
     width: root.dims.w
     height: root.dims.h
 
-    Rectangle {
+    BoxGlass {
         anchors.fill: parent
         radius: 22
-        color: Qt.rgba(0.09, 0.09, 0.11, 0.80)
-        border.width: 1
-        border.color: Qt.rgba(1, 1, 1, 0.08)
+        color: "#59101014"
+        light: "#60ffffff"
+        rimStrength: 1.0
     }
 
     Loader {
