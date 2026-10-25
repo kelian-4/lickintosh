@@ -5,6 +5,7 @@ Item {
 
     property var window: null
     property bool hovered: false
+    signal closeRequested()
 
     implicitHeight: 24
 
@@ -39,7 +40,7 @@ Item {
                 cursorShape: Qt.PointingHandCursor
                 onEntered: root.hovered = true
                 onExited: root.hovered = false
-                onClicked: if (root.window) root.window.close()
+                onClicked: root.closeRequested()
             }
         }
 
@@ -63,7 +64,7 @@ Item {
                 cursorShape: Qt.PointingHandCursor
                 onEntered: root.hovered = true
                 onExited: root.hovered = false
-                onClicked: if (root.window) root.window.showMinimized()
+                onClicked: if (root.window) root.window.minimized = true
             }
         }
     }

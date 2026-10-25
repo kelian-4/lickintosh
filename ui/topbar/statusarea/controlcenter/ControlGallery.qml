@@ -49,7 +49,7 @@ Scope {
                     hint: "Drag a control into Control Center, or click it to add."
                     emptyText: "No Controls Found"
                     empty: panel.sections.length === 0
-                    onDone: win.close()
+                    onDone: ControlCatalog.galleryOpen = false
 
                     Repeater {
                         model: panel.sections
@@ -109,7 +109,7 @@ Scope {
                                                     anchors.fill: parent
                                                     hoverEnabled: true
                                                     cursorShape: Qt.PointingHandCursor
-                                                    onPressed: face.grabToImage(function(result) { face.Drag.imageSource = result.url })
+                                                    onPressed: face.grabToImage(function(result) { face.Drag.imageSource = result.url }, Qt.size(face.width, face.height))
                                                     onClicked: ControlCatalog.add(tile.modelData.id)
                                                 }
 
