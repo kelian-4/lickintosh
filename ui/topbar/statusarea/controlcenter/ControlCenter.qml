@@ -157,11 +157,23 @@ Scope {
 
     readonly property var _packedLayout: ControlCatalog.packedLayout
 
+    property var _slotMemo: ({})
+
     function packedX(id) {
-        return root._packedLayout[id] ? root._packedLayout[id].xPos : 0
+        var p = root._packedLayout[id]
+        if (p) {
+            root._slotMemo[id + "x"] = p.xPos
+            return p.xPos
+        }
+        return root._slotMemo[id + "x"] !== undefined ? root._slotMemo[id + "x"] : 0
     }
     function packedY(id) {
-        return root._packedLayout[id] ? root._packedLayout[id].yPos : 0
+        var p = root._packedLayout[id]
+        if (p) {
+            root._slotMemo[id + "y"] = p.yPos
+            return p.yPos
+        }
+        return root._slotMemo[id + "y"] !== undefined ? root._slotMemo[id + "y"] : 0
     }
 
     readonly property int _lastVisibleRow: ControlCatalog.shownRows - 1
@@ -467,6 +479,14 @@ Scope {
                     left:   true
                 }
 
+                mask: ControlCatalog.galleryOpen ? editMask : null
+
+                Region {
+                    id: editMask
+                    item: ccContent
+                    Region { item: editPill }
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -478,21 +498,6 @@ Scope {
                             root.closing()
                         }
                     }
-                }
-
-                Rectangle {
-                    id: ccGhost
-                    property bool shown: false
-                    property var info: null
-                    width: ccGhost.info ? ccGhost.info.w * root.box + (ccGhost.info.w - 1) * root.boxMargin : root.box
-                    height: ccGhost.info ? ccGhost.info.h * root.box + (ccGhost.info.h - 1) * root.boxMargin : root.box
-                    radius: Math.min(width, height) / 2
-                    color: "#99303034"
-                    border.width: 1
-                    border.color: "#60ffffff"
-                    visible: ccGhost.shown
-                    z: 100
-                    enabled: false
                 }
 
                 WidgetContextMenu {
@@ -509,6 +514,9 @@ Scope {
                     id: ccContent
                     width:  root.gridImplicitWidth
                     height: root._visibleGridHeight
+                    Behavior on height {
+                        NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
+                    }
                     anchors.top: parent.top
                     anchors.right: parent.right
                     anchors.topMargin: 30
@@ -534,27 +542,94 @@ Scope {
                     }
 
                     Repeater {
-                        model: ControlCatalog.emptySlots
+                        model: ControlCatalog.maxRows * ControlCatalog.gridW
 
                         delegate: Rectangle {
-                            required property var modelData
-                            x: ccContent.gridX(modelData.x)
-                            y: ccContent.gridY(modelData.y)
+                            id: slotCell
+                            required property int index
+                            readonly property int cx: slotCell.index % ControlCatalog.gridW
+                            readonly property int cy: Math.floor(slotCell.index / ControlCatalog.gridW)
+                            readonly property bool shown: ControlCatalog.galleryOpen
+                                                          && slotCell.cy < ControlCatalog.shownRows
+                                                          && !ControlCatalog.occupied[ControlCatalog.key(slotCell.cx, slotCell.cy)]
+                            x: ccContent.gridX(slotCell.cx)
+                            y: ccContent.gridY(slotCell.cy)
                             width: root.box
                             height: root.box
                             radius: root.box / 2
                             color: "#26ffffff"
                             border.width: 1
                             border.color: "#18ffffff"
+                            opacity: slotCell.shown ? 1 : 0
+                            visible: opacity > 0
+                            Behavior on opacity {
+                                NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                            }
                         }
                     }
 
-                    Binding { target: ControlCatalog; property: "panelX"; value: ccContent.x }
-                    Binding { target: ControlCatalog; property: "panelY"; value: ccContent.y }
-                    Binding { target: ControlCatalog; property: "panelWidth"; value: ccContent.width }
-                    Binding { target: ControlCatalog; property: "panelHeight"; value: ccContent.height }
+                    Rectangle {
+                        id: dropPreview
+                        readonly property var target: ControlCatalog.preview
+                        property var shape: null
+                        property int cellX: 0
+                        property int cellY: 0
+                        onTargetChanged: {
+                            if (!dropPreview.target) return
+                            dropPreview.shape = ControlCatalog.infoOf(dropPreview.target.id)
+                            dropPreview.cellX = dropPreview.target.x
+                            dropPreview.cellY = dropPreview.target.y
+                        }
+                        x: ccContent.gridX(dropPreview.cellX)
+                        y: ccContent.gridY(dropPreview.cellY)
+                        width: dropPreview.shape ? dropPreview.shape.w * root.box + (dropPreview.shape.w - 1) * root.boxMargin : root.box
+                        height: dropPreview.shape ? dropPreview.shape.h * root.box + (dropPreview.shape.h - 1) * root.boxMargin : root.box
+                        radius: 40
+                        color: "#40ffffff"
+                        border.width: 2
+                        border.color: "#80ffffff"
+                        opacity: dropPreview.target ? 1 : 0
+                        visible: opacity > 0
+                        Behavior on x {
+                            enabled: dropPreview.opacity > 0.5
+                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
+                        }
+                        Behavior on y {
+                            enabled: dropPreview.opacity > 0.5
+                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
+                        }
+                        Behavior on opacity {
+                            NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                        }
+                    }
+
+                    DropArea {
+                        anchors.fill: parent
+                        keys: ["text/plain"]
+                        function controlId(drag) {
+                            return drag.hasText && drag.text.indexOf("cc:") === 0 ? drag.text.substring(3) : ""
+                        }
+                        function track(drag) {
+                            var info = ControlCatalog.infoOf(controlId(drag))
+                            if (!info) return
+                            var left = drag.x - (info.w * root.box + (info.w - 1) * root.boxMargin) / 2
+                            var top = drag.y - (info.h * root.box + (info.h - 1) * root.boxMargin) / 2
+                            ControlCatalog.setPreview(info.id, (left - root.boxMargin) / ControlCatalog.cell, (top - root.boxMargin) / ControlCatalog.cell)
+                        }
+                        onEntered: function(drag) {
+                            drag.accepted = ControlCatalog.galleryOpen && controlId(drag) !== ""
+                            if (drag.accepted) track(drag)
+                        }
+                        onPositionChanged: function(drag) { track(drag) }
+                        onExited: ControlCatalog.clearPreview()
+                        onDropped: function(drop) {
+                            drop.accept(Qt.CopyAction)
+                            ControlCatalog.commitPreview()
+                        }
+                    }
 
                     Rectangle {
+                        id: editPill
                         y: ccContent.height + 10
                         anchors.right: parent.right
                         width: _editControlsLabel.implicitWidth + 28
@@ -563,6 +638,11 @@ Scope {
                         color: "#40000000"
                         border.width: 1
                         border.color: "#30ffffff"
+                        opacity: ControlCatalog.galleryOpen ? 0 : 1
+                        enabled: !ControlCatalog.galleryOpen
+                        Behavior on opacity {
+                            NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                        }
 
                         Text {
                             id: _editControlsLabel
@@ -612,7 +692,11 @@ Scope {
 
                         opacity: (boxbutton.hideCause || boxbutton.hiddenByUser) ? 0 : 1
                         visible: opacity > 0
-                        scale: boxbutton.scaleCause ? 1.25 : (boxbutton.isPressed ? 0.93 : 1.0)
+                        scale: boxbutton.dragging ? 1.06 : (boxbutton.scaleCause ? 1.25 : (boxbutton.isPressed ? 0.93 : 1.0))
+        z: boxbutton.dragging ? 100 : 0
+        property bool dragging: false
+        property real dragDX: 0
+        property real dragDY: 0
 
                         transformOrigin: Item.Top
 
@@ -628,17 +712,18 @@ Scope {
                         anchors {
                             top: parent.top
                             left: parent.left
-                            leftMargin: boxbutton.overwriteXFromRight
+                            leftMargin: (boxbutton.overwriteXFromRight
                                             ? (boxbutton.overwriteRightPos - boxbutton.width)
-                                            : (boxbutton.overwriteX ? boxbutton.overwriteXPos : ccContent.gridX(boxbutton.xPos))
-                            topMargin: boxbutton.overwriteY ? boxbutton.overwriteYPos : ccContent.gridY(boxbutton.yPos)
+                                            : (boxbutton.overwriteX ? boxbutton.overwriteXPos : ccContent.gridX(boxbutton.xPos))) + boxbutton.dragDX
+                            topMargin: (boxbutton.overwriteY ? boxbutton.overwriteYPos : ccContent.gridY(boxbutton.yPos)) + boxbutton.dragDY
                         }
 
                         Behavior on anchors.leftMargin {
-                            enabled: !boxbutton.overwriteXFromRight
+                            enabled: !boxbutton.overwriteXFromRight && !boxbutton.dragging
                             NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                         }
                         Behavior on anchors.topMargin {
+                            enabled: !boxbutton.dragging
                             NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                         }
                         Behavior on opacity {
@@ -713,17 +798,27 @@ Scope {
                                 acceptedButtons: Qt.LeftButton
                                 onActiveChanged: {
                                     if (active) {
-                                        ccGhost.info = ControlCatalog.infoOf(boxbutton.widgetId)
-                                        ccGhost.shown = true
+                                        boxbutton.dragging = true
                                         return
                                     }
-                                    ccGhost.shown = false
-                                    ControlCatalog.dropAt(boxbutton.widgetId, ccGhost.x + ccGhost.width / 2, ccGhost.y + ccGhost.height / 2)
+                                    boxbutton.dragging = false
+                                    boxbutton.dragDX = 0
+                                    boxbutton.dragDY = 0
+                                    ControlCatalog.commitPreview()
                                 }
                                 onCentroidChanged: {
                                     if (!active) return
-                                    ccGhost.x = centroid.scenePosition.x - ccGhost.width / 2
-                                    ccGhost.y = centroid.scenePosition.y - ccGhost.height / 2
+                                    boxbutton.dragDX = centroid.scenePosition.x - centroid.scenePressPosition.x
+                                    boxbutton.dragDY = centroid.scenePosition.y - centroid.scenePressPosition.y
+                                    var info = ControlCatalog.infoOf(boxbutton.widgetId)
+                                    var left = ccContent.gridX(boxbutton.xPos) + boxbutton.dragDX
+                                    var top = ccContent.gridY(boxbutton.yPos) + boxbutton.dragDY
+                                    var cx = left + boxbutton.width / 2
+                                    var cy = top + boxbutton.height / 2
+                                    var outside = cx < -ControlCatalog.cell / 2 || cx > ccContent.width + ControlCatalog.cell / 2
+                                                  || cy < -ControlCatalog.cell / 2 || cy > ccContent.height + ControlCatalog.cell / 2
+                                    if (outside) ControlCatalog.clearPreview()
+                                    else ControlCatalog.setPreview(info.id, (left - root.boxMargin) / ControlCatalog.cell, (top - root.boxMargin) / ControlCatalog.cell)
                                 }
                             }
                         }

@@ -11,14 +11,13 @@ Singleton {
 
     readonly property int box: 65
     readonly property int boxMargin: 10
+    readonly property int cell: root.box + root.boxMargin
     readonly property int gridW: 4
     readonly property int editExtraRows: 2
+    readonly property int maxRows: 16
 
     property bool galleryOpen: false
-    property real panelX: 0
-    property real panelY: 0
-    property real panelWidth: 0
-    property real panelHeight: 0
+    property var preview: null
 
     readonly property var categories: [
         { key: "connectivity", title: "Connectivity", icon: "notch/bluetooth.svg",  tint: "#0a84ff" },
@@ -31,76 +30,82 @@ Singleton {
     ]
 
     readonly property var controls: [
-        { id: "wifiWidget",      title: "Wi-Fi",         icon: "wifi/nm-signal-100-symbolic.svg", category: "connectivity", w: 2, h: 1 },
-        { id: "musicWidget",     title: "Now Playing",   icon: "music/play.svg",                  category: "media",        w: 2, h: 2 },
-        { id: "btWidget",        title: "Bluetooth",     icon: "bluetooth/bluetooth.svg",         category: "connectivity", w: 1, h: 1 },
-        { id: "adWidget",        title: "KDE Connect",   icon: "devices/smartphone.svg",          category: "connectivity", w: 1, h: 1 },
-        { id: "focusWidget",     title: "Focus",         icon: "dnd.svg",                         category: "focus",        w: 2, h: 1 },
-        { id: "stageWidget",     title: "Screenshot",    icon: "screenshot/region.svg",           category: "screen",       w: 1, h: 1 },
-        { id: "shareWidget",     title: "Screen Share",  icon: "screenshare.svg",                 category: "screen",       w: 1, h: 1 },
-        { id: "displayWidget",   title: "Display",       icon: "sun-small.svg",                   category: "display",      w: 4, h: 1 },
-        { id: "volumeWidget",    title: "Sound",         icon: "volume/audio-volume-3.svg",       category: "media",        w: 4, h: 1 },
-        { id: "darkWidget",      title: "Dark Mode",     icon: "notch/moon.svg",                  category: "display",      w: 2, h: 1 },
-        { id: "calcWidget",      title: "Calculator",    icon: "calculator.svg",                  category: "utilities",    w: 1, h: 1 },
-        { id: "gameModeWidget",  title: "Game Mode",     icon: "notch/zap.svg",                   category: "gaming",       w: 1, h: 1 },
-        { id: "timerWidget",     title: "Timer",         icon: "notch/clock.svg",                 category: "utilities",    w: 1, h: 1 },
-        { id: "alarmWidget",     title: "Alarm",         icon: "notch/bell.svg",                  category: "utilities",    w: 1, h: 1 },
-        { id: "stopwatchWidget", title: "Stopwatch",     icon: "notch/watch.svg",                 category: "utilities",    w: 1, h: 1 }
+        { id: "wifiWidget",      title: "Wi-Fi",         icon: "wifi/nm-signal-100-symbolic.svg", category: "connectivity", w: 2, h: 1, subtitle: "Network" },
+        { id: "musicWidget",     title: "Now Playing",   icon: "music/play.svg",                  category: "media",        w: 2, h: 2, subtitle: "Not Playing" },
+        { id: "btWidget",        title: "Bluetooth",     icon: "bluetooth/bluetooth.svg",         category: "connectivity", w: 1, h: 1, subtitle: "" },
+        { id: "adWidget",        title: "KDE Connect",   icon: "devices/smartphone.svg",          category: "connectivity", w: 1, h: 1, subtitle: "" },
+        { id: "focusWidget",     title: "Focus",         icon: "dnd.svg",                         category: "focus",        w: 2, h: 1, subtitle: "Off" },
+        { id: "stageWidget",     title: "Screenshot",    icon: "screenshot/region.svg",           category: "screen",       w: 1, h: 1, subtitle: "" },
+        { id: "shareWidget",     title: "Screen Share",  icon: "screenshare.svg",                 category: "screen",       w: 1, h: 1, subtitle: "" },
+        { id: "displayWidget",   title: "Display",       icon: "sun-small.svg",                   category: "display",      w: 4, h: 1, subtitle: "" },
+        { id: "volumeWidget",    title: "Sound",         icon: "volume/audio-volume-3.svg",       category: "media",        w: 4, h: 1, subtitle: "" },
+        { id: "darkWidget",      title: "Dark Mode",     icon: "notch/moon.svg",                  category: "display",      w: 2, h: 1, subtitle: "On" },
+        { id: "calcWidget",      title: "Calculator",    icon: "calculator.svg",                  category: "utilities",    w: 1, h: 1, subtitle: "" },
+        { id: "gameModeWidget",  title: "Game Mode",     icon: "notch/zap.svg",                   category: "gaming",       w: 1, h: 1, subtitle: "" },
+        { id: "timerWidget",     title: "Timer",         icon: "notch/clock.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" },
+        { id: "alarmWidget",     title: "Alarm",         icon: "notch/bell.svg",                  category: "utilities",    w: 1, h: 1, subtitle: "" },
+        { id: "stopwatchWidget", title: "Stopwatch",     icon: "notch/watch.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" }
     ]
 
-    readonly property var orderedIds: {
-        var saved = ShellConfig.options.controlCenter.packOrder
-        var known = root.controls.map(function(c) { return c.id })
-        var ids = []
-        for (var i = 0; i < saved.length; i++) {
-            if (known.indexOf(saved[i]) >= 0 && ids.indexOf(saved[i]) < 0) ids.push(saved[i])
-        }
-        for (var j = 0; j < known.length; j++) {
-            if (ids.indexOf(known[j]) < 0) ids.push(known[j])
-        }
-        return ids
-    }
-
-    readonly property var built: root.build()
+    readonly property var built: root.build(root.savedPositions(), "")
     readonly property var packedLayout: root.built.layout
     readonly property var occupied: root.built.occupied
     readonly property int lastRow: root.built.lastRow
     readonly property int shownRows: root.lastRow + 1 + (root.galleryOpen ? root.editExtraRows : 0)
 
-    readonly property var emptySlots: {
-        var slots = []
-        if (!root.galleryOpen) return slots
-        for (var y = 0; y < root.shownRows; y++) {
-            for (var x = 0; x < root.gridW; x++) {
-                if (!root.occupied[x + "," + y]) slots.push({ x: x, y: y })
-            }
-        }
-        return slots
+    function savedPositions() {
+        var out = {}
+        var list = ShellConfig.options.controlCenter.positions
+        for (var i = 0; i < list.length; i++) out[list[i].id] = { x: list[i].x, y: list[i].y }
+        return out
     }
 
-    function build() {
+    function key(x, y) {
+        return x + "," + y
+    }
+
+    function isFree(occupied, x, y, w, h) {
+        if (x < 0 || y < 0 || x + w > root.gridW || y + h > root.maxRows) return false
+        for (var dy = 0; dy < h; dy++) {
+            for (var dx = 0; dx < w; dx++) {
+                if (occupied[root.key(x + dx, y + dy)]) return false
+            }
+        }
+        return true
+    }
+
+    function mark(occupied, x, y, w, h) {
+        for (var dy = 0; dy < h; dy++) {
+            for (var dx = 0; dx < w; dx++) occupied[root.key(x + dx, y + dy)] = true
+        }
+    }
+
+    function build(saved, skipId) {
         var layout = {}
         var occupied = {}
         var lastRow = 0
-        for (var i = 0; i < root.orderedIds.length; i++) {
-            var id = root.orderedIds[i]
-            if (!ShellConfig.ccWidgetVisible(id)) continue
-            var info = root.infoOf(id)
+        var pending = []
+        for (var i = 0; i < root.controls.length; i++) {
+            var info = root.controls[i]
+            if (info.id === skipId || !ShellConfig.ccWidgetVisible(info.id)) continue
+            var pos = saved[info.id]
+            if (pos && root.isFree(occupied, pos.x, pos.y, info.w, info.h)) {
+                root.mark(occupied, pos.x, pos.y, info.w, info.h)
+                layout[info.id] = { xPos: pos.x, yPos: pos.y, wUnits: info.w, hUnits: info.h }
+                lastRow = Math.max(lastRow, pos.y + info.h - 1)
+            } else {
+                pending.push(info)
+            }
+        }
+        for (var j = 0; j < pending.length; j++) {
+            var item = pending[j]
             var placed = false
-            for (var y = 0; !placed; y++) {
-                for (var x = 0; x + info.w <= root.gridW && !placed; x++) {
-                    var free = true
-                    for (var dy = 0; dy < info.h && free; dy++) {
-                        for (var dx = 0; dx < info.w && free; dx++) {
-                            if (occupied[(x + dx) + "," + (y + dy)]) free = false
-                        }
-                    }
-                    if (!free) continue
-                    for (var my = 0; my < info.h; my++) {
-                        for (var mx = 0; mx < info.w; mx++) occupied[(x + mx) + "," + (y + my)] = true
-                    }
-                    layout[id] = { xPos: x, yPos: y, wUnits: info.w, hUnits: info.h }
-                    lastRow = Math.max(lastRow, y + info.h - 1)
+            for (var y = 0; y < root.maxRows && !placed; y++) {
+                for (var x = 0; x + item.w <= root.gridW && !placed; x++) {
+                    if (!root.isFree(occupied, x, y, item.w, item.h)) continue
+                    root.mark(occupied, x, y, item.w, item.h)
+                    layout[item.id] = { xPos: x, yPos: y, wUnits: item.w, hUnits: item.h }
+                    lastRow = Math.max(lastRow, y + item.h - 1)
                     placed = true
                 }
             }
@@ -115,6 +120,57 @@ Singleton {
         return null
     }
 
+    function nearestFree(id, fx, fy) {
+        var info = root.infoOf(id)
+        if (!info) return null
+        var rest = root.build(root.savedPositions(), id)
+        var rows = Math.min(root.maxRows, rest.lastRow + 1 + root.editExtraRows)
+        var best = null
+        var bestDist = 1e9
+        for (var y = 0; y + info.h <= rows; y++) {
+            for (var x = 0; x + info.w <= root.gridW; x++) {
+                if (!root.isFree(rest.occupied, x, y, info.w, info.h)) continue
+                var d = (x - fx) * (x - fx) + (y - fy) * (y - fy)
+                if (d < bestDist) {
+                    bestDist = d
+                    best = { x: x, y: y }
+                }
+            }
+        }
+        return best
+    }
+
+    function setPreview(id, fx, fy) {
+        var spot = root.nearestFree(id, fx, fy)
+        root.preview = spot ? { id: id, x: spot.x, y: spot.y } : null
+    }
+
+    function clearPreview() {
+        root.preview = null
+    }
+
+    function commitPreview() {
+        var p = root.preview
+        root.preview = null
+        if (!p) return false
+        root.place(p.id, p.x, p.y)
+        return true
+    }
+
+    function place(id, x, y) {
+        if (!root.infoOf(id)) return
+        var layout = root.packedLayout
+        var list = []
+        for (var i = 0; i < root.controls.length; i++) {
+            var cid = root.controls[i].id
+            if (cid === id) continue
+            if (layout[cid]) list.push({ id: cid, x: layout[cid].xPos, y: layout[cid].yPos })
+        }
+        list.push({ id: id, x: x, y: y })
+        ShellConfig.options.controlCenter.positions = list
+        ShellConfig.setCcWidgetVisible(id, true)
+    }
+
     function add(id) {
         if (!root.infoOf(id)) return
         ShellConfig.setCcWidgetVisible(id, true)
@@ -122,28 +178,13 @@ Singleton {
 
     function remove(id) {
         if (!root.infoOf(id)) return
-        ShellConfig.setCcWidgetVisible(id, false)
-    }
-
-    function dropAt(id, x, y) {
-        if (!root.infoOf(id)) return
-        var outside = x < root.panelX || x > root.panelX + root.panelWidth || y < root.panelY || y > root.panelY + root.panelHeight
-        if (outside) return
-        var cell = root.box + root.boxMargin
-        var cx = Math.max(0, Math.min(root.gridW - 1, Math.floor((x - root.panelX - root.boxMargin) / cell)))
-        var cy = Math.max(0, Math.floor((y - root.panelY - root.boxMargin) / cell))
-        var shown = root.orderedIds.filter(function(p) { return p !== id && ShellConfig.ccWidgetVisible(p) })
-        var hidden = root.orderedIds.filter(function(p) { return p !== id && !ShellConfig.ccWidgetVisible(p) })
-        var index = shown.length
-        for (var i = 0; i < shown.length; i++) {
-            var pos = root.packedLayout[shown[i]]
-            if (pos && (pos.yPos > cy || (pos.yPos === cy && pos.xPos >= cx))) {
-                index = i
-                break
-            }
+        var layout = root.packedLayout
+        var list = []
+        for (var i = 0; i < root.controls.length; i++) {
+            var cid = root.controls[i].id
+            if (cid !== id && layout[cid]) list.push({ id: cid, x: layout[cid].xPos, y: layout[cid].yPos })
         }
-        shown.splice(index, 0, id)
-        ShellConfig.options.controlCenter.packOrder = shown.concat(hidden)
-        ShellConfig.setCcWidgetVisible(id, true)
+        ShellConfig.options.controlCenter.positions = list
+        ShellConfig.setCcWidgetVisible(id, false)
     }
 }

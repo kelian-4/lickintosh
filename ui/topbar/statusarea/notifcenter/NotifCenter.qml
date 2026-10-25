@@ -52,6 +52,13 @@ Scope {
                 exclusiveZone: -1
                 anchors { top: true; right: true; bottom: true; left: true }
 
+                mask: WidgetState.galleryZone === "notifCenter" ? galleryMask : null
+
+                Region {
+                    id: galleryMask
+                    item: panel
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: root.closing()
@@ -92,6 +99,27 @@ Scope {
                         anchors.fill: parent
                         propagateComposedEvents: false
                         onClicked: function(e) { e.accepted = true }
+                    }
+
+                    DropArea {
+                        anchors.fill: parent
+                        keys: ["text/plain"]
+
+                        function parse(drag) {
+                            if (!drag.hasText || drag.text.indexOf("widget:") !== 0) return null
+                            var parts = drag.text.split(":")
+                            return { type: parts[1], size: parts[2] }
+                        }
+
+                        onEntered: function(drag) {
+                            drag.accepted = WidgetState.galleryZone === "notifCenter" && parse(drag) !== null
+                        }
+                        onDropped: function(drop) {
+                            var spec = parse(drop)
+                            if (!spec) return
+                            drop.accept(Qt.CopyAction)
+                            WidgetState.addWidget("notifCenter", spec.type, spec.size)
+                        }
                     }
 
                     Flickable {
