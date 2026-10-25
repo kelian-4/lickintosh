@@ -21,7 +21,7 @@ Item {
 
     BoxGlass {
         anchors.fill: parent
-        radius: 40
+        radius: root.info && root.info.w === 4 ? 25 : 40
         color: "#20000000"
         light: "#80ffffff"
         rimStrength: 1.0
@@ -89,39 +89,28 @@ Item {
         visible: root.info && root.info.w === 4
         anchors.fill: parent
 
-        Text {
-            x: 18
-            y: 8
-            text: root.info ? root.info.title : ""
-            color: "#ffffff"
-            font.pixelSize: 11
-            font.weight: Font.Bold
-            font.family: "SF Pro Rounded"
-            renderType: Text.NativeRendering
+        CFSlider {
+            anchors.fill: parent
+            anchors.leftMargin: 40
+            anchors.rightMargin: 40
+            value: 0.6
+            enabled: false
         }
 
-        Rectangle {
-            x: 14
-            y: parent.height - 26
-            width: parent.width - 28
-            height: 20
-            radius: 10
-            color: "#40ffffff"
+        CFVI {
+            anchors.left: parent.left
+            anchors.leftMargin: 15
+            anchors.verticalCenter: parent.verticalCenter
+            icon: root.info && root.info.id === "volumeWidget" ? "volume/audio-volume-1.svg" : "sun-small.svg"
+            size: 14
+        }
 
-            Rectangle {
-                width: parent.width * 0.6
-                height: parent.height
-                radius: 10
-                color: "#ffffff"
-            }
-
-            CFVI {
-                x: 4
-                anchors.verticalCenter: parent.verticalCenter
-                size: 13
-                icon: root.info ? root.info.icon : ""
-                color: "#80000000"
-            }
+        CFVI {
+            anchors.right: parent.right
+            anchors.rightMargin: 15
+            anchors.verticalCenter: parent.verticalCenter
+            icon: root.info && root.info.id === "volumeWidget" ? "volume/audio-volume-3.svg" : "sun-huge.svg"
+            size: 18
         }
     }
 

@@ -71,15 +71,14 @@ Scope {
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: flow.implicitHeight + 32
-                                radius: 18
-                                color: "#26262c"
+                                Layout.preferredHeight: flow.implicitHeight + 16
+                                color: "transparent"
 
                                 Flow {
                                     id: flow
-                                    x: 16
-                                    y: 16
-                                    width: parent.width - 32
+                                    x: 4
+                                    y: 8
+                                    width: parent.width - 8
                                     spacing: 18
 
                                     Repeater {
