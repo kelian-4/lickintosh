@@ -10,8 +10,6 @@ layout(std140, binding = 0) uniform buf {
     float qt_Opacity;
     vec2 v_MidPoint;
     vec2 v_QuadNDC2ScreenNDCScale;
-    vec2 u_size;
-    float u_refractionMode;
     float u_powerFactor;
     float u_a;
     float u_b;
@@ -69,17 +67,7 @@ vec4 LiquidGlass() {
 		discard;
 
 	float dist = -d;
-	vec2 sampleP;
-	if (u_refractionMode > 0.5) {
-		vec2 halfSize = u_size * 0.5;
-		float m = min(halfSize.x, halfSize.y);
-		vec2 pPx = p * halfSize;
-		vec2 core = max(halfSize - vec2(m), vec2(0.0));
-		vec2 localP = pPx - clamp(pPx, -core, core);
-		sampleP = p - localP * (1.0 - pow(f(dist), u_fPower)) / halfSize;
-	} else {
-		sampleP = p * pow(f(dist), u_fPower);
-	}
+	vec2 sampleP = p * pow(f(dist), u_fPower);
 
 	vec2 targetNDC = sampleP * v_QuadNDC2ScreenNDCScale + v_MidPoint.xy;
 	vec2 coord = targetNDC * 0.5 + vec2(0.5);

@@ -323,3 +323,21 @@ Fermeture au changement de workspace :
 Vérifié : sur le banc, les formes (rond, carré, pilule, barre, tuile) en mode 0 ; en VM, le service émet `changed` à chaque changement de workspace et le control center reçoit sa demande de fermeture environ 10 ms après l'événement ; le vrai `shell.qml` modifié se charge sans erreur (les avertissements viennent des services absents de la VM).
 
 Non vérifié : la fermeture de chacun des autres panneaux (aucun n'a pu être ouvert dans la VM : leurs états sont des propriétés remises à `false`, vérifiées uniquement par lecture) ; le rendu avec ton fond d'écran et ton GPU ; le temps de capture.
+
+## 20. Retour à l'état du commit « Rapport de recherche » et modifications techniques seules
+
+Retour du propriétaire : le verre s'est beaucoup trop éloigné du repo. Demande : revenir à l'état du commit « Rapport de recherche Liquid Glass » et n'y réimplémenter que les modifications techniques.
+
+Les sections 11 à 19 ci-dessus décrivent des variantes d'aspect qui ont été abandonnées (SDF à rayon constant, mode de réfraction par le cœur de la forme, rim, dégradé intérieur, voile, `BoxGlass` à l'échelle du shell, `GlassSettings`, `GlassLayers`). Elles restent consultables dans l'historique git ; elles ne correspondent plus au code.
+
+État actuel :
+
+- Restaurés à l'identique de ce commit : `LiquidGlass.vert/frag/.qsb` (sauf `GlowEdge`), `LiquidGlassBlur.*`, `BoxGlass.qml` (l'ancien, sans verre), `Dock.qml` (verre du dock avec ses valeurs d'alors), `tools/liquid-glass/test-shell`, `THIRD_PARTY_LICENSES`. Valeurs par défaut du repo partout (`noise 0.06`, lueur `0.25 / 0 / 0.5 / -0.5`, flou `2.0`, `powerFactor 3.0`). Le verre n'est utilisé que par le dock.
+- Conservé ou réimplémenté, uniquement de la mécanique :
+  - `GlowEdge()` : même valeur que le `smoothstep` à bornes inversées d'origine, sans comportement indéfini.
+  - `GlassTracker` (nouveau singleton) : suivi des fenêtres par les événements Hyprland, sondage adaptatif (200 ms au repos, 40 ms pendant 1,5 s après un événement de géométrie, `windowtitle` et autres événements ignorés), `transitionEpoch` incrémenté aux changements de workspace.
+  - `GlassWindows` : flux de capture ouverts seulement pour les fenêtres proches (marge 200 px) de la région de verre, invisibles tant qu'ils n'ont pas reçu leur première image, redémarrés après 8 s sans contenu, porte (`latched`) qui n'ouvre le verre qu'une fois les captures prêtes (délai de grâce 60 ms, plafond 2 s, réinitialisée à chaque changement de workspace).
+  - `LiquidGlass` / `LiquidGlassBackdrop` : chaque verre déclare son rectangle au backdrop, qui en déduit la région à capturer ; résolution du backdrop réduite (`backdropScale 0.5` dans `GlassTracker`) ; verre affiché en fondu de 120 ms une fois la porte ouverte.
+  - Fermeture au changement de workspace (`WorkspaceWatcher`, `shell.qml`, états locaux, control center) : inchangée, voir § 19.
+
+Vérifié : shader comparé fonction par fonction au repo (identique, sauf syntaxe et `GlowEdge`) ; sur un banc Qt, trois verres s'enregistrent et la région déduite est l'enveloppe exacte de leurs rectangles ; `GlassTracker` testé en exécution avec une doublure de `Quickshell.Hyprland` (≈5 rafraîchissements/s au repos, +25 en 1 s après `workspace`, retour au repos après 1,5 s, `windowtitle` ignoré, `transitionEpoch` +1). Non vérifié : tout ce qui touche Quickshell et Hyprland réels pour cette révision (la VM n'existait plus : `GlassWindows`, le chargement du shell, la fermeture des panneaux ont été vérifiés en VM sur des révisions précédentes de ces fichiers, pas sur celle-ci) ; le rendu avec ton fond d'écran et ton GPU ; les temps de capture, jamais mesurés.

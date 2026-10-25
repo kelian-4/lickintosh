@@ -20,23 +20,12 @@ Adaptations (syntaxe Qt / Vulkan-style uniquement, aucune formule modifiee) :
     BatchRenderer2D.glsl, rand() inutilise de Blur.glsl, branches v_LiquidGlass 0 et 2, switch sur
     32 slots, macros EPSILON/INT_NOT. rand() du fragment du verre est conserve (bruit).
   - Commentaires retires (regle du projet lickintosh).
-
-Ecarts de calcul par rapport au projet d'origine (les deux seuls) :
-  - assets/shaders/liquidglass/LiquidGlass.frag : sdSuperellipse, f, rand, Glow, ainsi que la logique de
-    LiquidGlass() (forme, distance, deplacement p * pow(f(dist), u_fPower), echantillonnage, bruit, lueur) sont
-    ceux de BatchRenderer2D.glsl, texte compare fonction par fonction apres suppression des commentaires. Pas de
-    SDF alternative, pas d'anti-aliasing, pas de rim ni de degrade interieur.
-  - Bornes inversees de la lueur : l'original appelle smoothstep(u_glowEdge0, u_glowEdge1, dist) avec
-    edge0 > edge1 (0.5, -0.5), indefini selon la specification GLSL (un pilote peut renvoyer NaN, donc du noir).
-    GlowEdge() calcule la meme valeur sans comportement indefini : si edge0 > edge1,
+  - Bornes inversees de la lueur : l'original appelle smoothstep(u_glowEdge0, u_glowEdge1, dist) avec les
+    valeurs par defaut edge0 = 0.5 > edge1 = -0.5, indefini selon la specification GLSL (un pilote peut renvoyer
+    NaN, donc du noir). GlowEdge() calcule la meme valeur sans comportement indefini : si edge0 > edge1,
     1 - smoothstep(edge1, edge0, x), identique mathematiquement car smoothstep(1 - t) = 1 - smoothstep(t).
-
-Option, desactivee par defaut (u_refractionMode = 0 : formule d'origine) :
-  - u_refractionMode = 1 applique la meme formule de deplacement autour du coeur de la forme : core =
-    max(halfSize - m, 0), localP = pPx - clamp(pPx, -core, core), sampleP = p - localP * (1 - pow(f(dist),
-    u_fPower)) / halfSize, avec m la moitie du plus petit cote et u_size la taille du quad en pixels. Pour un
-    cercle ou un carre core vaut 0 : resultat identique a l'original ; pour une forme allongee, les extremites se
-    comportent comme des lentilles rondes au lieu d'etirer le contenu (verifie visuellement, pas par mesure).
+    sdSuperellipse, f, rand, Glow et la logique de LiquidGlass() sont ceux de l'original (textes compares apres
+    suppression des commentaires).
 
 Licence d'origine :
 

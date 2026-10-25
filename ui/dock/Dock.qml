@@ -616,7 +616,6 @@ Scope {
                     screenSize: Qt.size(dockWin.screen.width, dockWin.screen.height)
                     windowPosition: Qt.point(0, dockWin.screen.height - dockWin.height)
                     captureWindows: true
-                    blurRadius: GlassSettings.blurRadius
                     monitorName: dockWin.screen.name
                 }
 
@@ -707,28 +706,14 @@ Scope {
                         }
 
                         LiquidGlass {
-                            id:           dockGlass
                             anchors.fill: parent
                             backdrop:     dockBackdrop
-                            powerFactor:  Math.max(2 + (GlassSettings.squarePower - 2) * Math.pow(1 - Math.max(0, Math.min(1, dockRoot.dockRadius / (height / 2))), 1.5), 2 + (GlassSettings.barPower - 2) * (1 - height / Math.max(1, width)))
-                            refractionMode: GlassSettings.refractionMode
-                            a:            GlassSettings.refractionA
-                            b:            GlassSettings.refractionB
-                            c:            GlassSettings.refractionC
-                            d:            GlassSettings.refractionD
-                            fPower:       GlassSettings.refractionPower
-                            noise:        GlassSettings.noise
-                            glowWeight:   GlassSettings.glowWeight
-                            glowBias:     GlassSettings.veil
-                            glowEdge0:    GlassSettings.glowEdge0
-                            glowEdge1:    GlassSettings.glowEdge1
-                        }
-                        GlassRim {
-                            anchors.fill: parent
-                            radius:       dockRoot.dockRadius
-                            baseColor:    GlassSettings.enabled ? "#10ffffff" : "#22ffffff"
-                            glowColor:    GlassSettings.enabled ? "transparent" : Qt.rgba(1, 1, 1, 0.63)
-                            glowEdgeBand: 0.01
+                            powerFactor:  6.0
+                            noise:        0.03
+                            glowWeight:   0.3
+                            glowBias:     0.0
+                            glowEdge0:    0.06
+                            glowEdge1:    0.0
                         }
 
                         Row {

@@ -7,7 +7,6 @@ Item {
     property Item backdrop: null
 
     property real powerFactor: 3.0
-    property real refractionMode: 0
     property real a: 0.7
     property real b: 2.3
     property real c: 5.2
@@ -24,7 +23,9 @@ Item {
     readonly property bool active: backdrop !== null && backdrop.ready && backdrop.captureSettled
     property real level: active ? 1 : 0
 
-    Behavior on level { NumberAnimation { duration: GlassSettings.fadeDuration; easing.type: Easing.InOutSine } }
+    Behavior on level { NumberAnimation { duration: 120; easing.type: Easing.InOutSine } }
+
+    property Item registeredBackdrop: null
 
     readonly property string shaderDir: Quickshell.shellDir + "/assets/shaders/liquidglass/"
     readonly property size screenSize: backdrop ? backdrop.screenSize : Qt.size(1, 1)
@@ -39,8 +40,6 @@ Item {
         if (nx !== root.screenPosition.x || ny !== root.screenPosition.y)
             root.screenPosition = Qt.point(nx, ny)
     }
-
-    property Item registeredBackdrop: null
 
     function syncRegistration() {
         if (root.registeredBackdrop === root.backdrop)
@@ -107,8 +106,6 @@ Item {
             root.width / root.screenSize.width,
             root.height / root.screenSize.height
         )
-        property vector2d u_size: Qt.vector2d(root.width, root.height)
-        property real u_refractionMode: root.refractionMode
         property real u_powerFactor: root.powerFactor
         property real u_a: root.a
         property real u_b: root.b

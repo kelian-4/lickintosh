@@ -2,7 +2,6 @@ import QtQuick
 import Quickshell
 import QtQuick.Controls
 import QtQuick.Effects
-import qs.services
 
 Item {
     id: box
@@ -26,115 +25,14 @@ Item {
     property int animationSpeed: 16
     property int animationSpeed2: 16
 
-    property Item backdrop: null
-
-    readonly property real shapeRatio: Math.max(0, Math.min(1, radius / (Math.max(1, Math.min(width, height)) / 2)))
-    readonly property real shapeAspect: Math.max(width, height) / Math.max(1, Math.min(width, height))
-    readonly property real shapePower: Math.max(
-        2 + (GlassSettings.squarePower - 2) * Math.pow(1 - shapeRatio, 1.5),
-        2 + (GlassSettings.barPower - 2) * (1 - 1 / Math.max(1, shapeAspect))
-    )
-    readonly property bool glassWanted: GlassSettings.enabled
-        && !transparent
-        && color.a > GlassSettings.minAlpha
-        && color.a < 0.99
-        && (width <= 0 || height <= 0 || Math.min(width, height) >= GlassSettings.minSize)
-
     Behavior on color { PropertyAnimation { duration: animationSpeed; easing.type: Easing.InSine } }
-
-    function ensureBackdrop() {
-        if (!glassWanted || backdrop !== null)
-            return
-        var win = box.QsWindow.window
-        if (!win || !win.contentItem)
-            return
-        var host = win.contentItem
-        for (var i = 0; i < host.children.length; i++) {
-            if (host.children[i].objectName === "liquidGlassBackdrop") {
-                backdrop = host.children[i]
-                return
-            }
-        }
-        backdrop = backdropComponent.createObject(host, { hostWindow: win })
-    }
-
-    onGlassWantedChanged: ensureBackdrop()
-    Component.onCompleted: ensureBackdrop()
-
-    onWidthChanged: ensureBackdrop()
-    onHeightChanged: ensureBackdrop()
-    onVisibleChanged: ensureBackdrop()
-
-    Timer {
-        interval: 16
-        repeat: true
-        running: box.glassWanted && box.backdrop === null
-        onTriggered: box.ensureBackdrop()
-    }
-
-    Component {
-        id: backdropComponent
-
-        LiquidGlassBackdrop {
-            objectName: "liquidGlassBackdrop"
-
-            property var hostWindow: null
-
-            readonly property string monitor: hostWindow && hostWindow.screen ? hostWindow.screen.name : ""
-            readonly property bool fullScreen: hostWindow !== null && hostWindow.screen !== null
-                && hostWindow.width >= hostWindow.screen.width - 1
-                && hostWindow.height >= hostWindow.screen.height - 1
-            readonly property var layerPos: fullScreen ? ({ x: 0, y: 0 }) : GlassLayers.lookup(
-                monitor,
-                hostWindow ? hostWindow.width : 0,
-                hostWindow ? hostWindow.height : 0,
-                GlassLayers.revision
-            )
-
-            ready: layerPos !== null && wallpaperPath !== ""
-            wallpaperPath: ShellConfig.options.wallpaper.path
-            screenSize: hostWindow && hostWindow.screen ? Qt.size(hostWindow.screen.width, hostWindow.screen.height) : Qt.size(1, 1)
-            windowPosition: layerPos ? Qt.point(layerPos.x, layerPos.y) : Qt.point(0, 0)
-            monitorName: monitor
-            captureWindows: GlassSettings.captureWindows && ready
-            blurRadius: GlassSettings.blurRadius
-        }
-    }
-
-    readonly property real glassLevel: box.glassWanted ? 1 : 0
-
-    LiquidGlass {
-        id: liquid
-        anchors.fill: parent
-        visible: box.glassWanted && box.backdrop !== null
-        backdrop: box.backdrop
-        powerFactor: box.shapePower
-        refractionMode: GlassSettings.refractionMode
-        a: GlassSettings.refractionA
-        b: GlassSettings.refractionB
-        c: GlassSettings.refractionC
-        d: GlassSettings.refractionD
-        fPower: GlassSettings.refractionPower
-        noise: GlassSettings.noise
-        glowWeight: GlassSettings.glowWeight
-        glowBias: GlassSettings.veil
-        glowEdge0: GlassSettings.glowEdge0
-        glowEdge1: GlassSettings.glowEdge1
-    }
-
+    
     GlassRim {
         id: boxContainer
         anchors.fill: parent
-        baseColor: box.transparent ? "transparent" : Qt.rgba(
-            box.color.r,
-            box.color.g,
-            box.color.b,
-            box.color.a * (1 - (1 - GlassSettings.tintScale) * box.glassLevel)
-        )
+        baseColor: box.transparent ? "transparent" : box.color
         radius: box.radius
-        glowColor: box.highlightEnabled
-            ? Qt.rgba(box.light.r, box.light.g, box.light.b, box.light.a * (1 - box.glassLevel))
-            : "#00000000"
+        glowColor: box.highlightEnabled ? box.light : "#00000000"
         lightDir: box.lightDir
         glowEdgeBand: box.rimSize
     }
