@@ -110,22 +110,30 @@ Singleton {
         root.setList(zone, list)
     }
 
+    function snap(size, x, y) {
+        var list = root.listOf("desktop")
+        var d = root.sizeOf(size)
+        var nx = Math.max(0, Math.min(Math.round(x / root.step) * root.step, root.areaWidth - d.w))
+        var ny = Math.max(0, Math.min(Math.round(y / root.step) * root.step, root.areaHeight - d.h))
+        if (root.collides(list, "", nx, ny, d.w, d.h)) return root.freeSlot(list, "", size)
+        return { x: nx, y: ny }
+    }
+
     function addWidgetAt(zone, type, size, x, y) {
         if (zone !== "desktop") {
             root.addWidget(zone, type, size)
             return
         }
         var list = root.listOf("desktop")
-        var d = root.sizeOf(size)
-        var nx = Math.max(0, Math.min(Math.round(x / root.step) * root.step, root.areaWidth - d.w))
-        var ny = Math.max(0, Math.min(Math.round(y / root.step) * root.step, root.areaHeight - d.h))
-        if (root.collides(list, "", nx, ny, d.w, d.h)) {
-            var p = root.freeSlot(list, "", size)
-            nx = p.x
-            ny = p.y
-        }
-        list.push({ id: "w_" + Date.now(), type: type, size: size, x: nx, y: ny })
+        var p = root.snap(size, x, y)
+        list.push({ id: "w_" + Date.now(), type: type, size: size, x: p.x, y: p.y })
         root.setList("desktop", list)
+    }
+
+    function entryOf(zone, id) {
+        var list = zone === "desktop" ? root.desktop : root.notifCenter
+        var i = root.indexOfId(list, id)
+        return i < 0 ? null : list[i]
     }
 
     function removeWidget(zone, id) {
