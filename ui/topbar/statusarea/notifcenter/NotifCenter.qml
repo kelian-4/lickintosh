@@ -108,7 +108,7 @@ Scope {
                         function parse(drag) {
                             if (!drag.hasText || drag.text.indexOf("widget:") !== 0) return null
                             var parts = drag.text.split(":")
-                            return { type: parts[1], size: parts[2], variant: parts[3] || "" }
+                            return { type: parts[1], size: parts[2] }
                         }
 
                         onEntered: function(drag) {
@@ -118,7 +118,7 @@ Scope {
                             var spec = parse(drop)
                             if (!spec) return
                             drop.accept(Qt.CopyAction)
-                            WidgetState.addWidget("notifCenter", spec.type, spec.size, spec.variant)
+                            WidgetState.addWidget("notifCenter", spec.type, spec.size)
                         }
                     }
 

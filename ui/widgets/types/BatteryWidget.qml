@@ -7,24 +7,13 @@ Item {
     id: root
 
     property string size: "s"
-    property string variant: "battery"
 
     readonly property bool present: UPower.displayDevice.isLaptopBattery
     readonly property real fraction: root.present ? UPower.displayDevice.percentage : 1
     readonly property bool charging: UPower.onBattery ? UPower.displayDevice.state === 1 : true
     readonly property color level: root.fraction <= 0.15 ? "#ff453a" : (root.fraction <= 0.3 ? "#ff9f0a" : "#30d158")
 
-    readonly property var performanceFiles: ({ ram: "RamWidget.qml", cpu: "CpuWidget.qml", storage: "StorageWidget.qml", network: "NetworkWidget.qml" })
-
-    Loader {
-        anchors.fill: parent
-        active: root.variant !== "battery" && root.performanceFiles[root.variant] !== undefined
-        source: root.performanceFiles[root.variant] || ""
-        onLoaded: item.size = Qt.binding(function() { return root.size })
-    }
-
     RowLayout {
-        visible: root.variant === "battery"
         anchors.fill: parent
         spacing: 16
 

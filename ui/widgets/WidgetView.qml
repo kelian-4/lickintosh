@@ -7,7 +7,6 @@ Item {
     required property var widgetData
 
     readonly property var dims: WidgetState.sizeOf(root.widgetData.size)
-    readonly property var resolved: WidgetRegistry.resolve(root.widgetData)
 
     width: root.dims.w
     height: root.dims.h
@@ -24,10 +23,7 @@ Item {
         id: loader
         anchors.fill: parent
         anchors.margins: loader.item && loader.item.fullBleed ? 0 : 14
-        source: "types/" + WidgetRegistry.fileOf(root.resolved.type) + ".qml"
-        onLoaded: {
-            loader.item.size = Qt.binding(function() { return root.widgetData.size })
-            if (loader.item.variant !== undefined) loader.item.variant = Qt.binding(function() { return root.resolved.variant })
-        }
+        source: "types/" + WidgetRegistry.fileOf(root.widgetData.type) + ".qml"
+        onLoaded: loader.item.size = Qt.binding(function() { return root.widgetData.size })
     }
 }
