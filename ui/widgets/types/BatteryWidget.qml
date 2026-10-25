@@ -171,6 +171,7 @@ Item {
 
             ColumnLayout {
                 Layout.fillWidth: true
+                visible: root.timeText !== "—"
                 spacing: 0
 
                 Text {

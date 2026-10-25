@@ -77,8 +77,10 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         height: 22
-        radius: 5
-        color: "#ffffff"
+        radius: 6
+        color: "#59000000"
+        border.width: 1
+        border.color: "#60ffffff"
         visible: root.editing
 
         TextInput {
@@ -87,7 +89,9 @@ Item {
             anchors.leftMargin: 4
             anchors.rightMargin: 4
             verticalAlignment: TextInput.AlignVCenter
-            color: "#1c1c1f"
+            color: "#ffffff"
+            selectionColor: "#a35cf0"
+            selectedTextColor: "#ffffff"
             clip: true
             selectByMouse: true
             font.pixelSize: 12

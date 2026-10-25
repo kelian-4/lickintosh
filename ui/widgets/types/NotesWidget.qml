@@ -76,40 +76,57 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: root.size === "s" ? 70 : 54
+            Layout.fillHeight: root.size === "s"
+            Layout.preferredHeight: 54
             visible: root.adding
             radius: 10
             color: Qt.rgba(1, 1, 1, 0.10)
             border.width: editor.activeFocus ? 1 : 0
             border.color: "#ffd60a"
+            clip: true
 
-            TextEdit {
-                id: editor
+            Flickable {
+                id: editorScroll
                 anchors.fill: parent
                 anchors.margins: 8
-                wrapMode: TextEdit.Wrap
-                color: "#ffffff"
-                selectedTextColor: "#000000"
-                selectionColor: "#ffd60a"
-                font.pixelSize: 13
-                font.family: "SF Pro Rounded"
-                renderType: Text.NativeRendering
-                Keys.onPressed: function(event) {
-                    if (event.key === Qt.Key_Escape) {
-                        root.closeEditor()
-                        event.accepted = true
-                    } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && !(event.modifiers & Qt.ShiftModifier)) {
-                        root.commit()
-                        event.accepted = true
-                    }
-                }
+                contentWidth: width
+                contentHeight: editor.implicitHeight
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
 
-                Text {
-                    visible: editor.text === "" && !editor.preeditText
-                    text: "New note…"
-                    color: Qt.rgba(1, 1, 1, 0.4)
-                    font: editor.font
+                TextEdit {
+                    id: editor
+                    width: editorScroll.width
+                    wrapMode: TextEdit.WrapAnywhere
+                    color: "#ffffff"
+                    selectedTextColor: "#000000"
+                    selectionColor: "#ffd60a"
+                    font.pixelSize: 13
+                    font.family: "SF Pro Rounded"
                     renderType: Text.NativeRendering
+                    onCursorRectangleChanged: {
+                        if (editor.cursorRectangle.y < editorScroll.contentY)
+                            editorScroll.contentY = editor.cursorRectangle.y
+                        else if (editor.cursorRectangle.y + editor.cursorRectangle.height > editorScroll.contentY + editorScroll.height)
+                            editorScroll.contentY = editor.cursorRectangle.y + editor.cursorRectangle.height - editorScroll.height
+                    }
+                    Keys.onPressed: function(event) {
+                        if (event.key === Qt.Key_Escape) {
+                            root.closeEditor()
+                            event.accepted = true
+                        } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && !(event.modifiers & Qt.ShiftModifier)) {
+                            root.commit()
+                            event.accepted = true
+                        }
+                    }
+
+                    Text {
+                        visible: editor.text === "" && !editor.preeditText
+                        text: "New note…"
+                        color: Qt.rgba(1, 1, 1, 0.4)
+                        font: editor.font
+                        renderType: Text.NativeRendering
+                    }
                 }
             }
         }
@@ -140,7 +157,7 @@ Item {
                     anchors.right: removeButton.left
                     anchors.rightMargin: 4
                     text: row.modelData.text
-                    wrapMode: Text.Wrap
+                    wrapMode: Text.WrapAnywhere
                     maximumLineCount: root.size === "s" ? 5 : (root.size === "m" ? 2 : 3)
                     elide: Text.ElideRight
                     color: "#ffffff"
