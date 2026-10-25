@@ -13,20 +13,13 @@ Rectangle {
     property string emptyText: "Nothing Found"
     property bool empty: false
     property color accent: "#a35cf0"
+    property var window: null
     signal done()
 
     default property alias content: contentColumn.data
 
-    radius: 26
     color: "#0d0d0d"
-    border.width: 1
-    border.color: Qt.rgba(1, 1, 1, 0.10)
     clip: true
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: function(e) { e.accepted = true }
-    }
 
     RowLayout {
         anchors.fill: parent
@@ -56,6 +49,14 @@ Rectangle {
                 ColumnLayout {
                     anchors.fill: parent
                     spacing: 0
+
+                    WindowControls {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 24
+                        Layout.topMargin: 16
+                        Layout.leftMargin: 16
+                        window: root.window
+                    }
 
                     Item {
                         Layout.fillWidth: true

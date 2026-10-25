@@ -1,77 +1,34 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
-import Quickshell.Hyprland
 import qs.components
 import qs.services
 
 Scope {
     id: root
 
-    readonly property bool opened: ControlCatalog.galleryOpen
-
-    Presence {
-        id: presence
-        wanted: root.opened
-        exitDuration: ShellMotion.fade()
-    }
-
     Loader {
-        active: presence.present
+        active: ControlCatalog.galleryOpen
 
         sourceComponent: Component {
-            PanelWindow {
+            FloatingWindow {
                 id: win
 
-                screen: {
-                    var m = Hyprland.focusedMonitor
-                    if (m) {
-                        var s = Quickshell.screens.find(function(sc) { return sc.name === m.name })
-                        if (s) return s
-                    }
-                    return Quickshell.screens[0]
-                }
-
-                WlrLayershell.namespace: "quickshell:controlgallery"
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+                visible: true
+                title: "Edit Controls"
+                implicitWidth: 820
+                implicitHeight: 600
+                minimumSize: Qt.size(820, 600)
+                maximumSize: Qt.size(820, 600)
                 color: "transparent"
-                exclusiveZone: -1
-                anchors { top: true; right: true; bottom: true; left: true }
-                mask: Region { item: panel }
 
-                Rectangle {
-                    id: ghost
-                    property bool shown: false
-                    property var info: null
-                    width: ghost.info ? ghost.info.w * ControlCatalog.box + (ghost.info.w - 1) * ControlCatalog.boxMargin : ControlCatalog.box
-                    height: ghost.info ? ghost.info.h * ControlCatalog.box + (ghost.info.h - 1) * ControlCatalog.boxMargin : ControlCatalog.box
-                    radius: Math.min(ghost.width, ghost.height) / 2
-                    color: "#e6303034"
-                    border.width: 1
-                    border.color: "#60ffffff"
-                    visible: ghost.shown
-                    z: 100
-                    enabled: false
-
-                    CFVI {
-                        anchors.centerIn: parent
-                        size: 26
-                        icon: ghost.info ? ghost.info.icon : ""
-                    }
-                }
+                onClosed: ControlCatalog.galleryOpen = false
 
                 GalleryFrame {
                     id: panel
+                    anchors.fill: parent
+                    window: win
 
-                    width: Math.min(760, win.width - ControlCatalog.panelWidth - 80)
-                    height: Math.min(620, win.height - 96)
-                    x: Math.max(24, (win.width - ControlCatalog.panelWidth - 10 - panel.width) / 2)
-                    y: (win.height - panel.height) / 2
-
-                    property bool vis: false
-                    property bool dragging: false
                     readonly property var sections: ControlCatalog.categories.map(function(cat) {
                         return {
                             cat: cat,
@@ -89,25 +46,10 @@ Scope {
                             return { key: c.key, title: c.title, icon: c.icon, tint: c.tint }
                         }))
                     searchPlaceholder: "Search Controls"
-                    hint: "Drag a control to place it in Control Center."
+                    hint: "Drag a control into Control Center, or click it to add."
                     emptyText: "No Controls Found"
                     empty: panel.sections.length === 0
-                    onDone: ControlCatalog.galleryOpen = false
-
-                    Component.onCompleted: panel.vis = root.opened
-                    Connections {
-                        target: root
-                        function onOpenedChanged() { panel.vis = root.opened }
-                    }
-
-                    opacity: panel.vis ? (panel.dragging ? 0.4 : 1) : 0
-                    scale: panel.vis ? 1 : 0.96
-                    Behavior on opacity {
-                        NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
-                    }
-                    Behavior on scale {
-                        NumberAnimation { duration: ShellMotion.enter(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
-                    }
+                    onDone: win.close()
 
                     Repeater {
                         model: panel.sections
@@ -129,112 +71,98 @@ Scope {
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 1
-                                color: Qt.rgba(1, 1, 1, 0.10)
-                            }
+                                Layout.preferredHeight: flow.implicitHeight + 32
+                                radius: 18
+                                color: "#26262c"
 
-                            Flow {
-                                Layout.fillWidth: true
-                                spacing: 18
+                                Flow {
+                                    id: flow
+                                    x: 16
+                                    y: 16
+                                    width: parent.width - 32
+                                    spacing: 18
 
-                                Repeater {
-                                    model: section.modelData.items
+                                    Repeater {
+                                        model: section.modelData.items
 
-                                    delegate: Column {
-                                        id: tile
-                                        required property var modelData
-                                        readonly property bool added: ShellConfig.ccWidgetVisible(tile.modelData.id)
+                                        delegate: Column {
+                                            id: tile
+                                            required property var modelData
+                                            readonly property bool added: ShellConfig.ccWidgetVisible(tile.modelData.id)
 
-                                        spacing: 6
+                                            spacing: 6
 
-                                        Rectangle {
-                                            id: face
-                                            width: tile.modelData.w * ControlCatalog.box + (tile.modelData.w - 1) * ControlCatalog.boxMargin
-                                            height: tile.modelData.h * ControlCatalog.box + (tile.modelData.h - 1) * ControlCatalog.boxMargin
-                                            radius: Math.min(face.width, face.height) / 2
-                                            color: faceArea.containsMouse ? "#3c3c42" : "#2a2a2e"
-                                            border.width: 1
-                                            border.color: "#20ffffff"
-                                            opacity: tile.added ? 0.55 : 1
+                                            ControlPreview {
+                                                id: face
+                                                info: tile.modelData
+                                                opacity: tile.added ? 0.55 : 1
 
-                                            CFVI {
-                                                anchors.centerIn: parent
-                                                size: 26
-                                                icon: tile.modelData.icon
-                                            }
+                                                Drag.active: dragHandler.active
+                                                Drag.dragType: Drag.Automatic
+                                                Drag.supportedActions: Qt.CopyAction
+                                                Drag.proposedAction: Qt.CopyAction
+                                                Drag.mimeData: ({ "text/plain": "cc:" + tile.modelData.id })
+                                                Drag.hotSpot.x: face.width / 2
+                                                Drag.hotSpot.y: face.height / 2
 
-                                            MouseArea {
-                                                id: faceArea
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                cursorShape: tile.added ? Qt.ArrowCursor : Qt.PointingHandCursor
-                                                onClicked: ControlCatalog.add(tile.modelData.id)
-                                            }
+                                                MouseArea {
+                                                    id: faceArea
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onPressed: face.grabToImage(function(result) { face.Drag.imageSource = result.url })
+                                                    onClicked: ControlCatalog.add(tile.modelData.id)
+                                                }
 
-                                            DragHandler {
-                                                target: null
-                                                onActiveChanged: {
-                                                    if (active) {
-                                                        ghost.info = tile.modelData
-                                                        ghost.shown = true
-                                                        panel.dragging = true
-                                                        return
+                                                DragHandler {
+                                                    id: dragHandler
+                                                    target: null
+                                                    grabPermissions: PointerHandler.CanTakeOverFromAnything
+                                                }
+
+                                                Rectangle {
+                                                    anchors.top: parent.top
+                                                    anchors.right: parent.right
+                                                    anchors.topMargin: -4
+                                                    anchors.rightMargin: -4
+                                                    width: 22
+                                                    height: 22
+                                                    radius: 11
+                                                    color: tile.added ? "#48484c" : "#a35cf0"
+                                                    border.width: 1
+                                                    border.color: "#50ffffff"
+                                                    visible: tile.added || faceArea.containsMouse
+
+                                                    CFVI {
+                                                        anchors.centerIn: parent
+                                                        size: 11
+                                                        visible: tile.added
+                                                        icon: "check.svg"
                                                     }
-                                                    ghost.shown = false
-                                                    panel.dragging = false
-                                                    ControlCatalog.dropAt(tile.modelData.id, ghost.x + ghost.width / 2, ghost.y + ghost.height / 2)
-                                                }
-                                                onCentroidChanged: {
-                                                    if (!active) return
-                                                    ghost.x = centroid.scenePosition.x - ghost.width / 2
-                                                    ghost.y = centroid.scenePosition.y - ghost.height / 2
-                                                }
-                                            }
-                                        }
 
-                                        Rectangle {
-                                            parent: face
-                                            anchors.top: parent.top
-                                            anchors.right: parent.right
-                                            anchors.topMargin: -4
-                                            anchors.rightMargin: -4
-                                            width: 22
-                                            height: 22
-                                            radius: 11
-                                            color: tile.added ? "#48484c" : "#a35cf0"
-                                            border.width: 1
-                                            border.color: "#50ffffff"
-                                            visible: tile.added || faceArea.containsMouse
-                                            z: 5
-
-                                            CFVI {
-                                                anchors.centerIn: parent
-                                                size: 11
-                                                visible: tile.added
-                                                icon: "check.svg"
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        visible: !tile.added
+                                                        text: "+"
+                                                        color: "#ffffff"
+                                                        font.pixelSize: 17
+                                                        font.family: "SF Pro Rounded"
+                                                        renderType: Text.NativeRendering
+                                                    }
+                                                }
                                             }
 
                                             Text {
-                                                anchors.centerIn: parent
-                                                visible: !tile.added
-                                                text: "+"
+                                                width: face.width
+                                                horizontalAlignment: Text.AlignHCenter
+                                                text: tile.modelData.title
+                                                elide: Text.ElideRight
                                                 color: "#ffffff"
-                                                font.pixelSize: 17
+                                                font.pixelSize: 11
+                                                font.weight: Font.Medium
                                                 font.family: "SF Pro Rounded"
                                                 renderType: Text.NativeRendering
                                             }
-                                        }
-
-                                        Text {
-                                            width: face.width
-                                            horizontalAlignment: Text.AlignHCenter
-                                            text: tile.modelData.title
-                                            elide: Text.ElideRight
-                                            color: "#ffffff"
-                                            font.pixelSize: 11
-                                            font.weight: Font.Medium
-                                            font.family: "SF Pro Rounded"
-                                            renderType: Text.NativeRendering
                                         }
                                     }
                                 }

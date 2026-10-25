@@ -1,8 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
-import Quickshell.Hyprland
 import qs.components
 import qs.services
 
@@ -12,59 +10,28 @@ Scope {
     readonly property bool opened: WidgetState.galleryZone !== ""
     readonly property string zoneTitle: WidgetState.galleryZone === "desktop" ? "the Desktop" : "the Notification Center"
 
-    Presence {
-        id: presence
-        wanted: root.opened
-        exitDuration: ShellMotion.fade()
-    }
-
     Loader {
-        active: presence.present
+        active: root.opened
 
         sourceComponent: Component {
-            PanelWindow {
+            FloatingWindow {
                 id: win
 
-                screen: {
-                    var m = Hyprland.focusedMonitor
-                    if (m) {
-                        var s = Quickshell.screens.find(function(sc) { return sc.name === m.name })
-                        if (s) return s
-                    }
-                    return Quickshell.screens[0]
-                }
-
-                WlrLayershell.namespace: "quickshell:widgetgallery"
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+                visible: true
+                title: "Edit Widgets"
+                implicitWidth: 820
+                implicitHeight: 620
+                minimumSize: Qt.size(820, 620)
+                maximumSize: Qt.size(820, 620)
                 color: "transparent"
-                exclusiveZone: -1
-                anchors { top: true; right: true; bottom: true; left: true }
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: WidgetState.closeGallery()
-                }
-
-                WidgetView {
-                    id: ghost
-                    property bool shown: false
-                    property var spec: ({ id: "ghost", type: "clock", size: "s" })
-                    widgetData: ghost.spec
-                    visible: ghost.shown
-                    opacity: 0.9
-                    z: 100
-                    enabled: false
-                }
+                onClosed: WidgetState.closeGallery()
 
                 GalleryFrame {
                     id: panel
-                    anchors.centerIn: parent
-                    width: Math.min(760, parent.width - 48)
-                    height: Math.min(600, parent.height - 96)
+                    anchors.fill: parent
+                    window: win
 
-                    property bool vis: false
-                    property bool dragging: false
                     readonly property var filtered: WidgetRegistry.types.filter(function(t) {
                         var inCategory = panel.category === "all" || t.type === panel.category
                         var inQuery = panel.query === "" || t.title.toLowerCase().indexOf(panel.query.toLowerCase()) >= 0
@@ -79,22 +46,7 @@ Scope {
                     hint: "Click or drag a widget to add it to " + root.zoneTitle + "."
                     emptyText: "No Widgets Found"
                     empty: panel.filtered.length === 0
-                    onDone: WidgetState.closeGallery()
-
-                    Component.onCompleted: panel.vis = root.opened
-                    Connections {
-                        target: root
-                        function onOpenedChanged() { panel.vis = root.opened }
-                    }
-
-                    opacity: panel.vis ? (panel.dragging ? 0.25 : 1) : 0
-                    scale: panel.vis ? 1 : 0.96
-                    Behavior on opacity {
-                        NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
-                    }
-                    Behavior on scale {
-                        NumberAnimation { duration: ShellMotion.enter(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
-                    }
+                    onDone: win.close()
 
                     Repeater {
                         model: panel.filtered
@@ -135,8 +87,17 @@ Scope {
                                         spacing: 6
 
                                         Item {
+                                            id: face
                                             width: tile.dims.w
                                             height: tile.dims.h
+
+                                            Drag.active: dragHandler.active
+                                            Drag.dragType: Drag.Automatic
+                                            Drag.supportedActions: Qt.CopyAction
+                                            Drag.proposedAction: Qt.CopyAction
+                                            Drag.mimeData: ({ "text/plain": "widget:" + section.modelData.type + ":" + tile.modelData })
+                                            Drag.hotSpot.x: face.width / 2
+                                            Drag.hotSpot.y: face.height / 2
 
                                             WidgetView {
                                                 widgetData: ({ id: "preview", type: section.modelData.type, size: tile.modelData })
@@ -173,33 +134,14 @@ Scope {
                                                 anchors.fill: parent
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
+                                                onPressed: face.grabToImage(function(result) { face.Drag.imageSource = result.url })
                                                 onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData)
                                             }
 
                                             DragHandler {
+                                                id: dragHandler
                                                 target: null
-                                                onActiveChanged: {
-                                                    if (active) {
-                                                        ghost.spec = ({ id: "ghost", type: section.modelData.type, size: tile.modelData })
-                                                        ghost.shown = true
-                                                        panel.dragging = true
-                                                        return
-                                                    }
-                                                    var cx = ghost.x + ghost.width / 2
-                                                    var cy = ghost.y + ghost.height / 2
-                                                    var inside = cx >= panel.x && cx <= panel.x + panel.width && cy >= panel.y && cy <= panel.y + panel.height
-                                                    ghost.shown = false
-                                                    panel.dragging = false
-                                                    if (!inside) {
-                                                        WidgetState.addWidgetAt(WidgetState.galleryZone, section.modelData.type, tile.modelData,
-                                                            ghost.x - WidgetState.desktopOffsetX, ghost.y - WidgetState.desktopOffsetY)
-                                                    }
-                                                }
-                                                onCentroidChanged: {
-                                                    if (!active) return
-                                                    ghost.x = centroid.scenePosition.x - ghost.width / 2
-                                                    ghost.y = centroid.scenePosition.y - ghost.height / 2
-                                                }
+                                                grabPermissions: PointerHandler.CanTakeOverFromAnything
                                             }
                                         }
 
