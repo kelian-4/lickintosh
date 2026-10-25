@@ -77,12 +77,71 @@ Singleton {
         return Quickshell.iconPath("image-missing")
     }
 
+    // Icon hints for the files of the desktop, filled by one shell pass over
+    // the directory: { "<file name>": { kind: "icon" | "mime", value } }.
+    //  - "icon": the Icon= value of a .desktop file. Launchers saved on the
+    //    desktop (Bottles, ...) are not registered applications, so
+    //    DesktopEntries does not know them.
+    //  - "mime": the mime type of any other file, to pick a specific icon
+    //    (package, script, ...) instead of the generic document.
+    property var fileHints: ({})
+
+    function scanHints() {
+        hintDebounce.restart()
+    }
+
+    Timer {
+        id: hintDebounce
+        interval: 300
+        onTriggered: hintScan.running = true
+    }
+
+    Process {
+        id: hintScan
+        running: true
+        command: ["sh", "-c",
+            'for f in "$1"/* "$1"/.[!.]*; do [ -f "$f" ] || continue; n=${f##*/}; ' +
+            'case "$n" in *.desktop) k=icon; v=$(sed -n "s/^Icon=//p" "$f" | head -n 1);; ' +
+            '*) k=mime; v=$(xdg-mime query filetype "$f" 2>/dev/null);; esac; ' +
+            'printf "%s\\t%s\\t%s\\n" "$n" "$k" "$v"; done',
+            "sh", root.dir]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var hints = {}
+                var lines = text.split("\n")
+                for (var i = 0; i < lines.length; i++) {
+                    var parts = lines[i].split("\t")
+                    if (parts.length >= 3 && parts[2].trim() !== "")
+                        hints[parts[0]] = { kind: parts[1], value: parts[2].trim() }
+                }
+                root.fileHints = hints
+            }
+        }
+    }
+
+    onDirChanged: root.scanHints()
+
+    Connections {
+        target: folderModel
+        function onCountChanged() { root.scanHints() }
+    }
+
+    // Icon naming spec: "image/png" -> "image-png", then "<media>-x-generic".
+    function mimeIconNames(mime) {
+        return [mime.replace("/", "-"), mime.split("/")[0] + "-x-generic"]
+    }
+
     function iconPathFor(name, isDir) {
         if (isDir) return Quickshell.iconPath("folder", "inode-directory")
+        var hint = root.fileHints[name]
+        var names = []
         var entry = root.entryFor(name)
-        if (entry && entry.icon !== "")
-            return root.firstThemeIcon([entry.icon, "application-x-executable", "application-x-executable-symbolic", "unknown"])
-        return root.firstThemeIcon(["text-x-generic", "text-x-generic-symbolic", "application-x-executable", "unknown"])
+        if (entry && entry.icon !== "") names.push(entry.icon)
+        if (hint && hint.kind === "icon") names.push(hint.value)
+        if (names.length > 0)
+            return root.firstThemeIcon(names.concat(["application-x-executable", "application-x-executable-symbolic", "unknown"]))
+        if (hint && hint.kind === "mime") names = root.mimeIconNames(hint.value)
+        return root.firstThemeIcon(names.concat(["text-x-generic", "text-x-generic-symbolic", "application-x-executable", "unknown"]))
     }
 
     function labelFor(name) {
