@@ -46,7 +46,7 @@ Scope {
                     hint: "Click or drag a widget to add it to " + root.zoneTitle + "."
                     emptyText: "No Widgets Found"
                     empty: panel.filtered.length === 0
-                    onDone: win.close()
+                    onDone: WidgetState.closeGallery()
 
                     Repeater {
                         model: panel.filtered
@@ -134,7 +134,7 @@ Scope {
                                                 anchors.fill: parent
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
-                                                onPressed: face.grabToImage(function(result) { face.Drag.imageSource = result.url })
+                                                onPressed: face.grabToImage(function(result) { face.Drag.imageSource = result.url }, Qt.size(face.width, face.height))
                                                 onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData)
                                             }
 

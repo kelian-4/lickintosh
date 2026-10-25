@@ -576,7 +576,7 @@ Scope {
                         property int cellY: 0
                         onTargetChanged: {
                             if (!dropPreview.target) return
-                            dropPreview.shape = ControlCatalog.infoOf(dropPreview.target.id)
+                            dropPreview.shape = ControlCatalog.infoOf(dropPreview.target.type)
                             dropPreview.cellX = dropPreview.target.x
                             dropPreview.cellY = dropPreview.target.y
                         }
@@ -614,7 +614,7 @@ Scope {
                             if (!info) return
                             var left = drag.x - (info.w * root.box + (info.w - 1) * root.boxMargin) / 2
                             var top = drag.y - (info.h * root.box + (info.h - 1) * root.boxMargin) / 2
-                            ControlCatalog.setPreview(info.id, (left - root.boxMargin) / ControlCatalog.cell, (top - root.boxMargin) / ControlCatalog.cell)
+                            ControlCatalog.setPreview("", info.id, (left - root.boxMargin) / ControlCatalog.cell, (top - root.boxMargin) / ControlCatalog.cell)
                         }
                         onEntered: function(drag) {
                             drag.accepted = ControlCatalog.galleryOpen && controlId(drag) !== ""
@@ -688,9 +688,12 @@ Scope {
                         property bool isPressed: false
                         property bool growing: false
                         property string widgetId: ""
-                        readonly property bool hiddenByUser: boxbutton.widgetId !== "" && !ShellConfig.ccWidgetVisible(boxbutton.widgetId)
+                        readonly property bool hiddenByUser: boxbutton.widgetId !== "" && ControlCatalog.isLeaving(boxbutton.widgetId)
+                        readonly property var info: ControlCatalog.infoOf(ControlCatalog.typeOfUid(boxbutton.widgetId))
+                        property bool appeared: false
+                        Component.onCompleted: boxbutton.appeared = true
 
-                        opacity: (boxbutton.hideCause || boxbutton.hiddenByUser) ? 0 : 1
+                        opacity: (boxbutton.hideCause || boxbutton.hiddenByUser || !boxbutton.appeared) ? 0 : 1
                         visible: opacity > 0
                         scale: boxbutton.dragging ? 1.06 : (boxbutton.scaleCause ? 1.25 : (boxbutton.isPressed ? 0.93 : 1.0))
         z: boxbutton.dragging ? 100 : 0
@@ -810,7 +813,6 @@ Scope {
                                     if (!active) return
                                     boxbutton.dragDX = centroid.scenePosition.x - centroid.scenePressPosition.x
                                     boxbutton.dragDY = centroid.scenePosition.y - centroid.scenePressPosition.y
-                                    var info = ControlCatalog.infoOf(boxbutton.widgetId)
                                     var left = ccContent.gridX(boxbutton.xPos) + boxbutton.dragDX
                                     var top = ccContent.gridY(boxbutton.yPos) + boxbutton.dragDY
                                     var cx = left + boxbutton.width / 2
@@ -818,7 +820,7 @@ Scope {
                                     var outside = cx < -ControlCatalog.cell / 2 || cx > ccContent.width + ControlCatalog.cell / 2
                                                   || cy < -ControlCatalog.cell / 2 || cy > ccContent.height + ControlCatalog.cell / 2
                                     if (outside) ControlCatalog.clearPreview()
-                                    else ControlCatalog.setPreview(info.id, (left - root.boxMargin) / ControlCatalog.cell, (top - root.boxMargin) / ControlCatalog.cell)
+                                    else ControlCatalog.setPreview(boxbutton.widgetId, boxbutton.info.id, (left - root.boxMargin) / ControlCatalog.cell, (top - root.boxMargin) / ControlCatalog.cell)
                                 }
                             }
                         }
@@ -886,510 +888,384 @@ Scope {
                     }
 
 
-                    BoxButton {
-                        id: wifiWidget
-                        widgetId: "wifiWidget"
-                        xPos: root.packedX("wifiWidget")
-                        yPos: root.packedY("wifiWidget")
-                        width: root.wifiGrowReady ? root.gridImplicitWidth : root.box*2+root.boxMargin
-                        height: root.wifiGrowReady ? _wPanel.implicitHeight : root.box
-                        radius: root.wifiGrowReady ? 12 : 40
-                        enabled: root.wifiOn
-                        hideCause: root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                        overwriteX: root.wifiGrowReady
-                        overwriteY: root.wifiGrowReady
-                        overwriteXPos: 0
-                        overwriteYPos: root.boxMargin
-
-                        z: (root.wifiOpened || root.wifiClosing) ? 100 : 0
-                        forceTransparentRim: root.wifiOpened
-
-                            CFClippingRect {
-                                anchors.fill: parent
-                                radius: 12
-                                visible: opacity > 0
-                                opacity: root.wifiContentReady ? 1 : 0
-                                Behavior on opacity {
-                                    NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
-                                }
-
-                                BoxGlass {
-                                    anchors.fill: parent
-                                    radius: 12
-                                    color: root.glassColor
-                                    light: root.glassRimColor
-                                    rimStrength: 1.3
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        preventStealing: true
-                                        propagateComposedEvents: false
-                                        onPressed: function(e) { e.accepted = true }
-                                        onClicked: function(e) { e.accepted = true }
-                                    }
-
-                                    CCWifiPanel {
-                                        id: _wPanel
-                                        width: root.gridImplicitWidth
-                                        onCloseRequested: root.wifiOpened = false
-                                    }
-                                }
-                            }
-
-                            Item {
-                                width: root.box*2+root.boxMargin
-                                height: root.box
-                                anchors.left: parent.left
-                                anchors.top: parent.top
-                                visible: opacity > 0
-                                opacity: (!root.wifiOpened && !root.wifiClosing) ? 1 : 0
-                                Behavior on opacity {
-                                    NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
-                                }
-                                CFClippingRect {
-                                    id: wifiCircle
-                                    width: 34
-                                    height: 34
-                                    radius: 17
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: 13
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    color: root.wifiOn ? "#fff" : Qt.rgba(1,1,1,0.18)
-                                    CFVI {
-                                        anchors.centerIn: parent
-                                        width: 25
-                                        height: 25
-                                        icon: "wifi/nm-signal-100-symbolic.svg"
-                                        color: root.wifiOn ? "#1C7AFF" : "#fff"
-                                    }
-                                }
-                                Column {
-                                    anchors.left: wifiCircle.right
-                                    anchors.leftMargin: 9
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    CFText {
-                                        text: "Wi-Fi"
-                                        font.weight: Font.Bold
-                                        font.pixelSize: 12
-                                        color: "#fff"
-                                    }
-                                    CFText {
-                                        text: root.wifiSSID
-                                        font.pixelSize: 10
-                                        color: Qt.rgba(1,1,1,0.55)
-                                        width: root.box - 10
-                                        elide: Text.ElideRight
-                                    }
-                                }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                enabled: !root.wifiOpened
-                                pressAndHoldInterval: 300
-                                onClicked: {
-                                    root.wifiOn = !root.wifiOn
-                                    if (root.wifiOn) {
-                                        _nmOn.running = true
-                                    } else {
-                                        _nmOff.running = true
-                                    }
-                                }
-                                onPressAndHold: {
-                                    root.wifiOpened = true
-                                    root.btOpened = false
-                                    root.playerExpanded = false
-                                }
-                                onPressed: wifiWidget.isPressed = true
-                                onReleased: wifiWidget.isPressed = false
-                                onCanceled: wifiWidget.isPressed = false
-                            }
-                    }
-
-
-                    BoxButton {
-                        id: btWidget
-                        widgetId: "btWidget"
-                        xPos: root.packedX("btWidget")
-                        yPos: root.packedY("btWidget")
-                        width: root.btGrowReady ? root.gridImplicitWidth : root.box
-                        height: root.btGrowReady ? _btPanel.implicitHeight : root.box
-                        radius: root.btGrowReady ? 12 : 40
-                        property bool btOn: Bluetooth.defaultAdapter ? Bluetooth.defaultAdapter.enabled : false
-                        enabled: btOn
-                        hideCause: root.wifiOpened || root.wifiClosing || root.playerExpanded || root.playerClosing
-                        overwriteX: root.btGrowReady
-                        overwriteY: root.btGrowReady
-                        overwriteXPos: 0
-                        overwriteYPos: root.boxMargin
-
-                        z: (root.btOpened || root.btClosing) ? 100 : 0
-                        forceTransparentRim: root.btOpened
-                        light: btWidget.forceTransparentRim ? "transparent" : (btWidget.enabled ? "transparent" : root.glassRimColor)
-                        rimStrength: btWidget.forceTransparentRim ? 0 : (btWidget.enabled ? 0 : root.glassRimStrength)
-                        color: btWidget.forceTransparentRim ? "transparent" : (btWidget.enabled ? "#fff" : root.glassColor)
-                        Behavior on color { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                        Behavior on light { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                        Behavior on rimStrength { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-
-                            CFClippingRect {
-                                anchors.fill: parent
-                                radius: 12
-                                visible: opacity > 0
-                                opacity: root.btContentReady ? 1 : 0
-                                Behavior on opacity {
-                                    NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
-                                }
-
-                                BoxGlass {
-                                    anchors.fill: parent
-                                    radius: 12
-                                    color: root.glassColor
-                                    light: root.glassRimColor
-                                    rimStrength: 1.3
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        preventStealing: true
-                                        propagateComposedEvents: false
-                                        onPressed: function(e) { e.accepted = true }
-                                        onClicked: function(e) { e.accepted = true }
-                                    }
-
-                                    CCBluetoothPanel {
-                                        id: _btPanel
-                                        width: root.gridImplicitWidth
-                                        onCloseRequested: root.btOpened = false
-                                    }
-                                }
-                            }
-
-                            Item {
-                                width: root.box
-                                height: root.box
-                                anchors.left: parent.left
-                                anchors.top: parent.top
-                                visible: opacity > 0
-                                opacity: (!root.btOpened && !root.btClosing) ? 1 : 0
-                                Behavior on opacity {
-                                    NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
-                                }
-                            CFClippingRect {
-                                anchors.centerIn: parent
-                                width: 38; height: 38; radius: 19
-                                color: btWidget.enabled ? "#fff" : Qt.rgba(1,1,1,0.18)
-                                Behavior on color { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                                CFVI {
-                                    anchors.centerIn: parent
-                                    width: 30; height: 30
-                                    icon: "bluetooth/bluetooth.svg"
-                                    color: btWidget.enabled ? "#1C7AFF" : "#fff"
-                                    Behavior on color { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                                }
-                            }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                enabled: !root.btOpened
-                                pressAndHoldInterval: 300
-                                onClicked: {
-                                    if (Bluetooth.defaultAdapter) {
-                                        Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled
-                                    }
-                                }
-                                onPressAndHold: {
-                                    root.btOpened = true
-                                    root.wifiOpened = false
-                                    root.playerExpanded = false
-                                }
-                                onPressed: btWidget.isPressed = true
-                                onReleased: btWidget.isPressed = false
-                                onCanceled: btWidget.isPressed = false
-                            }
-                    }
-
-
-                    BoxButton {
-                        id: adWidget
-                        widgetId: "adWidget"
-                        xPos: root.packedX("adWidget")
-                        yPos: root.packedY("adWidget")
-                        width: root.box
-                        height: root.box
-                        radius: 40
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                        enabled: true
-                        CFVI {
-                            anchors.centerIn: parent
-                            width: 30
-                            height: 30
-                            icon: "devices/smartphone.svg"
-                            color: "#1C7AFF"
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("wifiWidget")
+                            objectProp: "uid"
                         }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                _kdeConnect.running = true
-                            }
-                            onPressed: adWidget.isPressed = true
-                            onReleased: adWidget.isPressed = false
-                            onCanceled: adWidget.isPressed = false
-                        }
-                    }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: wifiWidget
+                                widgetId: wifiWidget.modelData.uid
+                                xPos: root.packedX(wifiWidget.widgetId)
+                                yPos: root.packedY(wifiWidget.widgetId)
+                                width: root.wifiGrowReady ? root.gridImplicitWidth : root.box*2+root.boxMargin
+                                height: root.wifiGrowReady ? _wPanel.implicitHeight : root.box
+                                radius: root.wifiGrowReady ? 12 : 40
+                                enabled: root.wifiOn
+                                hideCause: root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                overwriteX: root.wifiGrowReady
+                                overwriteY: root.wifiGrowReady
+                                overwriteXPos: 0
+                                overwriteYPos: root.boxMargin
 
+                                z: (root.wifiOpened || root.wifiClosing) ? 100 : 0
+                                forceTransparentRim: root.wifiOpened
 
-                    BoxButton {
-                        id: musicWidget
-                        widgetId: "musicWidget"
-                        xPos: root.packedX("musicWidget")
-                        yPos: root.packedY("musicWidget")
-                        width: root.playerGrowReady ? root.gridImplicitWidth : root.box*2+root.boxMargin
-                        height: root.playerGrowReady ? expCol.implicitHeight + 32 : root.box*2+root.boxMargin
-                        radius: root.playerGrowReady ? 24 : 25
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing
-                        overwriteY: root.playerGrowReady
-                        overwriteXFromRight: root.playerExpanded || root.playerClosing
-                        overwriteRightPos: ccContent.gridX(root.packedX("musicWidget")) + (root.box*2+root.boxMargin)
-                        overwriteYPos: root.boxMargin
-                        z: (root.playerExpanded || root.playerClosing) ? 100 : 0
-                        forceTransparentRim: false
-
-                        Item {
-                            width: root.box*2+root.boxMargin
-                            height: root.box*2+root.boxMargin
-                            anchors.left: parent.left
-                            anchors.top: parent.top
-                            visible: opacity > 0
-                            opacity: (!root.playerExpanded && !root.playerClosing) ? 1 : 0
-                            Behavior on opacity {
-                                NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    root.playerExpanded = true
-                                    _pPosition.running = true
-                                    _pLength.running   = true
-                                }
-                            }
-
-                            Rectangle {
-                                id: artRect
-                                anchors.top: parent.top
-                                anchors.left: parent.left
-                                anchors.topMargin: 12
-                                anchors.leftMargin: 12
-                                width: 44
-                                height: 44
-                                radius: 9
-                                color: Qt.rgba(1,1,1,0.18)
-                                Image {
-                                    anchors.fill: parent
-                                    source: root.musicArt
-                                    fillMode: Image.PreserveAspectCrop
-                                    visible: root.musicArt !== ""
-                                }
-                                CFText {
-                                    anchors.centerIn: parent
-                                    text: "♪"
-                                    font.pixelSize: 22
-                                    gray: true
-                                    visible: root.musicArt === ""
-                                }
-                            }
-                            CFText {
-                                id: titleTxt
-                                anchors.top: artRect.bottom
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.topMargin: 8
-                                anchors.leftMargin: 12
-                                anchors.rightMargin: 12
-                                text: root.musicTitle
-                                font.pixelSize: 12
-                                font.weight: Font.Bold
-                                elide: Text.ElideRight
-                            }
-                            CFText {
-                                anchors.top: titleTxt.bottom
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.topMargin: 2
-                                anchors.leftMargin: 12
-                                anchors.rightMargin: 12
-                                text: root.musicArtist
-                                font.pixelSize: 10
-                                gray: true
-                                elide: Text.ElideRight
-                            }
-                            Row {
-                                anchors.bottom: parent.bottom
-                                anchors.bottomMargin: 14
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                spacing: 22
-                                CFVI {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 16
-                                    height: 13
-                                    icon: "music/backward.svg"
-                                    MouseArea {
+                                    CFClippingRect {
                                         anchors.fill: parent
-                                        anchors.margins: -8
-                                        onClicked: {
-                                            _pPrev.running = true
+                                        radius: 12
+                                        visible: opacity > 0
+                                        opacity: root.wifiContentReady ? 1 : 0
+                                        Behavior on opacity {
+                                            NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                         }
-                                    }
-                                }
-                                CFVI {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 18
-                                    height: 18
-                                    icon: root.musicPlaying ? "music/pause.svg" : "music/play.svg"
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        anchors.margins: -8
-                                        onClicked: {
-                                            _pPlay.running = true
-                                        }
-                                    }
-                                }
-                                CFVI {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 16
-                                    height: 13
-                                    icon: "music/forward.svg"
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        anchors.margins: -8
-                                        onClicked: {
-                                            _pNext.running = true
-                                        }
-                                    }
-                                }
-                            }
-                        }
 
-                        Item {
-                            anchors.fill: parent
-                            visible: opacity > 0
-                            opacity: root.playerContentReady ? 1 : 0
-                            Behavior on opacity {
-                                NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
-                            }
+                                        BoxGlass {
+                                            anchors.fill: parent
+                                            radius: 12
+                                            color: root.glassColor
+                                            light: root.glassRimColor
+                                            rimStrength: 1.3
 
-                            MouseArea {
-                                anchors.fill: parent
-                                preventStealing: true
-                                propagateComposedEvents: false
-                                onPressed: function(e) { e.accepted = true }
-                                onClicked: function(e) {
-                                    e.accepted = true
-                                    root.playerExpanded = false
-                                }
-                            }
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                preventStealing: true
+                                                propagateComposedEvents: false
+                                                onPressed: function(e) { e.accepted = true }
+                                                onClicked: function(e) { e.accepted = true }
+                                            }
 
-                            Column {
-                                id: expCol
-                                anchors.top: parent.top
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.margins: 16
-                                spacing: 14
-
-                                CFClippingRect {
-                                    id: expArt
-                                    width: parent.width
-                                    height: width
-                                    radius: 20
-                                    color: Qt.rgba(1,1,1,0.18)
-
-                                    Image {
-                                        anchors.fill: parent
-                                        source: root.musicArt
-                                        fillMode: Image.PreserveAspectCrop
-                                        visible: root.musicArt !== ""
-                                    }
-                                    CFText {
-                                        anchors.centerIn: parent
-                                        text: "♪"
-                                        font.pixelSize: 44
-                                        gray: true
-                                        visible: root.musicArt === ""
-                                    }
-                                }
-
-                                Column {
-                                    width: parent.width
-                                    spacing: 2
-                                    CFText {
-                                        width: parent.width
-                                        text: root.musicTitle
-                                        font.pixelSize: 16
-                                        font.weight: Font.Bold
-                                        elide: Text.ElideRight
-                                    }
-                                    CFText {
-                                        width: parent.width
-                                        text: root.musicArtist
-                                        font.pixelSize: 12
-                                        gray: true
-                                        elide: Text.ElideRight
-                                    }
-                                }
-
-                                Column {
-                                    width: parent.width
-                                    spacing: 4
-
-                                    CFFlatSlider {
-                                        id: expSlider
-                                        width: parent.width
-                                        value: root.musicLength > 0 ? root.musicPosition / root.musicLength : 0
-                                        onMoved: function(value) {
-                                            if (root.musicLength > 0) {
-                                                var secs = value * root.musicLength
-                                                root.musicPosition = secs
-                                                _pSeek.command = ["sh", "-c", "playerctl position " + secs.toFixed(1)]
-                                                _pSeek.running = true
+                                            CCWifiPanel {
+                                                id: _wPanel
+                                                width: root.gridImplicitWidth
+                                                onCloseRequested: root.wifiOpened = false
                                             }
                                         }
                                     }
 
                                     Item {
-                                        width: parent.width
-                                        height: 14
-                                        CFText {
-                                            anchors.left: parent.left
-                                            text: root.formatTime(root.musicPosition)
-                                            font.pixelSize: 10
-                                            gray: true
+                                        width: root.box*2+root.boxMargin
+                                        height: root.box
+                                        anchors.left: parent.left
+                                        anchors.top: parent.top
+                                        visible: opacity > 0
+                                        opacity: (!root.wifiOpened && !root.wifiClosing) ? 1 : 0
+                                        Behavior on opacity {
+                                            NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                         }
-                                        CFText {
-                                            anchors.right: parent.right
-                                            text: root.formatTime(root.musicLength)
-                                            font.pixelSize: 10
-                                            gray: true
+                                        CFClippingRect {
+                                            id: wifiCircle
+                                            width: 34
+                                            height: 34
+                                            radius: 17
+                                            anchors.left: parent.left
+                                            anchors.leftMargin: 13
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            color: root.wifiOn ? "#fff" : Qt.rgba(1,1,1,0.18)
+                                            CFVI {
+                                                anchors.centerIn: parent
+                                                width: 25
+                                                height: 25
+                                                icon: "wifi/nm-signal-100-symbolic.svg"
+                                                color: root.wifiOn ? "#1C7AFF" : "#fff"
+                                            }
+                                        }
+                                        Column {
+                                            anchors.left: wifiCircle.right
+                                            anchors.leftMargin: 9
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            CFText {
+                                                text: "Wi-Fi"
+                                                font.weight: Font.Bold
+                                                font.pixelSize: 12
+                                                color: "#fff"
+                                            }
+                                            CFText {
+                                                text: root.wifiSSID
+                                                font.pixelSize: 10
+                                                color: Qt.rgba(1,1,1,0.55)
+                                                width: root.box - 10
+                                                elide: Text.ElideRight
+                                            }
                                         }
                                     }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        enabled: !root.wifiOpened
+                                        pressAndHoldInterval: 300
+                                        onClicked: {
+                                            root.wifiOn = !root.wifiOn
+                                            if (root.wifiOn) {
+                                                _nmOn.running = true
+                                            } else {
+                                                _nmOff.running = true
+                                            }
+                                        }
+                                        onPressAndHold: {
+                                            root.wifiOpened = true
+                                            root.btOpened = false
+                                            root.playerExpanded = false
+                                        }
+                                        onPressed: wifiWidget.isPressed = true
+                                        onReleased: wifiWidget.isPressed = false
+                                        onCanceled: wifiWidget.isPressed = false
+                                    }
+                            }
+                    }
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("btWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: btWidget
+                                widgetId: btWidget.modelData.uid
+                                xPos: root.packedX(btWidget.widgetId)
+                                yPos: root.packedY(btWidget.widgetId)
+                                width: root.btGrowReady ? root.gridImplicitWidth : root.box
+                                height: root.btGrowReady ? _btPanel.implicitHeight : root.box
+                                radius: root.btGrowReady ? 12 : 40
+                                property bool btOn: Bluetooth.defaultAdapter ? Bluetooth.defaultAdapter.enabled : false
+                                enabled: btOn
+                                hideCause: root.wifiOpened || root.wifiClosing || root.playerExpanded || root.playerClosing
+                                overwriteX: root.btGrowReady
+                                overwriteY: root.btGrowReady
+                                overwriteXPos: 0
+                                overwriteYPos: root.boxMargin
+
+                                z: (root.btOpened || root.btClosing) ? 100 : 0
+                                forceTransparentRim: root.btOpened
+                                light: btWidget.forceTransparentRim ? "transparent" : (btWidget.enabled ? "transparent" : root.glassRimColor)
+                                rimStrength: btWidget.forceTransparentRim ? 0 : (btWidget.enabled ? 0 : root.glassRimStrength)
+                                color: btWidget.forceTransparentRim ? "transparent" : (btWidget.enabled ? "#fff" : root.glassColor)
+                                Behavior on color { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                Behavior on light { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                Behavior on rimStrength { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+
+                                    CFClippingRect {
+                                        anchors.fill: parent
+                                        radius: 12
+                                        visible: opacity > 0
+                                        opacity: root.btContentReady ? 1 : 0
+                                        Behavior on opacity {
+                                            NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                                        }
+
+                                        BoxGlass {
+                                            anchors.fill: parent
+                                            radius: 12
+                                            color: root.glassColor
+                                            light: root.glassRimColor
+                                            rimStrength: 1.3
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                preventStealing: true
+                                                propagateComposedEvents: false
+                                                onPressed: function(e) { e.accepted = true }
+                                                onClicked: function(e) { e.accepted = true }
+                                            }
+
+                                            CCBluetoothPanel {
+                                                id: _btPanel
+                                                width: root.gridImplicitWidth
+                                                onCloseRequested: root.btOpened = false
+                                            }
+                                        }
+                                    }
+
+                                    Item {
+                                        width: root.box
+                                        height: root.box
+                                        anchors.left: parent.left
+                                        anchors.top: parent.top
+                                        visible: opacity > 0
+                                        opacity: (!root.btOpened && !root.btClosing) ? 1 : 0
+                                        Behavior on opacity {
+                                            NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                                        }
+                                    CFClippingRect {
+                                        anchors.centerIn: parent
+                                        width: 38; height: 38; radius: 19
+                                        color: btWidget.enabled ? "#fff" : Qt.rgba(1,1,1,0.18)
+                                        Behavior on color { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                        CFVI {
+                                            anchors.centerIn: parent
+                                            width: 30; height: 30
+                                            icon: "bluetooth/bluetooth.svg"
+                                            color: btWidget.enabled ? "#1C7AFF" : "#fff"
+                                            Behavior on color { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                        }
+                                    }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        enabled: !root.btOpened
+                                        pressAndHoldInterval: 300
+                                        onClicked: {
+                                            if (Bluetooth.defaultAdapter) {
+                                                Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled
+                                            }
+                                        }
+                                        onPressAndHold: {
+                                            root.btOpened = true
+                                            root.wifiOpened = false
+                                            root.playerExpanded = false
+                                        }
+                                        onPressed: btWidget.isPressed = true
+                                        onReleased: btWidget.isPressed = false
+                                        onCanceled: btWidget.isPressed = false
+                                    }
+                            }
+                    }
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("adWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: adWidget
+                                widgetId: adWidget.modelData.uid
+                                xPos: root.packedX(adWidget.widgetId)
+                                yPos: root.packedY(adWidget.widgetId)
+                                width: root.box
+                                height: root.box
+                                radius: 40
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                enabled: true
+                                CFVI {
+                                    anchors.centerIn: parent
+                                    width: 30
+                                    height: 30
+                                    icon: "devices/smartphone.svg"
+                                    color: "#1C7AFF"
                                 }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        _kdeConnect.running = true
+                                    }
+                                    onPressed: adWidget.isPressed = true
+                                    onReleased: adWidget.isPressed = false
+                                    onCanceled: adWidget.isPressed = false
+                                }
+                            }
+                    }
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("musicWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: musicWidget
+                                widgetId: musicWidget.modelData.uid
+                                xPos: root.packedX(musicWidget.widgetId)
+                                yPos: root.packedY(musicWidget.widgetId)
+                                width: root.playerGrowReady ? root.gridImplicitWidth : root.box*2+root.boxMargin
+                                height: root.playerGrowReady ? expCol.implicitHeight + 32 : root.box*2+root.boxMargin
+                                radius: root.playerGrowReady ? 24 : 25
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing
+                                overwriteY: root.playerGrowReady
+                                overwriteXFromRight: root.playerExpanded || root.playerClosing
+                                overwriteRightPos: ccContent.gridX(root.packedX(musicWidget.widgetId)) + (root.box*2+root.boxMargin)
+                                overwriteYPos: root.boxMargin
+                                z: (root.playerExpanded || root.playerClosing) ? 100 : 0
+                                forceTransparentRim: false
 
                                 Item {
-                                    width: parent.width
-                                    height: 44
+                                    width: root.box*2+root.boxMargin
+                                    height: root.box*2+root.boxMargin
+                                    anchors.left: parent.left
+                                    anchors.top: parent.top
+                                    visible: opacity > 0
+                                    opacity: (!root.playerExpanded && !root.playerClosing) ? 1 : 0
+                                    Behavior on opacity {
+                                        NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                                    }
 
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: {
+                                            root.playerExpanded = true
+                                            _pPosition.running = true
+                                            _pLength.running   = true
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        id: artRect
+                                        anchors.top: parent.top
+                                        anchors.left: parent.left
+                                        anchors.topMargin: 12
+                                        anchors.leftMargin: 12
+                                        width: 44
+                                        height: 44
+                                        radius: 9
+                                        color: Qt.rgba(1,1,1,0.18)
+                                        Image {
+                                            anchors.fill: parent
+                                            source: root.musicArt
+                                            fillMode: Image.PreserveAspectCrop
+                                            visible: root.musicArt !== ""
+                                        }
+                                        CFText {
+                                            anchors.centerIn: parent
+                                            text: "♪"
+                                            font.pixelSize: 22
+                                            gray: true
+                                            visible: root.musicArt === ""
+                                        }
+                                    }
+                                    CFText {
+                                        id: titleTxt
+                                        anchors.top: artRect.bottom
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.topMargin: 8
+                                        anchors.leftMargin: 12
+                                        anchors.rightMargin: 12
+                                        text: root.musicTitle
+                                        font.pixelSize: 12
+                                        font.weight: Font.Bold
+                                        elide: Text.ElideRight
+                                    }
+                                    CFText {
+                                        anchors.top: titleTxt.bottom
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.topMargin: 2
+                                        anchors.leftMargin: 12
+                                        anchors.rightMargin: 12
+                                        text: root.musicArtist
+                                        font.pixelSize: 10
+                                        gray: true
+                                        elide: Text.ElideRight
+                                    }
                                     Row {
-                                        anchors.centerIn: parent
-                                        spacing: 42
+                                        anchors.bottom: parent.bottom
+                                        anchors.bottomMargin: 14
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        spacing: 22
                                         CFVI {
                                             anchors.verticalCenter: parent.verticalCenter
-                                            width: 30
-                                            height: 26
+                                            width: 16
+                                            height: 13
                                             icon: "music/backward.svg"
                                             MouseArea {
                                                 anchors.fill: parent
-                                                anchors.margins: -10
+                                                anchors.margins: -8
                                                 onClicked: {
                                                     _pPrev.running = true
                                                 }
@@ -1397,12 +1273,12 @@ Scope {
                                         }
                                         CFVI {
                                             anchors.verticalCenter: parent.verticalCenter
-                                            width: 40
-                                            height: 40
+                                            width: 18
+                                            height: 18
                                             icon: root.musicPlaying ? "music/pause.svg" : "music/play.svg"
                                             MouseArea {
                                                 anchors.fill: parent
-                                                anchors.margins: -10
+                                                anchors.margins: -8
                                                 onClicked: {
                                                     _pPlay.running = true
                                                 }
@@ -1410,12 +1286,12 @@ Scope {
                                         }
                                         CFVI {
                                             anchors.verticalCenter: parent.verticalCenter
-                                            width: 30
-                                            height: 26
+                                            width: 16
+                                            height: 13
                                             icon: "music/forward.svg"
                                             MouseArea {
                                                 anchors.fill: parent
-                                                anchors.margins: -10
+                                                anchors.margins: -8
                                                 onClicked: {
                                                     _pNext.running = true
                                                 }
@@ -1425,960 +1301,1191 @@ Scope {
                                 }
 
                                 Item {
-                                    width: parent.width
-                                    height: 24
-
-                                    CFVI {
-                                        anchors.left: parent.left
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        icon: "volume/audio-volume-1.svg"
-                                        size: 12
+                                    anchors.fill: parent
+                                    visible: opacity > 0
+                                    opacity: root.playerContentReady ? 1 : 0
+                                    Behavior on opacity {
+                                        NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                     }
-                                    CFFlatSlider {
-                                        anchors.left: parent.left
-                                        anchors.right: parent.right
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        anchors.leftMargin: 22
-                                        anchors.rightMargin: 22
-                                        value: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio.volume : 0
-                                        onMoved: function(value) {
-                                            if (Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio) {
-                                                Pipewire.defaultAudioSink.audio.volume = value
-                                            }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        preventStealing: true
+                                        propagateComposedEvents: false
+                                        onPressed: function(e) { e.accepted = true }
+                                        onClicked: function(e) {
+                                            e.accepted = true
+                                            root.playerExpanded = false
                                         }
                                     }
-                                    CFVI {
+
+                                    Column {
+                                        id: expCol
+                                        anchors.top: parent.top
+                                        anchors.left: parent.left
                                         anchors.right: parent.right
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        icon: "volume/audio-volume-3.svg"
-                                        size: 16
-                                    }
-                                }
+                                        anchors.margins: 16
+                                        spacing: 14
 
-                                Item {
-                                    width: parent.width
-                                    height: outputPill.height
+                                        CFClippingRect {
+                                            id: expArt
+                                            width: parent.width
+                                            height: width
+                                            radius: 20
+                                            color: Qt.rgba(1,1,1,0.18)
 
-                                    Rectangle {
-                                        id: outputPill
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        width: pillRow.implicitWidth + 28
-                                        height: 30
-                                        radius: 15
-                                        color: Qt.rgba(1,1,1,0.10)
-
-                                        Row {
-                                            id: pillRow
-                                            anchors.centerIn: parent
-                                            spacing: 6
-                                            CFVI {
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                icon: "bluetooth/bluetooth.svg"
-                                                size: 12
+                                            Image {
+                                                anchors.fill: parent
+                                                source: root.musicArt
+                                                fillMode: Image.PreserveAspectCrop
+                                                visible: root.musicArt !== ""
                                             }
                                             CFText {
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                text: (Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.description) ? Pipewire.defaultAudioSink.description : "Sortie audio"
-                                                font.pixelSize: 11
+                                                anchors.centerIn: parent
+                                                text: "♪"
+                                                font.pixelSize: 44
+                                                gray: true
+                                                visible: root.musicArt === ""
+                                            }
+                                        }
+
+                                        Column {
+                                            width: parent.width
+                                            spacing: 2
+                                            CFText {
+                                                width: parent.width
+                                                text: root.musicTitle
+                                                font.pixelSize: 16
                                                 font.weight: Font.Bold
                                                 elide: Text.ElideRight
                                             }
-                                        }
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            onClicked: {
-                                                root.playerExpanded = false
-                                                root.btOpened = true
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-
-                    BoxButton {
-                        id: focusWidget
-                        widgetId: "focusWidget"
-                        xPos: root.packedX("focusWidget")
-                        yPos: root.packedY("focusWidget")
-                        width: root.box*2+root.boxMargin
-                        height: root.box
-                        radius: 40
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                        enabled: root.focusOn
-                        light: focusWidget.enabled ? "transparent" : root.glassRimColor
-                        rimStrength: focusWidget.enabled ? 0 : root.glassRimStrength
-                        color: focusWidget.enabled ? "#fff" : root.glassColor
-                        CFClippingRect {
-                            id: focusCircle
-                            anchors.left: parent.left
-                            anchors.leftMargin: 11
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 38; height: 38; radius: 19
-                            color: "transparent"
-                            CFVI {
-                                anchors.centerIn: parent
-                                icon: "dnd.svg"
-                                size: 26
-                                color: root.focusOn ? "#8E44AD" : "#fff"
-                            }
-                        }
-                        CFText {
-                            anchors.left: focusCircle.right
-                            anchors.leftMargin: 9
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "Focus"
-                            font.pixelSize: 12
-                            font.weight: Font.Bold
-                            color: root.focusOn ? "#000" : "#fff"
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                root.focusOn = !root.focusOn
-                                NotifService.dndEnabled = root.focusOn
-                            }
-                            onPressed: focusWidget.isPressed = true
-                            onReleased: focusWidget.isPressed = false
-                            onCanceled: focusWidget.isPressed = false
-                        }
-                    }
-
-
-                    BoxButton {
-                        id: stageWidget
-                        widgetId: "stageWidget"
-                        xPos: root.packedX("stageWidget")
-                        yPos: root.packedY("stageWidget")
-                        width: root.box
-                        height: root.box
-                        radius: 22
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                        CFVI {
-                            anchors.centerIn: parent
-                            width: 24
-                            height: 20
-                            icon: "screenshot/region.svg"
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                _screenshotCmd.running = true
-                            }
-                            onPressed: stageWidget.isPressed = true
-                            onReleased: stageWidget.isPressed = false
-                            onCanceled: stageWidget.isPressed = false
-                        }
-                    }
-
-
-                    BoxButton {
-                        id: shareWidget
-                        widgetId: "shareWidget"
-                        xPos: root.packedX("shareWidget")
-                        yPos: root.packedY("shareWidget")
-                        width: root.box
-                        height: root.box
-                        radius: 22
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                        enabled: root.recording
-                        CFVI {
-                            anchors.centerIn: parent
-                            width: 26
-                            height: 20
-                            icon: "screenshare.svg"
-                            color: root.recording ? "#1C7AFF" : "#fff"
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                root.recording = !root.recording
-                                if (root.recording) {
-                                    _shOn.running = true
-                                } else {
-                                    _shOn.signal(2) // SIGINT, laisse wf-recorder finaliser le mp4 proprement
-                                }
-                            }
-                            onPressed: shareWidget.isPressed = true
-                            onReleased: shareWidget.isPressed = false
-                            onCanceled: shareWidget.isPressed = false
-                        }
-                    }
-
-
-                    BoxButton {
-                        id: displayWidget
-                        widgetId: "displayWidget"
-                        xPos: root.packedX("displayWidget")
-                        yPos: root.packedY("displayWidget")
-                        width: root.box*4+root.boxMargin*3
-                        height: root.box
-                        radius: 25
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-
-                        CFSlider {
-                            anchors.fill: parent
-                            anchors.leftMargin: 40
-                            anchors.rightMargin: 40
-                            value: root.brtValue
-                            onMoved: {
-                                root.brtValue = value
-                                _brtT.restart()
-                            }
-                        }
-                        CFVI {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 15
-                            anchors.verticalCenter: parent.verticalCenter
-                            icon: "sun-small.svg"
-                            size: 14
-                        }
-                        CFVI {
-                            anchors.right: parent.right
-                            anchors.rightMargin: 15
-                            anchors.verticalCenter: parent.verticalCenter
-                            icon: "sun-huge.svg"
-                            size: 18
-                        }
-                    }
-
-
-                    BoxButton {
-                        id: volumeWidget
-                        widgetId: "volumeWidget"
-                        xPos: root.packedX("volumeWidget")
-                        yPos: root.packedY("volumeWidget")
-                        width: root.box*4+root.boxMargin*3
-                        height: root.box
-                        radius: 25
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-
-                        CFSlider {
-                            anchors.fill: parent
-                            anchors.leftMargin: 40
-                            anchors.rightMargin: 40
-                            value: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio.volume : 0
-                            onMoved: {
-                                if (Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio) {
-                                    Pipewire.defaultAudioSink.audio.volume = value
-                                }
-                            }
-                        }
-                        CFVI {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 15
-                            anchors.verticalCenter: parent.verticalCenter
-                            icon: "volume/audio-volume-1.svg"
-                            size: 14
-                        }
-                        CFVI {
-                            anchors.right: parent.right
-                            anchors.rightMargin: 15
-                            anchors.verticalCenter: parent.verticalCenter
-                            icon: "volume/audio-volume-3.svg"
-                            size: 18
-                        }
-                    }
-
-
-
-                    BoxButton {
-                        id: darkWidget
-                        widgetId: "darkWidget"
-                        xPos: root.packedX("darkWidget")
-                        yPos: root.packedY("darkWidget")
-                        width: root.box*2+root.boxMargin
-                        height: root.box
-                        radius: 40
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                        enabled: root.darkOn
-                        light: darkWidget.enabled ? "transparent" : root.glassRimColor
-                        rimStrength: darkWidget.enabled ? 0 : root.glassRimStrength
-                        color: darkWidget.enabled ? "#fff" : root.glassColor
-                        CFClippingRect {
-                            id: darkCircle
-                            anchors.left: parent.left
-                            anchors.leftMargin: 11
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 38; height: 38; radius: 19
-                            color: "transparent"
-                            CFVI {
-                                anchors.centerIn: parent
-                                icon: root.darkOn ? "notch/moon.svg" : "weather/sun.svg"
-                                size: 26
-                                color: root.darkOn ? "#F1C40F" : "#fff"
-                            }
-                        }
-                        CFText {
-                            anchors.left: darkCircle.right
-                            anchors.leftMargin: 9
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "Dark Mode"
-                            font.pixelSize: 12
-                            font.weight: Font.Bold
-                            color: root.darkOn ? "#000" : "#fff"
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                root.darkOn = !root.darkOn
-                                _darkToggleCmd.running = true
-                            }
-                            onPressed: darkWidget.isPressed = true
-                            onReleased: darkWidget.isPressed = false
-                            onCanceled: darkWidget.isPressed = false
-                        }
-                    }
-
-
-                    BoxButton {
-                        id: calcWidget
-                        widgetId: "calcWidget"
-                        xPos: root.packedX("calcWidget")
-                        yPos: root.packedY("calcWidget")
-                        width: root.box
-                        height: root.box
-                        radius: 40
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                        Item {
-                            anchors.centerIn: parent
-                            width: 22
-                            height: 26
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: 4
-                                color: "transparent"
-                                border.color: "#fff"
-                                border.width: 2
-                            }
-                            Rectangle {
-                                anchors.top: parent.top
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.margins: 4
-                                height: 6
-                                radius: 1.5
-                                color: "#fff"
-                            }
-                            Grid {
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.bottom: parent.bottom
-                                anchors.leftMargin: 4
-                                anchors.rightMargin: 4
-                                anchors.bottomMargin: 4
-                                columns: 3
-                                rowSpacing: 2
-                                columnSpacing: 2
-                                Repeater {
-                                    model: 6
-                                    Rectangle {
-                                        width: 3
-                                        height: 3
-                                        radius: 1
-                                        color: "#fff"
-                                    }
-                                }
-                            }
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                _calcCmd.running = true
-                            }
-                            onPressed: if (!root.subOpened) calcWidget.isPressed = true
-                            onReleased: calcWidget.isPressed = false
-                            onCanceled: calcWidget.isPressed = false
-                        }
-                    }
-
-
-                    BoxButton {
-                        id: gameModeWidget
-                        widgetId: "gameModeWidget"
-                        xPos: root.packedX("gameModeWidget")
-                        yPos: root.packedY("gameModeWidget")
-                        width: root.box
-                        height: root.box
-                        radius: 40
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                        enabled: GameMode.enabled
-                        light: gameModeWidget.enabled ? "transparent" : root.glassRimColor
-                        rimStrength: gameModeWidget.enabled ? 0 : root.glassRimStrength
-                        color: gameModeWidget.enabled ? "#fff" : root.glassColor
-                        Item {
-                            anchors.centerIn: parent
-                            width: 30
-                            height: 20
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: height/2
-                                color: "transparent"
-                                border.color: GameMode.enabled ? "#1C7AFF" : "#fff"
-                                border.width: 2
-                            }
-                            Rectangle {
-                                width: 8
-                                height: 2
-                                radius: 1
-                                color: GameMode.enabled ? "#1C7AFF" : "#fff"
-                                anchors.left: parent.left
-                                anchors.leftMargin: 6
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                            Rectangle {
-                                width: 2
-                                height: 8
-                                radius: 1
-                                color: GameMode.enabled ? "#1C7AFF" : "#fff"
-                                anchors.left: parent.left
-                                anchors.leftMargin: 9
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                            Rectangle {
-                                width: 4
-                                height: 4
-                                radius: 2
-                                color: GameMode.enabled ? "#1C7AFF" : "#fff"
-                                anchors.right: parent.right
-                                anchors.rightMargin: 5
-                                anchors.top: parent.top
-                                anchors.topMargin: 5
-                            }
-                            Rectangle {
-                                width: 4
-                                height: 4
-                                radius: 2
-                                color: GameMode.enabled ? "#1C7AFF" : "#fff"
-                                anchors.right: parent.right
-                                anchors.rightMargin: 10
-                                anchors.bottom: parent.bottom
-                                anchors.bottomMargin: 5
-                            }
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                GameMode.toggle()
-                            }
-                            onPressed: if (!root.subOpened) gameModeWidget.isPressed = true
-                            onReleased: gameModeWidget.isPressed = false
-                            onCanceled: gameModeWidget.isPressed = false
-                        }
-                    }
-
-                    BoxButton {
-                        id: timerWidget
-                        widgetId: "timerWidget"
-                        xPos: root.packedX("timerWidget")
-                        yPos: root.packedY("timerWidget")
-                        width: root.timerGrowReady ? (root.box*4+root.boxMargin*3) : root.box
-                        height: root.timerGrowReady ? (root.box*2+root.boxMargin) : root.box
-                        radius: root.timerGrowReady ? 30 : 40
-                        z: root.timerOpened || root.timerClosing ? 5 : 0
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.alarmOpened || root.alarmClosing || root.stopwatchOpened || root.stopwatchClosing
-                        enabled: TimerState.running || TimerState.firing
-
-                        CFVI {
-                            opacity: (!root.timerOpened && !root.timerClosing) ? 1 : 0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                            anchors.centerIn: parent
-                            width: 22
-                            height: 22
-                            icon: "notch/clock.svg"
-                            color: (TimerState.running || TimerState.firing) ? "#1C7AFF" : "#fff"
-                        }
-                        Rectangle {
-                            opacity: (!root.timerOpened && !root.timerClosing && (TimerState.running || TimerState.firing)) ? 1 : 0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                            width: 8
-                            height: 8
-                            radius: 4
-                            color: TimerState.firing ? "#ff453a" : "#1C7AFF"
-                            anchors.top: parent.top
-                            anchors.right: parent.right
-                            anchors.margins: 10
-                        }
-
-                        Item {
-                            anchors.fill: parent
-                            anchors.margins: 14
-                            opacity: root.timerContentReady ? 1 : 0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-
-                            ColumnLayout {
-                                anchors.fill: parent
-                                spacing: 10
-
-                                CFText {
-                                    text: "Minuteur"
-                                    font.pixelSize: 15
-                                    font.weight: Font.Bold
-                                    color: "#fff"
-                                }
-
-                                CFText {
-                                    visible: TimerState.firing
-                                    text: "Terminé"
-                                    font.pixelSize: 30
-                                    font.weight: Font.Bold
-                                    color: "#ff453a"
-                                    Layout.alignment: Qt.AlignHCenter
-                                }
-
-                                CFText {
-                                    visible: !TimerState.firing && (TimerState.running || TimerState.remainingAtPauseMs > 0)
-                                    text: TimerState.formatRemaining(TimerState.remainingMs)
-                                    font.pixelSize: 30
-                                    font.weight: Font.Bold
-                                    color: "#fff"
-                                    Layout.alignment: Qt.AlignHCenter
-                                }
-
-                                RowLayout {
-                                    visible: !TimerState.firing && !TimerState.running && TimerState.remainingAtPauseMs <= 0
-                                    Layout.alignment: Qt.AlignHCenter
-                                    spacing: 6
-
-                                    Repeater {
-                                        model: [1, 5, 10, 15, 30]
-
-                                        Rectangle {
-                                            id: _presetBtn
-                                            required property int modelData
-                                            width: 44
-                                            height: 32
-                                            radius: 8
-                                            color: _presetMouse.containsMouse ? "#28ffffff" : "#18ffffff"
                                             CFText {
-                                                anchors.centerIn: parent
-                                                text: _presetBtn.modelData + "m"
+                                                width: parent.width
+                                                text: root.musicArtist
                                                 font.pixelSize: 12
-                                                color: "#fff"
-                                            }
-                                            MouseArea {
-                                                id: _presetMouse
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: TimerState.start(_presetBtn.modelData * 60 * 1000)
+                                                gray: true
+                                                elide: Text.ElideRight
                                             }
                                         }
-                                    }
-                                }
 
-                                RowLayout {
-                                    visible: TimerState.firing || TimerState.running || TimerState.remainingAtPauseMs > 0
-                                    Layout.alignment: Qt.AlignHCenter
-                                    spacing: 8
+                                        Column {
+                                            width: parent.width
+                                            spacing: 4
 
-                                    Rectangle {
-                                        visible: !TimerState.firing
-                                        width: 90
-                                        height: 32
-                                        radius: 8
-                                        color: _pauseMouse.containsMouse ? "#28ffffff" : "#18ffffff"
-                                        CFText {
-                                            anchors.centerIn: parent
-                                            text: TimerState.running ? "Pause" : "Reprendre"
-                                            font.pixelSize: 12
-                                            color: "#fff"
-                                        }
-                                        MouseArea {
-                                            id: _pauseMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: TimerState.running ? TimerState.pause() : TimerState.resume()
-                                        }
-                                    }
-
-                                    Rectangle {
-                                        width: 90
-                                        height: 32
-                                        radius: 8
-                                        color: _cancelMouse.containsMouse ? "#40ff453a" : "#20ff453a"
-                                        CFText {
-                                            anchors.centerIn: parent
-                                            text: TimerState.firing ? "OK" : "Annuler"
-                                            font.pixelSize: 12
-                                            color: "#ff453a"
-                                        }
-                                        MouseArea {
-                                            id: _cancelMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: TimerState.firing ? TimerState.dismissFiring() : TimerState.cancel()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            enabled: !root.timerOpened && !root.timerClosing
-                            onClicked: root.timerOpened = true
-                            onPressed: timerWidget.isPressed = true
-                            onReleased: timerWidget.isPressed = false
-                            onCanceled: timerWidget.isPressed = false
-                        }
-
-                        Rectangle {
-                            opacity: root.timerContentReady ? 1 : 0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                            width: 26
-                            height: 26
-                            radius: 13
-                            anchors.top: parent.top
-                            anchors.right: parent.right
-                            anchors.margins: 8
-                            color: _timerCloseMouse.containsMouse ? "#28ffffff" : "#18ffffff"
-                            CFVI {
-                                anchors.centerIn: parent
-                                width: 11
-                                height: 11
-                                icon: "notch/x.svg"
-                            }
-                            MouseArea {
-                                id: _timerCloseMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.timerOpened = false
-                            }
-                        }
-                    }
-
-                    BoxButton {
-                        id: alarmWidget
-                        widgetId: "alarmWidget"
-                        xPos: root.packedX("alarmWidget")
-                        yPos: root.packedY("alarmWidget")
-                        width: root.alarmGrowReady ? (root.box*4+root.boxMargin*3) : root.box
-                        height: root.alarmGrowReady ? (root.box*2+root.boxMargin) : root.box
-                        radius: root.alarmGrowReady ? 30 : 40
-                        z: root.alarmOpened || root.alarmClosing ? 5 : 0
-                        overwriteX: root.alarmGrowReady
-                        overwriteXFromRight: root.alarmGrowReady
-                        overwriteRightPos: root.gridImplicitWidth - root.boxMargin
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.timerOpened || root.timerClosing || root.stopwatchOpened || root.stopwatchClosing
-                        enabled: AlarmState.alarms.filter(function(a) { return a.enabled }).length > 0
-
-                        CFVI {
-                            opacity: (!root.alarmOpened && !root.alarmClosing) ? 1 : 0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                            anchors.centerIn: parent
-                            width: 22
-                            height: 22
-                            icon: "notch/bell.svg"
-                            color: alarmWidget.enabled ? "#1C7AFF" : "#fff"
-                        }
-
-                        Item {
-                            anchors.fill: parent
-                            anchors.margins: 14
-                            opacity: root.alarmContentReady ? 1 : 0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-
-                            ColumnLayout {
-                                anchors.fill: parent
-                                spacing: 8
-
-                                RowLayout {
-                                    Layout.fillWidth: true
-
-                                    CFText {
-                                        text: "Alarmes"
-                                        font.pixelSize: 15
-                                        font.weight: Font.Bold
-                                        color: "#fff"
-                                        Layout.fillWidth: true
-                                    }
-
-                                    Rectangle {
-                                        width: 26
-                                        height: 26
-                                        radius: 13
-                                        color: _addAlarmMouse.containsMouse ? "#28ffffff" : "#18ffffff"
-                                        CFVI {
-                                            anchors.centerIn: parent
-                                            width: 12
-                                            height: 12
-                                            icon: "notch/plus.svg"
-                                        }
-                                        MouseArea {
-                                            id: _addAlarmMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                var now = new Date()
-                                                now.setMinutes(now.getMinutes() + 5)
-                                                AlarmState.addAlarm(now.getHours(), now.getMinutes(), "", [])
-                                            }
-                                        }
-                                    }
-                                }
-
-                                ScrollView {
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    clip: true
-
-                                    ColumnLayout {
-                                        width: parent.width
-                                        spacing: 4
-
-                                        Repeater {
-                                            model: AlarmState.alarms
-
-                                            RowLayout {
-                                                id: _alarmRow
-                                                required property var modelData
-                                                Layout.fillWidth: true
-                                                spacing: 8
-
-                                                CFText {
-                                                    text: (_alarmRow.modelData.hour < 10 ? "0" : "") + _alarmRow.modelData.hour + ":" + (_alarmRow.modelData.minute < 10 ? "0" : "") + _alarmRow.modelData.minute
-                                                    font.pixelSize: 16
-                                                    font.weight: Font.Bold
-                                                    color: _alarmRow.modelData.enabled ? "#fff" : "#80ffffff"
-                                                    Layout.fillWidth: true
-                                                }
-
-                                                Rectangle {
-                                                    width: 40
-                                                    height: 22
-                                                    radius: 11
-                                                    color: _alarmRow.modelData.enabled ? "#34c759" : "#40ffffff"
-                                                    Rectangle {
-                                                        width: 18
-                                                        height: 18
-                                                        radius: 9
-                                                        color: "#fff"
-                                                        anchors.verticalCenter: parent.verticalCenter
-                                                        x: _alarmRow.modelData.enabled ? parent.width - width - 2 : 2
-                                                        Behavior on x { NumberAnimation { duration: 150 } }
+                                            CFFlatSlider {
+                                                id: expSlider
+                                                width: parent.width
+                                                value: root.musicLength > 0 ? root.musicPosition / root.musicLength : 0
+                                                onMoved: function(value) {
+                                                    if (root.musicLength > 0) {
+                                                        var secs = value * root.musicLength
+                                                        root.musicPosition = secs
+                                                        _pSeek.command = ["sh", "-c", "playerctl position " + secs.toFixed(1)]
+                                                        _pSeek.running = true
                                                     }
+                                                }
+                                            }
+
+                                            Item {
+                                                width: parent.width
+                                                height: 14
+                                                CFText {
+                                                    anchors.left: parent.left
+                                                    text: root.formatTime(root.musicPosition)
+                                                    font.pixelSize: 10
+                                                    gray: true
+                                                }
+                                                CFText {
+                                                    anchors.right: parent.right
+                                                    text: root.formatTime(root.musicLength)
+                                                    font.pixelSize: 10
+                                                    gray: true
+                                                }
+                                            }
+                                        }
+
+                                        Item {
+                                            width: parent.width
+                                            height: 44
+
+                                            Row {
+                                                anchors.centerIn: parent
+                                                spacing: 42
+                                                CFVI {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    width: 30
+                                                    height: 26
+                                                    icon: "music/backward.svg"
                                                     MouseArea {
                                                         anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: AlarmState.setAlarmEnabled(_alarmRow.modelData.id, !_alarmRow.modelData.enabled)
+                                                        anchors.margins: -10
+                                                        onClicked: {
+                                                            _pPrev.running = true
+                                                        }
                                                     }
                                                 }
+                                                CFVI {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    width: 40
+                                                    height: 40
+                                                    icon: root.musicPlaying ? "music/pause.svg" : "music/play.svg"
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        anchors.margins: -10
+                                                        onClicked: {
+                                                            _pPlay.running = true
+                                                        }
+                                                    }
+                                                }
+                                                CFVI {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    width: 30
+                                                    height: 26
+                                                    icon: "music/forward.svg"
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        anchors.margins: -10
+                                                        onClicked: {
+                                                            _pNext.running = true
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        Item {
+                                            width: parent.width
+                                            height: 24
+
+                                            CFVI {
+                                                anchors.left: parent.left
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                icon: "volume/audio-volume-1.svg"
+                                                size: 12
+                                            }
+                                            CFFlatSlider {
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: 22
+                                                anchors.rightMargin: 22
+                                                value: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio.volume : 0
+                                                onMoved: function(value) {
+                                                    if (Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio) {
+                                                        Pipewire.defaultAudioSink.audio.volume = value
+                                                    }
+                                                }
+                                            }
+                                            CFVI {
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                icon: "volume/audio-volume-3.svg"
+                                                size: 16
+                                            }
+                                        }
+
+                                        Item {
+                                            width: parent.width
+                                            height: outputPill.height
+
+                                            Rectangle {
+                                                id: outputPill
+                                                anchors.horizontalCenter: parent.horizontalCenter
+                                                width: pillRow.implicitWidth + 28
+                                                height: 30
+                                                radius: 15
+                                                color: Qt.rgba(1,1,1,0.10)
+
+                                                Row {
+                                                    id: pillRow
+                                                    anchors.centerIn: parent
+                                                    spacing: 6
+                                                    CFVI {
+                                                        anchors.verticalCenter: parent.verticalCenter
+                                                        icon: "bluetooth/bluetooth.svg"
+                                                        size: 12
+                                                    }
+                                                    CFText {
+                                                        anchors.verticalCenter: parent.verticalCenter
+                                                        text: (Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.description) ? Pipewire.defaultAudioSink.description : "Sortie audio"
+                                                        font.pixelSize: 11
+                                                        font.weight: Font.Bold
+                                                        elide: Text.ElideRight
+                                                    }
+                                                }
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    onClicked: {
+                                                        root.playerExpanded = false
+                                                        root.btOpened = true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    }
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("focusWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: focusWidget
+                                widgetId: focusWidget.modelData.uid
+                                xPos: root.packedX(focusWidget.widgetId)
+                                yPos: root.packedY(focusWidget.widgetId)
+                                width: root.box*2+root.boxMargin
+                                height: root.box
+                                radius: 40
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                enabled: root.focusOn
+                                light: focusWidget.enabled ? "transparent" : root.glassRimColor
+                                rimStrength: focusWidget.enabled ? 0 : root.glassRimStrength
+                                color: focusWidget.enabled ? "#fff" : root.glassColor
+                                CFClippingRect {
+                                    id: focusCircle
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 11
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: 38; height: 38; radius: 19
+                                    color: "transparent"
+                                    CFVI {
+                                        anchors.centerIn: parent
+                                        icon: "dnd.svg"
+                                        size: 26
+                                        color: root.focusOn ? "#8E44AD" : "#fff"
+                                    }
+                                }
+                                CFText {
+                                    anchors.left: focusCircle.right
+                                    anchors.leftMargin: 9
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "Focus"
+                                    font.pixelSize: 12
+                                    font.weight: Font.Bold
+                                    color: root.focusOn ? "#000" : "#fff"
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        root.focusOn = !root.focusOn
+                                        NotifService.dndEnabled = root.focusOn
+                                    }
+                                    onPressed: focusWidget.isPressed = true
+                                    onReleased: focusWidget.isPressed = false
+                                    onCanceled: focusWidget.isPressed = false
+                                }
+                            }
+                    }
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("stageWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: stageWidget
+                                widgetId: stageWidget.modelData.uid
+                                xPos: root.packedX(stageWidget.widgetId)
+                                yPos: root.packedY(stageWidget.widgetId)
+                                width: root.box
+                                height: root.box
+                                radius: 22
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                CFVI {
+                                    anchors.centerIn: parent
+                                    width: 24
+                                    height: 20
+                                    icon: "screenshot/region.svg"
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        _screenshotCmd.running = true
+                                    }
+                                    onPressed: stageWidget.isPressed = true
+                                    onReleased: stageWidget.isPressed = false
+                                    onCanceled: stageWidget.isPressed = false
+                                }
+                            }
+                    }
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("shareWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: shareWidget
+                                widgetId: shareWidget.modelData.uid
+                                xPos: root.packedX(shareWidget.widgetId)
+                                yPos: root.packedY(shareWidget.widgetId)
+                                width: root.box
+                                height: root.box
+                                radius: 22
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                enabled: root.recording
+                                CFVI {
+                                    anchors.centerIn: parent
+                                    width: 26
+                                    height: 20
+                                    icon: "screenshare.svg"
+                                    color: root.recording ? "#1C7AFF" : "#fff"
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        root.recording = !root.recording
+                                        if (root.recording) {
+                                            _shOn.running = true
+                                        } else {
+                                            _shOn.signal(2) // SIGINT, laisse wf-recorder finaliser le mp4 proprement
+                                        }
+                                    }
+                                    onPressed: shareWidget.isPressed = true
+                                    onReleased: shareWidget.isPressed = false
+                                    onCanceled: shareWidget.isPressed = false
+                                }
+                            }
+                    }
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("displayWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: displayWidget
+                                widgetId: displayWidget.modelData.uid
+                                xPos: root.packedX(displayWidget.widgetId)
+                                yPos: root.packedY(displayWidget.widgetId)
+                                width: root.box*4+root.boxMargin*3
+                                height: root.box
+                                radius: 25
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+
+                                CFSlider {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 40
+                                    anchors.rightMargin: 40
+                                    value: root.brtValue
+                                    onMoved: {
+                                        root.brtValue = value
+                                        _brtT.restart()
+                                    }
+                                }
+                                CFVI {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 15
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    icon: "sun-small.svg"
+                                    size: 14
+                                }
+                                CFVI {
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 15
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    icon: "sun-huge.svg"
+                                    size: 18
+                                }
+                            }
+                    }
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("volumeWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: volumeWidget
+                                widgetId: volumeWidget.modelData.uid
+                                xPos: root.packedX(volumeWidget.widgetId)
+                                yPos: root.packedY(volumeWidget.widgetId)
+                                width: root.box*4+root.boxMargin*3
+                                height: root.box
+                                radius: 25
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+
+                                CFSlider {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 40
+                                    anchors.rightMargin: 40
+                                    value: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio.volume : 0
+                                    onMoved: {
+                                        if (Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio) {
+                                            Pipewire.defaultAudioSink.audio.volume = value
+                                        }
+                                    }
+                                }
+                                CFVI {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 15
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    icon: "volume/audio-volume-1.svg"
+                                    size: 14
+                                }
+                                CFVI {
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 15
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    icon: "volume/audio-volume-3.svg"
+                                    size: 18
+                                }
+                            }
+                    }
+
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("darkWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: darkWidget
+                                widgetId: darkWidget.modelData.uid
+                                xPos: root.packedX(darkWidget.widgetId)
+                                yPos: root.packedY(darkWidget.widgetId)
+                                width: root.box*2+root.boxMargin
+                                height: root.box
+                                radius: 40
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                enabled: root.darkOn
+                                light: darkWidget.enabled ? "transparent" : root.glassRimColor
+                                rimStrength: darkWidget.enabled ? 0 : root.glassRimStrength
+                                color: darkWidget.enabled ? "#fff" : root.glassColor
+                                CFClippingRect {
+                                    id: darkCircle
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 11
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: 38; height: 38; radius: 19
+                                    color: "transparent"
+                                    CFVI {
+                                        anchors.centerIn: parent
+                                        icon: root.darkOn ? "notch/moon.svg" : "weather/sun.svg"
+                                        size: 26
+                                        color: root.darkOn ? "#F1C40F" : "#fff"
+                                    }
+                                }
+                                CFText {
+                                    anchors.left: darkCircle.right
+                                    anchors.leftMargin: 9
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "Dark Mode"
+                                    font.pixelSize: 12
+                                    font.weight: Font.Bold
+                                    color: root.darkOn ? "#000" : "#fff"
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        root.darkOn = !root.darkOn
+                                        _darkToggleCmd.running = true
+                                    }
+                                    onPressed: darkWidget.isPressed = true
+                                    onReleased: darkWidget.isPressed = false
+                                    onCanceled: darkWidget.isPressed = false
+                                }
+                            }
+                    }
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("calcWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: calcWidget
+                                widgetId: calcWidget.modelData.uid
+                                xPos: root.packedX(calcWidget.widgetId)
+                                yPos: root.packedY(calcWidget.widgetId)
+                                width: root.box
+                                height: root.box
+                                radius: 40
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                Item {
+                                    anchors.centerIn: parent
+                                    width: 22
+                                    height: 26
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: 4
+                                        color: "transparent"
+                                        border.color: "#fff"
+                                        border.width: 2
+                                    }
+                                    Rectangle {
+                                        anchors.top: parent.top
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.margins: 4
+                                        height: 6
+                                        radius: 1.5
+                                        color: "#fff"
+                                    }
+                                    Grid {
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.bottom: parent.bottom
+                                        anchors.leftMargin: 4
+                                        anchors.rightMargin: 4
+                                        anchors.bottomMargin: 4
+                                        columns: 3
+                                        rowSpacing: 2
+                                        columnSpacing: 2
+                                        Repeater {
+                                            model: 6
+                                            Rectangle {
+                                                width: 3
+                                                height: 3
+                                                radius: 1
+                                                color: "#fff"
+                                            }
+                                        }
+                                    }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        _calcCmd.running = true
+                                    }
+                                    onPressed: if (!root.subOpened) calcWidget.isPressed = true
+                                    onReleased: calcWidget.isPressed = false
+                                    onCanceled: calcWidget.isPressed = false
+                                }
+                            }
+                    }
+
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("gameModeWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: gameModeWidget
+                                widgetId: gameModeWidget.modelData.uid
+                                xPos: root.packedX(gameModeWidget.widgetId)
+                                yPos: root.packedY(gameModeWidget.widgetId)
+                                width: root.box
+                                height: root.box
+                                radius: 40
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                enabled: GameMode.enabled
+                                light: gameModeWidget.enabled ? "transparent" : root.glassRimColor
+                                rimStrength: gameModeWidget.enabled ? 0 : root.glassRimStrength
+                                color: gameModeWidget.enabled ? "#fff" : root.glassColor
+                                Item {
+                                    anchors.centerIn: parent
+                                    width: 30
+                                    height: 20
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: height/2
+                                        color: "transparent"
+                                        border.color: GameMode.enabled ? "#1C7AFF" : "#fff"
+                                        border.width: 2
+                                    }
+                                    Rectangle {
+                                        width: 8
+                                        height: 2
+                                        radius: 1
+                                        color: GameMode.enabled ? "#1C7AFF" : "#fff"
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 6
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Rectangle {
+                                        width: 2
+                                        height: 8
+                                        radius: 1
+                                        color: GameMode.enabled ? "#1C7AFF" : "#fff"
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 9
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Rectangle {
+                                        width: 4
+                                        height: 4
+                                        radius: 2
+                                        color: GameMode.enabled ? "#1C7AFF" : "#fff"
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 5
+                                        anchors.top: parent.top
+                                        anchors.topMargin: 5
+                                    }
+                                    Rectangle {
+                                        width: 4
+                                        height: 4
+                                        radius: 2
+                                        color: GameMode.enabled ? "#1C7AFF" : "#fff"
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 10
+                                        anchors.bottom: parent.bottom
+                                        anchors.bottomMargin: 5
+                                    }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        GameMode.toggle()
+                                    }
+                                    onPressed: if (!root.subOpened) gameModeWidget.isPressed = true
+                                    onReleased: gameModeWidget.isPressed = false
+                                    onCanceled: gameModeWidget.isPressed = false
+                                }
+                            }
+                    }
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("timerWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: timerWidget
+                                widgetId: timerWidget.modelData.uid
+                                xPos: root.packedX(timerWidget.widgetId)
+                                yPos: root.packedY(timerWidget.widgetId)
+                                width: root.timerGrowReady ? (root.box*4+root.boxMargin*3) : root.box
+                                height: root.timerGrowReady ? (root.box*2+root.boxMargin) : root.box
+                                radius: root.timerGrowReady ? 30 : 40
+                                z: root.timerOpened || root.timerClosing ? 5 : 0
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.alarmOpened || root.alarmClosing || root.stopwatchOpened || root.stopwatchClosing
+                                enabled: TimerState.running || TimerState.firing
+
+                                CFVI {
+                                    opacity: (!root.timerOpened && !root.timerClosing) ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                    anchors.centerIn: parent
+                                    width: 22
+                                    height: 22
+                                    icon: "notch/clock.svg"
+                                    color: (TimerState.running || TimerState.firing) ? "#1C7AFF" : "#fff"
+                                }
+                                Rectangle {
+                                    opacity: (!root.timerOpened && !root.timerClosing && (TimerState.running || TimerState.firing)) ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                    width: 8
+                                    height: 8
+                                    radius: 4
+                                    color: TimerState.firing ? "#ff453a" : "#1C7AFF"
+                                    anchors.top: parent.top
+                                    anchors.right: parent.right
+                                    anchors.margins: 10
+                                }
+
+                                Item {
+                                    anchors.fill: parent
+                                    anchors.margins: 14
+                                    opacity: root.timerContentReady ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+
+                                    ColumnLayout {
+                                        anchors.fill: parent
+                                        spacing: 10
+
+                                        CFText {
+                                            text: "Minuteur"
+                                            font.pixelSize: 15
+                                            font.weight: Font.Bold
+                                            color: "#fff"
+                                        }
+
+                                        CFText {
+                                            visible: TimerState.firing
+                                            text: "Terminé"
+                                            font.pixelSize: 30
+                                            font.weight: Font.Bold
+                                            color: "#ff453a"
+                                            Layout.alignment: Qt.AlignHCenter
+                                        }
+
+                                        CFText {
+                                            visible: !TimerState.firing && (TimerState.running || TimerState.remainingAtPauseMs > 0)
+                                            text: TimerState.formatRemaining(TimerState.remainingMs)
+                                            font.pixelSize: 30
+                                            font.weight: Font.Bold
+                                            color: "#fff"
+                                            Layout.alignment: Qt.AlignHCenter
+                                        }
+
+                                        RowLayout {
+                                            visible: !TimerState.firing && !TimerState.running && TimerState.remainingAtPauseMs <= 0
+                                            Layout.alignment: Qt.AlignHCenter
+                                            spacing: 6
+
+                                            Repeater {
+                                                model: [1, 5, 10, 15, 30]
 
                                                 Rectangle {
-                                                    width: 22
-                                                    height: 22
-                                                    radius: 11
-                                                    color: _delAlarmMouse.containsMouse ? "#40ff453a" : "transparent"
-                                                    CFVI {
+                                                    id: _presetBtn
+                                                    required property int modelData
+                                                    width: 44
+                                                    height: 32
+                                                    radius: 8
+                                                    color: _presetMouse.containsMouse ? "#28ffffff" : "#18ffffff"
+                                                    CFText {
                                                         anchors.centerIn: parent
-                                                        width: 10
-                                                        height: 10
-                                                        icon: "notch/x.svg"
+                                                        text: _presetBtn.modelData + "m"
+                                                        font.pixelSize: 12
+                                                        color: "#fff"
                                                     }
                                                     MouseArea {
-                                                        id: _delAlarmMouse
+                                                        id: _presetMouse
                                                         anchors.fill: parent
                                                         hoverEnabled: true
                                                         cursorShape: Qt.PointingHandCursor
-                                                        onClicked: AlarmState.removeAlarm(_alarmRow.modelData.id)
+                                                        onClicked: TimerState.start(_presetBtn.modelData * 60 * 1000)
                                                     }
                                                 }
                                             }
                                         }
 
-                                        CFText {
-                                            visible: AlarmState.alarms.length === 0
-                                            text: "Aucune alarme"
-                                            font.pixelSize: 12
-                                            gray: true
+                                        RowLayout {
+                                            visible: TimerState.firing || TimerState.running || TimerState.remainingAtPauseMs > 0
+                                            Layout.alignment: Qt.AlignHCenter
+                                            spacing: 8
+
+                                            Rectangle {
+                                                visible: !TimerState.firing
+                                                width: 90
+                                                height: 32
+                                                radius: 8
+                                                color: _pauseMouse.containsMouse ? "#28ffffff" : "#18ffffff"
+                                                CFText {
+                                                    anchors.centerIn: parent
+                                                    text: TimerState.running ? "Pause" : "Reprendre"
+                                                    font.pixelSize: 12
+                                                    color: "#fff"
+                                                }
+                                                MouseArea {
+                                                    id: _pauseMouse
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: TimerState.running ? TimerState.pause() : TimerState.resume()
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                width: 90
+                                                height: 32
+                                                radius: 8
+                                                color: _cancelMouse.containsMouse ? "#40ff453a" : "#20ff453a"
+                                                CFText {
+                                                    anchors.centerIn: parent
+                                                    text: TimerState.firing ? "OK" : "Annuler"
+                                                    font.pixelSize: 12
+                                                    color: "#ff453a"
+                                                }
+                                                MouseArea {
+                                                    id: _cancelMouse
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: TimerState.firing ? TimerState.dismissFiring() : TimerState.cancel()
+                                                }
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            enabled: !root.alarmOpened && !root.alarmClosing
-                            onClicked: root.alarmOpened = true
-                            onPressed: alarmWidget.isPressed = true
-                            onReleased: alarmWidget.isPressed = false
-                            onCanceled: alarmWidget.isPressed = false
-                        }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: !root.timerOpened && !root.timerClosing
+                                    onClicked: root.timerOpened = true
+                                    onPressed: timerWidget.isPressed = true
+                                    onReleased: timerWidget.isPressed = false
+                                    onCanceled: timerWidget.isPressed = false
+                                }
 
-                        Rectangle {
-                            opacity: root.alarmContentReady ? 1 : 0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                            width: 26
-                            height: 26
-                            radius: 13
-                            anchors.top: parent.top
-                            anchors.right: parent.right
-                            anchors.margins: 8
-                            color: _alarmCloseMouse.containsMouse ? "#28ffffff" : "#18ffffff"
-                            CFVI {
-                                anchors.centerIn: parent
-                                width: 11
-                                height: 11
-                                icon: "notch/x.svg"
+                                Rectangle {
+                                    opacity: root.timerContentReady ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                    width: 26
+                                    height: 26
+                                    radius: 13
+                                    anchors.top: parent.top
+                                    anchors.right: parent.right
+                                    anchors.margins: 8
+                                    color: _timerCloseMouse.containsMouse ? "#28ffffff" : "#18ffffff"
+                                    CFVI {
+                                        anchors.centerIn: parent
+                                        width: 11
+                                        height: 11
+                                        icon: "notch/x.svg"
+                                    }
+                                    MouseArea {
+                                        id: _timerCloseMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.timerOpened = false
+                                    }
+                                }
                             }
-                            MouseArea {
-                                id: _alarmCloseMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.alarmOpened = false
-                            }
-                        }
                     }
 
-                    BoxButton {
-                        id: stopwatchWidget
-                        widgetId: "stopwatchWidget"
-                        xPos: root.packedX("stopwatchWidget")
-                        yPos: root.packedY("stopwatchWidget")
-                        width: root.stopwatchGrowReady ? (root.box*4+root.boxMargin*3) : root.box
-                        height: root.stopwatchGrowReady ? (root.box*2+root.boxMargin) : root.box
-                        radius: root.stopwatchGrowReady ? 30 : 40
-                        z: root.stopwatchOpened || root.stopwatchClosing ? 5 : 0
-                        overwriteX: root.stopwatchGrowReady
-                        overwriteXFromRight: root.stopwatchGrowReady
-                        overwriteRightPos: root.gridImplicitWidth - root.boxMargin
-                        hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.timerOpened || root.timerClosing || root.alarmOpened || root.alarmClosing
-                        enabled: StopwatchState.running
-
-                        CFVI {
-                            opacity: (!root.stopwatchOpened && !root.stopwatchClosing) ? 1 : 0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                            anchors.centerIn: parent
-                            width: 22
-                            height: 22
-                            icon: "notch/watch.svg"
-                            color: (StopwatchState.running || StopwatchState.accumulatedMs > 0) ? "#1C7AFF" : "#fff"
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("alarmWidget")
+                            objectProp: "uid"
                         }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: alarmWidget
+                                widgetId: alarmWidget.modelData.uid
+                                xPos: root.packedX(alarmWidget.widgetId)
+                                yPos: root.packedY(alarmWidget.widgetId)
+                                width: root.alarmGrowReady ? (root.box*4+root.boxMargin*3) : root.box
+                                height: root.alarmGrowReady ? (root.box*2+root.boxMargin) : root.box
+                                radius: root.alarmGrowReady ? 30 : 40
+                                z: root.alarmOpened || root.alarmClosing ? 5 : 0
+                                overwriteX: root.alarmGrowReady
+                                overwriteXFromRight: root.alarmGrowReady
+                                overwriteRightPos: root.gridImplicitWidth - root.boxMargin
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.timerOpened || root.timerClosing || root.stopwatchOpened || root.stopwatchClosing
+                                enabled: AlarmState.alarms.filter(function(a) { return a.enabled }).length > 0
 
-                        Item {
-                            anchors.fill: parent
-                            anchors.margins: 14
-                            opacity: root.stopwatchContentReady ? 1 : 0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-
-                            ColumnLayout {
-                                anchors.fill: parent
-                                spacing: 10
-
-                                CFText {
-                                    text: "Chronomètre"
-                                    font.pixelSize: 15
-                                    font.weight: Font.Bold
-                                    color: "#fff"
+                                CFVI {
+                                    opacity: (!root.alarmOpened && !root.alarmClosing) ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                    anchors.centerIn: parent
+                                    width: 22
+                                    height: 22
+                                    icon: "notch/bell.svg"
+                                    color: alarmWidget.enabled ? "#1C7AFF" : "#fff"
                                 }
 
-                                CFText {
-                                    text: StopwatchState.formatElapsed(StopwatchState.elapsedMs)
-                                    font.pixelSize: 30
-                                    font.weight: Font.Bold
-                                    color: "#fff"
-                                    Layout.alignment: Qt.AlignHCenter
+                                Item {
+                                    anchors.fill: parent
+                                    anchors.margins: 14
+                                    opacity: root.alarmContentReady ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+
+                                    ColumnLayout {
+                                        anchors.fill: parent
+                                        spacing: 8
+
+                                        RowLayout {
+                                            Layout.fillWidth: true
+
+                                            CFText {
+                                                text: "Alarmes"
+                                                font.pixelSize: 15
+                                                font.weight: Font.Bold
+                                                color: "#fff"
+                                                Layout.fillWidth: true
+                                            }
+
+                                            Rectangle {
+                                                width: 26
+                                                height: 26
+                                                radius: 13
+                                                color: _addAlarmMouse.containsMouse ? "#28ffffff" : "#18ffffff"
+                                                CFVI {
+                                                    anchors.centerIn: parent
+                                                    width: 12
+                                                    height: 12
+                                                    icon: "notch/plus.svg"
+                                                }
+                                                MouseArea {
+                                                    id: _addAlarmMouse
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: {
+                                                        var now = new Date()
+                                                        now.setMinutes(now.getMinutes() + 5)
+                                                        AlarmState.addAlarm(now.getHours(), now.getMinutes(), "", [])
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        ScrollView {
+                                            Layout.fillWidth: true
+                                            Layout.fillHeight: true
+                                            clip: true
+
+                                            ColumnLayout {
+                                                width: parent.width
+                                                spacing: 4
+
+                                                Repeater {
+                                                    model: AlarmState.alarms
+
+                                                    RowLayout {
+                                                        id: _alarmRow
+                                                        required property var modelData
+                                                        Layout.fillWidth: true
+                                                        spacing: 8
+
+                                                        CFText {
+                                                            text: (_alarmRow.modelData.hour < 10 ? "0" : "") + _alarmRow.modelData.hour + ":" + (_alarmRow.modelData.minute < 10 ? "0" : "") + _alarmRow.modelData.minute
+                                                            font.pixelSize: 16
+                                                            font.weight: Font.Bold
+                                                            color: _alarmRow.modelData.enabled ? "#fff" : "#80ffffff"
+                                                            Layout.fillWidth: true
+                                                        }
+
+                                                        Rectangle {
+                                                            width: 40
+                                                            height: 22
+                                                            radius: 11
+                                                            color: _alarmRow.modelData.enabled ? "#34c759" : "#40ffffff"
+                                                            Rectangle {
+                                                                width: 18
+                                                                height: 18
+                                                                radius: 9
+                                                                color: "#fff"
+                                                                anchors.verticalCenter: parent.verticalCenter
+                                                                x: _alarmRow.modelData.enabled ? parent.width - width - 2 : 2
+                                                                Behavior on x { NumberAnimation { duration: 150 } }
+                                                            }
+                                                            MouseArea {
+                                                                anchors.fill: parent
+                                                                cursorShape: Qt.PointingHandCursor
+                                                                onClicked: AlarmState.setAlarmEnabled(_alarmRow.modelData.id, !_alarmRow.modelData.enabled)
+                                                            }
+                                                        }
+
+                                                        Rectangle {
+                                                            width: 22
+                                                            height: 22
+                                                            radius: 11
+                                                            color: _delAlarmMouse.containsMouse ? "#40ff453a" : "transparent"
+                                                            CFVI {
+                                                                anchors.centerIn: parent
+                                                                width: 10
+                                                                height: 10
+                                                                icon: "notch/x.svg"
+                                                            }
+                                                            MouseArea {
+                                                                id: _delAlarmMouse
+                                                                anchors.fill: parent
+                                                                hoverEnabled: true
+                                                                cursorShape: Qt.PointingHandCursor
+                                                                onClicked: AlarmState.removeAlarm(_alarmRow.modelData.id)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                CFText {
+                                                    visible: AlarmState.alarms.length === 0
+                                                    text: "Aucune alarme"
+                                                    font.pixelSize: 12
+                                                    gray: true
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
 
-                                RowLayout {
-                                    Layout.alignment: Qt.AlignHCenter
-                                    spacing: 8
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: !root.alarmOpened && !root.alarmClosing
+                                    onClicked: root.alarmOpened = true
+                                    onPressed: alarmWidget.isPressed = true
+                                    onReleased: alarmWidget.isPressed = false
+                                    onCanceled: alarmWidget.isPressed = false
+                                }
 
-                                    Rectangle {
-                                        width: 90
-                                        height: 32
-                                        radius: 8
-                                        color: _swToggleMouse.containsMouse ? "#28ffffff" : "#18ffffff"
+                                Rectangle {
+                                    opacity: root.alarmContentReady ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                    width: 26
+                                    height: 26
+                                    radius: 13
+                                    anchors.top: parent.top
+                                    anchors.right: parent.right
+                                    anchors.margins: 8
+                                    color: _alarmCloseMouse.containsMouse ? "#28ffffff" : "#18ffffff"
+                                    CFVI {
+                                        anchors.centerIn: parent
+                                        width: 11
+                                        height: 11
+                                        icon: "notch/x.svg"
+                                    }
+                                    MouseArea {
+                                        id: _alarmCloseMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.alarmOpened = false
+                                    }
+                                }
+                            }
+                    }
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("stopwatchWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: stopwatchWidget
+                                widgetId: stopwatchWidget.modelData.uid
+                                xPos: root.packedX(stopwatchWidget.widgetId)
+                                yPos: root.packedY(stopwatchWidget.widgetId)
+                                width: root.stopwatchGrowReady ? (root.box*4+root.boxMargin*3) : root.box
+                                height: root.stopwatchGrowReady ? (root.box*2+root.boxMargin) : root.box
+                                radius: root.stopwatchGrowReady ? 30 : 40
+                                z: root.stopwatchOpened || root.stopwatchClosing ? 5 : 0
+                                overwriteX: root.stopwatchGrowReady
+                                overwriteXFromRight: root.stopwatchGrowReady
+                                overwriteRightPos: root.gridImplicitWidth - root.boxMargin
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.timerOpened || root.timerClosing || root.alarmOpened || root.alarmClosing
+                                enabled: StopwatchState.running
+
+                                CFVI {
+                                    opacity: (!root.stopwatchOpened && !root.stopwatchClosing) ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                    anchors.centerIn: parent
+                                    width: 22
+                                    height: 22
+                                    icon: "notch/watch.svg"
+                                    color: (StopwatchState.running || StopwatchState.accumulatedMs > 0) ? "#1C7AFF" : "#fff"
+                                }
+
+                                Item {
+                                    anchors.fill: parent
+                                    anchors.margins: 14
+                                    opacity: root.stopwatchContentReady ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+
+                                    ColumnLayout {
+                                        anchors.fill: parent
+                                        spacing: 10
+
                                         CFText {
-                                            anchors.centerIn: parent
-                                            text: StopwatchState.running ? "Arrêter" : "Démarrer"
-                                            font.pixelSize: 12
+                                            text: "Chronomètre"
+                                            font.pixelSize: 15
+                                            font.weight: Font.Bold
                                             color: "#fff"
                                         }
-                                        MouseArea {
-                                            id: _swToggleMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: StopwatchState.toggle()
-                                        }
-                                    }
 
-                                    Rectangle {
-                                        width: 90
-                                        height: 32
-                                        radius: 8
-                                        color: _swResetMouse.containsMouse ? "#40ff453a" : "#20ff453a"
                                         CFText {
-                                            anchors.centerIn: parent
-                                            text: "Réinitialiser"
-                                            font.pixelSize: 12
-                                            color: "#ff453a"
+                                            text: StopwatchState.formatElapsed(StopwatchState.elapsedMs)
+                                            font.pixelSize: 30
+                                            font.weight: Font.Bold
+                                            color: "#fff"
+                                            Layout.alignment: Qt.AlignHCenter
                                         }
-                                        MouseArea {
-                                            id: _swResetMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: StopwatchState.reset()
+
+                                        RowLayout {
+                                            Layout.alignment: Qt.AlignHCenter
+                                            spacing: 8
+
+                                            Rectangle {
+                                                width: 90
+                                                height: 32
+                                                radius: 8
+                                                color: _swToggleMouse.containsMouse ? "#28ffffff" : "#18ffffff"
+                                                CFText {
+                                                    anchors.centerIn: parent
+                                                    text: StopwatchState.running ? "Arrêter" : "Démarrer"
+                                                    font.pixelSize: 12
+                                                    color: "#fff"
+                                                }
+                                                MouseArea {
+                                                    id: _swToggleMouse
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: StopwatchState.toggle()
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                width: 90
+                                                height: 32
+                                                radius: 8
+                                                color: _swResetMouse.containsMouse ? "#40ff453a" : "#20ff453a"
+                                                CFText {
+                                                    anchors.centerIn: parent
+                                                    text: "Réinitialiser"
+                                                    font.pixelSize: 12
+                                                    color: "#ff453a"
+                                                }
+                                                MouseArea {
+                                                    id: _swResetMouse
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: StopwatchState.reset()
+                                                }
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            enabled: !root.stopwatchOpened && !root.stopwatchClosing
-                            onClicked: root.stopwatchOpened = true
-                            onPressed: stopwatchWidget.isPressed = true
-                            onReleased: stopwatchWidget.isPressed = false
-                            onCanceled: stopwatchWidget.isPressed = false
-                        }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: !root.stopwatchOpened && !root.stopwatchClosing
+                                    onClicked: root.stopwatchOpened = true
+                                    onPressed: stopwatchWidget.isPressed = true
+                                    onReleased: stopwatchWidget.isPressed = false
+                                    onCanceled: stopwatchWidget.isPressed = false
+                                }
 
-                        Rectangle {
-                            opacity: root.stopwatchContentReady ? 1 : 0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                            width: 26
-                            height: 26
-                            radius: 13
-                            anchors.top: parent.top
-                            anchors.right: parent.right
-                            anchors.margins: 8
-                            color: _stopwatchCloseMouse.containsMouse ? "#28ffffff" : "#18ffffff"
-                            CFVI {
-                                anchors.centerIn: parent
-                                width: 11
-                                height: 11
-                                icon: "notch/x.svg"
+                                Rectangle {
+                                    opacity: root.stopwatchContentReady ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                    width: 26
+                                    height: 26
+                                    radius: 13
+                                    anchors.top: parent.top
+                                    anchors.right: parent.right
+                                    anchors.margins: 8
+                                    color: _stopwatchCloseMouse.containsMouse ? "#28ffffff" : "#18ffffff"
+                                    CFVI {
+                                        anchors.centerIn: parent
+                                        width: 11
+                                        height: 11
+                                        icon: "notch/x.svg"
+                                    }
+                                    MouseArea {
+                                        id: _stopwatchCloseMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.stopwatchOpened = false
+                                    }
+                                }
                             }
-                            MouseArea {
-                                id: _stopwatchCloseMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.stopwatchOpened = false
-                            }
-                        }
                     }
                 }
             }

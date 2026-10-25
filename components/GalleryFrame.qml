@@ -56,6 +56,7 @@ Rectangle {
                         Layout.topMargin: 16
                         Layout.leftMargin: 16
                         window: root.window
+                        onCloseRequested: root.done()
                     }
 
                     Item {

@@ -196,23 +196,19 @@ Singleton {
             }
 
             property JsonObject controlCenter: JsonObject {
-                property list<var> positions: []
-                property list<var> widgetVisibility: [
-                    { "id": "wifiWidget",     "visible": true },
-                    { "id": "btWidget",       "visible": true },
-                    { "id": "adWidget",       "visible": true },
-                    { "id": "musicWidget",    "visible": true },
-                    { "id": "focusWidget",    "visible": true },
-                    { "id": "stageWidget",    "visible": true },
-                    { "id": "shareWidget",    "visible": true },
-                    { "id": "darkWidget",     "visible": true },
-                    { "id": "calcWidget",     "visible": true },
-                    { "id": "gameModeWidget", "visible": true },
-                    { "id": "displayWidget",  "visible": true },
-                    { "id": "volumeWidget",   "visible": true },
-                    { "id": "timerWidget",    "visible": false },
-                    { "id": "alarmWidget",    "visible": false },
-                    { "id": "stopwatchWidget","visible": false }
+                property list<var> items: [
+                    { "uid": "wifiWidget", "type": "wifiWidget" },
+                    { "uid": "btWidget", "type": "btWidget" },
+                    { "uid": "adWidget", "type": "adWidget" },
+                    { "uid": "musicWidget", "type": "musicWidget" },
+                    { "uid": "focusWidget", "type": "focusWidget" },
+                    { "uid": "stageWidget", "type": "stageWidget" },
+                    { "uid": "shareWidget", "type": "shareWidget" },
+                    { "uid": "darkWidget", "type": "darkWidget" },
+                    { "uid": "calcWidget", "type": "calcWidget" },
+                    { "uid": "gameModeWidget", "type": "gameModeWidget" },
+                    { "uid": "displayWidget", "type": "displayWidget" },
+                    { "uid": "volumeWidget", "type": "volumeWidget" }
                 ]
             }
         }
@@ -224,25 +220,23 @@ Singleton {
     readonly property var pinnedApps:  options.dock.pinnedApps
     readonly property var pinnedFiles: options.dock.pinnedFiles
 
-    function ccWidgetVisible(id) {
-        var list = root.options.controlCenter.widgetVisibility
+    function ccWidgetVisible(type) {
+        var list = root.options.controlCenter.items
         for (var i = 0; i < list.length; i++) {
-            if (list[i].id === id) return list[i].visible
+            if (list[i].type === type) return true
         }
         return false
     }
 
-    function setCcWidgetVisible(id, visible) {
-        var list = root.options.controlCenter.widgetVisibility.slice()
-        for (var i = 0; i < list.length; i++) {
-            if (list[i].id === id) {
-                list[i] = { id: id, visible: visible }
-                root.options.controlCenter.widgetVisibility = list
-                return
-            }
+    function setCcWidgetVisible(type, visible) {
+        var list = root.options.controlCenter.items.slice()
+        if (visible) {
+            if (root.ccWidgetVisible(type)) return
+            list.push({ uid: type + "_" + Date.now(), type: type })
+        } else {
+            list = list.filter(function(item) { return item.type !== type })
         }
-        list.push({ id: id, visible: visible })
-        root.options.controlCenter.widgetVisibility = list
+        root.options.controlCenter.items = list
     }
 
     // ---------------------------------------------------------------
