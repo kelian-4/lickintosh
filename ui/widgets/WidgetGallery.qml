@@ -32,11 +32,19 @@ Scope {
                     anchors.fill: parent
                     window: win
 
-                    readonly property var filtered: WidgetRegistry.types.filter(function(t) {
-                        var inCategory = panel.category === "all" || t.type === panel.category
-                        var inQuery = panel.query === "" || t.title.toLowerCase().indexOf(panel.query.toLowerCase()) >= 0
-                        return inCategory && inQuery
-                    })
+                    readonly property var filtered: {
+                        var out = []
+                        var query = panel.query.toLowerCase()
+                        WidgetRegistry.types.forEach(function(t) {
+                            if (panel.category !== "all" && t.type !== panel.category) return
+                            WidgetRegistry.variantsOf(t.type).forEach(function(v) {
+                                var title = v.title || t.title
+                                if (query !== "" && title.toLowerCase().indexOf(query) < 0 && t.title.toLowerCase().indexOf(query) < 0) return
+                                out.push({ type: t.type, variant: v.key, title: title, sizes: v.sizes })
+                            })
+                        })
+                        return out
+                    }
 
                     categories: [{ key: "all", title: "All Widgets", icon: "notch/columns.svg", tint: "#8e8e93" }].concat(
                         WidgetRegistry.types.map(function(t) {
@@ -95,12 +103,12 @@ Scope {
                                             Drag.dragType: Drag.Automatic
                                             Drag.supportedActions: Qt.CopyAction
                                             Drag.proposedAction: Qt.CopyAction
-                                            Drag.mimeData: ({ "text/plain": "widget:" + section.modelData.type + ":" + tile.modelData })
+                                            Drag.mimeData: ({ "text/plain": "widget:" + section.modelData.type + ":" + tile.modelData + ":" + section.modelData.variant })
                                             Drag.hotSpot.x: face.width / 2
                                             Drag.hotSpot.y: face.height / 2
 
                                             WidgetView {
-                                                widgetData: ({ id: "preview", type: section.modelData.type, size: tile.modelData })
+                                                widgetData: ({ id: "preview", type: section.modelData.type, variant: section.modelData.variant, size: tile.modelData })
                                             }
 
                                             Rectangle {
@@ -135,7 +143,7 @@ Scope {
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
                                                 onPressed: face.grabToImage(function(result) { face.Drag.imageSource = result.url }, Qt.size(face.width, face.height))
-                                                onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData)
+                                                onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData, section.modelData.variant)
                                             }
 
                                             DragHandler {
