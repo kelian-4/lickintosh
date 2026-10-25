@@ -261,6 +261,25 @@ Scope {
 
             DropArea {
                 anchors.fill: parent
+                keys: ["text/uri-list"]
+
+                onEntered: function(drag) {
+                    drag.accepted = drag.hasUrls
+                }
+                onDropped: function(drop) {
+                    if (!drop.hasUrls) return
+                    drop.accept(Qt.CopyAction)
+                    var names = DesktopFiles.linkNames(drop.urls)
+                    for (var i = 0; i < names.length; i++) {
+                        var nx = Math.max(0, Math.min(Math.round((drop.x - stage.iconW / 2) / stage.iconW) * stage.iconW, stage.width - stage.iconW))
+                        var ny = Math.max(0, Math.min(Math.round((drop.y - stage.iconH / 2) / stage.iconH) * stage.iconH + i * stage.iconH, stage.height - stage.iconH))
+                        WidgetState.setIconPosition(names[i], nx, ny)
+                    }
+                }
+            }
+
+            DropArea {
+                anchors.fill: parent
                 keys: ["text/plain"]
 
                 function parse(drag) {
