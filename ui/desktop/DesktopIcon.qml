@@ -15,11 +15,18 @@ Item {
     width: 96
     height: 104
 
-    onEditingChanged: {
-        if (!root.editing) return
+    function startEditing() {
         renameInput.text = root.fileName
         renameInput.forceActiveFocus()
         renameInput.selectAll()
+    }
+
+    onEditingChanged: {
+        if (root.editing) root.startEditing()
+    }
+
+    Component.onCompleted: {
+        if (root.editing) root.startEditing()
     }
 
     Rectangle {
