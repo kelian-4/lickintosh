@@ -60,6 +60,13 @@ Singleton {
         return out
     }
 
+    function currentSaved() {
+        var out = {}
+        var layout = root.packedLayout
+        for (var id in layout) out[id] = { x: layout[id].xPos, y: layout[id].yPos }
+        return out
+    }
+
     function key(x, y) {
         return x + "," + y
     }
@@ -120,16 +127,12 @@ Singleton {
         return null
     }
 
-    function nearestFree(id, fx, fy) {
-        var info = root.infoOf(id)
-        if (!info) return null
-        var rest = root.build(root.savedPositions(), id)
-        var rows = Math.min(root.maxRows, rest.lastRow + 1 + root.editExtraRows)
+    function nearestIn(occupied, w, h, fx, fy) {
         var best = null
         var bestDist = 1e9
-        for (var y = 0; y + info.h <= rows; y++) {
-            for (var x = 0; x + info.w <= root.gridW; x++) {
-                if (!root.isFree(rest.occupied, x, y, info.w, info.h)) continue
+        for (var y = 0; y + h <= root.maxRows; y++) {
+            for (var x = 0; x + w <= root.gridW; x++) {
+                if (!root.isFree(occupied, x, y, w, h)) continue
                 var d = (x - fx) * (x - fx) + (y - fy) * (y - fy)
                 if (d < bestDist) {
                     bestDist = d
@@ -140,9 +143,41 @@ Singleton {
         return best
     }
 
+    function resolve(id, fx, fy) {
+        var info = root.infoOf(id)
+        if (!info) return null
+        var rest = root.build(root.currentSaved(), id)
+        var rows = Math.max(info.h, Math.min(root.maxRows, rest.lastRow + 1 + root.editExtraRows))
+        var x = Math.max(0, Math.min(root.gridW - info.w, Math.round(fx)))
+        var y = Math.max(0, Math.min(rows - info.h, Math.round(fy)))
+        var colliders = []
+        var occupied = {}
+        for (var i = 0; i < root.controls.length; i++) {
+            var cid = root.controls[i].id
+            var pos = rest.layout[cid]
+            if (!pos) continue
+            var hit = x < pos.xPos + pos.wUnits && x + info.w > pos.xPos && y < pos.yPos + pos.hUnits && y + info.h > pos.yPos
+            if (hit) colliders.push(cid)
+            else root.mark(occupied, pos.xPos, pos.yPos, pos.wUnits, pos.hUnits)
+        }
+        root.mark(occupied, x, y, info.w, info.h)
+        var old = root.packedLayout[id]
+        var moves = {}
+        for (var j = 0; j < colliders.length; j++) {
+            var ci = root.infoOf(colliders[j])
+            var orig = rest.layout[colliders[j]]
+            var spot = null
+            if (colliders.length === 1 && old && root.isFree(occupied, old.xPos, old.yPos, ci.w, ci.h)) spot = { x: old.xPos, y: old.yPos }
+            else spot = root.nearestIn(occupied, ci.w, ci.h, orig.xPos, orig.yPos)
+            if (!spot) return null
+            root.mark(occupied, spot.x, spot.y, ci.w, ci.h)
+            moves[colliders[j]] = spot
+        }
+        return { id: id, x: x, y: y, moves: moves }
+    }
+
     function setPreview(id, fx, fy) {
-        var spot = root.nearestFree(id, fx, fy)
-        root.preview = spot ? { id: id, x: spot.x, y: spot.y } : null
+        root.preview = root.resolve(id, fx, fy)
     }
 
     function clearPreview() {
@@ -153,18 +188,19 @@ Singleton {
         var p = root.preview
         root.preview = null
         if (!p) return false
-        root.place(p.id, p.x, p.y)
+        root.place(p.id, p.x, p.y, p.moves)
         return true
     }
 
-    function place(id, x, y) {
+    function place(id, x, y, moves) {
         if (!root.infoOf(id)) return
         var layout = root.packedLayout
         var list = []
         for (var i = 0; i < root.controls.length; i++) {
             var cid = root.controls[i].id
             if (cid === id) continue
-            if (layout[cid]) list.push({ id: cid, x: layout[cid].xPos, y: layout[cid].yPos })
+            if (moves && moves[cid]) list.push({ id: cid, x: moves[cid].x, y: moves[cid].y })
+            else if (layout[cid]) list.push({ id: cid, x: layout[cid].xPos, y: layout[cid].yPos })
         }
         list.push({ id: id, x: x, y: y })
         ShellConfig.options.controlCenter.positions = list

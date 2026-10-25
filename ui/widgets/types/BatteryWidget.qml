@@ -18,6 +18,11 @@ Item {
         spacing: 16
 
         Item {
+            Layout.fillWidth: true
+            visible: root.size === "s"
+        }
+
+        Item {
             Layout.alignment: Qt.AlignVCenter
             Layout.preferredWidth: 84
             Layout.preferredHeight: 84
@@ -28,16 +33,11 @@ Item {
                 percent: root.fraction * 100
                 ringColor: root.level
             }
+        }
 
-            Text {
-                anchors.centerIn: parent
-                text: Math.round(root.fraction * 100) + "%"
-                color: "#ffffff"
-                font.pixelSize: 18
-                font.weight: Font.Medium
-                font.family: "SF Pro Rounded"
-                renderType: Text.NativeRendering
-            }
+        Item {
+            Layout.fillWidth: true
+            visible: root.size === "s"
         }
 
         ColumnLayout {
