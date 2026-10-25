@@ -33,5 +33,16 @@ Item {
             font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering
         }
+
+        Text {
+            Layout.fillWidth: true
+            visible: QuoteState.author !== ""
+            text: "— " + QuoteState.author
+            elide: Text.ElideRight
+            color: Qt.rgba(1, 1, 1, 0.6)
+            font.pixelSize: 12
+            font.family: "SF Pro Rounded"
+            renderType: Text.NativeRendering
+        }
     }
 }

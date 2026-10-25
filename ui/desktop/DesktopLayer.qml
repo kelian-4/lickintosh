@@ -15,7 +15,7 @@ Scope {
 
         WlrLayershell.namespace: "quickshell:desktop"
         WlrLayershell.layer: WlrLayer.Bottom
-        WlrLayershell.keyboardFocus: DesktopFiles.renaming !== "" ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: DesktopFiles.renaming !== "" || WidgetState.typing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
         exclusionMode: ExclusionMode.Ignore
         color: "transparent"
         anchors { top: true; right: true; bottom: true; left: true }
