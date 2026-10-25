@@ -178,12 +178,49 @@ Singleton {
         Quickshell.execDetached(["xdg-open", path])
     }
 
+    Process {
+        id: creator
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var path = text.trim()
+                if (path === "") return
+                root.selected = path
+                root.renaming = path
+            }
+        }
+    }
+
+    function create(script) {
+        if (creator.running) return
+        creator.command = ["sh", "-c", script, "sh", root.dir]
+        creator.running = true
+    }
+
     function newFolder() {
-        root.run('d="$1/untitled folder"; n=2; while [ -e "$d" ]; do d="$1/untitled folder $n"; n=$((n+1)); done; mkdir -- "$d"', [root.dir])
+        root.create('d="$1/untitled folder"; n=2; while [ -e "$d" ]; do d="$1/untitled folder $n"; n=$((n+1)); done; mkdir -- "$d" && printf "%s" "$d"')
     }
 
     function newFile() {
-        root.run('d="$1/untitled file"; n=2; while [ -e "$d" ]; do d="$1/untitled file $n"; n=$((n+1)); done; : > "$d"', [root.dir])
+        root.create('d="$1/untitled file"; n=2; while [ -e "$d" ]; do d="$1/untitled file $n"; n=$((n+1)); done; : > "$d" && printf "%s" "$d"')
+    }
+
+    function pathOfUrl(url) {
+        return decodeURIComponent(String(url).replace(/^file:\/\//, ""))
+    }
+
+    function linkNames(urls) {
+        var names = []
+        var paths = []
+        for (var i = 0; i < urls.length; i++) {
+            var path = root.pathOfUrl(urls[i])
+            if (path === "" || path.indexOf(root.dir + "/") === 0) continue
+            paths.push(path)
+            names.push(path.split("/").filter(function(part) { return part !== "" }).pop())
+        }
+        if (paths.length > 0) {
+            root.run('d="$1"; shift; for f in "$@"; do b="$(basename -- "$f")"; [ -e "$d/$b" ] || [ -L "$d/$b" ] || ln -s -- "$f" "$d/$b"; done', [root.dir].concat(paths))
+        }
+        return names
     }
 
     function duplicate(path) {
