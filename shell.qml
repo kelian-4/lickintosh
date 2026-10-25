@@ -1,3 +1,4 @@
+//@ pragma IconTheme MacTahoe-dark
 //@ pragma UseQApplication
 //@ pragma ShellId main-shell
 import Quickshell
