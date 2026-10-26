@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 
 Item {
@@ -17,6 +18,7 @@ Item {
     property real glowBias: 0.0
     property real glowEdge0: 0.5
     property real glowEdge1: -0.5
+    property real cornerRadius: 0
 
     property point screenPosition: Qt.point(0, 0)
 
@@ -91,34 +93,54 @@ Item {
         }
     }
 
-    ShaderEffect {
+    Item {
+        id: glassLayer
         anchors.fill: parent
-        blending: true
-        visible: root.level > 0 && root.width > 0 && root.height > 0
-        opacity: root.level
+        layer.enabled: root.cornerRadius > 0
+        layer.smooth: true
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: glassMask
+        }
 
-        property variant u_Slots5: root.backdrop ? root.backdrop.blurSource : null
-        property vector2d v_MidPoint: Qt.vector2d(
-            2.0 * (root.screenPosition.x + root.width / 2) / root.screenSize.width - 1.0,
-            1.0 - 2.0 * (root.screenPosition.y + root.height / 2) / root.screenSize.height
-        )
-        property vector2d v_QuadNDC2ScreenNDCScale: Qt.vector2d(
-            root.width / root.screenSize.width,
-            root.height / root.screenSize.height
-        )
-        property real u_powerFactor: root.powerFactor
-        property real u_a: root.a
-        property real u_b: root.b
-        property real u_c: root.c
-        property real u_d: root.d
-        property real u_fPower: root.fPower
-        property real u_noise: root.noise
-        property real u_glowWeight: root.glowWeight
-        property real u_glowBias: root.glowBias
-        property real u_glowEdge0: root.glowEdge0
-        property real u_glowEdge1: root.glowEdge1
+        ShaderEffect {
+            anchors.fill: parent
+            blending: true
+            visible: root.level > 0 && root.width > 0 && root.height > 0
+            opacity: root.level
 
-        vertexShader: Qt.resolvedUrl(root.shaderDir + "LiquidGlass.vert.qsb")
-        fragmentShader: Qt.resolvedUrl(root.shaderDir + "LiquidGlass.frag.qsb")
+            property variant u_Slots5: root.backdrop ? root.backdrop.blurSource : null
+            property vector2d v_MidPoint: Qt.vector2d(
+                2.0 * (root.screenPosition.x + root.width / 2) / root.screenSize.width - 1.0,
+                1.0 - 2.0 * (root.screenPosition.y + root.height / 2) / root.screenSize.height
+            )
+            property vector2d v_QuadNDC2ScreenNDCScale: Qt.vector2d(
+                root.width / root.screenSize.width,
+                root.height / root.screenSize.height
+            )
+            property real u_powerFactor: root.powerFactor
+            property real u_a: root.a
+            property real u_b: root.b
+            property real u_c: root.c
+            property real u_d: root.d
+            property real u_fPower: root.fPower
+            property real u_noise: root.noise
+            property real u_glowWeight: root.glowWeight
+            property real u_glowBias: root.glowBias
+            property real u_glowEdge0: root.glowEdge0
+            property real u_glowEdge1: root.glowEdge1
+
+            vertexShader: Qt.resolvedUrl(root.shaderDir + "LiquidGlass.vert.qsb")
+            fragmentShader: Qt.resolvedUrl(root.shaderDir + "LiquidGlass.frag.qsb")
+        }
+    }
+
+    Rectangle {
+        id: glassMask
+        anchors.fill: parent
+        radius: root.cornerRadius
+        visible: false
+        layer.enabled: root.cornerRadius > 0
+        layer.smooth: true
     }
 }
