@@ -7,13 +7,38 @@ Item {
     required property string fileName
     required property string filePath
     required property bool fileIsDir
+    required property real cellX
+    required property real cellY
+    required property real cellWidth
+    required property real cellHeight
+
+    signal dropped(real centerX, real centerY)
+    signal contextRequested(real x, real y)
 
     readonly property bool selected: DesktopFiles.selected === root.filePath
     readonly property bool editing: DesktopFiles.renaming === root.filePath
     readonly property bool thumbnail: !root.fileIsDir && DesktopFiles.isImage(root.fileName)
 
-    width: 96
-    height: 104
+    x: root.cellX
+    y: root.cellY
+    width: root.cellWidth
+    height: root.cellHeight
+    z: area.drag.active ? 100 : 0
+
+    Behavior on x {
+        enabled: !area.drag.active
+        NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
+    }
+
+    Behavior on y {
+        enabled: !area.drag.active
+        NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
+    }
+
+    function resetPosition() {
+        root.x = Qt.binding(function() { return root.cellX })
+        root.y = Qt.binding(function() { return root.cellY })
+    }
 
     function startEditing() {
         renameInput.text = root.fileName
@@ -111,9 +136,31 @@ Item {
     }
 
     MouseArea {
+        id: area
+
+        property bool moved: false
+
         anchors.fill: parent
         enabled: !root.editing
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        drag.target: pressedButtons === Qt.LeftButton ? root : null
+        drag.threshold: 6
+
         onPressed: DesktopFiles.selected = root.filePath
-        onDoubleClicked: DesktopFiles.open(root.filePath, root.fileName)
+        onPositionChanged: {
+            if (drag.active) moved = true
+        }
+        onReleased: {
+            if (!moved) return
+            moved = false
+            root.dropped(root.x + root.width / 2, root.y + root.height / 2)
+            root.resetPosition()
+        }
+        onClicked: function(mouse) {
+            if (mouse.button === Qt.RightButton) root.contextRequested(root.x + mouse.x, root.y + mouse.y)
+        }
+        onDoubleClicked: function(mouse) {
+            if (mouse.button === Qt.LeftButton) DesktopFiles.open(root.filePath, root.fileName)
+        }
     }
 }
