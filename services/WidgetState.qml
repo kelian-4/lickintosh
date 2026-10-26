@@ -256,9 +256,16 @@ Singleton {
         return null
     }
 
-    function setIconPosition(name, x, y) {
+    function setIconPosition(name, col, row) {
         var list = root.iconPositions.filter(function(p) { return p.name !== name })
-        list.push({ name: name, x: x, y: y })
+        list.push({ name: name, col: col, row: row })
+        root.iconPositions = list
+    }
+
+    function renameIcon(oldName, newName) {
+        var list = root.iconPositions.map(function(p) {
+            return p.name === oldName ? { name: newName, col: p.col, row: p.row } : p
+        })
         root.iconPositions = list
     }
 }
