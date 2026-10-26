@@ -8,8 +8,6 @@ Item {
     property string size: "s"
     property bool adding: false
 
-    readonly property int visibleCount: root.size === "l" ? 6 : (root.size === "m" ? 2 : 1)
-    readonly property var shown: NotesState.notes.slice(0, root.visibleCount)
 
     function openEditor() {
         root.adding = true
@@ -30,6 +28,14 @@ Item {
 
     Component.onDestruction: {
         if (root.adding) WidgetState.typing = false
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onPressed: function(mouse) {
+            root.forceActiveFocus()
+            mouse.accepted = false
+        }
     }
 
     ColumnLayout {
@@ -98,6 +104,9 @@ Item {
                     id: editor
                     width: editorScroll.width
                     wrapMode: TextEdit.WrapAnywhere
+                    onActiveFocusChanged: {
+                        if (!editor.activeFocus && root.adding) root.commit()
+                    }
                     color: "#ffffff"
                     selectedTextColor: "#000000"
                     selectionColor: "#ffd60a"
@@ -133,7 +142,7 @@ Item {
 
         Text {
             Layout.fillWidth: true
-            visible: root.shown.length === 0 && !root.adding
+            visible: NotesState.notes.length === 0 && !root.adding
             text: "No Notes"
             color: Qt.rgba(1, 1, 1, 0.5)
             font.pixelSize: 13
@@ -141,53 +150,68 @@ Item {
             renderType: Text.NativeRendering
         }
 
-        Repeater {
-            model: root.adding && root.size === "s" ? [] : root.shown
+        Flickable {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            visible: !(root.adding && root.size === "s")
+            contentWidth: width
+            contentHeight: notesColumn.implicitHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
 
-            delegate: Rectangle {
-                id: row
-                required property var modelData
-                Layout.fillWidth: true
-                Layout.preferredHeight: noteText.implicitHeight
-                color: "transparent"
+            ColumnLayout {
+                id: notesColumn
+                width: parent.width
+                spacing: 8
 
-                Text {
-                    id: noteText
-                    anchors.left: parent.left
-                    anchors.right: removeButton.left
-                    anchors.rightMargin: 4
-                    text: row.modelData.text
-                    wrapMode: Text.WrapAnywhere
-                    maximumLineCount: root.size === "s" ? 5 : (root.size === "m" ? 2 : 3)
-                    elide: Text.ElideRight
-                    color: "#ffffff"
-                    font.pixelSize: 13
-                    font.family: "SF Pro Rounded"
-                    renderType: Text.NativeRendering
-                }
+                Repeater {
+                    model: NotesState.notes
 
-                Text {
-                    id: removeButton
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    text: "×"
-                    color: removeArea.containsMouse ? "#ff453a" : Qt.rgba(1, 1, 1, 0.4)
-                    font.pixelSize: 16
-                    font.family: "SF Pro Rounded"
-                    renderType: Text.NativeRendering
+                    delegate: Rectangle {
+                        id: row
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: noteText.implicitHeight
+                        color: "transparent"
 
-                    MouseArea {
-                        id: removeArea
-                        anchors.fill: parent
-                        anchors.margins: -4
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: NotesState.removeNote(row.modelData.id)
+                        Text {
+                            id: noteText
+                            anchors.left: parent.left
+                            anchors.right: removeButton.left
+                            anchors.rightMargin: 4
+                            text: row.modelData.text
+                            wrapMode: Text.WrapAnywhere
+                            maximumLineCount: root.size === "s" ? 5 : (root.size === "m" ? 2 : 3)
+                            elide: Text.ElideRight
+                            color: "#ffffff"
+                            font.pixelSize: 13
+                            font.family: "SF Pro Rounded"
+                            renderType: Text.NativeRendering
+                        }
+
+                        Text {
+                            id: removeButton
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            text: "×"
+                            color: removeArea.containsMouse ? "#ff453a" : Qt.rgba(1, 1, 1, 0.4)
+                            font.pixelSize: 16
+                            font.family: "SF Pro Rounded"
+                            renderType: Text.NativeRendering
+
+                            MouseArea {
+                                id: removeArea
+                                anchors.fill: parent
+                                anchors.margins: -4
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: NotesState.removeNote(row.modelData.id)
+                            }
+                        }
                     }
                 }
             }
         }
 
-        Item { Layout.fillHeight: true }
     }
 }

@@ -31,6 +31,70 @@ Scope {
             readonly property int iconW: 96
             readonly property int iconH: 104
             readonly property int iconRows: Math.max(1, Math.floor(stage.height / stage.iconH))
+            readonly property int iconCols: Math.max(1, Math.floor(stage.width / stage.iconW))
+            readonly property var iconCells: stage.computeCells(DesktopFiles.model.count, WidgetState.iconPositions, stage.iconRows, stage.iconCols)
+
+            function cellOf(x, y) {
+                return {
+                    col: Math.max(0, Math.min(stage.iconCols - 1, Math.round(x / stage.iconW))),
+                    row: Math.max(0, Math.min(stage.iconRows - 1, Math.round(y / stage.iconH)))
+                }
+            }
+
+            function computeCells(count, saved, rows, cols) {
+                var names = []
+                for (var i = 0; i < count; i++) names.push(DesktopFiles.model.get(i, "fileName"))
+                var cells = {}
+                var occupied = {}
+                names.forEach(function(name) {
+                    for (var j = 0; j < saved.length; j++) {
+                        if (saved[j].name !== name) continue
+                        var cell = stage.cellOf(saved[j].x, saved[j].y)
+                        if (!occupied[cell.col + "," + cell.row]) {
+                            occupied[cell.col + "," + cell.row] = true
+                            cells[name] = cell
+                        }
+                        return
+                    }
+                })
+                var col = cols - 1
+                var row = 0
+                names.forEach(function(name) {
+                    if (cells[name]) return
+                    while (col > 0 && occupied[col + "," + row]) {
+                        row++
+                        if (row >= rows) {
+                            row = 0
+                            col--
+                        }
+                    }
+                    occupied[col + "," + row] = true
+                    cells[name] = { col: col, row: row }
+                })
+                return cells
+            }
+
+            function nearestFreeCell(name, col, row, extra) {
+                var occupied = {}
+                for (var other in stage.iconCells) {
+                    if (other === name) continue
+                    occupied[stage.iconCells[other].col + "," + stage.iconCells[other].row] = true
+                }
+                for (var k = 0; k < extra.length; k++) occupied[extra[k].col + "," + extra[k].row] = true
+                var best = { col: col, row: row }
+                var bestDist = 1e9
+                for (var c = 0; c < stage.iconCols; c++) {
+                    for (var r = 0; r < stage.iconRows; r++) {
+                        if (occupied[c + "," + r]) continue
+                        var dist = (c - col) * (c - col) + (r - row) * (r - row)
+                        if (dist < bestDist) {
+                            bestDist = dist
+                            best = { col: c, row: r }
+                        }
+                    }
+                }
+                return best
+            }
 
             Binding {
                 target: WidgetState
@@ -48,6 +112,7 @@ Scope {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onPressed: function(mouse) {
+                    stage.forceActiveFocus()
                     DesktopFiles.selected = ""
                     DesktopFiles.renaming = ""
                     if (mouse.button === Qt.RightButton) {
@@ -70,16 +135,14 @@ Scope {
                     required property var fileSize
                     required property var fileModified
 
-                    readonly property var saved: WidgetState.iconPosition(iconSlot.fileName)
-                    readonly property real homeX: stage.width - (Math.floor(iconSlot.index / stage.iconRows) + 1) * stage.iconW
-                    readonly property real homeY: (iconSlot.index % stage.iconRows) * stage.iconH
+                    readonly property var cell: stage.iconCells[iconSlot.fileName]
 
                     property bool dragging: false
                     property real dragDX: 0
                     property real dragDY: 0
 
-                    x: (iconSlot.saved ? Math.min(iconSlot.saved.x, stage.width - stage.iconW) : iconSlot.homeX) + iconSlot.dragDX
-                    y: (iconSlot.saved ? Math.min(iconSlot.saved.y, stage.height - stage.iconH) : iconSlot.homeY) + iconSlot.dragDY
+                    x: (iconSlot.cell ? iconSlot.cell.col * stage.iconW : 0) + iconSlot.dragDX
+                    y: (iconSlot.cell ? iconSlot.cell.row * stage.iconH : 0) + iconSlot.dragDY
                     z: iconSlot.dragging ? 100 : 0
                     width: stage.iconW
                     height: stage.iconH
@@ -135,16 +198,12 @@ Scope {
                                     iconSlot.dragging = true
                                     return
                                 }
-                                var rawX = iconSlot.x
-                                var rawY = iconSlot.y
-                                var nx = Math.round(rawX / stage.iconW) * stage.iconW
-                                var ny = Math.round(rawY / stage.iconH) * stage.iconH
-                                nx = Math.max(0, Math.min(nx, stage.width - stage.iconW))
-                                ny = Math.max(0, Math.min(ny, stage.height - stage.iconH))
+                                var target = stage.cellOf(iconSlot.x, iconSlot.y)
+                                var spot = stage.nearestFreeCell(iconSlot.fileName, target.col, target.row, [])
                                 iconSlot.dragging = false
                                 iconSlot.dragDX = 0
                                 iconSlot.dragDY = 0
-                                WidgetState.setIconPosition(iconSlot.fileName, nx, ny)
+                                WidgetState.setIconPosition(iconSlot.fileName, spot.col * stage.iconW, spot.row * stage.iconH)
                             }
                             onCentroidChanged: {
                                 if (!active) return
@@ -270,10 +329,12 @@ Scope {
                     if (!drop.hasUrls) return
                     drop.accept(Qt.CopyAction)
                     var names = DesktopFiles.linkNames(drop.urls)
+                    var taken = []
                     for (var i = 0; i < names.length; i++) {
-                        var nx = Math.max(0, Math.min(Math.round((drop.x - stage.iconW / 2) / stage.iconW) * stage.iconW, stage.width - stage.iconW))
-                        var ny = Math.max(0, Math.min(Math.round((drop.y - stage.iconH / 2) / stage.iconH) * stage.iconH + i * stage.iconH, stage.height - stage.iconH))
-                        WidgetState.setIconPosition(names[i], nx, ny)
+                        var base = stage.cellOf(drop.x - stage.iconW / 2, drop.y - stage.iconH / 2)
+                        var spot = stage.nearestFreeCell(names[i], base.col, base.row, taken)
+                        taken.push(spot)
+                        WidgetState.setIconPosition(names[i], spot.col * stage.iconW, spot.row * stage.iconH)
                     }
                 }
             }
@@ -285,7 +346,7 @@ Scope {
                 function parse(drag) {
                     if (!drag.hasText || drag.text.indexOf("widget:") !== 0) return null
                     var parts = drag.text.split(":")
-                    return { type: parts[1], size: parts[2] }
+                    return { type: parts[1], size: parts[2], variant: parts[3] || "" }
                 }
 
                 function track(drag) {
@@ -310,7 +371,7 @@ Scope {
                     dropGuide.active = false
                     if (!spec) return
                     drop.accept(Qt.CopyAction)
-                    WidgetState.addWidgetAt("desktop", spec.type, spec.size, dropGuide.gx, dropGuide.gy)
+                    WidgetState.addWidgetAt("desktop", spec.type, spec.size, spec.variant, dropGuide.gx, dropGuide.gy)
                 }
             }
         }

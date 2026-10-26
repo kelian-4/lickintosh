@@ -99,9 +99,31 @@ Singleton {
         return { x: 0, y: 0 }
     }
 
-    function addWidget(zone, type, size) {
+    function nearestFree(list, skipId, size, x, y) {
+        var d = root.sizeOf(size)
+        var cols = Math.max(1, Math.floor(root.areaWidth / root.step))
+        var rows = Math.max(1, Math.floor(root.areaHeight / root.step))
+        var best = null
+        var bestDist = 1e12
+        for (var c = 0; c < cols; c++) {
+            for (var r = 0; r < rows; r++) {
+                var cx = c * root.step
+                var cy = r * root.step
+                if (cx + d.w > root.areaWidth || cy + d.h > root.areaHeight) continue
+                if (root.collides(list, skipId, cx, cy, d.w, d.h)) continue
+                var dist = (cx - x) * (cx - x) + (cy - y) * (cy - y)
+                if (dist < bestDist) {
+                    bestDist = dist
+                    best = { x: cx, y: cy }
+                }
+            }
+        }
+        return best || { x: 0, y: 0 }
+    }
+
+    function addWidget(zone, type, size, variant) {
         var list = root.listOf(zone)
-        var entry = { id: "w_" + Date.now(), type: type, size: size, x: 0, y: 0 }
+        var entry = { id: "w_" + Date.now(), type: type, variant: variant || "", size: size, x: 0, y: 0 }
         if (zone === "desktop") {
             var p = root.freeSlot(list, "", size)
             entry.x = p.x
@@ -116,18 +138,18 @@ Singleton {
         var d = root.sizeOf(size)
         var nx = Math.max(0, Math.min(Math.round(x / root.step) * root.step, root.areaWidth - d.w))
         var ny = Math.max(0, Math.min(Math.round(y / root.step) * root.step, root.areaHeight - d.h))
-        if (root.collides(list, "", nx, ny, d.w, d.h)) return root.freeSlot(list, "", size)
+        if (root.collides(list, "", nx, ny, d.w, d.h)) return root.nearestFree(list, "", size, nx, ny)
         return { x: nx, y: ny }
     }
 
-    function addWidgetAt(zone, type, size, x, y) {
+    function addWidgetAt(zone, type, size, variant, x, y) {
         if (zone !== "desktop") {
-            root.addWidget(zone, type, size)
+            root.addWidget(zone, type, size, variant)
             return
         }
         var list = root.listOf("desktop")
         var p = root.snap(size, x, y)
-        list.push({ id: "w_" + Date.now(), type: type, size: size, x: p.x, y: p.y })
+        list.push({ id: "w_" + Date.now(), type: type, variant: variant || "", size: size, x: p.x, y: p.y })
         root.setList("desktop", list)
     }
 
@@ -150,7 +172,11 @@ Singleton {
         var ny = Math.round(y / root.step) * root.step
         nx = Math.max(0, Math.min(nx, root.areaWidth - d.w))
         ny = Math.max(0, Math.min(ny, root.areaHeight - d.h))
-        if (root.collides(list, id, nx, ny, d.w, d.h)) return
+        if (root.collides(list, id, nx, ny, d.w, d.h)) {
+            var p = root.nearestFree(list, id, list[i].size, nx, ny)
+            nx = p.x
+            ny = p.y
+        }
         list[i] = Object.assign({}, list[i], { x: nx, y: ny })
         root.setList("desktop", list)
     }
@@ -196,7 +222,8 @@ Singleton {
         var entries = []
         if (widget) {
             entries.push({ label: "Remove Widget", action: "remove" })
-            var sizes = WidgetRegistry.sizesOf(widget.type)
+            var resolved = WidgetRegistry.resolve(widget)
+            var sizes = WidgetRegistry.sizesOf(resolved.type, resolved.variant)
             if (sizes.length > 1) {
                 for (var i = 0; i < sizes.length; i++) {
                     entries.push({
