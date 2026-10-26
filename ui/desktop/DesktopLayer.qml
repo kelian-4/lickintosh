@@ -28,51 +28,64 @@ Scope {
             anchors.rightMargin: 16
             anchors.bottomMargin: 16
 
-            readonly property int iconW: 96
-            readonly property int iconH: 104
-            readonly property int iconRows: Math.max(1, Math.floor(stage.height / stage.iconH))
-            readonly property int iconCols: Math.max(1, Math.floor(stage.width / stage.iconW))
-            readonly property var iconCells: stage.computeCells(DesktopFiles.model.count, WidgetState.iconPositions, stage.iconRows, stage.iconCols)
+            readonly property real iconW: 96
+            readonly property real iconH: 104
+            readonly property real iconPad: 8
+            readonly property int iconCols: Math.max(1, Math.floor((stage.width - stage.iconPad * 2) / stage.iconW))
+            readonly property int iconRows: Math.max(1, Math.floor((stage.height - stage.iconPad * 2) / stage.iconH))
 
-            function cellOf(x, y) {
-                return {
-                    col: Math.max(0, Math.min(stage.iconCols - 1, Math.round((stage.width - stage.iconW - x) / stage.iconW))),
-                    row: Math.max(0, Math.min(stage.iconRows - 1, Math.round(y / stage.iconH)))
-                }
+            property var iconCells: ({})
+
+            function fileNames() {
+                var names = []
+                for (var i = 0; i < DesktopFiles.model.count; i++) names.push(DesktopFiles.model.get(i, "fileName"))
+                return names
             }
 
-            function computeCells(count, saved, rows, cols) {
-                var names = []
-                for (var i = 0; i < count; i++) names.push(DesktopFiles.model.get(i, "fileName"))
-                var cells = {}
-                var occupied = {}
+            function relayout() {
+                var names = stage.fileNames()
+                var saved = WidgetState.iconPositions
+                var taken = {}
+                var result = {}
                 names.forEach(function(name) {
                     for (var j = 0; j < saved.length; j++) {
                         if (saved[j].name !== name) continue
-                        var cell = { col: saved[j].col, row: saved[j].row }
-                        var inside = cell.col >= 0 && cell.col < cols && cell.row >= 0 && cell.row < rows
-                        if (inside && !occupied[cell.col + "," + cell.row]) {
-                            occupied[cell.col + "," + cell.row] = true
-                            cells[name] = cell
-                        }
+                        if (saved[j].col < 0 || saved[j].row < 0 || saved[j].col >= stage.iconCols || saved[j].row >= stage.iconRows) return
+                        var key = saved[j].col + "," + saved[j].row
+                        if (taken[key]) return
+                        taken[key] = true
+                        result[name] = { col: saved[j].col, row: saved[j].row }
                         return
                     }
                 })
-                var col = 0
-                var row = 0
                 names.forEach(function(name) {
-                    if (cells[name]) return
-                    while (col < cols - 1 && occupied[col + "," + row]) {
-                        row++
-                        if (row >= rows) {
-                            row = 0
-                            col++
+                    if (result[name]) return
+                    for (var col = 0; result[name] === undefined; col++) {
+                        for (var row = 0; row < stage.iconRows; row++) {
+                            var key = col + "," + row
+                            if (taken[key]) continue
+                            taken[key] = true
+                            result[name] = { col: col, row: row }
+                            break
                         }
                     }
-                    occupied[col + "," + row] = true
-                    cells[name] = { col: col, row: row }
                 })
-                return cells
+                stage.iconCells = result
+            }
+
+            function cellX(col) {
+                return stage.width - stage.iconPad - (col + 1) * stage.iconW
+            }
+
+            function cellY(row) {
+                return stage.iconPad + row * stage.iconH
+            }
+
+            function dropIcon(name, centerX, centerY) {
+                var targetCol = Math.min(stage.iconCols - 1, Math.max(0, Math.round((stage.width - stage.iconPad - centerX) / stage.iconW - 0.5)))
+                var targetRow = Math.min(stage.iconRows - 1, Math.max(0, Math.round((centerY - stage.iconPad - stage.iconH / 2) / stage.iconH)))
+                var spot = stage.nearestFreeCell(name, targetCol, targetRow, [])
+                WidgetState.setIconPosition(name, spot.col, spot.row)
             }
 
             function nearestFreeCell(name, col, row, extra) {
@@ -82,19 +95,34 @@ Scope {
                     occupied[stage.iconCells[other].col + "," + stage.iconCells[other].row] = true
                 }
                 for (var k = 0; k < extra.length; k++) occupied[extra[k].col + "," + extra[k].row] = true
-                var best = { col: col, row: row }
-                var bestDist = 1e9
+                var best = null
                 for (var c = 0; c < stage.iconCols; c++) {
                     for (var r = 0; r < stage.iconRows; r++) {
                         if (occupied[c + "," + r]) continue
                         var dist = (c - col) * (c - col) + (r - row) * (r - row)
-                        if (dist < bestDist) {
-                            bestDist = dist
-                            best = { col: c, row: r }
-                        }
+                        if (best === null || dist < best.dist) best = { col: c, row: r, dist: dist }
                     }
                 }
-                return best
+                return best || { col: col, row: row }
+            }
+
+            onIconColsChanged: stage.relayout()
+            onIconRowsChanged: stage.relayout()
+            Component.onCompleted: stage.relayout()
+
+            Connections {
+                target: DesktopFiles.model
+
+                function onCountChanged() { stage.relayout() }
+                function onModelReset() { stage.relayout() }
+                function onRowsInserted() { stage.relayout() }
+                function onRowsRemoved() { stage.relayout() }
+            }
+
+            Connections {
+                target: WidgetState
+
+                function onIconPositionsChanged() { stage.relayout() }
             }
 
             Binding {
@@ -126,97 +154,30 @@ Scope {
             Repeater {
                 model: DesktopFiles.model
 
-                delegate: Item {
-                    id: iconSlot
+                delegate: DesktopIcon {
+                    id: icon
 
-                    required property int index
-                    required property string fileName
-                    required property string filePath
-                    required property bool fileIsDir
                     required property var fileSize
                     required property var fileModified
 
-                    readonly property var cell: stage.iconCells[iconSlot.fileName]
-                    property var lastCell: ({ col: 0, row: 0 })
-                    onCellChanged: {
-                        if (iconSlot.cell) iconSlot.lastCell = iconSlot.cell
-                    }
-                    readonly property var shownCell: iconSlot.cell || iconSlot.lastCell
+                    cellX: stage.cellX(stage.iconCells[icon.fileName] ? stage.iconCells[icon.fileName].col : 0)
+                    cellY: stage.cellY(stage.iconCells[icon.fileName] ? stage.iconCells[icon.fileName].row : 0)
+                    cellWidth: stage.iconW
+                    cellHeight: stage.iconH
 
-                    property bool dragging: false
-                    property real dragDX: 0
-                    property real dragDY: 0
-
-                    x: stage.width - (iconSlot.shownCell.col + 1) * stage.iconW + iconSlot.dragDX
-                    y: iconSlot.shownCell.row * stage.iconH + iconSlot.dragDY
-                    z: iconSlot.dragging ? 100 : 0
-                    width: stage.iconW
-                    height: stage.iconH
-
-                    Behavior on x {
-                        enabled: !iconSlot.dragging
-                        NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
-                    }
-                    Behavior on y {
-                        enabled: !iconSlot.dragging
-                        NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
-                    }
-
-                    Item {
-                        id: iconMover
-                        width: parent.width
-                        height: parent.height
-                        scale: iconSlot.dragging ? 1.06 : 1
-                        Behavior on scale {
-                            NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
+                    onDropped: function(centerX, centerY) { stage.dropIcon(icon.fileName, centerX, centerY) }
+                    onContextRequested: function(x, y) {
+                        DesktopFiles.selected = icon.filePath
+                        menu.target = {
+                            kind: "icon",
+                            path: icon.filePath,
+                            name: icon.fileName,
+                            isDir: icon.fileIsDir,
+                            size: icon.fileSize,
+                            modified: icon.fileModified
                         }
-
-                        DesktopIcon {
-                            fileName: iconSlot.fileName
-                            filePath: iconSlot.filePath
-                            fileIsDir: iconSlot.fileIsDir
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.RightButton
-                            onPressed: function(mouse) {
-                                DesktopFiles.selected = iconSlot.filePath
-                                menu.target = {
-                                    kind: "icon",
-                                    path: iconSlot.filePath,
-                                    name: iconSlot.fileName,
-                                    isDir: iconSlot.fileIsDir,
-                                    size: iconSlot.fileSize,
-                                    modified: iconSlot.fileModified
-                                }
-                                var p = mapToItem(menu, mouse.x, mouse.y)
-                                menu.openAt(p.x, p.y, DesktopFiles.fileMenu())
-                            }
-                        }
-
-                        DragHandler {
-                            target: null
-                            acceptedButtons: Qt.LeftButton
-                            enabled: DesktopFiles.renaming !== iconSlot.filePath
-                            onActiveChanged: {
-                                if (active) {
-                                    iconSlot.dragging = true
-                                    return
-                                }
-                                var target = stage.cellOf(iconSlot.x, iconSlot.y)
-                                var spot = stage.nearestFreeCell(iconSlot.fileName, target.col, target.row, [])
-                                iconSlot.dragging = false
-                                iconSlot.dragDX = 0
-                                iconSlot.dragDY = 0
-                                WidgetState.setIconPosition(iconSlot.fileName, spot.col, spot.row)
-                            }
-                            onCentroidChanged: {
-                                if (!active) return
-                                iconSlot.dragDX = centroid.scenePosition.x - centroid.scenePressPosition.x
-                                iconSlot.dragDY = centroid.scenePosition.y - centroid.scenePressPosition.y
-                            }
-                        }
+                        var p = stage.mapToItem(menu, x, y)
+                        menu.openAt(p.x, p.y, DesktopFiles.fileMenu())
                     }
                 }
             }
@@ -337,8 +298,9 @@ Scope {
                     var names = DesktopFiles.linkNames(drop.urls)
                     var taken = []
                     for (var i = 0; i < names.length; i++) {
-                        var base = stage.cellOf(drop.x - stage.iconW / 2, drop.y - stage.iconH / 2)
-                        var spot = stage.nearestFreeCell(names[i], base.col, base.row, taken)
+                        var baseCol = Math.min(stage.iconCols - 1, Math.max(0, Math.round((stage.width - stage.iconPad - drop.x) / stage.iconW - 0.5)))
+                        var baseRow = Math.min(stage.iconRows - 1, Math.max(0, Math.round((drop.y - stage.iconPad - stage.iconH / 2) / stage.iconH)))
+                        var spot = stage.nearestFreeCell(names[i], baseCol, baseRow, taken)
                         taken.push(spot)
                         WidgetState.setIconPosition(names[i], spot.col, spot.row)
                     }
