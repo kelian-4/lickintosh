@@ -30,13 +30,14 @@ Singleton {
 
     readonly property var sizeLabels: ({ s: "Small", m: "Medium", l: "Large" })
 
-    readonly property var legacy: ({ resources: "battery", ram: "battery", cpu: "battery", storage: "battery", network: "battery" })
-
-    function resolve(type) {
-        return root.legacy[type] !== undefined ? root.legacy[type] : type
-    }
-
-    readonly property var legacy: ({ digital: { type: "clock", variant: "digital" } })
+    readonly property var legacy: ({
+        digital:   { type: "clock",   variant: "digital" },
+        resources: { type: "battery", variant: "" },
+        ram:       { type: "battery", variant: "" },
+        cpu:       { type: "battery", variant: "" },
+        storage:   { type: "battery", variant: "" },
+        network:   { type: "battery", variant: "" }
+    })
 
     function resolve(widget) {
         var alias = root.legacy[widget.type]
@@ -74,12 +75,15 @@ Singleton {
     }
 
     function fileOf(type) {
-        var i = root.info(root.resolve(type))
+        var i = root.info(type)
         return i ? i.file : ""
     }
 
-    function sizesOf(type) {
-        var i = root.info(root.resolve(type))
-        return i ? i.sizes : ["s"]
+    function sizesOf(type, variant) {
+        var list = root.variantsOf(type)
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].key === variant) return list[i].sizes
+        }
+        return list[0].sizes
     }
 }
