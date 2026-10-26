@@ -137,13 +137,18 @@ Scope {
                     required property var fileModified
 
                     readonly property var cell: stage.iconCells[iconSlot.fileName]
+                    property var lastCell: ({ col: 0, row: 0 })
+                    onCellChanged: {
+                        if (iconSlot.cell) iconSlot.lastCell = iconSlot.cell
+                    }
+                    readonly property var shownCell: iconSlot.cell || iconSlot.lastCell
 
                     property bool dragging: false
                     property real dragDX: 0
                     property real dragDY: 0
 
-                    x: stage.width - ((iconSlot.cell ? iconSlot.cell.col : 0) + 1) * stage.iconW + iconSlot.dragDX
-                    y: (iconSlot.cell ? iconSlot.cell.row * stage.iconH : 0) + iconSlot.dragDY
+                    x: stage.width - (iconSlot.shownCell.col + 1) * stage.iconW + iconSlot.dragDX
+                    y: iconSlot.shownCell.row * stage.iconH + iconSlot.dragDY
                     z: iconSlot.dragging ? 100 : 0
                     width: stage.iconW
                     height: stage.iconH

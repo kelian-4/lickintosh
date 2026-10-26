@@ -29,12 +29,24 @@ Singleton {
     readonly property int desktopOffsetX: 16
     readonly property int desktopOffsetY: 44
 
+    Timer {
+        id: reloadTimer
+        interval: 100
+        onTriggered: widgetsFile.reload()
+    }
+
+    Timer {
+        id: writeTimer
+        interval: 100
+        onTriggered: widgetsFile.writeAdapter()
+    }
+
     FileView {
         id: widgetsFile
         path: root.filePath
         watchChanges: true
-        onFileChanged: reload()
-        onAdapterUpdated: writeAdapter()
+        onFileChanged: reloadTimer.restart()
+        onAdapterUpdated: writeTimer.restart()
         onLoadFailed: function(error) {
             if (error === FileViewError.FileNotFound) writeAdapter()
         }
