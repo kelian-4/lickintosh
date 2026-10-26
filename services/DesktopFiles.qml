@@ -247,6 +247,7 @@ Singleton {
         var name = newName.trim()
         if (name === "" || name.indexOf("/") >= 0) return
         root.run('mv -n -- "$1" "$2"', [path, path.slice(0, path.lastIndexOf("/") + 1) + name])
+        WidgetState.renameIcon(path.slice(path.lastIndexOf("/") + 1), name)
     }
 
     function cleanUp() {

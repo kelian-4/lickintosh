@@ -32,12 +32,11 @@ Scope {
             readonly property int iconH: 104
             readonly property int iconRows: Math.max(1, Math.floor(stage.height / stage.iconH))
             readonly property int iconCols: Math.max(1, Math.floor(stage.width / stage.iconW))
-            readonly property real gridX: stage.width - stage.iconCols * stage.iconW
             readonly property var iconCells: stage.computeCells(DesktopFiles.model.count, WidgetState.iconPositions, stage.iconRows, stage.iconCols)
 
             function cellOf(x, y) {
                 return {
-                    col: Math.max(0, Math.min(stage.iconCols - 1, Math.round((x - stage.gridX) / stage.iconW))),
+                    col: Math.max(0, Math.min(stage.iconCols - 1, Math.round((stage.width - stage.iconW - x) / stage.iconW))),
                     row: Math.max(0, Math.min(stage.iconRows - 1, Math.round(y / stage.iconH)))
                 }
             }
@@ -50,23 +49,24 @@ Scope {
                 names.forEach(function(name) {
                     for (var j = 0; j < saved.length; j++) {
                         if (saved[j].name !== name) continue
-                        var cell = stage.cellOf(saved[j].x, saved[j].y)
-                        if (!occupied[cell.col + "," + cell.row]) {
+                        var cell = { col: saved[j].col, row: saved[j].row }
+                        var inside = cell.col >= 0 && cell.col < cols && cell.row >= 0 && cell.row < rows
+                        if (inside && !occupied[cell.col + "," + cell.row]) {
                             occupied[cell.col + "," + cell.row] = true
                             cells[name] = cell
                         }
                         return
                     }
                 })
-                var col = cols - 1
+                var col = 0
                 var row = 0
                 names.forEach(function(name) {
                     if (cells[name]) return
-                    while (col > 0 && occupied[col + "," + row]) {
+                    while (col < cols - 1 && occupied[col + "," + row]) {
                         row++
                         if (row >= rows) {
                             row = 0
-                            col--
+                            col++
                         }
                     }
                     occupied[col + "," + row] = true
@@ -142,7 +142,7 @@ Scope {
                     property real dragDX: 0
                     property real dragDY: 0
 
-                    x: stage.gridX + (iconSlot.cell ? iconSlot.cell.col * stage.iconW : 0) + iconSlot.dragDX
+                    x: stage.width - ((iconSlot.cell ? iconSlot.cell.col : 0) + 1) * stage.iconW + iconSlot.dragDX
                     y: (iconSlot.cell ? iconSlot.cell.row * stage.iconH : 0) + iconSlot.dragDY
                     z: iconSlot.dragging ? 100 : 0
                     width: stage.iconW
@@ -204,7 +204,7 @@ Scope {
                                 iconSlot.dragging = false
                                 iconSlot.dragDX = 0
                                 iconSlot.dragDY = 0
-                                WidgetState.setIconPosition(iconSlot.fileName, stage.gridX + spot.col * stage.iconW, spot.row * stage.iconH)
+                                WidgetState.setIconPosition(iconSlot.fileName, spot.col, spot.row)
                             }
                             onCentroidChanged: {
                                 if (!active) return
@@ -335,7 +335,7 @@ Scope {
                         var base = stage.cellOf(drop.x - stage.iconW / 2, drop.y - stage.iconH / 2)
                         var spot = stage.nearestFreeCell(names[i], base.col, base.row, taken)
                         taken.push(spot)
-                        WidgetState.setIconPosition(names[i], stage.gridX + spot.col * stage.iconW, spot.row * stage.iconH)
+                        WidgetState.setIconPosition(names[i], spot.col, spot.row)
                     }
                 }
             }
