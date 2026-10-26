@@ -19,7 +19,7 @@ Item {
                 color: "#ff9f0a"
                 font.pixelSize: 13
                 font.weight: Font.Bold
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 renderType: Text.NativeRendering
             }
 
@@ -30,7 +30,7 @@ Item {
                 color: "#ffffff"
                 font.pixelSize: root.size === "s" ? 38 : 20
                 font.weight: Font.Light
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 renderType: Text.NativeRendering
             }
         }
@@ -41,7 +41,7 @@ Item {
             text: TasksState.pending.length === 1 ? "task left" : "tasks left"
             color: Qt.rgba(1, 1, 1, 0.55)
             font.pixelSize: 12
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
 
@@ -51,7 +51,7 @@ Item {
             text: "Nothing to do"
             color: Qt.rgba(1, 1, 1, 0.5)
             font.pixelSize: 13
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
 
@@ -99,7 +99,7 @@ Item {
                             elide: Text.ElideRight
                             color: "#ffffff"
                             font.pixelSize: 13
-                            font.family: "SF Pro Rounded"
+                            font.family: "SF Pro Text"
                             renderType: Text.NativeRendering
                         }
                     }

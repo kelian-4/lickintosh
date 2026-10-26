@@ -78,7 +78,7 @@ ColumnLayout {
                 text:           root.items.length.toString()
                 font.pixelSize: 10
                 font.weight:    Font.Bold
-                font.family:    "SF Pro Rounded"
+                font.family:    "SF Pro Text"
                 color:          "#ffffff"
                 renderType:     Text.NativeRendering
             }
@@ -108,7 +108,7 @@ ColumnLayout {
                 text: root.appName
                 font.pixelSize: 13
                 font.weight: Font.Bold
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 color: "#ffffff"
                 renderType: Text.NativeRendering
             }
@@ -124,7 +124,7 @@ ColumnLayout {
                     anchors.centerIn: parent
                     text: "Show less"
                     font.pixelSize: 11
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     color: "#ffffff"
                     renderType: Text.NativeRendering
                 }
@@ -148,7 +148,7 @@ ColumnLayout {
                     anchors.centerIn: parent
                     text: "×"
                     font.pixelSize: 13
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     color: "#ffffff"
                     renderType: Text.NativeRendering
                 }
@@ -195,7 +195,7 @@ ColumnLayout {
                 anchors.centerIn: parent
                 text: (root.items.length - root.maxVisible) + " more notification" + (root.items.length - root.maxVisible > 1 ? "s" : "")
                 font.pixelSize: 11
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 color: Qt.rgba(1, 1, 1, 0.60)
                 renderType: Text.NativeRendering
             }

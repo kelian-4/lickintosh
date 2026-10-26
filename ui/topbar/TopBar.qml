@@ -40,10 +40,6 @@ Rectangle {
     anchors.left:  parent.left
     anchors.right: parent.right
 
-    FontLoader {
-        id: macFont
-        source: "../../../assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf"
-    }
 
     readonly property real notchZoneLeft:  root.themeMargin + menuBarItem.width
     readonly property real notchZoneRight: root.width - root.themeMargin - statusAreaItem.width
