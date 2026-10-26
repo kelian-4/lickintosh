@@ -77,12 +77,12 @@ Scope {
                                 spacing: WidgetState.gap
 
                                 Repeater {
-                                    model: section.modelData.sizes
+                                    model: WidgetRegistry.tilesOf(section.modelData.type)
 
                                     delegate: Column {
                                         id: tile
-                                        required property string modelData
-                                        readonly property var dims: WidgetState.sizeOf(tile.modelData)
+                                        required property var modelData
+                                        readonly property var dims: WidgetState.sizeOf(tile.modelData.size)
 
                                         spacing: 6
 
@@ -95,12 +95,12 @@ Scope {
                                             Drag.dragType: Drag.Automatic
                                             Drag.supportedActions: Qt.CopyAction
                                             Drag.proposedAction: Qt.CopyAction
-                                            Drag.mimeData: ({ "text/plain": "widget:" + section.modelData.type + ":" + tile.modelData })
+                                            Drag.mimeData: ({ "text/plain": "widget:" + section.modelData.type + ":" + tile.modelData.size + ":" + tile.modelData.variant })
                                             Drag.hotSpot.x: face.width / 2
                                             Drag.hotSpot.y: face.height / 2
 
                                             WidgetView {
-                                                widgetData: ({ id: "preview", type: section.modelData.type, size: tile.modelData })
+                                                widgetData: ({ id: "preview", type: section.modelData.type, variant: tile.modelData.variant, size: tile.modelData.size })
                                             }
 
                                             Rectangle {
@@ -135,7 +135,7 @@ Scope {
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
                                                 onPressed: face.grabToImage(function(result) { face.Drag.imageSource = result.url }, Qt.size(face.width, face.height))
-                                                onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData)
+                                                onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData.size, tile.modelData.variant)
                                             }
 
                                             DragHandler {
@@ -148,7 +148,7 @@ Scope {
                                         Text {
                                             width: tile.dims.w
                                             horizontalAlignment: Text.AlignHCenter
-                                            text: WidgetRegistry.sizeLabels[tile.modelData]
+                                            text: tile.modelData.label
                                             color: Qt.rgba(1, 1, 1, 0.55)
                                             font.pixelSize: 11
                                             font.family: "SF Pro Rounded"

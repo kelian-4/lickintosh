@@ -5,14 +5,23 @@ Item {
     id: root
 
     property string size: "s"
+    property string variant: "analog"
 
     SystemClock {
         id: clock
         precision: SystemClock.Seconds
     }
 
+    Loader {
+        anchors.fill: parent
+        active: root.variant === "digital"
+        source: "DigitalClockWidget.qml"
+        onLoaded: item.size = Qt.binding(function() { return root.size })
+    }
+
     Item {
         id: face
+        visible: root.variant !== "digital"
         anchors.centerIn: parent
         width: Math.min(root.width, root.height)
         height: width

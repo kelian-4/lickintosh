@@ -6,8 +6,6 @@ Item {
     id: root
 
     property string size: "s"
-    readonly property int visibleCount: root.size === "l" ? 8 : (root.size === "m" ? 3 : 0)
-    readonly property var shown: TasksState.pending.slice(0, root.visibleCount)
 
     ColumnLayout {
         anchors.fill: parent
@@ -57,42 +55,57 @@ Item {
             renderType: Text.NativeRendering
         }
 
-        Repeater {
-            model: root.shown
+        Flickable {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            visible: root.size !== "s"
+            contentWidth: width
+            contentHeight: tasksColumn.implicitHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
 
-            delegate: RowLayout {
-                id: taskRow
-                required property var modelData
-                Layout.fillWidth: true
-                spacing: 8
+            ColumnLayout {
+                id: tasksColumn
+                width: parent.width
+                spacing: 6
 
-                Rectangle {
-                    Layout.preferredWidth: 16
-                    Layout.preferredHeight: 16
-                    radius: 8
-                    color: "transparent"
-                    border.width: 1.5
-                    border.color: "#ff9f0a"
+                Repeater {
+                    model: TasksState.pending
 
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: TasksState.toggleTask(taskRow.modelData.id)
+                    delegate: RowLayout {
+                        id: taskRow
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Rectangle {
+                            Layout.preferredWidth: 16
+                            Layout.preferredHeight: 16
+                            radius: 8
+                            color: "transparent"
+                            border.width: 1.5
+                            border.color: "#ff9f0a"
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: TasksState.toggleTask(taskRow.modelData.id)
+                            }
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: taskRow.modelData.text
+                            elide: Text.ElideRight
+                            color: "#ffffff"
+                            font.pixelSize: 13
+                            font.family: "SF Pro Rounded"
+                            renderType: Text.NativeRendering
+                        }
                     }
-                }
-
-                Text {
-                    Layout.fillWidth: true
-                    text: taskRow.modelData.text
-                    elide: Text.ElideRight
-                    color: "#ffffff"
-                    font.pixelSize: 13
-                    font.family: "SF Pro Rounded"
-                    renderType: Text.NativeRendering
                 }
             }
         }
 
-        Item { Layout.fillHeight: true }
     }
 }
