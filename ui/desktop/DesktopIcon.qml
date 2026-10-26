@@ -92,7 +92,7 @@ Item {
         style: Text.Outline
         styleColor: Qt.rgba(0, 0, 0, 0.55)
         font.pixelSize: 12
-        font.family: "SF Pro Rounded"
+        font.family: "SF Pro Text"
         renderType: Text.NativeRendering
     }
 
@@ -120,7 +120,7 @@ Item {
             clip: true
             selectByMouse: true
             font.pixelSize: 12
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
             onAccepted: {
                 DesktopFiles.rename(root.filePath, renameInput.text)

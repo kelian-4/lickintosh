@@ -34,8 +34,6 @@ Scope {
     readonly property color glassColor: "#c01e1e1e"
     readonly property color textColor:  "#dfdfdf"
 
-    FontLoader { id: sfRounded;       source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf") }
-    FontLoader { id: sfRoundedMedium; source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/fonts/SFPR/SF-Pro-Rounded-Medium.otf") }
 
     property var fileIndex:  []
     property bool indexReady: false
@@ -1217,7 +1215,7 @@ Scope {
                                     anchors.leftMargin:     48
                                     anchors.right:          parent.right
                                     anchors.rightMargin:    8
-                                    font.family:    sfRoundedMedium.name
+                                    font.family:    "SF Pro Text"
                                     font.pixelSize: 26
                                     font.weight:    Font.Medium
                                     color:          root.textColor
@@ -1248,7 +1246,7 @@ Scope {
                                     visible: text !== "" && searchField.activeFocus
                                     color:   root.textColor
                                     opacity: 0.35
-                                    font.family:    sfRoundedMedium.name
+                                    font.family:    "SF Pro Text"
                                     font.pixelSize: 26
                                     font.weight:    Font.Medium
                                     renderType:     Text.NativeRendering
@@ -1269,8 +1267,9 @@ Scope {
                                         text: "—  " + win.topHitLabel
                                         color: root.textColor
                                         opacity: 0.7
-                                        font.family:    sfRoundedMedium.name
+                                        font.family:    "SF Pro Text"
                                         font.pixelSize: 13
+                                        font.weight:    Font.Medium
                                         renderType:     Text.NativeRendering
                                     }
                                 }
@@ -1280,8 +1279,9 @@ Scope {
                                     anchors.fill:        parent
                                     anchors.leftMargin:  48
                                     anchors.rightMargin: 14
-                                    font.family:         sfRoundedMedium.name
+                                    font.family:         "SF Pro Text"
                                     font.pixelSize:      26
+                                    font.weight:         Font.Medium
                                     color:               root.textColor
                                     renderType:          Text.NativeRendering
                                     background:          Item {}
@@ -1380,8 +1380,8 @@ Scope {
                                     categoryOrder: win.selectedAction === "applications" ? root.appCategoryOrder : root.fileCategoryOrder
                                     sectioned:     win.selectedAction === "files"
                                     mode:          win.selectedAction === "applications" ? "apps" : "files"
-                                    fontFamily:       sfRounded.name
-                                    fontFamilyMedium: sfRoundedMedium.name
+                                    fontFamily:       "SF Pro Text"
+                                    fontFamilyMedium: "SF Pro Text"
                                     onItemClicked: function(data) { root.recordAppUsage(data); win.closeGracefully() }
                                 }
 
@@ -1391,8 +1391,8 @@ Scope {
                                     visible: !win.gridMode && !win.showingShellOutput
                                     searchText:       searchField.text
                                     answers:          win.answers
-                                    fontFamily:       sfRounded.name
-                                    fontFamilyMedium: sfRoundedMedium.name
+                                    fontFamily:       "SF Pro Text"
+                                    fontFamilyMedium: "SF Pro Text"
                                     currentIdx:       win.currentIdx
                                     showWhenEmpty:    win.selectedAction === "clipboard"
                                     sectioned:        win.selectedAction === "search"
@@ -1436,7 +1436,7 @@ Scope {
                                             Layout.fillWidth: true
                                             text: "$ " + win.shellOutputCmd
                                             color: "#ffffff"
-                                            font.family: sfRoundedMedium.name
+                                            font.family: "SF Pro Text"
                                             font.pixelSize: 13
                                             font.weight: Font.DemiBold
                                             elide: Text.ElideRight

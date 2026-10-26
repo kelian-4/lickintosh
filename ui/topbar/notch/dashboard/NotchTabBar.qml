@@ -51,7 +51,7 @@ Item {
                         color: tab.active ? "#FFFFFF" : "#8A8A8A"
                         font.pixelSize: 13
                         font.bold: tab.active
-                        font.family: "SF Pro Rounded"
+                        font.family: "SF Pro Text"
                     }
                 }
 

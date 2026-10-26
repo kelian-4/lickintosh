@@ -23,7 +23,7 @@ Item {
                 color: "#0a84ff"
                 font.pixelSize: 13
                 font.weight: Font.Bold
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 renderType: Text.NativeRendering
             }
 
@@ -42,7 +42,7 @@ Item {
             color: "#ffffff"
             font.pixelSize: root.size === "s" ? 18 : 15
             font.weight: Font.Medium
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
 
@@ -60,7 +60,7 @@ Item {
                     elide: Text.ElideRight
                     color: "#ffffff"
                     font.pixelSize: 13
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
                 }
 
@@ -69,7 +69,7 @@ Item {
                     text: BluetoothState.batteryPercent(modelData) + "%"
                     color: Qt.rgba(1, 1, 1, 0.6)
                     font.pixelSize: 12
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
                 }
             }

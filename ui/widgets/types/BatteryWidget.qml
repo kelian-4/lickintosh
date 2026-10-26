@@ -68,7 +68,7 @@ Item {
                 color: "#ffffff"
                 font.pixelSize: 11
                 font.weight: Font.Bold
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 renderType: Text.NativeRendering
             }
 
@@ -77,7 +77,7 @@ Item {
                 color: block.tint
                 font.pixelSize: 11
                 font.weight: Font.Bold
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 renderType: Text.NativeRendering
             }
         }
@@ -100,7 +100,7 @@ Item {
             text: block.detail
             color: Qt.rgba(1, 1, 1, 0.55)
             font.pixelSize: 10
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
     }
@@ -118,7 +118,7 @@ Item {
         text: title.updated
         color: Qt.rgba(1, 1, 1, 0.55)
         font.pixelSize: 11
-        font.family: "SF Pro Rounded"
+        font.family: "SF Pro Text"
         renderType: Text.NativeRendering
     }
 
@@ -155,7 +155,7 @@ Item {
                     color: root.level
                     font.pixelSize: 11
                     font.weight: Font.Bold
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
                 }
 
@@ -164,7 +164,7 @@ Item {
                     text: "State"
                     color: Qt.rgba(1, 1, 1, 0.55)
                     font.pixelSize: 10
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
                 }
             }
@@ -180,7 +180,7 @@ Item {
                     color: root.level
                     font.pixelSize: 11
                     font.weight: Font.Bold
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
                 }
 
@@ -189,7 +189,7 @@ Item {
                     text: root.charging ? "To full" : "Left"
                     color: Qt.rgba(1, 1, 1, 0.55)
                     font.pixelSize: 10
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
                 }
             }
@@ -299,7 +299,7 @@ Item {
             color: "#ffffff"
             font.pixelSize: 12
             font.weight: Font.Bold
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
 
@@ -324,7 +324,7 @@ Item {
                     elide: Text.ElideRight
                     color: "#ffffff"
                     font.pixelSize: 11
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
                 }
 
@@ -336,7 +336,7 @@ Item {
                     text: root.memory(row.modelData.mb)
                     color: Qt.rgba(1, 1, 1, 0.65)
                     font.pixelSize: 11
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
                 }
             }
@@ -349,7 +349,7 @@ Item {
             text: root.stateText + " · " + root.timeText
             color: Qt.rgba(1, 1, 1, 0.65)
             font.pixelSize: 11
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
     }
