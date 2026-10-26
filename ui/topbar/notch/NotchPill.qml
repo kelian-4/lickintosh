@@ -6,8 +6,7 @@ import qs.services
 /*
     Contenu compact : icône réelle du projet (assets/icons/...), pas
     un glyphe inventé — chemins relatifs depuis ui/topbar/notch/ (3
-    niveaux jusqu'à la racine), même convention que le FontLoader de
-    TopBar.qml ("../../../assets/...").
+    niveaux jusqu'à la racine).
 */
 Item {
     id: root
@@ -89,7 +88,7 @@ Item {
             text: root._label(root.kind)
             color: "#FFFFFF"
             font.pixelSize: 12
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             elide: Text.ElideRight
             renderType: Text.NativeRendering
         }

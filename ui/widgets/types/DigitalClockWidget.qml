@@ -23,7 +23,7 @@ Item {
             color: "#ffffff"
             font.pixelSize: root.size === "s" ? 46 : 72
             font.weight: Font.Light
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
 
@@ -32,7 +32,7 @@ Item {
             color: "#5e5ce6"
             font.pixelSize: root.size === "s" ? 13 : 16
             font.weight: Font.Medium
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
 

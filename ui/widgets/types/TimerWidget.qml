@@ -21,7 +21,7 @@ Item {
             color: "#ff9f0a"
             font.pixelSize: 13
             font.weight: Font.Bold
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
 
@@ -30,7 +30,7 @@ Item {
             color: TimerState.firing ? "#ff9f0a" : "#ffffff"
             font.pixelSize: root.size === "s" ? 34 : 44
             font.weight: Font.Light
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
 
