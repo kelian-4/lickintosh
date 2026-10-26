@@ -102,6 +102,11 @@ Item {
                 DesktopFiles.renaming = ""
             }
             Keys.onEscapePressed: DesktopFiles.renaming = ""
+            onActiveFocusChanged: {
+                if (renameInput.activeFocus || !root.editing) return
+                DesktopFiles.rename(root.filePath, renameInput.text)
+                DesktopFiles.renaming = ""
+            }
         }
     }
 
