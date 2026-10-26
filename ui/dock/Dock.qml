@@ -15,7 +15,7 @@ Scope {
     readonly property int  dockPadH:     14
     readonly property int  dockPadV:     10
     readonly property int  dockHeight:   baseIconSize + dockPadV * 2 + 12
-    readonly property int  dockRadius:   22
+    readonly property int  dockRadius:   0
     readonly property int  iconSpacing:  8
     readonly property real magScale1:    ShellConfig.options.dockAppearance.magnificationEnabled ? ShellConfig.options.dockAppearance.magnification : 1.0
     readonly property real magScale2:    ShellConfig.options.dockAppearance.magnificationEnabled ? (1.0 + (ShellConfig.options.dockAppearance.magnification - 1.0) * 0.5) : 1.0
@@ -617,6 +617,7 @@ Scope {
                     windowPosition: Qt.point(0, dockWin.screen.height - dockWin.height)
                     captureWindows: true
                     monitorName: dockWin.screen.name
+                    blurRadius: 1.0
                 }
 
                 MouseArea {
@@ -708,11 +709,11 @@ Scope {
                         LiquidGlass {
                             anchors.fill: parent
                             backdrop:     dockBackdrop
-                            powerFactor:  6.0
-                            noise:        0.03
-                            glowWeight:   0.3
-                            glowBias:     0.0
-                            glowEdge0:    0.06
+                            powerFactor:  64.0
+                            noise:        0.0
+                            glowWeight:   0.2
+                            glowBias:     0.03
+                            glowEdge0:    0.12
                             glowEdge1:    0.0
                         }
 
