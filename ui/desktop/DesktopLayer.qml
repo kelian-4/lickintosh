@@ -32,11 +32,12 @@ Scope {
             readonly property int iconH: 104
             readonly property int iconRows: Math.max(1, Math.floor(stage.height / stage.iconH))
             readonly property int iconCols: Math.max(1, Math.floor(stage.width / stage.iconW))
+            readonly property real gridX: stage.width - stage.iconCols * stage.iconW
             readonly property var iconCells: stage.computeCells(DesktopFiles.model.count, WidgetState.iconPositions, stage.iconRows, stage.iconCols)
 
             function cellOf(x, y) {
                 return {
-                    col: Math.max(0, Math.min(stage.iconCols - 1, Math.round(x / stage.iconW))),
+                    col: Math.max(0, Math.min(stage.iconCols - 1, Math.round((x - stage.gridX) / stage.iconW))),
                     row: Math.max(0, Math.min(stage.iconRows - 1, Math.round(y / stage.iconH)))
                 }
             }
@@ -141,7 +142,7 @@ Scope {
                     property real dragDX: 0
                     property real dragDY: 0
 
-                    x: (iconSlot.cell ? iconSlot.cell.col * stage.iconW : 0) + iconSlot.dragDX
+                    x: stage.gridX + (iconSlot.cell ? iconSlot.cell.col * stage.iconW : 0) + iconSlot.dragDX
                     y: (iconSlot.cell ? iconSlot.cell.row * stage.iconH : 0) + iconSlot.dragDY
                     z: iconSlot.dragging ? 100 : 0
                     width: stage.iconW
@@ -203,7 +204,7 @@ Scope {
                                 iconSlot.dragging = false
                                 iconSlot.dragDX = 0
                                 iconSlot.dragDY = 0
-                                WidgetState.setIconPosition(iconSlot.fileName, spot.col * stage.iconW, spot.row * stage.iconH)
+                                WidgetState.setIconPosition(iconSlot.fileName, stage.gridX + spot.col * stage.iconW, spot.row * stage.iconH)
                             }
                             onCentroidChanged: {
                                 if (!active) return
@@ -334,7 +335,7 @@ Scope {
                         var base = stage.cellOf(drop.x - stage.iconW / 2, drop.y - stage.iconH / 2)
                         var spot = stage.nearestFreeCell(names[i], base.col, base.row, taken)
                         taken.push(spot)
-                        WidgetState.setIconPosition(names[i], spot.col * stage.iconW, spot.row * stage.iconH)
+                        WidgetState.setIconPosition(names[i], stage.gridX + spot.col * stage.iconW, spot.row * stage.iconH)
                     }
                 }
             }
