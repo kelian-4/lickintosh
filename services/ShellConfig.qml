@@ -211,6 +211,10 @@ Singleton {
                     { "uid": "volumeWidget", "type": "volumeWidget" }
                 ]
             }
+
+            property JsonObject coucou: JsonObject {
+                property string command: "coucou"
+            }
         }
     }
 
