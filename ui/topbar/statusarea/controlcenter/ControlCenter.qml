@@ -651,7 +651,7 @@ Scope {
                             color: "#ffffff"
                             font.pixelSize: 12
                             font.weight: Font.Medium
-                            font.family: "SF Pro Text"
+                            font.family: "SF Pro Rounded"
                             renderType: Text.NativeRendering
                         }
 

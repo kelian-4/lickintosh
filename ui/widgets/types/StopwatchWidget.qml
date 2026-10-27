@@ -17,7 +17,7 @@ Item {
             color: "#ff9f0a"
             font.pixelSize: 13
             font.weight: Font.Bold
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering
         }
 
@@ -26,7 +26,7 @@ Item {
             color: "#ffffff"
             font.pixelSize: root.size === "s" ? 26 : 40
             font.weight: Font.Light
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering
         }
 

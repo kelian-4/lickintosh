@@ -35,7 +35,7 @@ Item {
                 color: "#FFFFFF"
                 font.pixelSize: 13
                 font.bold: true
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 elide: Text.ElideRight
             }
             Text {
@@ -43,7 +43,7 @@ Item {
                 text: root._entry ? root._entry.subtitle : ""
                 color: "#B0B0B0"
                 font.pixelSize: 12
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 wrapMode: Text.WordWrap
                 maximumLineCount: 2
                 elide: Text.ElideRight

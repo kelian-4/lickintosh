@@ -35,7 +35,7 @@ Item {
                 color: "#FFFFFF"
                 font.pixelSize: 14
                 font.bold: true
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 elide: Text.ElideRight
             }
             Text {
@@ -43,7 +43,7 @@ Item {
                 text: MprisState.trackArtist
                 color: "#B0B0B0"
                 font.pixelSize: 12
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 elide: Text.ElideRight
                 visible: text !== ""
             }

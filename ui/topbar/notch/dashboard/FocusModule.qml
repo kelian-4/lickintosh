@@ -31,7 +31,7 @@ Item {
             color: PomodoroState.phase === "work" ? "#8A8A8A" : "#34C759"
             font.pixelSize: 12
             font.bold: true
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
         }
 
         Text {
@@ -40,7 +40,7 @@ Item {
             color: "#FFFFFF"
             font.pixelSize: 30
             font.bold: true
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
         }
 
         RowLayout {

@@ -62,7 +62,7 @@ Scope {
                                 color: "#ffffff"
                                 font.pixelSize: 13
                                 font.weight: Font.Bold
-                                font.family: "SF Pro Text"
+                                font.family: "SF Pro Rounded"
                                 renderType: Text.NativeRendering
                             }
 
@@ -124,7 +124,7 @@ Scope {
                                                     text: "+"
                                                     color: "#ffffff"
                                                     font.pixelSize: 18
-                                                    font.family: "SF Pro Text"
+                                                    font.family: "SF Pro Rounded"
                                                     renderType: Text.NativeRendering
                                                 }
                                             }
@@ -151,7 +151,7 @@ Scope {
                                             text: tile.modelData.label
                                             color: Qt.rgba(1, 1, 1, 0.55)
                                             font.pixelSize: 11
-                                            font.family: "SF Pro Text"
+                                            font.family: "SF Pro Rounded"
                                             renderType: Text.NativeRendering
                                         }
                                     }

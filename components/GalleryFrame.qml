@@ -91,7 +91,7 @@ Rectangle {
                                     clip: true
                                     selectByMouse: true
                                     font.pixelSize: 13
-                                    font.family: "SF Pro Text"
+                                    font.family: "SF Pro Rounded"
                                     renderType: Text.NativeRendering
                                     onTextChanged: root.query = searchInput.text
                                     Keys.onEscapePressed: root.done()
@@ -162,7 +162,7 @@ Rectangle {
                                             color: "#ffffff"
                                             font.pixelSize: 13
                                             font.weight: Font.Medium
-                                            font.family: "SF Pro Text"
+                                            font.family: "SF Pro Rounded"
                                             renderType: Text.NativeRendering
                                         }
                                     }
@@ -208,7 +208,7 @@ Rectangle {
                         text: root.emptyText
                         color: Qt.rgba(1, 1, 1, 0.5)
                         font.pixelSize: 14
-                        font.family: "SF Pro Text"
+                        font.family: "SF Pro Rounded"
                         renderType: Text.NativeRendering
                     }
                 }
@@ -232,7 +232,7 @@ Rectangle {
                     elide: Text.ElideRight
                     color: Qt.rgba(1, 1, 1, 0.75)
                     font.pixelSize: 12
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                     renderType: Text.NativeRendering
                 }
 
@@ -248,7 +248,7 @@ Rectangle {
                         color: "#ffffff"
                         font.pixelSize: 13
                         font.weight: Font.Medium
-                        font.family: "SF Pro Text"
+                        font.family: "SF Pro Rounded"
                         renderType: Text.NativeRendering
                     }
 

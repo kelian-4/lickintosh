@@ -39,7 +39,7 @@ Item {
                     color: "#ff453a"
                     font.pixelSize: 12
                     font.weight: Font.Bold
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                     renderType: Text.NativeRendering
                 }
 
@@ -48,7 +48,7 @@ Item {
                     color: "#ffffff"
                     font.pixelSize: 56
                     font.weight: Font.Light
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                     renderType: Text.NativeRendering
                 }
 
@@ -56,7 +56,7 @@ Item {
                     text: Qt.locale().standaloneMonthName(root.today.getMonth(), Locale.LongFormat)
                     color: Qt.rgba(1, 1, 1, 0.6)
                     font.pixelSize: 12
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                     renderType: Text.NativeRendering
                 }
             }
@@ -73,7 +73,7 @@ Item {
                     text: "No Events"
                     color: Qt.rgba(1, 1, 1, 0.5)
                     font.pixelSize: 13
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                     renderType: Text.NativeRendering
                 }
 
@@ -102,7 +102,7 @@ Item {
                                 color: "#ffffff"
                                 font.pixelSize: 12
                                 font.weight: Font.Medium
-                                font.family: "SF Pro Text"
+                                font.family: "SF Pro Rounded"
                                 renderType: Text.NativeRendering
                             }
 
@@ -110,7 +110,7 @@ Item {
                                 text: modelData.time
                                 color: Qt.rgba(1, 1, 1, 0.55)
                                 font.pixelSize: 11
-                                font.family: "SF Pro Text"
+                                font.family: "SF Pro Rounded"
                                 renderType: Text.NativeRendering
                             }
                         }
@@ -130,7 +130,7 @@ Item {
             color: "#ff453a"
             font.pixelSize: 13
             font.weight: Font.Bold
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering
         }
 
@@ -152,7 +152,7 @@ Item {
                     color: Qt.rgba(1, 1, 1, 0.5)
                     font.pixelSize: 11
                     font.weight: Font.Bold
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                     renderType: Text.NativeRendering
                 }
             }
@@ -186,7 +186,7 @@ Item {
                         color: "#ffffff"
                         font.pixelSize: 12
                         font.weight: dayCell.isToday ? Font.Bold : Font.Normal
-                        font.family: "SF Pro Text"
+                        font.family: "SF Pro Rounded"
                         renderType: Text.NativeRendering
                     }
                 }

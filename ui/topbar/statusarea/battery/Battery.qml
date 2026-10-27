@@ -11,6 +11,10 @@ RowLayout {
 
     signal toggleBattery(int xPos)
 
+    FontLoader {
+        id: macFont
+        source: "../../../../assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf"
+    }
 
     readonly property bool onBattery:     UPower.onBattery
     readonly property real batPercentage: UPower.displayDevice.isLaptopBattery ? UPower.displayDevice.percentage : 1
@@ -54,7 +58,7 @@ RowLayout {
         id: _pctText
         text:           Math.round(root.batPercentage * 100) + "%"
         color:          "#FFFFFF"
-        font.family:    "SF Pro Text"
+        font.family:    macFont.name
         font.pixelSize: 13
         renderType:     Text.NativeRendering
         Layout.alignment: Qt.AlignVCenter

@@ -35,7 +35,7 @@ Item {
                 color: "#FFFFFF"
                 font.pixelSize: 24
                 font.bold: true
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
             }
 
             Repeater {
@@ -55,7 +55,7 @@ Item {
                         color: parent.isToday ? "#1C7AFF" : (parent.isWeekend ? "#EC4899" : "#8A8A8A")
                         font.pixelSize: 10
                         font.bold: parent.isToday
-                        font.family: "SF Pro Text"
+                        font.family: "SF Pro Rounded"
                     }
                     Text {
                         Layout.alignment: Qt.AlignHCenter
@@ -63,7 +63,7 @@ Item {
                         color: parent.isToday ? "#1C7AFF" : (parent.isWeekend ? "#EC4899" : "#FFFFFF")
                         font.pixelSize: parent.isToday ? 20 : 15
                         font.bold: parent.isToday
-                        font.family: "SF Pro Text"
+                        font.family: "SF Pro Rounded"
                     }
                 }
             }
@@ -81,7 +81,7 @@ Item {
                 text: "Rien de prévu aujourd'hui"
                 color: "#8A8A8A"
                 font.pixelSize: 12
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 elide: Text.ElideRight
             }
 
@@ -98,7 +98,7 @@ Item {
                         text: parent.modelData.time + "  " + parent.modelData.title
                         color: "#C0C0C0"
                         font.pixelSize: 11
-                        font.family: "SF Pro Text"
+                        font.family: "SF Pro Rounded"
                         elide: Text.ElideRight
                         verticalAlignment: Text.AlignVCenter
                     }

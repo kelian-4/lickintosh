@@ -47,7 +47,7 @@ Item {
             color: root.tint
             font.pixelSize: root.valueSize
             font.weight: Font.Bold
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering
         }
 
@@ -57,7 +57,7 @@ Item {
             text: root.caption
             color: Qt.rgba(1, 1, 1, 0.6)
             font.pixelSize: Math.max(9, root.valueSize * 0.5)
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering
         }
     }

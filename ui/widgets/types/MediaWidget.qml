@@ -55,7 +55,7 @@ Item {
                 color: "#ffffff"
                 font.pixelSize: 14
                 font.weight: Font.Medium
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 renderType: Text.NativeRendering
             }
 
@@ -66,7 +66,7 @@ Item {
                 elide: Text.ElideRight
                 color: Qt.rgba(1, 1, 1, 0.6)
                 font.pixelSize: 12
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 renderType: Text.NativeRendering
             }
 
