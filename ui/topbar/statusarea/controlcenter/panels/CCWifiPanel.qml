@@ -390,7 +390,7 @@ Item {
                 placeholderText:         "Mot de passe"
                 color:                   "#ffffff"
                 font.pixelSize:          13
-                font.family:             "SF Pro Text"
+                font.family:             "SF Pro Rounded"
                 renderType:              Text.NativeRendering
                 selectionColor:          "#50ffffff"
                 selectedTextColor:       "#ffffff"

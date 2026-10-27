@@ -22,7 +22,7 @@ Item {
             color: "#FFFFFF"
             font.pixelSize: 18
             font.bold: true
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
         }
         Text {
             Layout.alignment: Qt.AlignHCenter
@@ -42,7 +42,7 @@ Item {
                 Layout.preferredHeight: 30
                 radius: 15
                 color: "#2A2A2A"
-                Text { anchors.centerIn: parent; text: "Répéter (9 min)"; color: "#FFFFFF"; font.pixelSize: 11; font.family: "SF Pro Text" }
+                Text { anchors.centerIn: parent; text: "Répéter (9 min)"; color: "#FFFFFF"; font.pixelSize: 11; font.family: "SF Pro Rounded" }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: AlarmState.snoozeFiringAlarm(9) }
             }
             Rectangle {
@@ -50,7 +50,7 @@ Item {
                 Layout.preferredHeight: 30
                 radius: 15
                 color: "#1C7AFF"
-                Text { anchors.centerIn: parent; text: "Arrêter"; color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Text" }
+                Text { anchors.centerIn: parent; text: "Arrêter"; color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Rounded" }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: AlarmState.dismissFiringAlarm() }
             }
         }

@@ -32,7 +32,7 @@ Item {
             color: "#FFFFFF"
             font.pixelSize: 13
             font.bold: true
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
         }
 
         Loader {

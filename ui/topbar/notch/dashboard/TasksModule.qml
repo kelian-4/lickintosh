@@ -29,7 +29,7 @@ Item {
             color: "#8A8A8A"
             font.pixelSize: 12
             font.bold: true
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
         }
 
         Text {
@@ -38,7 +38,7 @@ Item {
             text: "Rien à faire"
             color: "#C0C0C0"
             font.pixelSize: 13
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
         }
 
         Repeater {
@@ -70,7 +70,7 @@ Item {
                     text: row.modelData.text
                     color: "#FFFFFF"
                     font.pixelSize: 12
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                     elide: Text.ElideRight
                 }
 

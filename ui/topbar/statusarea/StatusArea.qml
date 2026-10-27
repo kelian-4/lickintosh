@@ -27,6 +27,10 @@ RowLayout {
     property int notifUnreadCount: 0
     property real barWidth: 0
 
+    FontLoader {
+        id: macFont
+        source: "../../../assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf"
+    }
 
     Item {
         id: systemTrayItem
@@ -198,7 +202,7 @@ RowLayout {
                     text:           root.notifUnreadCount > 99 ? "99+" : root.notifUnreadCount.toString()
                     font.pixelSize: 10
                     font.weight:    Font.Bold
-                    font.family:    "SF Pro Text"
+                    font.family:    "SF Pro Rounded"
                     color:          "#fff"
                     renderType:     Text.NativeRendering
                 }

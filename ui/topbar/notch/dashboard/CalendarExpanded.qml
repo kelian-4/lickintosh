@@ -49,7 +49,7 @@ Item {
             text: nav.label
             color: "#FFFFFF"
             font.pixelSize: nav.pill ? 12 : 18
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
         }
         MouseArea {
             anchors.fill: parent
@@ -78,14 +78,14 @@ Item {
                 color: "#FFFFFF"
                 font.pixelSize: 28
                 font.bold: true
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 elide: Text.ElideRight
             }
             Text {
                 text: root.shown.getFullYear()
                 color: "#8A8A8A"
                 font.pixelSize: 15
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
             }
 
             RowLayout {
@@ -132,7 +132,7 @@ Item {
                             color: parent.index >= 5 ? "#EC4899" : "#8A8A8A"
                             font.pixelSize: 11
                             font.bold: true
-                            font.family: "SF Pro Text"
+                            font.family: "SF Pro Rounded"
                         }
                     }
                 }
@@ -174,7 +174,7 @@ Item {
                             color: cell.isToday ? "#FFFFFF" : (!cell.inMonth ? "#4A4A4A" : (cell.isWeekend ? "#EC4899" : "#FFFFFF"))
                             font.pixelSize: 12
                             font.bold: cell.isToday
-                            font.family: "SF Pro Text"
+                            font.family: "SF Pro Rounded"
                         }
                     }
                 }
@@ -198,7 +198,7 @@ Item {
                     color: "#8A8A8A"
                     font.pixelSize: 12
                     font.bold: true
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                 }
                 Item { Layout.fillWidth: true }
                 CtrlButton {
@@ -214,7 +214,7 @@ Item {
                 text: "Rien de prévu aujourd'hui"
                 color: "#C0C0C0"
                 font.pixelSize: 12
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 elide: Text.ElideRight
             }
 
@@ -231,7 +231,7 @@ Item {
                         text: parent.modelData.time + "  " + parent.modelData.title
                         color: "#FFFFFF"
                         font.pixelSize: 12
-                        font.family: "SF Pro Text"
+                        font.family: "SF Pro Rounded"
                         elide: Text.ElideRight
                         verticalAlignment: Text.AlignVCenter
                     }

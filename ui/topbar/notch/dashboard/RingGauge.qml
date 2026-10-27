@@ -46,6 +46,6 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 15
         font.bold: true
-        font.family: "SF Pro Text"
+        font.family: "SF Pro Rounded"
     }
 }

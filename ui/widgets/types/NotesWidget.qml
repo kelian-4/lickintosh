@@ -51,7 +51,7 @@ Item {
                 color: "#ffd60a"
                 font.pixelSize: 13
                 font.weight: Font.Bold
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 renderType: Text.NativeRendering
             }
 
@@ -66,7 +66,7 @@ Item {
                     text: root.adding ? "×" : "+"
                     color: "#ffd60a"
                     font.pixelSize: 16
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                     renderType: Text.NativeRendering
                 }
 
@@ -111,7 +111,7 @@ Item {
                     selectedTextColor: "#000000"
                     selectionColor: "#ffd60a"
                     font.pixelSize: 13
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                     renderType: Text.NativeRendering
                     onCursorRectangleChanged: {
                         if (editor.cursorRectangle.y < editorScroll.contentY)
@@ -146,7 +146,7 @@ Item {
             text: "No Notes"
             color: Qt.rgba(1, 1, 1, 0.5)
             font.pixelSize: 13
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering
         }
 
@@ -185,7 +185,7 @@ Item {
                             elide: Text.ElideRight
                             color: "#ffffff"
                             font.pixelSize: 13
-                            font.family: "SF Pro Text"
+                            font.family: "SF Pro Rounded"
                             renderType: Text.NativeRendering
                         }
 
@@ -196,7 +196,7 @@ Item {
                             text: "×"
                             color: removeArea.containsMouse ? "#ff453a" : Qt.rgba(1, 1, 1, 0.4)
                             font.pixelSize: 16
-                            font.family: "SF Pro Text"
+                            font.family: "SF Pro Rounded"
                             renderType: Text.NativeRendering
 
                             MouseArea {
