@@ -2,7 +2,6 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-dir="$root/assets/shaders/liquidglass"
 qsb_bin="${QSB:-qsb}"
 
 if ! command -v "$qsb_bin" >/dev/null 2>&1; then
@@ -10,14 +9,22 @@ if ! command -v "$qsb_bin" >/dev/null 2>&1; then
     exit 1
 fi
 
-for name in LiquidGlass LiquidGlassBlur; do
+build() {
+    local dir="$root/assets/shaders/$1"
+    local name="$2"
+    local glsl="$3"
+    local stage
     for stage in vert frag; do
         "$qsb_bin" --qt6 \
-            --glsl "100 es,120,150,300 es,320 es,440" \
+            --glsl "$glsl" \
             --hlsl 50 \
             --msl 12 \
             -o "$dir/$name.$stage.qsb" \
             "$dir/$name.$stage"
         echo "ok $name.$stage.qsb"
     done
-done
+}
+
+build liquidglass LiquidGlass "100 es,120,150,300 es,320 es,440"
+build liquidglass LiquidGlassBlur "100 es,120,150,300 es,320 es,440"
+build tahoeglass TahoeGlass "150,300 es,320 es,440"
