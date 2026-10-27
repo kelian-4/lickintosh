@@ -14,7 +14,39 @@ Singleton {
 
     property string dir: Quickshell.env("HOME") + "/Desktop"
     property alias model: folderModel
-    property string selected: ""
+    property var selection: []
+
+    function isSelected(path) {
+        return root.selection.indexOf(path) >= 0
+    }
+
+    function selectOnly(path) {
+        root.selection = [path]
+    }
+
+    function selectMany(paths) {
+        root.selection = paths
+    }
+
+    function toggleSelected(path) {
+        var index = root.selection.indexOf(path)
+        var next = root.selection.slice()
+        if (index >= 0) next.splice(index, 1)
+        else next.push(path)
+        root.selection = next
+    }
+
+    function clearSelection() {
+        root.selection = []
+    }
+
+    function targetsOf(target) {
+        return root.isSelected(target.path) ? root.selection.slice() : [target.path]
+    }
+
+    function nameOfPath(path) {
+        return path.slice(path.lastIndexOf("/") + 1)
+    }
     property string renaming: ""
     property var infoTarget: null
 
@@ -184,7 +216,7 @@ Singleton {
             onStreamFinished: {
                 var path = text.trim()
                 if (path === "") return
-                root.selected = path
+                root.selectOnly(path)
                 root.renaming = path
             }
         }
@@ -284,7 +316,15 @@ Singleton {
         ]
     }
 
-    function fileMenu() {
+    function fileMenu(count) {
+        if (count > 1) return [
+            { label: "Open", action: "open" },
+            { label: "Duplicate", action: "duplicate" },
+            { label: "Compress", action: "compress" },
+            { label: "Copy Paths", action: "copy-path" },
+            { separator: true },
+            { label: "Move " + count + " Items to Trash", action: "trash", danger: true }
+        ]
         return [
             { label: "Open", action: "open" },
             { label: "Show in File Manager", action: "reveal" },
@@ -308,13 +348,13 @@ Singleton {
         else if (action === "hidden") WidgetState.showHidden = !WidgetState.showHidden
         else if (action === "edit") WidgetState.openGallery("desktop")
         else if (action.indexOf("sort:") === 0) root.setSort(action.slice(5))
-        else if (action === "open") root.open(target.path, target.name)
         else if (action === "reveal") root.reveal(target.path)
         else if (action === "rename") root.renaming = target.path
-        else if (action === "duplicate") root.duplicate(target.path)
-        else if (action === "compress") root.compress(target.path)
         else if (action === "info") root.infoTarget = target
-        else if (action === "copy-path") root.copyPath(target.path)
-        else if (action === "trash") root.trash(target.path)
+        else if (action === "copy-path") root.copyPath(root.targetsOf(target).join("\n"))
+        else if (action === "open") root.targetsOf(target).forEach(function(path) { root.open(path, root.nameOfPath(path)) })
+        else if (action === "duplicate") root.targetsOf(target).forEach(function(path) { root.duplicate(path) })
+        else if (action === "compress") root.targetsOf(target).forEach(function(path) { root.compress(path) })
+        else if (action === "trash") root.targetsOf(target).forEach(function(path) { root.trash(path) })
     }
 }

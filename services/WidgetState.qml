@@ -274,6 +274,10 @@ Singleton {
         root.iconPositions = list
     }
 
+    function setIconPositions(entries) {
+        root.iconPositions = entries
+    }
+
     function renameIcon(oldName, newName) {
         var list = root.iconPositions.map(function(p) {
             return p.name === oldName ? { name: newName, col: p.col, row: p.row } : p
