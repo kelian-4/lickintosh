@@ -24,7 +24,7 @@ Item {
         Layout.maximumWidth: 150
         color: "#8A8A8A"
         font.pixelSize: 11
-        font.family: "SF Pro Text"
+        font.family: "SF Pro Rounded"
         elide: Text.ElideRight
         horizontalAlignment: Text.AlignHCenter
     }
@@ -102,7 +102,7 @@ Item {
                     color: "#4ADE80"
                     font.pixelSize: 14
                     font.bold: true
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                 }
                 Text {
                     Layout.alignment: Qt.AlignHCenter
@@ -110,7 +110,7 @@ Item {
                     color: "#FBBF24"
                     font.pixelSize: 14
                     font.bold: true
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                 }
                 Caption {
                     color: "#6A6A6A"

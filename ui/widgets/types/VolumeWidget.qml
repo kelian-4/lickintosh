@@ -35,7 +35,7 @@ Item {
                 color: "#0a84ff"
                 font.pixelSize: 13
                 font.weight: Font.Bold
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 renderType: Text.NativeRendering
             }
 
@@ -45,7 +45,7 @@ Item {
                 text: root.muted ? "Muted" : Math.round(root.level * 100) + "%"
                 color: "#ffffff"
                 font.pixelSize: 13
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 renderType: Text.NativeRendering
             }
         }
@@ -57,7 +57,7 @@ Item {
             elide: Text.ElideRight
             color: Qt.rgba(1, 1, 1, 0.55)
             font.pixelSize: 12
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering
         }
 

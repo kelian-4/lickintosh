@@ -19,7 +19,7 @@ Item {
                 text: "Caméra : " + MediaCaptureState.cameraApps.join(", ")
                 color: "#FFFFFF"
                 font.pixelSize: 12
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 wrapMode: Text.WordWrap
             }
         }
@@ -34,7 +34,7 @@ Item {
                 text: "Micro : " + MediaCaptureState.micApps.join(", ")
                 color: "#FFFFFF"
                 font.pixelSize: 12
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 wrapMode: Text.WordWrap
             }
         }

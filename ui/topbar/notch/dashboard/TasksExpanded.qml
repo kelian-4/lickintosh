@@ -49,7 +49,7 @@ Item {
             color: row.finished ? "#6A6A6A" : "#FFFFFF"
             font.pixelSize: 13
             font.strikeout: row.finished
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
             elide: Text.ElideRight
         }
 
@@ -91,13 +91,13 @@ Item {
                 color: "#FFFFFF"
                 font.pixelSize: 28
                 font.bold: true
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
             }
             Text {
                 text: root.pending.length === 0 ? "Tout est fait" : root.pending.length + " à faire"
                 color: "#8A8A8A"
                 font.pixelSize: 15
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
             }
             Text {
                 Layout.topMargin: 8
@@ -105,7 +105,7 @@ Item {
                 text: "Ajout : >+ dans Spotlight"
                 color: "#6A6A6A"
                 font.pixelSize: 11
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 elide: Text.ElideRight
             }
 
@@ -125,7 +125,7 @@ Item {
                 color: "#8A8A8A"
                 font.pixelSize: 12
                 font.bold: true
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
             }
 
             Text {
@@ -133,7 +133,7 @@ Item {
                 text: "Rien à faire"
                 color: "#C0C0C0"
                 font.pixelSize: 13
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
             }
 
             Repeater {
@@ -149,7 +149,7 @@ Item {
                 text: "+" + (root.pending.length - root.maxRows) + " autres"
                 color: "#6A6A6A"
                 font.pixelSize: 11
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
             }
 
             Item { Layout.fillHeight: true }
@@ -171,7 +171,7 @@ Item {
                     color: "#8A8A8A"
                     font.pixelSize: 12
                     font.bold: true
-                    font.family: "SF Pro Text"
+                    font.family: "SF Pro Rounded"
                 }
                 Item { Layout.fillWidth: true }
                 CtrlButton {
@@ -186,7 +186,7 @@ Item {
                 text: "Aucune tâche terminée"
                 color: "#6A6A6A"
                 font.pixelSize: 13
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
             }
 
             Repeater {
@@ -203,7 +203,7 @@ Item {
                 text: "+" + (root.finished.length - root.maxRows) + " autres"
                 color: "#6A6A6A"
                 font.pixelSize: 11
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
             }
 
             Item { Layout.fillHeight: true }

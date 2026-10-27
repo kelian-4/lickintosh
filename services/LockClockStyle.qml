@@ -8,7 +8,7 @@ import Quickshell
     l'horloge). Partagé entre LockSurface (rendu réel) et LockScreenPage
     (aperçu + tuiles de choix), pour que les deux restent identiques.
 
-    Les familles viennent des polices installées sur le système (fontconfig)
+    Les familles viennent des polices déjà livrées dans assets/fonts
     (SF Pro Display, SF Pro Rounded, SF Mono) ; "serif" est la famille
     générique résolue par fontconfig.
 

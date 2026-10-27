@@ -23,7 +23,7 @@ Item {
                 color: root.phaseColor
                 font.pixelSize: 13
                 font.weight: Font.Bold
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 renderType: Text.NativeRendering
             }
 
@@ -34,7 +34,7 @@ Item {
                 text: "Cycle " + ((PomodoroState.cyclesCompleted % PomodoroState.cyclesBeforeLongBreak) + 1) + " of " + PomodoroState.cyclesBeforeLongBreak
                 color: Qt.rgba(1, 1, 1, 0.55)
                 font.pixelSize: 12
-                font.family: "SF Pro Text"
+                font.family: "SF Pro Rounded"
                 renderType: Text.NativeRendering
             }
         }
@@ -44,7 +44,7 @@ Item {
             color: "#ffffff"
             font.pixelSize: root.size === "s" ? 34 : 44
             font.weight: Font.Light
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Rounded"
             renderType: Text.NativeRendering
         }
 
