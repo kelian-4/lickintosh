@@ -19,8 +19,12 @@ Item {
     property real glowEdge0: 0.5
     property real glowEdge1: -0.5
     property real cornerRadius: 0
+    property real supersample: 1.0
 
     property point screenPosition: Qt.point(0, 0)
+    property size screenExtent: Qt.size(0, 0)
+    readonly property real effectiveWidth: screenExtent.width > 0 ? screenExtent.width : width
+    readonly property real effectiveHeight: screenExtent.height > 0 ? screenExtent.height : height
 
     readonly property bool active: backdrop !== null && backdrop.ready && backdrop.captureSettled
     property real level: active ? 1 : 0
@@ -36,11 +40,16 @@ Item {
         if (!root.backdrop)
             return
         var p = root.mapToItem(null, 0, 0)
+        var q = root.mapToItem(null, root.width, root.height)
         var wp = root.backdrop.windowPosition
         var nx = wp.x + p.x
         var ny = wp.y + p.y
+        var ew = q.x - p.x
+        var eh = q.y - p.y
         if (nx !== root.screenPosition.x || ny !== root.screenPosition.y)
             root.screenPosition = Qt.point(nx, ny)
+        if (ew !== root.screenExtent.width || eh !== root.screenExtent.height)
+            root.screenExtent = Qt.size(ew, eh)
     }
 
     function syncRegistration() {
@@ -96,12 +105,12 @@ Item {
     Item {
         id: glassLayer
         anchors.fill: parent
-        layer.enabled: root.cornerRadius > 0
+        layer.enabled: root.cornerRadius > 0 || root.supersample > 1
         layer.smooth: true
-        layer.effect: MultiEffect {
-            maskEnabled: true
-            maskSource: glassMask
-        }
+        layer.textureSize: root.supersample > 1
+            ? Qt.size(Math.max(1, Math.ceil(root.width * root.supersample)), Math.max(1, Math.ceil(root.height * root.supersample)))
+            : Qt.size(0, 0)
+        layer.effect: root.cornerRadius > 0 ? maskEffect : null
 
         ShaderEffect {
             anchors.fill: parent
@@ -111,12 +120,12 @@ Item {
 
             property variant u_Slots5: root.backdrop ? root.backdrop.blurSource : null
             property vector2d v_MidPoint: Qt.vector2d(
-                2.0 * (root.screenPosition.x + root.width / 2) / root.screenSize.width - 1.0,
-                1.0 - 2.0 * (root.screenPosition.y + root.height / 2) / root.screenSize.height
+                2.0 * (root.screenPosition.x + root.effectiveWidth / 2) / root.screenSize.width - 1.0,
+                1.0 - 2.0 * (root.screenPosition.y + root.effectiveHeight / 2) / root.screenSize.height
             )
             property vector2d v_QuadNDC2ScreenNDCScale: Qt.vector2d(
-                root.width / root.screenSize.width,
-                root.height / root.screenSize.height
+                root.effectiveWidth / root.screenSize.width,
+                root.effectiveHeight / root.screenSize.height
             )
             property real u_powerFactor: root.powerFactor
             property real u_a: root.a
@@ -132,6 +141,15 @@ Item {
 
             vertexShader: Qt.resolvedUrl(root.shaderDir + "LiquidGlass.vert.qsb")
             fragmentShader: Qt.resolvedUrl(root.shaderDir + "LiquidGlass.frag.qsb")
+        }
+    }
+
+    Component {
+        id: maskEffect
+
+        MultiEffect {
+            maskEnabled: true
+            maskSource: glassMask
         }
     }
 
