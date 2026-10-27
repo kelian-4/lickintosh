@@ -1503,7 +1503,7 @@ Scope {
                                                 width: parent.width
                                                 text: win.shellOutput
                                                 color: "#ffffff"
-                                                font.family: "monospace"
+                                                font.family: "SF Mono"
                                                 font.pixelSize: 12
                                                 wrapMode: Text.Wrap
                                                 textFormat: Text.PlainText

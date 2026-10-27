@@ -543,7 +543,7 @@ Scope {
                                     text: win.pendingItem ? (win.pendingItem.cmd || "") : ""
                                     color: "#FFDD88"
                                     font.pixelSize: 12
-                                    font.family: "monospace"
+                                    font.family: "SF Mono"
                                     renderType: Text.NativeRendering
                                     wrapMode: Text.Wrap
                                 }
@@ -558,7 +558,7 @@ Scope {
                                     text: win.pendingItem ? win.pendingItem.path : ""
                                     color: "#FFDD88"
                                     font.pixelSize: 12
-                                    font.family: "monospace"
+                                    font.family: "SF Mono"
                                     renderType: Text.NativeRendering
                                 }
                                 Rectangle {
@@ -578,7 +578,7 @@ Scope {
                                             text: win.pendingItem ? win.pendingItem.newContent : ""
                                             color: "#88DD88"
                                             font.pixelSize: 11
-                                            font.family: "monospace"
+                                            font.family: "SF Mono"
                                             renderType: Text.NativeRendering
                                             wrapMode: Text.Wrap
                                         }
@@ -595,7 +595,7 @@ Scope {
                                     text: win.pendingItem ? win.pendingItem.path : ""
                                     color: "#FFDD88"
                                     font.pixelSize: 12
-                                    font.family: "monospace"
+                                    font.family: "SF Mono"
                                     renderType: Text.NativeRendering
                                 }
                                 Repeater {
@@ -615,7 +615,7 @@ Scope {
                                                 text: "- " + modelData.oldText
                                                 color: "#FF8888"
                                                 font.pixelSize: 11
-                                                font.family: "monospace"
+                                                font.family: "SF Mono"
                                                 renderType: Text.NativeRendering
                                                 wrapMode: Text.Wrap
                                             }
@@ -624,7 +624,7 @@ Scope {
                                                 text: "+ " + modelData.newText
                                                 color: "#88DD88"
                                                 font.pixelSize: 11
-                                                font.family: "monospace"
+                                                font.family: "SF Mono"
                                                 renderType: Text.NativeRendering
                                                 wrapMode: Text.Wrap
                                             }

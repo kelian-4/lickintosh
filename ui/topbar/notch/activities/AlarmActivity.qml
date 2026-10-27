@@ -29,7 +29,7 @@ Item {
             text: root._firing ? (String(root._firing.hour).padStart(2, "0") + ":" + String(root._firing.minute).padStart(2, "0")) : ""
             color: "#B0B0B0"
             font.pixelSize: 22
-            font.family: "SF Pro Mono"
+            font.family: "SF Mono"
         }
 
         RowLayout {
