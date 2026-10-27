@@ -26,15 +26,19 @@ Scope {
             anchors.topMargin: WidgetState.desktopOffsetY
             anchors.leftMargin: WidgetState.desktopOffsetX
             anchors.rightMargin: 16
-            anchors.bottomMargin: 16
+            anchors.bottomMargin: 0
 
             readonly property real iconW: 96
-            readonly property real iconH: 104
+            readonly property real iconH: 100
             readonly property real iconPad: 8
             readonly property int iconCols: Math.max(1, Math.floor((stage.width - stage.iconPad * 2) / stage.iconW))
             readonly property int iconRows: Math.max(1, Math.floor((stage.height - stage.iconPad * 2) / stage.iconH))
 
             property var iconCells: ({})
+            property var iconPaths: ({})
+            property bool groupDragging: false
+            property real groupDX: 0
+            property real groupDY: 0
 
             function fileNames() {
                 var names = []
@@ -44,6 +48,9 @@ Scope {
 
             function relayout() {
                 var names = stage.fileNames()
+                var paths = {}
+                for (var n = 0; n < DesktopFiles.model.count; n++) paths[DesktopFiles.model.get(n, "fileName")] = DesktopFiles.model.get(n, "filePath")
+                stage.iconPaths = paths
                 var saved = WidgetState.iconPositions
                 var taken = {}
                 var result = {}
@@ -81,17 +88,64 @@ Scope {
                 return stage.iconPad + row * stage.iconH
             }
 
-            function dropIcon(name, centerX, centerY) {
-                var targetCol = Math.min(stage.iconCols - 1, Math.max(0, Math.round((stage.width - stage.iconPad - centerX) / stage.iconW - 0.5)))
-                var targetRow = Math.min(stage.iconRows - 1, Math.max(0, Math.round((centerY - stage.iconPad - stage.iconH / 2) / stage.iconH)))
-                var spot = stage.nearestFreeCell(name, targetCol, targetRow, [])
-                WidgetState.setIconPosition(name, spot.col, spot.row)
+            function cellFromCenter(centerX, centerY) {
+                return {
+                    col: Math.min(stage.iconCols - 1, Math.max(0, Math.round((stage.width - stage.iconPad - centerX) / stage.iconW - 0.5))),
+                    row: Math.min(stage.iconRows - 1, Math.max(0, Math.round((centerY - stage.iconPad - stage.iconH / 2) / stage.iconH)))
+                }
             }
 
-            function nearestFreeCell(name, col, row, extra) {
+            function commitCells(overrides) {
+                var list = []
+                for (var name in stage.iconCells) {
+                    var cell = overrides[name] || stage.iconCells[name]
+                    list.push({ name: name, col: cell.col, row: cell.row })
+                }
+                for (var extra in overrides) {
+                    if (stage.iconCells[extra] === undefined) list.push({ name: extra, col: overrides[extra].col, row: overrides[extra].row })
+                }
+                WidgetState.setIconPositions(list)
+            }
+
+            function selectedNames() {
+                var names = []
+                for (var name in stage.iconPaths) {
+                    if (DesktopFiles.isSelected(stage.iconPaths[name])) names.push(name)
+                }
+                return names
+            }
+
+            function dropIcon(name, centerX, centerY) {
+                var group = stage.selectedNames()
+                if (group.indexOf(name) < 0) group = [name]
+                var origin = stage.iconCells[name]
+                var target = stage.cellFromCenter(centerX, centerY)
+                var skip = {}
+                group.forEach(function(member) { skip[member] = true })
+                var placed = []
+                var overrides = {}
+                var first = stage.nearestFreeCell(skip, target.col, target.row, placed)
+                placed.push(first)
+                overrides[name] = first
+                group.forEach(function(member) {
+                    if (member === name) return
+                    var from = stage.iconCells[member]
+                    var col = Math.min(stage.iconCols - 1, Math.max(0, from.col + target.col - origin.col))
+                    var row = Math.min(stage.iconRows - 1, Math.max(0, from.row + target.row - origin.row))
+                    var spot = stage.nearestFreeCell(skip, col, row, placed)
+                    placed.push(spot)
+                    overrides[member] = spot
+                })
+                stage.commitCells(overrides)
+                stage.groupDragging = false
+                stage.groupDX = 0
+                stage.groupDY = 0
+            }
+
+            function nearestFreeCell(skip, col, row, extra) {
                 var occupied = {}
                 for (var other in stage.iconCells) {
-                    if (other === name) continue
+                    if (skip[other]) continue
                     occupied[stage.iconCells[other].col + "," + stage.iconCells[other].row] = true
                 }
                 for (var k = 0; k < extra.length; k++) occupied[extra[k].col + "," + extra[k].row] = true
@@ -138,17 +192,58 @@ Scope {
             }
 
             MouseArea {
+                id: backdrop
+
+                property real startX: 0
+                property real startY: 0
+                property var baseSelection: []
+                property bool banding: false
+
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                function updateBand(mouse) {
+                    var x1 = Math.min(backdrop.startX, mouse.x)
+                    var y1 = Math.min(backdrop.startY, mouse.y)
+                    var x2 = Math.max(backdrop.startX, mouse.x)
+                    var y2 = Math.max(backdrop.startY, mouse.y)
+                    band.x = x1
+                    band.y = y1
+                    band.width = x2 - x1
+                    band.height = y2 - y1
+                    var picked = backdrop.baseSelection.slice()
+                    for (var name in stage.iconCells) {
+                        var cell = stage.iconCells[name]
+                        var left = stage.cellX(cell.col) + 6
+                        var top = stage.cellY(cell.row) + 4
+                        var hit = left < x2 && left + stage.iconW - 12 > x1 && top < y2 && top + stage.iconH - 8 > y1
+                        var path = stage.iconPaths[name]
+                        if (hit && picked.indexOf(path) < 0) picked.push(path)
+                    }
+                    DesktopFiles.selectMany(picked)
+                }
+
                 onPressed: function(mouse) {
                     stage.forceActiveFocus()
-                    DesktopFiles.selected = ""
                     DesktopFiles.renaming = ""
                     if (mouse.button === Qt.RightButton) {
+                        DesktopFiles.clearSelection()
                         menu.target = { kind: "desktop" }
                         menu.openAt(mouse.x + stage.x, mouse.y + stage.y, DesktopFiles.desktopMenu())
+                        return
                     }
+                    backdrop.startX = mouse.x
+                    backdrop.startY = mouse.y
+                    backdrop.baseSelection = (mouse.modifiers & Qt.ControlModifier) ? DesktopFiles.selection.slice() : []
+                    if (!(mouse.modifiers & Qt.ControlModifier)) DesktopFiles.clearSelection()
                 }
+                onPositionChanged: function(mouse) {
+                    if (!pressed || pressedButtons !== Qt.LeftButton) return
+                    if (!backdrop.banding && Math.abs(mouse.x - backdrop.startX) + Math.abs(mouse.y - backdrop.startY) < 6) return
+                    backdrop.banding = true
+                    backdrop.updateBand(mouse)
+                }
+                onReleased: backdrop.banding = false
             }
 
             Repeater {
@@ -164,10 +259,18 @@ Scope {
                     cellY: stage.cellY(stage.iconCells[icon.fileName] ? stage.iconCells[icon.fileName].row : 0)
                     cellWidth: stage.iconW
                     cellHeight: stage.iconH
+                    instant: stage.groupDragging
+                    followX: icon.selected && !icon.dragActive && stage.groupDragging ? stage.groupDX : 0
+                    followY: icon.selected && !icon.dragActive && stage.groupDragging ? stage.groupDY : 0
 
+                    onDragMoved: function(dx, dy) {
+                        stage.groupDragging = true
+                        stage.groupDX = dx
+                        stage.groupDY = dy
+                    }
                     onDropped: function(centerX, centerY) { stage.dropIcon(icon.fileName, centerX, centerY) }
                     onContextRequested: function(x, y) {
-                        DesktopFiles.selected = icon.filePath
+                        if (!icon.selected) DesktopFiles.selectOnly(icon.filePath)
                         menu.target = {
                             kind: "icon",
                             path: icon.filePath,
@@ -177,7 +280,7 @@ Scope {
                             modified: icon.fileModified
                         }
                         var p = stage.mapToItem(menu, x, y)
-                        menu.openAt(p.x, p.y, DesktopFiles.fileMenu())
+                        menu.openAt(p.x, p.y, DesktopFiles.fileMenu(DesktopFiles.selection.length))
                     }
                 }
             }
@@ -257,6 +360,16 @@ Scope {
             }
 
             Rectangle {
+                id: band
+                visible: backdrop.banding
+                color: "#30ffffff"
+                border.width: 1
+                border.color: "#80ffffff"
+                radius: 3
+                z: 50
+            }
+
+            Rectangle {
                 id: dropGuide
                 property var shape: null
                 property real gx: 0
@@ -297,13 +410,17 @@ Scope {
                     drop.accept(Qt.CopyAction)
                     var names = DesktopFiles.linkNames(drop.urls)
                     var taken = []
+                    var overrides = {}
                     for (var i = 0; i < names.length; i++) {
                         var baseCol = Math.min(stage.iconCols - 1, Math.max(0, Math.round((stage.width - stage.iconPad - drop.x) / stage.iconW - 0.5)))
                         var baseRow = Math.min(stage.iconRows - 1, Math.max(0, Math.round((drop.y - stage.iconPad - stage.iconH / 2) / stage.iconH)))
-                        var spot = stage.nearestFreeCell(names[i], baseCol, baseRow, taken)
+                        var skipNew = {}
+                        skipNew[names[i]] = true
+                        var spot = stage.nearestFreeCell(skipNew, baseCol, baseRow, taken)
                         taken.push(spot)
-                        WidgetState.setIconPosition(names[i], spot.col, spot.row)
+                        overrides[names[i]] = spot
                     }
+                    stage.commitCells(overrides)
                 }
             }
 
