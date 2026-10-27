@@ -41,12 +41,12 @@ Item {
 
     Behavior on x {
         enabled: !area.drag.active && !root.instant
-        NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
     }
 
     Behavior on y {
         enabled: !area.drag.active && !root.instant
-        NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
     }
 
     function resetPosition() {
