@@ -14,9 +14,12 @@ ColumnLayout {
     Loader {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        sourceComponent: tabBar.currentIndex === 1 ? performanceComp : dashboardComp
+        sourceComponent: tabBar.currentIndex === 1 ? performanceComp
+                       : tabBar.currentIndex === 2 ? agentsComp
+                       : dashboardComp
     }
 
     Component { id: dashboardComp;   DashboardPage {} }
     Component { id: performanceComp; PerformancePage {} }
+    Component { id: agentsComp;      AgentsPage {} }
 }
