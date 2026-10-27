@@ -14,7 +14,7 @@ Item {
             text: TimerState.firing ? "Temps écoulé" : TimerState.formatRemaining(TimerState.remainingMs)
             color: "#FFFFFF"
             font.pixelSize: TimerState.firing ? 16 : 28
-            font.family: "SF Pro Mono"
+            font.family: "SF Mono"
         }
 
         RowLayout {

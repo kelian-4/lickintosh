@@ -68,7 +68,7 @@ Item {
                     color: "#FFFFFF"
                     font.pixelSize: 13
                     font.bold: true
-                    font.family: "monospace"
+                    font.family: "SF Mono"
                     renderType: Text.NativeRendering
                 }
                 Text {
@@ -76,7 +76,7 @@ Item {
                     visible: (delegateRoot.modelData.sub || "") !== ""
                     color: "#FFFFFF"
                     font.pixelSize: 12
-                    font.family: "monospace"
+                    font.family: "SF Mono"
                     renderType: Text.NativeRendering
                 }
                 Item { Layout.fillWidth: true }
