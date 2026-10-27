@@ -115,26 +115,55 @@ Scope {
                 return names
             }
 
+            function nearestAvoiding(blocked, col, row) {
+                var best = null
+                for (var c = 0; c < stage.iconCols; c++) {
+                    for (var r = 0; r < stage.iconRows; r++) {
+                        if (blocked[c + "," + r]) continue
+                        var dist = (c - col) * (c - col) + (r - row) * (r - row)
+                        if (best === null || dist < best.dist) best = { col: c, row: r, dist: dist }
+                    }
+                }
+                return best || { col: col, row: row }
+            }
+
             function dropIcon(name, centerX, centerY) {
                 var group = stage.selectedNames()
                 if (group.indexOf(name) < 0) group = [name]
+                var inGroup = {}
+                group.forEach(function(member) { inGroup[member] = true })
                 var origin = stage.iconCells[name]
                 var target = stage.cellFromCenter(centerX, centerY)
-                var skip = {}
-                group.forEach(function(member) { skip[member] = true })
-                var placed = []
+                var occupant = {}
+                for (var other in stage.iconCells) {
+                    if (inGroup[other]) continue
+                    occupant[stage.iconCells[other].col + "," + stage.iconCells[other].row] = other
+                }
+                var claimed = {}
                 var overrides = {}
-                var first = stage.nearestFreeCell(skip, target.col, target.row, placed)
-                placed.push(first)
-                overrides[name] = first
-                group.forEach(function(member) {
-                    if (member === name) return
+                var displaced = []
+                var ordered = [name].concat(group.filter(function(member) { return member !== name }))
+                ordered.forEach(function(member) {
                     var from = stage.iconCells[member]
-                    var col = Math.min(stage.iconCols - 1, Math.max(0, from.col + target.col - origin.col))
-                    var row = Math.min(stage.iconRows - 1, Math.max(0, from.row + target.row - origin.row))
-                    var spot = stage.nearestFreeCell(skip, col, row, placed)
-                    placed.push(spot)
-                    overrides[member] = spot
+                    var col = member === name ? target.col : Math.min(stage.iconCols - 1, Math.max(0, from.col + target.col - origin.col))
+                    var row = member === name ? target.row : Math.min(stage.iconRows - 1, Math.max(0, from.row + target.row - origin.row))
+                    var spot = claimed[col + "," + row] ? stage.nearestAvoiding(claimed, col, row) : { col: col, row: row }
+                    var key = spot.col + "," + spot.row
+                    claimed[key] = true
+                    overrides[member] = { col: spot.col, row: spot.row }
+                    if (occupant[key] !== undefined) {
+                        displaced.push({ name: occupant[key], prefer: from })
+                        delete occupant[key]
+                    }
+                })
+                var blocked = {}
+                for (var key in claimed) blocked[key] = true
+                for (var k in occupant) blocked[k] = true
+                displaced.forEach(function(entry) {
+                    var home = stage.iconCells[entry.name]
+                    var spot = !blocked[entry.prefer.col + "," + entry.prefer.row] ? { col: entry.prefer.col, row: entry.prefer.row } : stage.nearestAvoiding(blocked, home.col, home.row)
+                    blocked[spot.col + "," + spot.row] = true
+                    overrides[entry.name] = spot
                 })
                 stage.commitCells(overrides)
                 stage.groupDragging = false
