@@ -12,32 +12,46 @@ Item {
     required property real cellWidth
     required property real cellHeight
 
+    property real followX: 0
+    property real followY: 0
+    property bool instant: false
+    readonly property bool dragActive: area.drag.active
+
+    signal dragMoved(real dx, real dy)
     signal dropped(real centerX, real centerY)
     signal contextRequested(real x, real y)
 
-    readonly property bool selected: DesktopFiles.selected === root.filePath
+    readonly property bool selected: DesktopFiles.selection.indexOf(root.filePath) >= 0
     readonly property bool editing: DesktopFiles.renaming === root.filePath
     readonly property bool thumbnail: !root.fileIsDir && DesktopFiles.isImage(root.fileName)
 
-    x: root.cellX
-    y: root.cellY
+    x: root.cellX + root.followX
+    y: root.cellY + root.followY
     width: root.cellWidth
     height: root.cellHeight
     z: area.drag.active ? 100 : 0
 
+    onXChanged: {
+        if (area.drag.active) root.dragMoved(root.x - root.cellX, root.y - root.cellY)
+    }
+
+    onYChanged: {
+        if (area.drag.active) root.dragMoved(root.x - root.cellX, root.y - root.cellY)
+    }
+
     Behavior on x {
-        enabled: !area.drag.active
+        enabled: !area.drag.active && !root.instant
         NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
     }
 
     Behavior on y {
-        enabled: !area.drag.active
+        enabled: !area.drag.active && !root.instant
         NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
     }
 
     function resetPosition() {
-        root.x = Qt.binding(function() { return root.cellX })
-        root.y = Qt.binding(function() { return root.cellY })
+        root.x = Qt.binding(function() { return root.cellX + root.followX })
+        root.y = Qt.binding(function() { return root.cellY + root.followY })
     }
 
     function startEditing() {
@@ -139,6 +153,7 @@ Item {
         id: area
 
         property bool moved: false
+        property bool ctrlPressed: false
 
         anchors.fill: parent
         enabled: !root.editing
@@ -146,12 +161,24 @@ Item {
         drag.target: pressedButtons === Qt.LeftButton ? root : null
         drag.threshold: 6
 
-        onPressed: DesktopFiles.selected = root.filePath
+        onPressed: function(mouse) {
+            if (mouse.button === Qt.LeftButton && (mouse.modifiers & Qt.ControlModifier)) {
+                DesktopFiles.toggleSelected(root.filePath)
+                ctrlPressed = true
+            } else if (!root.selected) {
+                DesktopFiles.selectOnly(root.filePath)
+            }
+        }
         onPositionChanged: {
             if (drag.active) moved = true
         }
-        onReleased: {
-            if (!moved) return
+        onReleased: function(mouse) {
+            if (!moved) {
+                if (mouse.button === Qt.LeftButton && !ctrlPressed && DesktopFiles.selection.length > 1) DesktopFiles.selectOnly(root.filePath)
+                ctrlPressed = false
+                return
+            }
+            ctrlPressed = false
             moved = false
             root.dropped(root.x + root.width / 2, root.y + root.height / 2)
             root.resetPosition()
