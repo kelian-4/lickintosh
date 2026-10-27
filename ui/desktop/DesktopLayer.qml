@@ -37,6 +37,7 @@ Scope {
             property var iconCells: ({})
             property var iconPaths: ({})
             property bool groupDragging: false
+            property var preview: ({})
             property real groupDX: 0
             property real groupDY: 0
 
@@ -127,7 +128,7 @@ Scope {
                 return best || { col: col, row: row }
             }
 
-            function dropIcon(name, centerX, centerY) {
+            function computeDrop(name, centerX, centerY) {
                 var group = stage.selectedNames()
                 if (group.indexOf(name) < 0) group = [name]
                 var inGroup = {}
@@ -165,7 +166,13 @@ Scope {
                     blocked[spot.col + "," + spot.row] = true
                     overrides[entry.name] = spot
                 })
+                return overrides
+            }
+
+            function dropIcon(name, centerX, centerY) {
+                var overrides = stage.computeDrop(name, centerX, centerY)
                 stage.commitCells(overrides)
+                stage.preview = ({})
                 stage.groupDragging = false
                 stage.groupDX = 0
                 stage.groupDY = 0
@@ -284,11 +291,13 @@ Scope {
                     required property var fileSize
                     required property var fileModified
 
-                    cellX: stage.cellX(stage.iconCells[icon.fileName] ? stage.iconCells[icon.fileName].col : 0)
-                    cellY: stage.cellY(stage.iconCells[icon.fileName] ? stage.iconCells[icon.fileName].row : 0)
+                    readonly property var shownCell: (!icon.selected && stage.preview[icon.fileName]) ? stage.preview[icon.fileName] : (stage.iconCells[icon.fileName] || ({ col: 0, row: 0 }))
+
+                    cellX: stage.cellX(icon.shownCell.col)
+                    cellY: stage.cellY(icon.shownCell.row)
                     cellWidth: stage.iconW
                     cellHeight: stage.iconH
-                    instant: stage.groupDragging
+                    instant: icon.selected && stage.groupDragging
                     followX: icon.selected && !icon.dragActive && stage.groupDragging ? stage.groupDX : 0
                     followY: icon.selected && !icon.dragActive && stage.groupDragging ? stage.groupDY : 0
 
@@ -296,6 +305,7 @@ Scope {
                         stage.groupDragging = true
                         stage.groupDX = dx
                         stage.groupDY = dy
+                        stage.preview = stage.computeDrop(icon.fileName, icon.cellX + dx + icon.width / 2, icon.cellY + dy + icon.height / 2)
                     }
                     onDropped: function(centerX, centerY) { stage.dropIcon(icon.fileName, centerX, centerY) }
                     onContextRequested: function(x, y) {
