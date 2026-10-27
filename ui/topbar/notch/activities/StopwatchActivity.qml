@@ -14,7 +14,7 @@ Item {
             text: StopwatchState.formatElapsed(StopwatchState.elapsedMs)
             color: "#FFFFFF"
             font.pixelSize: 28
-            font.family: "SF Pro Mono"
+            font.family: "SF Mono"
         }
 
         RowLayout {
