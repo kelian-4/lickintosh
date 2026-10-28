@@ -76,6 +76,8 @@ Scope {
                         value:    menuContainer.width
                     }
                 }
+
+                GlassBackdrop {}
             }
         }
     }

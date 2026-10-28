@@ -1499,6 +1499,8 @@ Scope {
                     SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:2;action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
                     SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:3;iconSize:36;action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
                 }
+
+                GlassBackdrop {}
             }
         }
     }
