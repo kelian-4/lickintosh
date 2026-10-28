@@ -7,9 +7,18 @@ ColumnLayout {
     id: root
     spacing: 8
 
-    NotchTabBar {
-        id: tabBar
+    RowLayout {
         Layout.fillWidth: true
+        spacing: 8
+
+        NotchTabBar {
+            id: tabBar
+            Layout.fillWidth: true
+        }
+
+        AmbientBadges {
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+        }
     }
 
     PageLoader {
