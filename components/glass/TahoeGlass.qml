@@ -18,6 +18,10 @@ Item {
     property real centerOpacity: 0.98
 
     property point screenPosition: Qt.point(0, 0)
+    property size screenExtent: Qt.size(0, 0)
+    readonly property real effectiveWidth: screenExtent.width > 0 ? screenExtent.width : width
+    readonly property real effectiveHeight: screenExtent.height > 0 ? screenExtent.height : height
+    readonly property real extentScale: width > 0 ? effectiveWidth / width : 1
 
     readonly property bool active: backdrop !== null && backdrop.ready && backdrop.captureSettled
     property real level: active ? 1 : 0
@@ -29,16 +33,22 @@ Item {
     readonly property string shaderDir: Quickshell.shellDir + "/assets/shaders/tahoeglass/"
     readonly property size screenSize: backdrop ? backdrop.screenSize : Qt.size(1, 1)
     readonly property real clampedRadius: Math.max(0, Math.min(cornerRadius, Math.min(width, height) / 2))
+    readonly property real screenRadius: clampedRadius * extentScale
 
     function updatePosition() {
         if (!root.backdrop)
             return
         var p = root.mapToItem(null, 0, 0)
+        var q = root.mapToItem(null, root.width, root.height)
         var wp = root.backdrop.windowPosition
         var nx = wp.x + p.x
         var ny = wp.y + p.y
+        var ew = q.x - p.x
+        var eh = q.y - p.y
         if (nx !== root.screenPosition.x || ny !== root.screenPosition.y)
             root.screenPosition = Qt.point(nx, ny)
+        if (ew !== root.screenExtent.width || eh !== root.screenExtent.height)
+            root.screenExtent = Qt.size(ew, eh)
     }
 
     function syncRegistration() {
@@ -104,8 +114,8 @@ Item {
             (1.0 - root.saturation) * 0.0722, (1.0 - root.saturation) * 0.0722, (1.0 - root.saturation) * 0.0722 + root.saturation, 0.0,
             0.0, 0.0, 0.0, 1.0
         )
-        property vector4d cornerRadius: Qt.vector4d(root.clampedRadius, root.clampedRadius, root.clampedRadius, root.clampedRadius)
-        property vector2d blurSize: Qt.vector2d(root.width, root.height)
+        property vector4d cornerRadius: Qt.vector4d(root.screenRadius, root.screenRadius, root.screenRadius, root.screenRadius)
+        property vector2d blurSize: Qt.vector2d(root.effectiveWidth, root.effectiveHeight)
         property vector2d backgroundSize: Qt.vector2d(root.screenSize.width, root.screenSize.height)
         property vector2d screenOrigin: Qt.vector2d(root.screenPosition.x, root.screenPosition.y)
         property vector2d halfpixel: Qt.vector2d(0.5 / root.screenSize.width, 0.5 / root.screenSize.height)
