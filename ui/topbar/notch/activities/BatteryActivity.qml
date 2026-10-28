@@ -57,7 +57,7 @@ Item {
             text: (NotchState.batteryCharging ? "Charge en cours · " : "") + NotchState.batteryPercent + "%"
             color: "#FFFFFF"
             font.pixelSize: 13
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
         }
     }
 }

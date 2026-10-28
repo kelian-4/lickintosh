@@ -537,7 +537,7 @@ Scope {
                         color: "#ffffff"
                         font.pixelSize: 16
                         font.weight: Font.Bold
-                        font.family: "SF Pro Rounded"
+                        font.family: "SF Pro Text"
                         renderType: Text.NativeRendering
                     }
 
@@ -559,7 +559,7 @@ Scope {
                                 text: modelData.key
                                 color: Qt.rgba(1, 1, 1, 0.55)
                                 font.pixelSize: 12
-                                font.family: "SF Pro Rounded"
+                                font.family: "SF Pro Text"
                                 renderType: Text.NativeRendering
                             }
 
@@ -569,7 +569,7 @@ Scope {
                                 elide: Text.ElideMiddle
                                 color: "#ffffff"
                                 font.pixelSize: 12
-                                font.family: "SF Pro Rounded"
+                                font.family: "SF Pro Text"
                                 renderType: Text.NativeRendering
                             }
                         }

@@ -93,7 +93,7 @@ Item {
                         text: "✓"
                         color: "#ffffff"
                         font.pixelSize: 12
-                        font.family: "SF Pro Rounded"
+                        font.family: "SF Pro Text"
                         renderType: Text.NativeRendering
                     }
 
@@ -108,7 +108,7 @@ Item {
                         elide: Text.ElideRight
                         color: row.isDisabled ? Qt.rgba(1, 1, 1, 0.35) : (row.modelData.danger === true && !area.containsMouse ? "#ff6961" : "#ffffff")
                         font.pixelSize: 13
-                        font.family: "SF Pro Rounded"
+                        font.family: "SF Pro Text"
                         renderType: Text.NativeRendering
                     }
 
@@ -120,7 +120,7 @@ Item {
                         text: "›"
                         color: "#ffffff"
                         font.pixelSize: 16
-                        font.family: "SF Pro Rounded"
+                        font.family: "SF Pro Text"
                         renderType: Text.NativeRendering
                     }
 

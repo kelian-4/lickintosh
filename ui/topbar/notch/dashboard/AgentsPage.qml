@@ -37,7 +37,7 @@ Item {
                 text: button.label
                 color: "#FFFFFF"
                 font.pixelSize: 13
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
             }
         }
 
@@ -65,7 +65,7 @@ Item {
                 color: "#FFFFFF"
                 font.pixelSize: 16
                 font.bold: true
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
             }
 
             Text {
@@ -73,7 +73,7 @@ Item {
                 text: "Suit les sessions de tes agents de code et te laisse valider leurs demandes depuis l'île de Coucou."
                 color: "#8A8A8A"
                 font.pixelSize: 12
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 wrapMode: Text.WordWrap
             }
 
@@ -83,7 +83,7 @@ Item {
                 text: CoucouState.command !== "" ? CoucouState.command : "Aucun binaire configuré"
                 color: "#5A5A5A"
                 font.pixelSize: 10
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 elide: Text.ElideMiddle
             }
         }
