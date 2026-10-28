@@ -17,6 +17,8 @@ Singleton {
     property int fadeDuration: 300
     property int splitDuration: 400
     property int splitStagger: 0
+    property int pageDuration: 240
+    property real pageSlide: 14
     property real speed: 1.0
 
     function spatial(factor) {
@@ -29,6 +31,10 @@ Singleton {
 
     function exit(factor) {
         return Math.round(root.exitDuration * root.speed * (factor === undefined ? 1 : factor))
+    }
+
+    function page(factor) {
+        return Math.round(root.pageDuration * root.speed * (factor === undefined ? 1 : factor))
     }
 
     function split(factor) {

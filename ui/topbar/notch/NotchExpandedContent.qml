@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.components
 import qs.services
 import qs.ui.topbar.notch.activities
 
@@ -35,18 +36,11 @@ Item {
             font.family: "SF Pro Text"
         }
 
-        Loader {
+        PageLoader {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: {
-                switch (root.kind) {
-                    case "timer":        return timerComp
-                    case "alarm":        return alarmComp
-                    case "notification": return notificationComp
-                    case "bluetooth":    return bluetoothComp
-                    default:             return dashboardComp
-                }
-            }
+            index: root.pageIndex(root.kind)
+            pages: [dashboardComp, timerComp, alarmComp, notificationComp, bluetoothComp]
         }
     }
 
@@ -55,6 +49,16 @@ Item {
     Component { id: notificationComp; NotificationActivity {} }
     Component { id: bluetoothComp;    BluetoothActivity {} }
     Component { id: dashboardComp;    NotchDashboard {} }
+
+    function pageIndex(k) {
+        switch (k) {
+            case "timer":        return 1
+            case "alarm":        return 2
+            case "notification": return 3
+            case "bluetooth":    return 4
+            default:             return 0
+        }
+    }
 
     function title(k) {
         switch (k) {
