@@ -485,10 +485,11 @@ Scope {
 
                 LiquidGlassBackdrop {
                     id: ccBackdrop
-                    wallpaperPath: ShellConfig.options.wallpaper.path
+                    wallpaperPath: GlassWallpaper.path
                     screenSize: Qt.size(ccWindow.screen.width, ccWindow.screen.height)
                     windowPosition: Qt.point(0, 0)
-                    captureWindows: true
+                    captureWindows: ShellConfig.options.glass.captureWindows
+                    windowOpacity: ShellConfig.options.glass.windowOpacity
                     monitorName: ccWindow.screen.name
                     blurRadius: 1.0
                 }

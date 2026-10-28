@@ -192,6 +192,8 @@ Scope {
                 implicitWidth:  324
                 implicitHeight: 108
 
+                GlassBackdrop { id: glassBackdrop }
+
                 Item {
                     id: pill
                     width:  300
@@ -221,6 +223,7 @@ Scope {
 
                     BoxGlass {
                         anchors.fill: parent
+                        backdrop:     glassBackdrop
                         radius:       27
                         color:        "#30000000"
                         light:        "#55ffffff"

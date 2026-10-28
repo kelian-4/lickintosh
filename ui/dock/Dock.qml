@@ -612,10 +612,11 @@ Scope {
 
                 LiquidGlassBackdrop {
                     id: dockBackdrop
-                    wallpaperPath: ShellConfig.options.wallpaper.path
+                    wallpaperPath: GlassWallpaper.path
                     screenSize: Qt.size(dockWin.screen.width, dockWin.screen.height)
                     windowPosition: Qt.point(0, dockWin.screen.height - dockWin.height)
-                    captureWindows: true
+                    captureWindows: ShellConfig.options.glass.captureWindows
+                    windowOpacity: ShellConfig.options.glass.windowOpacity
                     monitorName: dockWin.screen.name
                     blurRadius: 1.0
                 }
