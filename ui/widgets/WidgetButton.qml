@@ -21,7 +21,7 @@ Rectangle {
         color: root.textColor
         font.pixelSize: 12
         font.weight: Font.Medium
-        font.family: "SF Pro Rounded"
+        font.family: "SF Pro Text"
         renderType: Text.NativeRendering
     }
 

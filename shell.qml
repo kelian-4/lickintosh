@@ -25,8 +25,6 @@ import qs.ui.widgets
 
 ShellRoot {
     id: appRoot
-    FontLoader { source: "assets/fonts/SFPD" }
-    FontLoader { source: "assets/fonts/SFPR" }
     property bool ccOpened:          false
     property bool appleMenuOpened:   false
     property bool aboutOpened:       false
