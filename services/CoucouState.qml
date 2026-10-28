@@ -11,7 +11,12 @@ Singleton {
 
     reloadableId: "coucouState"
 
-    readonly property string command: ShellConfig.options.coucou.command.trim()
+    readonly property string _home: Quickshell.env("HOME") || ""
+    readonly property string _configured: ShellConfig.options.coucou.binary.trim()
+
+    readonly property string command: root._configured !== "" ? root._configured
+                                    : root._home !== ""       ? root._home + "/coucou/result/bin/coucou"
+                                                              : "coucou"
 
     function launch() {
         root._run([])
