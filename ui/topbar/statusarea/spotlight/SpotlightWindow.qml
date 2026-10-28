@@ -610,6 +610,12 @@ Scope {
     // ShellConfig.
     property string previewWallpaper: ""
 
+    Binding {
+        target: GlassWallpaper
+        property: "preview"
+        value: root.previewWallpaper
+    }
+
     readonly property string currentWallpaper: root.previewWallpaper !== ""
         ? root.previewWallpaper
         : ShellConfig.options.wallpaper.path

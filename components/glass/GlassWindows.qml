@@ -8,6 +8,7 @@ Item {
     property string monitorName: ""
     property rect region: Qt.rect(0, 0, 0, 0)
     property real attachMargin: GlassTracker.captureMargin
+    property real windowOpacity: 1.0
 
     readonly property var monitorObject: {
         var ms = Hyprland.monitors.values
@@ -142,7 +143,7 @@ Item {
             captureSource: shown && !restarting ? modelData.wayland : null
             live: true
             visible: shown
-            opacity: hasContent ? 1 : 0
+            opacity: hasContent ? root.windowOpacity : 0
             x: ipc && ipc.at ? ipc.at[0] - root.monitorX : 0
             y: ipc && ipc.at ? ipc.at[1] - root.monitorY : 0
             width: ipc && ipc.size ? ipc.size[0] : 0

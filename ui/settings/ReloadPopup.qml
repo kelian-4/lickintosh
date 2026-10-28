@@ -54,12 +54,22 @@ Scope {
                 onTriggered: popupLoader.active = false
             }
 
+            GlassBackdrop { id: glassBackdrop }
+
             BoxGlass {
                 anchors.fill: parent
                 radius: 14
+                backdrop: glassBackdrop
                 color: root.failed ? "#30ff4444" : "#18000000"
                 light: "#20ffffff"
                 rimStrength: 1.0
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 14
+                    color: "#30ff4444"
+                    visible: root.failed
+                }
 
                 RowLayout {
                     id: _content
