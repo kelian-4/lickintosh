@@ -9,8 +9,7 @@ Item {
 
     readonly property var tabs: [
         { label: "Dashboard",   icon: "grid.svg" },
-        { label: "Performance", icon: "bar-chart2.svg" },
-        { label: "Agents",      icon: "terminal.svg" }
+        { label: "Performance", icon: "bar-chart2.svg" }
     ]
 
     Layout.fillWidth: true
