@@ -213,7 +213,7 @@ Singleton {
             }
 
             property JsonObject coucou: JsonObject {
-                property string command: "coucou"
+                property string binary: ""
             }
         }
     }
