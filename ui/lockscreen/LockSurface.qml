@@ -17,6 +17,17 @@ WlSessionLockSurface {
     required property LockContext context
 
     readonly property bool unlocking: unlockAnim.running
+
+    LiquidGlassBackdrop {
+        id: lockBackdrop
+        wallpaperPath: root.context.wallpaperSource.toString().replace(/^file:\/\//, "")
+        screenSize: Qt.size(root.width, root.height)
+        windowPosition: Qt.point(0, 0)
+        blurRadius: 1.0
+
+        Component.onCompleted: GlassRegistry.register(root, lockBackdrop)
+        Component.onDestruction: GlassRegistry.unregister(lockBackdrop)
+    }
     readonly property bool reduceMotion: ShellConfig.options.appearance.reduceMotion
 
     color: "transparent"

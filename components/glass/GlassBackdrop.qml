@@ -20,6 +20,16 @@ LiquidGlassBackdrop {
         return Qt.point(x, y)
     }
 
+    onWinChanged: {
+        if (win)
+            GlassRegistry.register(win, root)
+    }
+    Component.onCompleted: {
+        if (win)
+            GlassRegistry.register(win, root)
+    }
+    Component.onDestruction: GlassRegistry.unregister(root)
+
     wallpaperPath: GlassWallpaper.path
     screenSize: scr ? Qt.size(scr.width, scr.height) : Qt.size(1, 1)
     monitorName: scr ? scr.name : ""

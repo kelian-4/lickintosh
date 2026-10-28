@@ -275,6 +275,8 @@ Scope {
                     running: true
                     stdout: StdioCollector { onStreamFinished: _procRAM.result = text.trim() }
                 }
+
+                GlassBackdrop {}
             }
         }
     }

@@ -483,16 +483,7 @@ Scope {
                     left:   true
                 }
 
-                LiquidGlassBackdrop {
-                    id: ccBackdrop
-                    wallpaperPath: GlassWallpaper.path
-                    screenSize: Qt.size(ccWindow.screen.width, ccWindow.screen.height)
-                    windowPosition: Qt.point(0, 0)
-                    captureWindows: ShellConfig.options.glass.captureWindows
-                    windowOpacity: ShellConfig.options.glass.windowOpacity
-                    monitorName: ccWindow.screen.name
-                    blurRadius: 1.0
-                }
+                GlassBackdrop { id: ccBackdrop }
 
                 MouseArea {
                     anchors.fill: parent
@@ -720,6 +711,7 @@ Scope {
                                 }
 
                                 BoxGlass {
+                                    backdrop: null
                                     anchors.fill: parent
                                     radius: 12
                                     color: root.glassColor
@@ -848,6 +840,7 @@ Scope {
                                 }
 
                                 BoxGlass {
+                                    backdrop: null
                                     anchors.fill: parent
                                     radius: 12
                                     color: root.glassColor
