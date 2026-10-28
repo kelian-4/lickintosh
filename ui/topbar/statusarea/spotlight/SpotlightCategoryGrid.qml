@@ -59,6 +59,7 @@ Item {
             text: pill.label
             color: "#ffffff"
             font.family: root.fontFamilyMedium
+            font.weight: Font.Medium
             font.pixelSize: 12
             renderType: Text.NativeRendering
         }

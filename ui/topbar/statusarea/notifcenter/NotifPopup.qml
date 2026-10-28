@@ -183,7 +183,7 @@ Scope {
                                             text:            wrap.myNotif.summary
                                             font.pixelSize:  14
                                             font.weight:     Font.Bold
-                                            font.family:     "SF Pro Rounded"
+                                            font.family:     "SF Pro Text"
                                             color:           "#ffffff"
                                             elide:           Text.ElideRight
                                             renderType:      Text.NativeRendering
@@ -194,7 +194,7 @@ Scope {
                                             visible:          wrap.myNotif.body !== ""
                                             text:             wrap.myNotif.body
                                             font.pixelSize:   12
-                                            font.family:      "SF Pro Rounded"
+                                            font.family:      "SF Pro Text"
                                             color:            Qt.rgba(1, 1, 1, 0.72)
                                             wrapMode:         Text.Wrap
                                             maximumLineCount: 2

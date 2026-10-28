@@ -38,7 +38,7 @@ RowLayout {
                 Text {
                     text:           _item._hasBatt ? Math.round(_item._pct) + "%" : ""
                     font.pixelSize: 11
-                    font.family:    "SF Pro Rounded"
+                    font.family:    "SF Pro Text"
                     font.weight:    Font.Medium
                     color:          _item._battColor()
                     renderType:     Text.NativeRendering
