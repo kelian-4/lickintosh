@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.components
 import qs.ui.topbar.notch.dashboard
 
 ColumnLayout {
@@ -11,10 +12,11 @@ ColumnLayout {
         Layout.fillWidth: true
     }
 
-    Loader {
+    PageLoader {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        sourceComponent: tabBar.currentIndex === 1 ? performanceComp : dashboardComp
+        index: tabBar.currentIndex
+        pages: [dashboardComp, performanceComp]
     }
 
     Component { id: dashboardComp;   DashboardPage {} }

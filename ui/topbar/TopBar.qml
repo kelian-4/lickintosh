@@ -157,6 +157,7 @@ Rectangle {
             shouldBeActive: !root.notchExpanded
             fadeDuration: ShellMotion.effects()
             fadeCurve: ShellMotion.effectsCurve
+            enterDelay: ShellMotion.spatial(0.4)
             sourceComponent: NotchPill { peek: root.notchPeek }
         }
 
@@ -169,6 +170,7 @@ Rectangle {
             shouldBeActive: root.notchExpanded
             fadeDuration: ShellMotion.effects()
             fadeCurve: ShellMotion.effectsCurve
+            enterDelay: ShellMotion.spatial(0.3)
             sourceComponent: NotchExpandedContent {}
         }
 
@@ -187,6 +189,7 @@ Rectangle {
         id: fl
         property bool shouldBeActive: false
         property int fadeDuration: 200
+        property int enterDelay: 0
         property var fadeCurve: [0.34, 0.8, 0.34, 1, 1, 1]
 
         active: false
@@ -203,6 +206,7 @@ Rectangle {
                 from: ""; to: "active"
                 SequentialAnimation {
                     PropertyAction { property: "active" }
+                    NumberAnimation { property: "opacity"; from: 0; to: 0; duration: fl.enterDelay }
                     NumberAnimation { property: "opacity"; duration: fl.fadeDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: fl.fadeCurve }
                 }
             },
