@@ -202,9 +202,9 @@ Scope {
 
     readonly property int _visibleGridHeight: (box*(_lastVisibleRow+1)) + (boxMargin*(_lastVisibleRow+1)) + boxMargin
 
-    readonly property color glassColor: "#20000000"
+    readonly property color glassColor: "transparent"
     readonly property color textColor:  "#ffffff"
-    readonly property color glassRimColor: "#80ffffff"
+    readonly property color glassRimColor: "transparent"
     readonly property real  glassRimStrength: 1.0
 
 
@@ -483,6 +483,16 @@ Scope {
                     left:   true
                 }
 
+                LiquidGlassBackdrop {
+                    id: ccBackdrop
+                    wallpaperPath: ShellConfig.options.wallpaper.path
+                    screenSize: Qt.size(ccWindow.screen.width, ccWindow.screen.height)
+                    windowPosition: Qt.point(0, 0)
+                    captureWindows: true
+                    monitorName: ccWindow.screen.name
+                    blurRadius: 1.0
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -550,6 +560,7 @@ Scope {
                     component BoxButton: BoxGlass {
                         id: boxbutton
                         radius: 40
+                        backdrop: ccBackdrop
                         property bool enabled: false
                         property bool hideCause: false
                         property bool scaleCause: false
