@@ -36,6 +36,14 @@ Singleton {
         root.notes = list
     }
 
+    function createNote() {
+        var id = "note_" + Date.now()
+        var list = root.notes.slice()
+        list.unshift({ id: id, text: "", createdAt: Date.now() })
+        root.notes = list
+        return id
+    }
+
     function removeNote(id) {
         root.notes = root.notes.filter(function(n) { return n.id !== id })
     }
