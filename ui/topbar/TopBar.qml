@@ -115,7 +115,7 @@ Rectangle {
     readonly property bool notchExpanded:  NotchState.expanded
     readonly property bool notchDashboard: root.notchExpanded && !NotchState.hasUrgentActivity
 
-    readonly property real notchTargetWidth: root.notchDashboard ? 912
+    readonly property real notchTargetWidth: root.notchDashboard ? Math.min(1160, root.width - 2 * root.themeMargin)
                                             : root.notchExpanded   ? 440
                                             : root.notchPeek       ? Math.min(260, root.notchZoneRight - root.notchZoneLeft - 24)
                                             : NotchState.primaryKind === "media" ? 156
@@ -125,7 +125,7 @@ Rectangle {
                                              : root.notchPeek       ? 40
                                                                      : 26
 
-    property real expandedWidth: 912
+    property real expandedWidth: 1160
     property real expandedHeight: 200
 
     Binding { target: root; property: "expandedWidth";  value: root.notchTargetWidth;  when: root.notchExpanded }
