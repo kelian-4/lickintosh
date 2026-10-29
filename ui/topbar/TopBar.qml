@@ -120,13 +120,13 @@ Rectangle {
                                             : root.notchPeek       ? Math.min(260, root.notchZoneRight - root.notchZoneLeft - 24)
                                             : NotchState.primaryKind === "media" ? 156
                                                                     : 130
-    readonly property real notchTargetHeight: root.notchDashboard ? 200
+    readonly property real notchTargetHeight: root.notchDashboard ? 270
                                              : root.notchExpanded   ? 300
                                              : root.notchPeek       ? 40
                                                                      : 26
 
     property real expandedWidth: 1200
-    property real expandedHeight: 200
+    property real expandedHeight: 270
 
     Binding { target: root; property: "expandedWidth";  value: root.notchTargetWidth;  when: root.notchExpanded }
     Binding { target: root; property: "expandedHeight"; value: root.notchTargetHeight; when: root.notchExpanded }
