@@ -617,6 +617,7 @@ Scope {
                     windowPosition: Qt.point(0, dockWin.screen.height - dockWin.height)
                     captureWindows: ShellConfig.options.glass.captureWindows
                     windowOpacity: ShellConfig.options.glass.windowOpacity
+                    windowOpacityByClass: ShellConfig.options.glass.windowOpacityByClass
                     monitorName: dockWin.screen.name
                     blurRadius: 1.0
                 }

@@ -9,6 +9,18 @@ Item {
     property rect region: Qt.rect(0, 0, 0, 0)
     property real attachMargin: GlassTracker.captureMargin
     property real windowOpacity: 1.0
+    property var opacityByClass: ({})
+
+    function opacityFor(windowClass) {
+        var wanted = String(windowClass || "").toLowerCase()
+        if (wanted !== "" && root.opacityByClass) {
+            for (var key in root.opacityByClass) {
+                if (String(key).toLowerCase() === wanted)
+                    return Number(root.opacityByClass[key])
+            }
+        }
+        return root.windowOpacity
+    }
 
     readonly property var monitorObject: {
         var ms = Hyprland.monitors.values
@@ -117,7 +129,8 @@ Item {
                 && (ipc.at[1] - root.monitorY + ipc.size[1]) > root.region.y
             readonly property real rank: ipc && ipc.focusHistoryID !== undefined ? ipc.focusHistoryID : 0
 
-            readonly property bool pending: inRegion && !hasContent
+            readonly property real captureOpacity: root.opacityFor(ipc ? ipc["class"] : "")
+            readonly property bool pending: inRegion && captureOpacity > 0 && !hasContent
             onPendingChanged: root.recount()
 
             property bool restarting: false
@@ -140,10 +153,10 @@ Item {
                 onTriggered: view.restart()
             }
 
-            captureSource: shown && !restarting ? modelData.wayland : null
+            captureSource: shown && !restarting && captureOpacity > 0 ? modelData.wayland : null
             live: true
             visible: shown
-            opacity: hasContent ? root.windowOpacity : 0
+            opacity: hasContent ? captureOpacity : 0
             x: ipc && ipc.at ? ipc.at[0] - root.monitorX : 0
             y: ipc && ipc.at ? ipc.at[1] - root.monitorY : 0
             width: ipc && ipc.size ? ipc.size[0] : 0

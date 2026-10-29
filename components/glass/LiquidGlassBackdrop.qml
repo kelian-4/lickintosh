@@ -10,6 +10,7 @@ Item {
 
     property bool captureWindows: false
     property real windowOpacity: 1.0
+    property var windowOpacityByClass: ({})
     property string monitorName: ""
     property rect captureRegion: glassRegion
     property rect glassRegion: Qt.rect(0, 0, 0, 0)
@@ -106,6 +107,7 @@ Item {
                 monitorName: root.monitorName
                 region: root.captureRegion
                 windowOpacity: root.windowOpacity
+                opacityByClass: root.windowOpacityByClass
             }
         }
     }
