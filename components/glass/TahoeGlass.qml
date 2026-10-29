@@ -26,7 +26,12 @@ Item {
     readonly property bool active: backdrop !== null && backdrop.ready && backdrop.captureSettled
     property real level: active ? 1 : 0
 
-    Behavior on level { NumberAnimation { duration: 120; easing.type: Easing.InOutSine } }
+    Behavior on level {
+        NumberAnimation {
+            duration: root.backdrop && root.backdrop.instantReveal ? 0 : 120
+            easing.type: Easing.InOutSine
+        }
+    }
 
     property Item registeredBackdrop: null
 
