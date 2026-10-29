@@ -60,6 +60,27 @@ Item {
 
             ColumnLayout {
                 anchors.centerIn: parent
+                width: parent.width - 8
+                spacing: 6
+                Caption { text: "Activité CPU" }
+                CpuSparkline {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 56
+                    values: ResourcesState.cpuHistory
+                }
+                Caption { color: "#B0B0B0"; text: Math.round(ResourcesState.cpuPercent) + "% · 40 dernières mesures" }
+            }
+        }
+
+        Divider {}
+
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredWidth: 1
+            Layout.fillHeight: true
+
+            ColumnLayout {
+                anchors.centerIn: parent
                 spacing: 5
                 RingGauge { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.memoryPercent; ringColor: "#EC4899" }
                 Caption { text: "Mémoire" }
@@ -136,6 +157,51 @@ Item {
                 }
                 Caption { text: "Batterie" }
                 Caption { color: "#B0B0B0"; text: NotchState.batteryCharging ? "En charge" : "Sur batterie" }
+            }
+        }
+
+        Divider {}
+
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredWidth: 1
+            Layout.fillHeight: true
+
+            Component.onCompleted: ResourcesState.topMemoryWatchers++
+            Component.onDestruction: ResourcesState.topMemoryWatchers--
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                width: parent.width - 8
+                spacing: 4
+
+                Caption { text: "Processus (mémoire)" }
+
+                Repeater {
+                    model: ResourcesState.topMemory.slice(0, 4)
+
+                    delegate: RowLayout {
+                        id: proc
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: 6
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: proc.modelData.name
+                            color: "#E6E6E6"
+                            font.pixelSize: 11
+                            font.family: "SF Pro Text"
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            text: proc.modelData.mb >= 1024 ? (proc.modelData.mb / 1024).toFixed(1) + " Gio" : Math.round(proc.modelData.mb) + " Mio"
+                            color: "#8A8A8A"
+                            font.pixelSize: 11
+                            font.family: "SF Mono"
+                        }
+                    }
+                }
             }
         }
     }
