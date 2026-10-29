@@ -20,6 +20,18 @@ LiquidGlassBackdrop {
         return Qt.point(x, y)
     }
 
+    property bool gateEnabled: true
+    property int gateTimeout: 400
+    property bool revealed: !gateEnabled
+    readonly property bool glassReady: ready && captureSettled
+
+    instantReveal: gateEnabled
+
+    onGlassReadyChanged: {
+        if (glassReady)
+            revealed = true
+    }
+
     onWinChanged: {
         if (win)
             GlassRegistry.register(win, root)
@@ -27,6 +39,21 @@ LiquidGlassBackdrop {
     Component.onCompleted: {
         if (win)
             GlassRegistry.register(win, root)
+        if (glassReady)
+            revealed = true
+    }
+
+    Timer {
+        interval: root.gateTimeout
+        running: root.gateEnabled && !root.revealed
+        onTriggered: root.revealed = true
+    }
+
+    Binding {
+        target: root.win ? root.win.contentItem : null
+        property: "opacity"
+        value: root.revealed ? 1 : 0
+        when: root.gateEnabled && root.win !== null && root.win !== undefined
     }
     Component.onDestruction: GlassRegistry.unregister(root)
 

@@ -17,6 +17,7 @@ Item {
     property var quads: []
     property bool ready: true
     property bool warm: false
+    property bool instantReveal: false
 
     property real blurRadius: 2.0
     property real blurDownscale: 0.5
