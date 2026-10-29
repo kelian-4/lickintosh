@@ -1,3 +1,4 @@
+import Quickshell
 import QtQuick
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -130,6 +131,7 @@ Item {
             readonly property real rank: ipc && ipc.focusHistoryID !== undefined ? ipc.focusHistoryID : 0
 
             readonly property real captureOpacity: root.opacityFor(ipc ? ipc["class"] : "")
+            readonly property bool translucent: captureOpacity > 0 && captureOpacity < 1
             readonly property bool pending: inRegion && captureOpacity > 0 && !hasContent
             onPendingChanged: root.recount()
 
@@ -156,7 +158,16 @@ Item {
             captureSource: shown && !restarting && captureOpacity > 0 ? modelData.wayland : null
             live: true
             visible: shown
-            opacity: hasContent ? captureOpacity : 0
+            opacity: hasContent ? (translucent ? 1 : Math.min(1, captureOpacity)) : 0
+            layer.enabled: translucent
+            layer.effect: ShaderEffect {
+                property real bgAlpha: view.captureOpacity
+                property real lumaLow: 0.12
+                property real lumaHigh: 0.45
+
+                vertexShader: Qt.resolvedUrl(Quickshell.shellDir + "/assets/shaders/liquidglass/WindowAlpha.vert.qsb")
+                fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/assets/shaders/liquidglass/WindowAlpha.frag.qsb")
+            }
             x: ipc && ipc.at ? ipc.at[0] - root.monitorX : 0
             y: ipc && ipc.at ? ipc.at[1] - root.monitorY : 0
             width: ipc && ipc.size ? ipc.size[0] : 0
