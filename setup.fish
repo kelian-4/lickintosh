@@ -73,7 +73,7 @@ else
     echo "    $installed police(s) installee(s), "(math (count $fonts) - $installed)" ignoree(s)"
     if test $installed -gt 0
         command -q fc-cache; and fc-cache -f $fonts_dst
-        echo "    Si le shell tourne deja, relance-le completement (qs kill, puis qs)."
+        echo "    Si le shell tourne deja, relancez-le completement (qs kill, puis qs)."
     end
 end
 
@@ -98,7 +98,7 @@ else
     end
 end
 
-say "Shell Quickshell ($qs_dst)"
+say "Shell : copie du shell du depot vers $qs_dst"
 set -l present
 for e in $managed assets
     test -e $qs_dst/$e; and set -a present $e
@@ -106,19 +106,20 @@ end
 
 set -l do_shell 1
 if test (count $present) -gt 0
-    echo "    deja present : $present"
-    echo "    (les donnees du shell comme dock/, core/ et spotlight/ ne sont pas touchees)"
-    if ask "    Remplacer le code du shell ? Une sauvegarde est faite avant."
-        set -l backup $qs_dst.bak-(date +%Y%m%d-%H%M%S)
+    set -l backup $qs_dst.bak-(date +%Y%m%d-%H%M%S)
+    echo "    Une version du shell est deja installee dans $qs_dst."
+    echo "    Si vous continuez, elle est remplacee par la version de ce depot."
+    echo "    L'ancienne version est d'abord copiee dans $backup."
+    if ask "    Remplacer la version installee par celle du depot ?"
         mkdir -p $backup
         for e in $present
             cp -a $qs_dst/$e $backup/$e
             rm -rf $qs_dst/$e
         end
-        echo "    sauvegarde : $backup"
+        echo "    ancienne version sauvegardee dans $backup"
     else
         set do_shell 0
-        echo "    shell conserve tel quel"
+        echo "    la version installee est conservee"
     end
 end
 
@@ -137,14 +138,14 @@ if test $do_shell -eq 1
     for f in $repo/assets/*
         test -f $f; and cp -f $f $qs_dst/assets/
     end
-    echo "    shell copie dans $qs_dst"
+    echo "    shell installe dans $qs_dst"
 
     for d in $qs_dst/*/
         if test -f $d/shell.qml
-            echo "    note : "(basename $d)" contient un shell.qml ; qs -c "(basename $d)" ne le trouvera plus (qs -p $d reste possible)"
+            echo "    note : "(basename $d)" est une autre configuration Quickshell ; elle ne se lance plus avec qs -c "(basename $d)" mais avec qs -p $d"
         end
     end
-    pgrep -x quickshell >/dev/null 2>&1; and echo "    Quickshell tourne deja : relance-le completement pour charger la nouvelle copie."
+    pgrep -x quickshell >/dev/null 2>&1; and echo "    Quickshell tourne deja : fermez-le (qs kill) puis relancez-le (qs) pour charger la nouvelle version."
 end
 
 say "Autostart ($autostart)"
@@ -153,7 +154,7 @@ set -l block 'hl.on("hyprland.start", function()
 end)'
 
 if not test -f $autostart
-    echo "    $autostart n'existe pas, rien n'a ete modifie. Ajoute ce bloc dans ta config :"
+    echo "    $autostart n'existe pas, rien n'a ete modifie. Ajoutez ce bloc dans votre configuration :"
     echo $block | sed 's/^/        /'
 else if grep -qE 'exec_cmd\([[:space:]]*["'\''](qs|quickshell)\b' $autostart
     echo "    quickshell est deja lance dans autostart.lua, rien a faire"
@@ -254,7 +255,7 @@ rm -f $fc_tmp
 say "Variable QT_QPA_PLATFORMTHEME ($env_lua)"
 set -l env_line 'hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")'
 if not test -f $env_lua
-    echo "    $env_lua n'existe pas, rien n'a ete modifie. Ajoute cette ligne dans ta config :"
+    echo "    $env_lua n'existe pas, rien n'a ete modifie. Ajoutez cette ligne dans votre configuration :"
     echo "        $env_line"
 else if grep -q 'QT_QPA_PLATFORMTHEME' $env_lua
     if grep -q 'QT_QPA_PLATFORMTHEME.*qt6ct' $env_lua
