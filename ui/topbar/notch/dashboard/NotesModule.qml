@@ -10,6 +10,8 @@ Item {
     Layout.fillHeight: true
 
     property string selectedId: ""
+    property bool composing: false
+    readonly property bool canValidate: editor.text.trim() !== ""
 
     readonly property var current: {
         const list = NotesState.notes
@@ -27,24 +29,43 @@ Item {
     function flush() {
         if (!saveTimer.running) return
         saveTimer.stop()
-        if (root.current) NotesState.updateNote(root.current.id, editor.text)
+        root.saveCurrent()
+    }
+
+    function saveCurrent() {
+        if (root.composing || !root.current || editor.text.trim() === "") return
+        NotesState.updateNote(root.current.id, editor.text)
     }
 
     function select(id) {
         root.flush()
+        root.composing = false
         root.selectedId = id
         editor.text = root.current ? root.current.text : ""
     }
 
-    function create() {
+    function startCompose() {
         root.flush()
-        root.selectedId = NotesState.createNote()
+        root.composing = true
         editor.text = ""
         editor.forceActiveFocus()
     }
 
+    function cancelCompose() {
+        root.composing = false
+        editor.text = root.current ? root.current.text : ""
+    }
+
+    function validate() {
+        if (!root.canValidate) return
+        NotesState.addNote(editor.text)
+        root.selectedId = NotesState.notes[0].id
+        root.composing = false
+        editor.text = root.current.text
+    }
+
     function remove() {
-        if (!root.current) return
+        if (root.composing || !root.current) return
         saveTimer.stop()
         const id = root.current.id
         root.selectedId = ""
@@ -56,13 +77,13 @@ Item {
         target: editor
         property: "text"
         value: root.current ? root.current.text : ""
-        when: !editor.activeFocus
+        when: !editor.activeFocus && !root.composing
     }
 
     Timer {
         id: saveTimer
         interval: 600
-        onTriggered: if (root.current) NotesState.updateNote(root.current.id, editor.text)
+        onTriggered: root.saveCurrent()
     }
 
     ColumnLayout {
@@ -83,7 +104,7 @@ Item {
             }
 
             Item {
-                visible: root.current !== null
+                visible: root.composing || root.current !== null
                 Layout.preferredWidth: 16
                 Layout.preferredHeight: 16
 
@@ -97,29 +118,33 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.remove()
+                    onClicked: root.composing ? root.cancelCompose() : root.remove()
                 }
             }
 
             Rectangle {
-                Layout.preferredWidth: 16
-                Layout.preferredHeight: 16
-                radius: 8
-                color: "#1C7AFF"
+                Layout.preferredHeight: 18
+                Layout.preferredWidth: actionLabel.implicitWidth + 16
+                radius: 9
+                color: root.composing ? (root.canValidate ? "#1C7AFF" : "#1F1F1F") : "#1C7AFF"
+
+                Behavior on color { ColorAnimation { duration: 140 } }
 
                 Text {
+                    id: actionLabel
                     anchors.centerIn: parent
-                    text: "+"
-                    color: "#FFFFFF"
-                    font.pixelSize: 13
+                    text: root.composing ? "Ajouter" : "+ Nouvelle"
+                    color: root.composing && !root.canValidate ? "#6A6A6A" : "#FFFFFF"
+                    font.pixelSize: 11
                     font.bold: true
                     font.family: "SF Pro Text"
                 }
 
                 MouseArea {
                     anchors.fill: parent
+                    enabled: !root.composing || root.canValidate
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.create()
+                    onClicked: root.composing ? root.validate() : root.startCompose()
                 }
             }
         }
@@ -138,7 +163,7 @@ Item {
             delegate: Rectangle {
                 id: chip
                 required property var modelData
-                readonly property bool active: root.current !== null && root.current.id === chip.modelData.id
+                readonly property bool active: !root.composing && root.current !== null && root.current.id === chip.modelData.id
 
                 width: Math.min(96, label.implicitWidth + 16)
                 height: 22
@@ -186,14 +211,20 @@ Item {
                     padding: 2
                     wrapMode: TextEdit.Wrap
                     color: "#E6E6E6"
-                    placeholderText: root.current ? "Écrire une note…" : "Appuie sur + pour créer une note"
+                    placeholderText: root.composing ? "Écris ta note puis valide…" : "Appuie sur + Nouvelle pour écrire une note"
                     placeholderTextColor: "#6A6A6A"
-                    readOnly: root.current === null
+                    readOnly: !root.composing && root.current === null
                     selectByMouse: true
                     font.pixelSize: 12
                     font.family: "SF Pro Text"
-                    onTextChanged: if (activeFocus) saveTimer.restart()
+                    onTextChanged: if (activeFocus && !root.composing) saveTimer.restart()
                     onActiveFocusChanged: if (!activeFocus) root.flush()
+                    Keys.onPressed: function(event) {
+                        if (root.composing && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && (event.modifiers & Qt.ControlModifier)) {
+                            root.validate()
+                            event.accepted = true
+                        }
+                    }
                 }
             }
         }
