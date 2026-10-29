@@ -29,88 +29,91 @@ Item {
         horizontalAlignment: Text.AlignHCenter
     }
 
+    component Section: Item {
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        Layout.fillHeight: true
+    }
+
+    component Metric: Section {
+        id: metric
+
+        property string title: ""
+        property var history: []
+        property color accent: "#1C7AFF"
+        property real percent: 0
+        property string detail: ""
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            width: parent.width - 8
+            spacing: 5
+
+            RowLayout {
+                Layout.fillWidth: true
+                Text {
+                    Layout.fillWidth: true
+                    text: metric.title
+                    color: "#8A8A8A"
+                    font.pixelSize: 11
+                    font.family: "SF Pro Text"
+                }
+                Text {
+                    text: Math.round(metric.percent) + "%"
+                    color: "#FFFFFF"
+                    font.pixelSize: 15
+                    font.bold: true
+                    font.family: "SF Pro Text"
+                }
+            }
+
+            Sparkline {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 56
+                values: metric.history
+                lineColor: metric.accent
+            }
+
+            Caption { color: "#B0B0B0"; text: metric.detail }
+        }
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.margins: 8
         spacing: 12
 
-        Item {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            Layout.fillHeight: true
-
-            ColumnLayout {
-                anchors.centerIn: parent
-                spacing: 5
-                RingGauge { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.cpuPercent; ringColor: "#1C7AFF" }
-                Caption { text: "CPU" }
-                Caption {
-                    color: "#B0B0B0"
-                    text: ResourcesState.cpuTempAvailable ? Math.round(ResourcesState.cpuTempC) + "°C" : (ResourcesState.cpuName || "Processeur")
-                }
-            }
+        Metric {
+            title: "CPU"
+            history: ResourcesState.cpuHistory
+            accent: "#1C7AFF"
+            percent: ResourcesState.cpuPercent
+            detail: ResourcesState.cpuTempAvailable ? Math.round(ResourcesState.cpuTempC) + "°C" : (ResourcesState.cpuName || "Processeur")
         }
 
         Divider {}
 
-        Item {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            Layout.fillHeight: true
-
-            ColumnLayout {
-                anchors.centerIn: parent
-                width: parent.width - 8
-                spacing: 6
-                Caption { text: "Activité CPU" }
-                CpuSparkline {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 56
-                    values: ResourcesState.cpuHistory
-                }
-                Caption { color: "#B0B0B0"; text: Math.round(ResourcesState.cpuPercent) + "% · 40 dernières mesures" }
-            }
+        Metric {
+            title: "Mémoire"
+            history: ResourcesState.memoryHistory
+            accent: "#EC4899"
+            percent: ResourcesState.memoryPercent
+            detail: ResourcesState.memoryUsedGb.toFixed(1) + " / " + ResourcesState.memoryTotalGb.toFixed(1) + " Gio"
         }
 
         Divider {}
 
-        Item {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            Layout.fillHeight: true
-
-            ColumnLayout {
-                anchors.centerIn: parent
-                spacing: 5
-                RingGauge { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.memoryPercent; ringColor: "#EC4899" }
-                Caption { text: "Mémoire" }
-                Caption { color: "#B0B0B0"; text: ResourcesState.memoryUsedGb.toFixed(1) + " / " + ResourcesState.memoryTotalGb.toFixed(1) + " Gio" }
-            }
+        Metric {
+            title: "Stockage"
+            history: ResourcesState.storageHistory
+            accent: "#4ADE80"
+            percent: ResourcesState.storagePercent
+            detail: ResourcesState.storageUsedGb.toFixed(0) + " / " + ResourcesState.storageTotalGb.toFixed(0) + " Gio"
         }
 
         Divider {}
 
-        Item {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            Layout.fillHeight: true
-
-            ColumnLayout {
-                anchors.centerIn: parent
-                spacing: 5
-                RingGauge { Layout.alignment: Qt.AlignHCenter; percent: ResourcesState.storagePercent; ringColor: "#4ADE80" }
-                Caption { text: "Stockage" }
-                Caption { color: "#B0B0B0"; text: ResourcesState.storageUsedGb.toFixed(0) + " / " + ResourcesState.storageTotalGb.toFixed(0) + " Gio" }
-            }
-        }
-
-        Divider {}
-
-        Item {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            Layout.fillHeight: true
-
+        Section {
             ColumnLayout {
                 anchors.centerIn: parent
                 spacing: 6
@@ -142,31 +145,17 @@ Item {
 
         Divider {}
 
-        Item {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            Layout.fillHeight: true
-
-            ColumnLayout {
-                anchors.centerIn: parent
-                spacing: 5
-                RingGauge {
-                    Layout.alignment: Qt.AlignHCenter
-                    percent: NotchState.batteryPercent
-                    ringColor: NotchState.batteryPercent > 20 ? "#4ADE80" : "#FF6B6B"
-                }
-                Caption { text: "Batterie" }
-                Caption { color: "#B0B0B0"; text: NotchState.batteryCharging ? "En charge" : "Sur batterie" }
-            }
+        Metric {
+            title: "Batterie"
+            history: ResourcesState.batteryHistory
+            accent: NotchState.batteryPercent > 20 ? "#4ADE80" : "#FF6B6B"
+            percent: NotchState.batteryPercent
+            detail: NotchState.batteryCharging ? "En charge" : "Sur batterie"
         }
 
         Divider {}
 
-        Item {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            Layout.fillHeight: true
-
+        Section {
             Component.onCompleted: ResourcesState.topMemoryWatchers++
             Component.onDestruction: ResourcesState.topMemoryWatchers--
 
