@@ -40,6 +40,12 @@ Item {
             ctx.lineWidth = 1.5
             ctx.lineJoin = "round"
             ctx.stroke()
+            ctx.lineTo(width, height)
+            ctx.lineTo(0, height)
+            ctx.closePath()
+            ctx.globalAlpha = 0.18
+            ctx.fillStyle = root.lineColor
+            ctx.fill()
         }
     }
 }
