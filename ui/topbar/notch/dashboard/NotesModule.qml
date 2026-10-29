@@ -11,7 +11,6 @@ Item {
 
     property string selectedId: ""
     property bool composing: false
-    readonly property bool canValidate: editor.text.trim() !== ""
 
     readonly property var current: {
         const list = NotesState.notes
@@ -21,52 +20,46 @@ Item {
         return list.length > 0 ? list[0] : null
     }
 
+    readonly property bool dirty: root.composing || (root.current !== null && editor.text !== root.current.text)
+    readonly property bool canValidate: editor.text.trim() !== ""
+
     function title(note) {
         const first = note.text.split("\n")[0].trim()
-        return first !== "" ? first : "Nouvelle note"
-    }
-
-    function flush() {
-        if (!saveTimer.running) return
-        saveTimer.stop()
-        root.saveCurrent()
-    }
-
-    function saveCurrent() {
-        if (root.composing || !root.current || editor.text.trim() === "") return
-        NotesState.updateNote(root.current.id, editor.text)
+        return first !== "" ? first : "Note"
     }
 
     function select(id) {
-        root.flush()
-        root.composing = false
         root.selectedId = id
         editor.text = root.current ? root.current.text : ""
     }
 
     function startCompose() {
-        root.flush()
         root.composing = true
         editor.text = ""
         editor.forceActiveFocus()
     }
 
-    function cancelCompose() {
+    function cancel() {
         root.composing = false
         editor.text = root.current ? root.current.text : ""
+        editor.focus = false
     }
 
     function validate() {
         if (!root.canValidate) return
-        NotesState.addNote(editor.text)
-        root.selectedId = NotesState.notes[0].id
-        root.composing = false
+        if (root.composing) {
+            NotesState.addNote(editor.text)
+            root.composing = false
+            root.selectedId = NotesState.notes[0].id
+        } else {
+            NotesState.updateNote(root.current.id, editor.text)
+        }
         editor.text = root.current.text
+        editor.focus = false
     }
 
     function remove() {
-        if (root.composing || !root.current) return
-        saveTimer.stop()
+        if (!root.current || root.dirty) return
         const id = root.current.id
         root.selectedId = ""
         NotesState.removeNote(id)
@@ -77,13 +70,7 @@ Item {
         target: editor
         property: "text"
         value: root.current ? root.current.text : ""
-        when: !editor.activeFocus && !root.composing
-    }
-
-    Timer {
-        id: saveTimer
-        interval: 600
-        onTriggered: root.saveCurrent()
+        when: !root.dirty
     }
 
     ColumnLayout {
@@ -104,7 +91,7 @@ Item {
             }
 
             Item {
-                visible: root.composing || root.current !== null
+                visible: root.current !== null && !root.dirty
                 Layout.preferredWidth: 16
                 Layout.preferredHeight: 16
 
@@ -118,23 +105,22 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.composing ? root.cancelCompose() : root.remove()
+                    onClicked: root.remove()
                 }
             }
 
             Rectangle {
+                visible: !root.dirty
                 Layout.preferredHeight: 18
-                Layout.preferredWidth: actionLabel.implicitWidth + 16
+                Layout.preferredWidth: newLabel.implicitWidth + 16
                 radius: 9
-                color: root.composing ? (root.canValidate ? "#1C7AFF" : "#1F1F1F") : "#1C7AFF"
-
-                Behavior on color { ColorAnimation { duration: 140 } }
+                color: "#1C7AFF"
 
                 Text {
-                    id: actionLabel
+                    id: newLabel
                     anchors.centerIn: parent
-                    text: root.composing ? "Ajouter" : "+ Nouvelle"
-                    color: root.composing && !root.canValidate ? "#6A6A6A" : "#FFFFFF"
+                    text: "+ Nouvelle"
+                    color: "#FFFFFF"
                     font.pixelSize: 11
                     font.bold: true
                     font.family: "SF Pro Text"
@@ -142,9 +128,8 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
-                    enabled: !root.composing || root.canValidate
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.composing ? root.validate() : root.startCompose()
+                    onClicked: root.startCompose()
                 }
             }
         }
@@ -159,6 +144,9 @@ Item {
             clip: true
             model: NotesState.notes
             boundsBehavior: Flickable.StopAtBounds
+            opacity: root.dirty ? 0.4 : 1
+
+            Behavior on opacity { NumberAnimation { duration: 140 } }
 
             delegate: Rectangle {
                 id: chip
@@ -185,6 +173,7 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
+                    enabled: !root.dirty
                     cursorShape: Qt.PointingHandCursor
                     onClicked: root.select(chip.modelData.id)
                 }
@@ -211,20 +200,70 @@ Item {
                     padding: 2
                     wrapMode: TextEdit.Wrap
                     color: "#E6E6E6"
-                    placeholderText: root.composing ? "Écris ta note puis valide…" : "Appuie sur + Nouvelle pour écrire une note"
+                    placeholderText: root.composing ? "Écris ta note…" : "Appuie sur + Nouvelle pour écrire une note"
                     placeholderTextColor: "#6A6A6A"
                     readOnly: !root.composing && root.current === null
                     selectByMouse: true
                     font.pixelSize: 12
                     font.family: "SF Pro Text"
-                    onTextChanged: if (activeFocus && !root.composing) saveTimer.restart()
-                    onActiveFocusChanged: if (!activeFocus) root.flush()
                     Keys.onPressed: function(event) {
-                        if (root.composing && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && (event.modifiers & Qt.ControlModifier)) {
+                        if (root.dirty && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && (event.modifiers & Qt.ControlModifier)) {
                             root.validate()
                             event.accepted = true
                         }
                     }
+                }
+            }
+        }
+
+        RowLayout {
+            visible: root.dirty
+            Layout.fillWidth: true
+            spacing: 6
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 22
+                radius: 11
+                color: "#1F1F1F"
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Annuler"
+                    color: "#E6E6E6"
+                    font.pixelSize: 11
+                    font.family: "SF Pro Text"
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.cancel()
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 22
+                radius: 11
+                color: root.canValidate ? "#1C7AFF" : "#1F1F1F"
+
+                Behavior on color { ColorAnimation { duration: 140 } }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Valider"
+                    color: root.canValidate ? "#FFFFFF" : "#6A6A6A"
+                    font.pixelSize: 11
+                    font.bold: true
+                    font.family: "SF Pro Text"
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: root.canValidate
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.validate()
                 }
             }
         }
