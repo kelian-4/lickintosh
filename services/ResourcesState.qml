@@ -38,6 +38,9 @@ Singleton {
     property real netTotalUpGb:   0
 
     property var cpuHistory: []
+    property var memoryHistory: []
+    property var storageHistory: []
+    property var batteryHistory: []
     property var topMemory: []
     property int topMemoryWatchers: 0
 
@@ -135,6 +138,7 @@ Singleton {
         root.memoryTotalGb = totalKb / 1048576
         root.memoryUsedGb  = usedKb  / 1048576
         root.memoryPercent = Math.max(0, Math.min(100, 100 * usedKb / totalKb))
+        root.memoryHistory = root._pushHistory(root.memoryHistory, root.memoryPercent)
     }
 
     // ---- Stockage ----
@@ -150,7 +154,10 @@ Singleton {
         var pcent = parseFloat(parts[0].replace('%', ''))
         var used  = parseFloat(parts[1])
         var size  = parseFloat(parts[2])
-        if (!isNaN(pcent)) root.storagePercent = pcent
+        if (!isNaN(pcent)) {
+            root.storagePercent = pcent
+            root.storageHistory = root._pushHistory(root.storageHistory, pcent)
+        }
         if (!isNaN(used))  root.storageUsedGb  = used / 1073741824
         if (!isNaN(size))  root.storageTotalGb = size / 1073741824
         var dev = parts[3] || ""
@@ -197,6 +204,7 @@ Singleton {
             if (!_cpuProc.running)  _cpuProc.running = true
             if (!_memProc.running)  _memProc.running = true
             if (!_netProc.running)  _netProc.running = true
+            root.batteryHistory = root._pushHistory(root.batteryHistory, NotchState.batteryPercent)
             if (root.topMemoryWatchers > 0 && !_topProc.running) _topProc.running = true
         }
     }
