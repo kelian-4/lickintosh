@@ -36,5 +36,6 @@ LiquidGlassBackdrop {
     windowPosition: computePosition()
     captureWindows: ShellConfig.options.glass.captureWindows
     windowOpacity: ShellConfig.options.glass.windowOpacity
+    windowOpacityByClass: ShellConfig.options.glass.windowOpacityByClass
     blurRadius: 1.0
 }
