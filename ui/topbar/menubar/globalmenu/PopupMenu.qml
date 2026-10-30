@@ -7,6 +7,7 @@ import QtQuick.Effects
 import qs.components.glass
 import qs.components
 import qs.ui.topbar.menubar.globalmenu
+import qs.services
 
 Scope {
     id: root
@@ -58,10 +59,16 @@ Scope {
         root.subY = y
     }
 
+    Presence { id: presence; wanted: root.opened }
+
     Loader {
-        active: root.opened
+        active: presence.present
         sourceComponent: Component {
             PanelWindow {
+                id: panel
+                property bool entered: false
+                Component.onCompleted: panel.entered = true
+
                 anchors {
                     top: true
                     left: true
@@ -91,6 +98,11 @@ Scope {
                     color: Qt.rgba(0.08, 0.08, 0.08, 0.88)
                     rimStrength: 1.7
                     light: "#20ffffff"
+                    opacity:         (root.opened && panel.entered) ? 1 : 0
+                    scale:           (root.opened && panel.entered) ? 1 : 0.95
+                    transformOrigin: Item.Top
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                    Behavior on scale { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     ColumnLayout {
                         id: itemsColumn

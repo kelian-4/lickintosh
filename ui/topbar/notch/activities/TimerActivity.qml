@@ -14,7 +14,7 @@ Item {
             text: TimerState.firing ? "Temps écoulé" : TimerState.formatRemaining(TimerState.remainingMs)
             color: "#FFFFFF"
             font.pixelSize: TimerState.firing ? 16 : 28
-            font.family: "SF Pro Mono"
+            font.family: "SF Mono"
         }
 
         RowLayout {
@@ -27,7 +27,7 @@ Item {
                 Layout.preferredHeight: 30
                 radius: 15
                 color: "#2A2A2A"
-                Text { anchors.centerIn: parent; text: "Ignorer"; color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Rounded" }
+                Text { anchors.centerIn: parent; text: "Ignorer"; color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Text" }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: TimerState.dismissFiring() }
             }
 
@@ -40,7 +40,7 @@ Item {
                 Text {
                     anchors.centerIn: parent
                     text: TimerState.running ? "Pause" : "Reprendre"
-                    color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Rounded"
+                    color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Text"
                 }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: TimerState.running ? TimerState.pause() : TimerState.resume() }
             }
@@ -51,7 +51,7 @@ Item {
                 Layout.preferredHeight: 30
                 radius: 15
                 color: "#4A1E1E"
-                Text { anchors.centerIn: parent; text: "Annuler"; color: "#FF6B6B"; font.pixelSize: 12; font.family: "SF Pro Rounded" }
+                Text { anchors.centerIn: parent; text: "Annuler"; color: "#FF6B6B"; font.pixelSize: 12; font.family: "SF Pro Text" }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: TimerState.cancel() }
             }
         }

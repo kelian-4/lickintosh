@@ -37,6 +37,35 @@ Singleton {
     property real netTotalDownGb: 0
     property real netTotalUpGb:   0
 
+    property var cpuHistory: []
+    property var topMemory: []
+    property int topMemoryWatchers: 0
+
+    function _pushHistory(list, value) {
+        var next = list.concat([value])
+        return next.length > 40 ? next.slice(next.length - 40) : next
+    }
+
+    Process {
+        id: _topProc
+        command: ["sh", "-c", "ps -eo comm=,rss= --sort=-rss | head -n 60"]
+        stdout: StdioCollector { onStreamFinished: root._parseTop(text) }
+    }
+
+    function _parseTop(raw) {
+        var sums = {}
+        var lines = raw.trim().split("\n")
+        for (var i = 0; i < lines.length; i++) {
+            var m = lines[i].trim().match(/^(.+?)\s+(\d+)$/)
+            if (!m) continue
+            sums[m[1]] = (sums[m[1]] || 0) + Number(m[2])
+        }
+        var list = []
+        for (var name in sums) list.push({ name: name, mb: sums[name] / 1024 })
+        list.sort(function(a, b) { return b.mb - a.mb })
+        root.topMemory = list.slice(0, 6)
+    }
+
     property var _prevCpu: null // { total, idle }
     property var _prevNet: null // { rx, tx, t }
 
@@ -55,7 +84,10 @@ Singleton {
         if (root._prevCpu) {
             var deltaTotal = total - root._prevCpu.total
             var deltaIdle  = idle  - root._prevCpu.idle
-            if (deltaTotal > 0) root.cpuPercent = Math.max(0, Math.min(100, 100 * (1 - deltaIdle / deltaTotal)))
+            if (deltaTotal > 0) {
+                root.cpuPercent = Math.max(0, Math.min(100, 100 * (1 - deltaIdle / deltaTotal)))
+                root.cpuHistory = root._pushHistory(root.cpuHistory, root.cpuPercent)
+            }
         }
         root._prevCpu = { total: total, idle: idle }
     }
@@ -165,6 +197,7 @@ Singleton {
             if (!_cpuProc.running)  _cpuProc.running = true
             if (!_memProc.running)  _memProc.running = true
             if (!_netProc.running)  _netProc.running = true
+            if (root.topMemoryWatchers > 0 && !_topProc.running) _topProc.running = true
         }
     }
 
