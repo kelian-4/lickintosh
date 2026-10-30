@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.services
 import qs.ui.widgets
+import qs.components.glass
 
 Scope {
     id: root
@@ -19,6 +20,11 @@ Scope {
         exclusionMode: ExclusionMode.Ignore
         color: "transparent"
         anchors { top: true; right: true; bottom: true; left: true }
+
+        GlassBackdrop {
+            captureWindows: false
+            gateEnabled: false
+        }
 
         Item {
             id: stage
