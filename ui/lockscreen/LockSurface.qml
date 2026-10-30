@@ -361,6 +361,50 @@ WlSessionLockSurface {
             // dents de scie / "résidus" visibles autour des lettres.
             maskThresholdMin: 0.5
             maskSpreadAtMin: 1.0
+            visible: !clockGlass.glassOn
+        }
+
+        ShaderEffect {
+            id: clockGlass
+            anchors.fill: clockRow
+            blending: true
+
+            readonly property bool glassOn: lockBackdrop.ready && lockBackdrop.captureSettled
+            visible: glassOn && clockRow.width > 0 && clockRow.height > 0
+
+            property variant maskTex: clockRow
+            property variant backTex: lockBackdrop.blurSource
+            property vector2d size: Qt.vector2d(clockRow.width, clockRow.height)
+            property vector2d screenOrigin: Qt.vector2d(0, 0)
+            property vector2d backgroundSize: Qt.vector2d(lockBackdrop.screenSize.width, lockBackdrop.screenSize.height)
+            property real ringRadius: Math.max(3, clockRow.digitSize * 0.075)
+            property real thickness: clockRow.digitSize * 0.09
+            property real highlightStrength: 0.55
+            property real highlightWidth: Math.max(1.5, clockRow.digitSize * 0.033)
+            property real saturation: 1.33
+            property real lift: 0.10
+
+            function syncOrigin() {
+                var p = clockRow.mapToItem(null, 0, 0)
+                if (p.x !== screenOrigin.x || p.y !== screenOrigin.y)
+                    screenOrigin = Qt.vector2d(p.x, p.y)
+            }
+
+            Component.onCompleted: syncOrigin()
+            onWidthChanged: syncOrigin()
+            onHeightChanged: syncOrigin()
+
+            Connections {
+                target: clockGlass.Window.window
+                ignoreUnknownSignals: true
+
+                function onAfterAnimating() {
+                    clockGlass.syncOrigin()
+                }
+            }
+
+            vertexShader: Qt.resolvedUrl(Quickshell.shellDir + "/assets/shaders/liquidglass/GlyphGlass.vert.qsb")
+            fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/assets/shaders/liquidglass/GlyphGlass.frag.qsb")
         }
 
         // --- Notifications, au-dessus du mini lecteur ----------------
