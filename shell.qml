@@ -3,6 +3,7 @@
 //@ pragma ShellId main-shell
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Wayland
 import QtQuick
 import Quickshell.Services.Notifications
 import qs.services
@@ -74,6 +75,7 @@ ShellRoot {
             color: "transparent"
             exclusionMode: ExclusionMode.Normal
             exclusiveZone: ShellConfig.options.menuBar.autoHide ? 0 : barHeight
+            WlrLayershell.keyboardFocus: NotchState.expanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             mask: NotchState.visualState === "idle" ? _barMask : _fullMask
 

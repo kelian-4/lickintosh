@@ -50,6 +50,8 @@ Item {
         Divider {}
         FocusModule {}
         Divider {}
+        NotesModule {}
+        Divider {}
         ProfilePhotoModule {}
     }
 
