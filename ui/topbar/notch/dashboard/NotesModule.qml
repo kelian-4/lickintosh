@@ -11,6 +11,7 @@ Item {
 
     property string selectedId: ""
     property bool composing: false
+    property bool edited: false
 
     readonly property var current: {
         const list = NotesState.notes
@@ -20,7 +21,7 @@ Item {
         return list.length > 0 ? list[0] : null
     }
 
-    readonly property bool dirty: root.composing || (root.current !== null && editor.text !== root.current.text)
+    readonly property bool dirty: root.composing || root.edited
     readonly property bool canValidate: editor.text.trim() !== ""
 
     function title(note) {
@@ -29,17 +30,20 @@ Item {
     }
 
     function select(id) {
+        root.edited = false
         root.selectedId = id
         editor.text = root.current ? root.current.text : ""
     }
 
     function startCompose() {
+        root.edited = false
         root.composing = true
         editor.text = ""
         editor.forceActiveFocus()
     }
 
     function cancel() {
+        root.edited = false
         root.composing = false
         editor.text = root.current ? root.current.text : ""
         editor.focus = false
@@ -54,6 +58,7 @@ Item {
         } else {
             NotesState.updateNote(root.current.id, editor.text)
         }
+        root.edited = false
         editor.text = root.current.text
         editor.focus = false
     }
@@ -61,6 +66,7 @@ Item {
     function remove() {
         if (!root.current || root.dirty) return
         const id = root.current.id
+        root.edited = false
         root.selectedId = ""
         NotesState.removeNote(id)
         editor.text = root.current ? root.current.text : ""
@@ -206,6 +212,7 @@ Item {
                     selectByMouse: true
                     font.pixelSize: 12
                     font.family: "SF Pro Text"
+                    onTextEdited: root.edited = true
                     Keys.onPressed: function(event) {
                         if (root.dirty && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && (event.modifiers & Qt.ControlModifier)) {
                             root.validate()
