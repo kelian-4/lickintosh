@@ -4,12 +4,14 @@ set -l repo (realpath (status dirname))
 set -l qs_dst ~/.config/quickshell
 set -l fonts_dst ~/.local/share/fonts/SF
 set -l icons_dst ~/.icons
+set -l hypr_dst ~/.config/hypr
+set -q LICKINTOSH_HYPR; and set hypr_dst $LICKINTOSH_HYPR
 set -l autostart ~/.config/hypr/hyprlua/autostart.lua
 set -q LICKINTOSH_AUTOSTART; and set autostart $LICKINTOSH_AUTOSTART
 set -l env_lua ~/.config/hypr/hyprlua/env.lua
 set -q LICKINTOSH_ENV; and set env_lua $LICKINTOSH_ENV
 
-set -l setup_only_assets fonts icons_desktop
+set -l setup_only_assets fonts icons_desktop MacOS-Tahoe-Cursor config
 set -l managed shell.qml settings.qml components services ui tools
 
 function ask --argument-names question
@@ -73,7 +75,7 @@ else
     echo "    $installed police(s) installee(s), "(math (count $fonts) - $installed)" ignoree(s)"
     if test $installed -gt 0
         command -q fc-cache; and fc-cache -f $fonts_dst
-        echo "    Si le shell tourne deja, relancez-le completement (qs kill, puis qs)."
+        echo "    Si le shell tourne deja, relance-le completement (qs kill, puis qs)."
     end
 end
 
@@ -98,7 +100,28 @@ else
     end
 end
 
-say "Shell : copie du shell du depot vers $qs_dst"
+say "Curseur"
+set -l cursor_src $repo/assets/MacOS-Tahoe-Cursor
+if not test -d $cursor_src
+    echo "    assets/MacOS-Tahoe-Cursor est absent, etape ignoree"
+else
+    test -d $cursor_src/cursors; or echo "    attention : $cursor_src ne contient pas de dossier cursors"
+    set -l cursor_install 1
+    if test -e $icons_dst/MacOS-Tahoe-Cursor; or test -L $icons_dst/MacOS-Tahoe-Cursor
+        if ask "    $icons_dst/MacOS-Tahoe-Cursor existe deja. Le remplacer ?"
+            rm -rf $icons_dst/MacOS-Tahoe-Cursor
+        else
+            set cursor_install 0
+            echo "    MacOS-Tahoe-Cursor conserve"
+        end
+    end
+    if test $cursor_install -eq 1
+        mkdir -p $icons_dst
+        cp -a $cursor_src $icons_dst/MacOS-Tahoe-Cursor; and echo "    MacOS-Tahoe-Cursor installe"
+    end
+end
+
+say "Shell Quickshell ($qs_dst)"
 set -l present
 for e in $managed assets
     test -e $qs_dst/$e; and set -a present $e
@@ -106,20 +129,19 @@ end
 
 set -l do_shell 1
 if test (count $present) -gt 0
-    set -l backup $qs_dst.bak-(date +%Y%m%d-%H%M%S)
-    echo "    Une version du shell est deja installee dans $qs_dst."
-    echo "    Si vous continuez, elle est remplacee par la version de ce depot."
-    echo "    L'ancienne version est d'abord copiee dans $backup."
-    if ask "    Remplacer la version installee par celle du depot ?"
+    echo "    deja present : $present"
+    echo "    (les donnees du shell comme dock/, core/ et spotlight/ ne sont pas touchees)"
+    if ask "    Remplacer le code du shell ? Une sauvegarde est faite avant."
+        set -l backup $qs_dst.bak-(date +%Y%m%d-%H%M%S)
         mkdir -p $backup
         for e in $present
             cp -a $qs_dst/$e $backup/$e
             rm -rf $qs_dst/$e
         end
-        echo "    ancienne version sauvegardee dans $backup"
+        echo "    sauvegarde : $backup"
     else
         set do_shell 0
-        echo "    la version installee est conservee"
+        echo "    shell conserve tel quel"
     end
 end
 
@@ -138,14 +160,43 @@ if test $do_shell -eq 1
     for f in $repo/assets/*
         test -f $f; and cp -f $f $qs_dst/assets/
     end
-    echo "    shell installe dans $qs_dst"
+    echo "    shell copie dans $qs_dst"
 
     for d in $qs_dst/*/
         if test -f $d/shell.qml
-            echo "    note : "(basename $d)" est une autre configuration Quickshell ; elle ne se lance plus avec qs -c "(basename $d)" mais avec qs -p $d"
+            echo "    note : "(basename $d)" contient un shell.qml ; qs -c "(basename $d)" ne le trouvera plus (qs -p $d reste possible)"
         end
     end
-    pgrep -x quickshell >/dev/null 2>&1; and echo "    Quickshell tourne deja : fermez-le (qs kill) puis relancez-le (qs) pour charger la nouvelle version."
+    pgrep -x quickshell >/dev/null 2>&1; and echo "    Quickshell tourne deja : relance-le completement pour charger la nouvelle copie."
+end
+
+say "Configuration Hyprland ($hypr_dst)"
+set -l hypr_src $repo/assets/config/hypr
+set -l hypr_files (find $hypr_src -type f 2>/dev/null | sort)
+if test (count $hypr_files) -eq 0
+    echo "    aucun fichier dans assets/config/hypr, etape ignoree"
+else
+    set -l hypr_copied 0
+    for f in $hypr_files
+        set -l rel (string replace -- "$hypr_src/" "" $f)
+        set -l dst $hypr_dst/$rel
+        if test -f $dst; and cmp -s $f $dst
+            continue
+        end
+        if test -e $dst
+            echo "    $dst differe :"
+            diff -u $dst $f | sed 's/^/        /'
+            if not ask "    Remplacer ?"
+                echo "    $rel conserve"
+                continue
+            end
+            backup $dst
+        end
+        mkdir -p (dirname $dst)
+        cp -f $f $dst; and set hypr_copied (math $hypr_copied + 1)
+    end
+    echo "    $hypr_copied fichier(s) installe(s)"
+    test $hypr_copied -gt 0; and command -q hyprctl; and echo "    Si Hyprland tourne, applique avec : hyprctl reload"
 end
 
 say "Autostart ($autostart)"
@@ -154,9 +205,9 @@ set -l block 'hl.on("hyprland.start", function()
 end)'
 
 if not test -f $autostart
-    echo "    $autostart n'existe pas, rien n'a ete modifie. Ajoutez ce bloc dans votre configuration :"
+    echo "    $autostart n'existe pas, rien n'a ete modifie. Ajoute ce bloc dans ta config :"
     echo $block | sed 's/^/        /'
-else if grep -qE 'exec_cmd\([[:space:]]*["'\''](qs|quickshell)\b' $autostart
+else if grep -qE 'exec_cmd\([[:space:]]*(["'\''](qs|quickshell)\b|programs\.shell)' $autostart
     echo "    quickshell est deja lance dans autostart.lua, rien a faire"
 else
     echo "    quickshell n'est pas dans autostart.lua. Bloc a ajouter a la fin du fichier :"
@@ -174,8 +225,8 @@ say "Applications GTK (dconf)"
 if not command -q dconf
     echo "    dconf est introuvable, etape ignoree"
 else
-    set -l dconf_keys /org/gnome/desktop/interface/icon-theme /org/gnome/desktop/interface/color-scheme /org/gnome/desktop/interface/font-name /org/gnome/desktop/interface/document-font-name /org/gnome/desktop/wm/preferences/button-layout
-    set -l dconf_vals "'MacTahoe-dark'" "'prefer-dark'" "'SF Pro Text 10'" "'SF Pro Text 10'" "'close,minimize,maximize:'"
+    set -l dconf_keys /org/gnome/desktop/interface/icon-theme /org/gnome/desktop/interface/color-scheme /org/gnome/desktop/interface/font-name /org/gnome/desktop/interface/document-font-name /org/gnome/desktop/wm/preferences/button-layout /org/gnome/desktop/interface/cursor-theme /org/gnome/desktop/interface/cursor-size
+    set -l dconf_vals "'MacTahoe-dark'" "'prefer-dark'" "'SF Pro Text 10'" "'SF Pro Text 10'" "'close,minimize,maximize:'" "'MacOS-Tahoe-Cursor'" 24
     set -l pending
     for i in (seq (count $dconf_keys))
         set -l cur (dconf read $dconf_keys[$i])
@@ -255,7 +306,7 @@ rm -f $fc_tmp
 say "Variable QT_QPA_PLATFORMTHEME ($env_lua)"
 set -l env_line 'hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")'
 if not test -f $env_lua
-    echo "    $env_lua n'existe pas, rien n'a ete modifie. Ajoutez cette ligne dans votre configuration :"
+    echo "    $env_lua n'existe pas, rien n'a ete modifie. Ajoute cette ligne dans ta config :"
     echo "        $env_line"
 else if grep -q 'QT_QPA_PLATFORMTHEME' $env_lua
     if grep -q 'QT_QPA_PLATFORMTHEME.*qt6ct' $env_lua
