@@ -370,6 +370,7 @@ WlSessionLockSurface {
         // seul grâce à son propre anchors.bottom: notifStack.top.
         LockNotifications {
             id: notifStack
+            glassBackdrop: lockBackdrop
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: mediaPlayer.top
             anchors.bottomMargin: visible ? 16 : 0
@@ -382,6 +383,7 @@ WlSessionLockSurface {
         // positionnement de l'avatar/mot de passe selon sa présence.
         LockMediaPlayer {
             id: mediaPlayer
+            glassBackdrop: lockBackdrop
             visible: ShellConfig.options.lockscreen.showMediaPlayer
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: loginArea.top
@@ -527,6 +529,7 @@ WlSessionLockSurface {
 
                     BoxGlass {
                         anchors.fill: parent
+                        backdrop: lockBackdrop
                         radius: pill.radius
                         color: Qt.rgba(1, 1, 1, 0.14)
                         light: Qt.rgba(1, 1, 1, 0.32)
