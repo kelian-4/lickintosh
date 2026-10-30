@@ -72,6 +72,20 @@ Scope {
         root.indexReady = true
     }
 
+    function mergeIncrementalOutput(text) {
+        if (!root.indexReady) return
+        var lines = text.trim().split("\n")
+        var fresh = []
+        var seen = {}
+        for (var i = 0; i < lines.length; i++) {
+            var p = lines[i]
+            if (p && !seen[p]) { seen[p] = true; fresh.push(p) }
+        }
+        if (fresh.length === 0) return
+        var kept = root.fileIndex.filter(function(path) { return !seen[path] })
+        root.fileIndex = fresh.concat(kept)
+    }
+
     Process {
         id: indexLoadProc
         running: true
@@ -106,11 +120,11 @@ Scope {
             "tmp=$(mktemp); printf '%s\\n' \"$new\" > \"$tmp\"; " +
             "grep -vFxf <(printf '%s\\n' \"$new\") \"$idx\" >> \"$tmp\"; " +
             "mv \"$tmp\" \"$idx\"; " +
-            "fi; " +
-            "cat \"$idx\""
+            "printf '%s\\n' \"$new\"; " +
+            "fi"
         ]
         stdout: StdioCollector { id: incrementalIndexOut }
-        onExited: root.applyIndexOutput(incrementalIndexOut.text)
+        onExited: root.mergeIncrementalOutput(incrementalIndexOut.text)
     }
 
     function startReindex() { indexProc.running = true }
