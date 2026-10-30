@@ -7,7 +7,9 @@ import Quickshell.Io
 import Quickshell.Services.Notifications
 import qs.components.glass
 import qs.components
+import qs.services
 import qs.ui.topbar.statusarea.notifcenter
+import qs.ui.widgets
 
 Scope {
     id: root
@@ -21,104 +23,15 @@ Scope {
     readonly property int panelWidth:   320
     readonly property int panelMarginR: 10
     readonly property int topOffset:    48
-    readonly property int animDur:      320
 
-    property real   lat:          0
-    property real   lon:          0
-    property string cityName:     ""
-    property int    currentTemp:  0
-    property string currentIcon:  "weather/a/clouds.svg"
-    property string currentDesc:  ""
-    property var    hourlyData:   []
-    property bool   weatherReady: false
-
-    function wmoToIcon(code) {
-        if (code === 0)               return "weather/a/sun.svg"
-        if (code >= 1 && code <= 2)   return "weather/a/cloud-sun.svg"
-        if (code === 3)               return "weather/a/clouds.svg"
-        if (code >= 51 && code <= 67) return "weather/a/cloud-rain.svg"
-        if (code >= 71 && code <= 77) return "weather/a/cloud-snow.svg"
-        if (code >= 80 && code <= 82) return "weather/a/cloud-rain.svg"
-        if (code >= 85 && code <= 86) return "weather/a/cloud-snow.svg"
-        if (code >= 95)               return "weather/a/cloud-lightning.svg"
-        return "weather/a/clouds.svg"
-    }
-
-    function wmoToDesc(code) {
-        if (code === 0)               return "Clear Sky"
-        if (code >= 1 && code <= 2)   return "Partly Cloudy"
-        if (code === 3)               return "Overcast"
-        if (code >= 51 && code <= 67) return "Rain"
-        if (code >= 71 && code <= 77) return "Snow"
-        if (code >= 80 && code <= 82) return "Showers"
-        if (code >= 95)               return "Thunderstorm"
-        return "Cloudy"
-    }
-
-    Process {
-        id: _geoProc
-        command: ["curl", "-s", "--max-time", "5", "http://ip-api.com/json/"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    var j = JSON.parse(text.trim())
-                    root.lat      = j.lat
-                    root.lon      = j.lon
-                    root.cityName = j.city || ""
-                    _weatherProc.running = true
-                } catch(e) {}
-            }
-        }
-    }
-
-    Process {
-        id: _weatherProc
-        command: [
-            "curl", "-s", "--max-time", "8",
-            "https://api.open-meteo.com/v1/forecast?latitude=" + root.lat +
-            "&longitude=" + root.lon +
-            "&current=temperature_2m,weather_code,is_day" +
-            "&hourly=temperature_2m,weather_code" +
-            "&forecast_days=1&timezone=auto"
-        ]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    var w     = JSON.parse(text.trim())
-                    root.currentTemp = Math.round(w.current.temperature_2m)
-                    root.currentIcon = root.wmoToIcon(w.current.weather_code)
-                    root.currentDesc = root.wmoToDesc(w.current.weather_code)
-                    var hrs   = []
-                    var times = w.hourly.time
-                    var temps = w.hourly.temperature_2m
-                    var codes = w.hourly.weather_code
-                    var nowH  = new Date().getHours()
-                    for (var i = 0; i < times.length && hrs.length < 6; i++) {
-                        var h = new Date(times[i]).getHours()
-                        if (h < nowH && hrs.length === 0) continue
-                        hrs.push({
-                            label: hrs.length === 0 ? "Now" : Qt.formatTime(new Date(times[i]), "h AP"),
-                            temp:  Math.round(temps[i]),
-                            icon:  root.wmoToIcon(codes[i])
-                        })
-                    }
-                    root.hourlyData   = hrs
-                    root.weatherReady = true
-                } catch(e) {}
-            }
-        }
-    }
-
-    Timer {
-        interval: 600000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: _geoProc.running = true
+    Presence {
+        id: presence
+        wanted: root.opened
+        exitDuration: ShellMotion.enter()
     }
 
     Loader {
-        active: root.opened
+        active: presence.present
         sourceComponent: Component {
             PanelWindow {
                 id: ncWin
@@ -139,6 +52,13 @@ Scope {
                 exclusiveZone: -1
                 anchors { top: true; right: true; bottom: true; left: true }
 
+                mask: WidgetState.galleryZone === "notifCenter" ? galleryMask : null
+
+                Region {
+                    id: galleryMask
+                    item: panel
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: root.closing()
@@ -153,27 +73,54 @@ Scope {
                     anchors.topMargin:   root.topOffset
                     anchors.rightMargin: root.panelMarginR
 
-                    property bool vis: root.opened
+                    property bool vis: false
+                    Component.onCompleted: panel.vis = root.opened
+                    Connections {
+                        target: root
+                        function onOpenedChanged() { panel.vis = root.opened }
+                    }
 
                     transform: Translate {
                         x: panel.vis ? 0 : root.panelWidth + root.panelMarginR
                         Behavior on x {
                             NumberAnimation {
-                                duration: root.animDur
-                                easing.type: Easing.OutBack
-                                easing.overshoot: 0.55
+                                duration: ShellMotion.enter()
+                                easing.type: Easing.BezierSpline
+                                easing.bezierCurve: ShellMotion.spatialCurve
                             }
                         }
                     }
                     opacity: panel.vis ? 1 : 0
                     Behavior on opacity {
-                        NumberAnimation { duration: root.animDur / 2 }
+                        NumberAnimation { duration: ShellMotion.enter(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                     }
 
                     MouseArea {
                         anchors.fill: parent
                         propagateComposedEvents: false
+                        onPressed: panel.forceActiveFocus()
                         onClicked: function(e) { e.accepted = true }
+                    }
+
+                    DropArea {
+                        anchors.fill: parent
+                        keys: ["text/plain"]
+
+                        function parse(drag) {
+                            if (!drag.hasText || drag.text.indexOf("widget:") !== 0) return null
+                            var parts = drag.text.split(":")
+                            return { type: parts[1], size: parts[2], variant: parts[3] || "" }
+                        }
+
+                        onEntered: function(drag) {
+                            drag.accepted = WidgetState.galleryZone === "notifCenter" && parse(drag) !== null
+                        }
+                        onDropped: function(drop) {
+                            var spec = parse(drop)
+                            if (!spec) return
+                            drop.accept(Qt.CopyAction)
+                            WidgetState.addWidget("notifCenter", spec.type, spec.size, spec.variant)
+                        }
                     }
 
                     Flickable {
@@ -195,7 +142,7 @@ Scope {
 
                                 SequentialAnimation {
                                     id: _clearAnim
-                                    NumberAnimation { target: _notifsBlock; property: "opacity"; to: 0; duration: 220; easing.type: Easing.InCubic }
+                                    NumberAnimation { target: _notifsBlock; property: "opacity"; to: 0; duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                     ScriptAction { script: NotifService.dismissAll() }
                                     PauseAnimation { duration: 20 }
                                     NumberAnimation { target: _notifsBlock; property: "opacity"; to: 1; duration: 1 }
@@ -222,7 +169,7 @@ Scope {
                                         text: "Notification Center"
                                         font.pixelSize: 13
                                         font.weight: Font.Bold
-                                        font.family: "SF Pro Rounded"
+                                        font.family: "SF Pro Text"
                                         color: "#ffffff"
                                         renderType: Text.NativeRendering
                                     }
@@ -238,7 +185,7 @@ Scope {
                                             anchors.centerIn: parent
                                             text: "×"
                                             font.pixelSize: 15
-                                            font.family: "SF Pro Rounded"
+                                            font.family: "SF Pro Text"
                                             color: "#ffffff"
                                             renderType: Text.NativeRendering
                                         }
@@ -262,7 +209,7 @@ Scope {
                                         anchors.centerIn: parent
                                         text: "No Notifications"
                                         font.pixelSize: 12
-                                        font.family: "SF Pro Rounded"
+                                        font.family: "SF Pro Text"
                                         color: Qt.rgba(1, 1, 1, 0.40)
                                         renderType: Text.NativeRendering
                                     }
@@ -284,127 +231,65 @@ Scope {
                                 }
                             }
 
-                            Rectangle {
+                            Flow {
+                                id: _widgetFlow
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: _wbody.implicitHeight + 36
-                                radius: 20
-                                clip: true
-                                color: "transparent"
+                                Layout.preferredHeight: _widgetFlow.childrenRect.height
+                                spacing: WidgetState.gap
 
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: 20
-                                    gradient: Gradient {
-                                        orientation: Gradient.Vertical
-                                        GradientStop { position: 0.0; color: "#0d3f9e" }
-                                        GradientStop { position: 1.0; color: "#1f6fd6" }
+                                Repeater {
+                                    model: WidgetState.notifCenter
+
+                                    delegate: Item {
+                                        id: _wslot
+                                        required property var modelData
+                                        readonly property var dims: WidgetState.sizeOf(_wslot.modelData.size)
+                                        width: _wslot.dims.w
+                                        height: _wslot.dims.h
+
+                                        WidgetView {
+                                            widgetData: _wslot.modelData
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            acceptedButtons: Qt.RightButton
+                                            onPressed: function(mouse) {
+                                                _widgetMenu.target = _wslot.modelData.id
+                                                var p = mapToItem(_widgetMenu, mouse.x, mouse.y)
+                                                _widgetMenu.openAt(p.x, p.y, WidgetState.menuEntries("notifCenter", _wslot.modelData))
+                                            }
+                                        }
                                     }
                                 }
+                            }
 
-                                ColumnLayout {
-                                    id: _wbody
-                                    anchors.left:        parent.left
-                                    anchors.right:       parent.right
-                                    anchors.top:         parent.top
-                                    anchors.leftMargin:  16
-                                    anchors.rightMargin: 16
-                                    anchors.topMargin:   14
-                                    spacing: 8
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 28
 
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 0
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: _editLabel.implicitWidth + 28
+                                    height: 26
+                                    radius: 13
+                                    color: Qt.rgba(1, 1, 1, 0.18)
 
-                                        ColumnLayout {
-                                            spacing: 0
-
-                                            Text {
-                                                text: root.cityName !== "" ? root.cityName : "Weather"
-                                                font.pixelSize: 14
-                                                font.weight: Font.Medium
-                                                font.family: "SF Pro Rounded"
-                                                color: "#ffffff"
-                                                renderType: Text.NativeRendering
-                                            }
-
-                                            Text {
-                                                text: root.weatherReady ? root.currentTemp + "°" : "--°"
-                                                font.pixelSize: 46
-                                                font.weight: Font.Thin
-                                                font.family: "SF Pro Rounded"
-                                                color: "#ffffff"
-                                                renderType: Text.NativeRendering
-                                            }
-                                        }
-
-                                        Item { Layout.fillWidth: true }
-
-                                        ColumnLayout {
-                                            Layout.alignment: Qt.AlignTop | Qt.AlignRight
-                                            spacing: 4
-
-                                            CFVI {
-                                                Layout.alignment: Qt.AlignRight
-                                                size: 32
-                                                colorized: false
-                                                icon: root.currentIcon
-                                            }
-
-                                            Text {
-                                                visible: root.weatherReady
-                                                text: root.currentDesc
-                                                font.pixelSize: 10
-                                                font.family: "SF Pro Rounded"
-                                                color: Qt.rgba(1, 1, 1, 0.80)
-                                                renderType: Text.NativeRendering
-                                                horizontalAlignment: Text.AlignRight
-                                            }
-                                        }
+                                    Text {
+                                        id: _editLabel
+                                        anchors.centerIn: parent
+                                        text: "Edit Widgets…"
+                                        color: "#ffffff"
+                                        font.pixelSize: 12
+                                        font.weight: Font.Medium
+                                        font.family: "SF Pro Text"
+                                        renderType: Text.NativeRendering
                                     }
 
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        height: 1
-                                        color: Qt.rgba(1, 1, 1, 0.20)
-                                        visible: root.weatherReady && root.hourlyData.length > 0
-                                    }
-
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 8
-                                        visible: root.weatherReady && root.hourlyData.length > 0
-
-                                        Repeater {
-                                            model: root.hourlyData
-                                            delegate: ColumnLayout {
-                                                Layout.fillWidth: true
-                                                spacing: 6
-
-                                                Text {
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                    text: modelData.label
-                                                    font.pixelSize: 10
-                                                    font.family: "SF Pro Rounded"
-                                                    color: Qt.rgba(1, 1, 1, 0.75)
-                                                    renderType: Text.NativeRendering
-                                                }
-                                                CFVI {
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                    size: 18
-                                                    colorized: false
-                                                    icon: modelData.icon
-                                                }
-                                                Text {
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                    text: modelData.temp + "°"
-                                                    font.pixelSize: 11
-                                                    font.weight: Font.Bold
-                                                    font.family: "SF Pro Rounded"
-                                                    color: "#ffffff"
-                                                    renderType: Text.NativeRendering
-                                                }
-                                            }
-                                        }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: WidgetState.openGallery("notifCenter")
                                     }
                                 }
                             }
@@ -414,6 +299,16 @@ Scope {
                                 Layout.preferredHeight: 10
                             }
                         }
+                    }
+                }
+
+                WidgetContextMenu {
+                    id: _widgetMenu
+
+                    property string target: ""
+
+                    onChosen: function(action) {
+                        WidgetState.applyAction("notifCenter", _widgetMenu.target, action)
                     }
                 }
 

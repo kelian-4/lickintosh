@@ -3,14 +3,17 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
-// Citations originales (rédigées pour ce projet, pas de reproduction
-// de texte protégé), une par jour choisie de façon déterministe pour
-// rester stable toute la journée sans dépendance réseau ni API key.
 Singleton {
     id: root
 
     reloadableId: "quoteState"
+
+    readonly property string filePath: "$HOME/.config/quickshell/core/quote.json"
+    readonly property string endpoint: "https://zenquotes.io/api/today"
+
+    property string dateKey: root._key()
 
     readonly property var _quotes: [
         "Le code le plus simple est celui qu'on n'a pas eu besoin d'écrire.",
@@ -30,12 +33,71 @@ Singleton {
         "Le meilleur moment pour documenter, c'était avant d'oublier pourquoi."
     ]
 
+    function _key() {
+        var now = new Date()
+        return now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate()
+    }
+
     function _dayOfYear() {
         var now = new Date()
         var start = new Date(now.getFullYear(), 0, 0)
-        var diff = now - start
-        return Math.floor(diff / 86400000)
+        return Math.floor((now - start) / 86400000)
     }
 
-    readonly property string today: root._quotes[root._dayOfYear() % root._quotes.length]
+    readonly property bool fresh: quoteAdapter.date === root.dateKey && quoteAdapter.text !== ""
+    readonly property string today: root.fresh ? quoteAdapter.text : root._quotes[root._dayOfYear() % root._quotes.length]
+    readonly property string author: root.fresh ? quoteAdapter.author : ""
+    readonly property bool fromApi: root.fresh
+
+    function refresh() {
+        if (!root.fresh && !fetcher.running) fetcher.running = true
+    }
+
+    function apply(raw) {
+        var data
+        try {
+            data = JSON.parse(raw)
+        } catch (e) {
+            return
+        }
+        if (!Array.isArray(data) || data.length === 0 || !data[0].q) return
+        if (data[0].q.indexOf("Too many requests") >= 0) return
+        quoteAdapter.date = root.dateKey
+        quoteAdapter.text = data[0].q
+        quoteAdapter.author = data[0].a || ""
+    }
+
+    FileView {
+        id: quoteFile
+        path: root.filePath
+        onAdapterUpdated: writeAdapter()
+        onLoaded: root.refresh()
+        onLoadFailed: function(error) {
+            if (error === FileViewError.FileNotFound) writeAdapter()
+            root.refresh()
+        }
+
+        JsonAdapter {
+            id: quoteAdapter
+            property string date: ""
+            property string text: ""
+            property string author: ""
+        }
+    }
+
+    Process {
+        id: fetcher
+        command: ["curl", "-fsS", "--max-time", "8", root.endpoint]
+        stdout: StdioCollector { onStreamFinished: root.apply(text) }
+    }
+
+    Timer {
+        interval: 1800000
+        running: true
+        repeat: true
+        onTriggered: {
+            root.dateKey = root._key()
+            root.refresh()
+        }
+    }
 }

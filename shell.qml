@@ -1,3 +1,4 @@
+//@ pragma IconTheme MacTahoe-dark
 //@ pragma UseQApplication
 //@ pragma ShellId main-shell
 import Quickshell
@@ -18,12 +19,12 @@ import qs.ui.dock
 import qs.ui.topbar.statusarea.spotlight
 import qs.ui.osd
 import qs.ui.lockscreen
+import qs.ui.desktop
+import qs.ui.widgets
 
 
 ShellRoot {
     id: appRoot
-    FontLoader { source: "assets/fonts/SFPD" }
-    FontLoader { source: "assets/fonts/SFPR" }
     property bool ccOpened:          false
     property bool appleMenuOpened:   false
     property bool aboutOpened:       false
@@ -197,6 +198,9 @@ ShellRoot {
         opened: appRoot.ccOpened
         onClosing: appRoot.ccOpened = false
     }
+    ControlGallery {}
+    DesktopLayer {}
+    WidgetGallery {}
     Dock {}
     SpotlightWindow {
         opened: appRoot.spotlightOpened

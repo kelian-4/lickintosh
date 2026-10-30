@@ -616,7 +616,7 @@ ContentPage {
                 CFText {
                     text: modelData.cmd
                     font.pixelSize: 13
-                    font.family: "monospace"
+                    font.family: "SF Mono"
                     color: "#fff"
                     elide: Text.ElideRight
                     Layout.fillWidth: true

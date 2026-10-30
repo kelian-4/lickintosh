@@ -92,6 +92,46 @@ Scope {
         return ""
     }
 
+    // First name of `names` that exists in the icon theme, or the theme's
+    // "missing" icon when none does. Empty names are skipped.
+    function _firstThemeIcon(names) {
+        for (var i = 0; i < names.length; i++) {
+            if (!names[i]) continue
+            var p = Quickshell.iconPath(names[i], true)
+            if (p !== "") return p
+        }
+        return Quickshell.iconPath("image-missing")
+    }
+
+    function _genericAppIcon() {
+        return dockRoot._firstThemeIcon(["application-x-executable", "application-x-executable-symbolic", "unknown"])
+    }
+
+    // A plain theme name ("kitty"), as opposed to an absolute path such as
+    // /nix/store/<hash>-pkg/..., which changes on every package update.
+    function _isThemeName(s) {
+        return !!s && s.charAt(0) !== "/" && s.indexOf("image://") !== 0
+    }
+
+    // Icon of a pinned app, resolved on every render. Order matters:
+    //  1. the entry's own theme name (curated names such as "kitty"),
+    //  2. the live desktop entry, which always carries the current icon,
+    //  3. the stored path, only as a last resort since it can be stale,
+    //  4. a generic application icon instead of the missing-texture checkerboard.
+    function pinnedIconFor(entry) {
+        if (dockRoot._isThemeName(entry.icon)) {
+            var byName = Quickshell.iconPath(entry.icon, true)
+            if (byName !== "") return byName
+        }
+        var de = entry.cmd ? DesktopEntries.heuristicLookup(entry.cmd) : null
+        if (de && de.icon) {
+            var live = Quickshell.iconPath(de.icon, true)
+            if (live !== "") return live
+        }
+        if (entry.iconPath) return entry.iconPath
+        return dockRoot._genericAppIcon()
+    }
+
     function _findDesktopEntry(name) {
         var entries = DesktopEntries.applications.values
         var lower   = name.toLowerCase()
@@ -430,7 +470,9 @@ Scope {
         if (idx >= 0) {
             list.splice(idx, 1)
         } else {
-            list.push({ name: dockRoot.menuAppName, cmd: key, icon: "", iconPath: dockRoot.menuIconPath, autostart: false })
+            var de = DesktopEntries.heuristicLookup(key)
+            var themeName = (de && dockRoot._isThemeName(de.icon)) ? de.icon : ""
+            list.push({ name: dockRoot.menuAppName, cmd: key, icon: themeName, iconPath: dockRoot.menuIconPath, autostart: false })
         }
         dockRoot.pinnedApps = list
     }
@@ -737,8 +779,7 @@ Scope {
 
                                     appName:       modelData.name
                                     appCmd:        modelData.cmd
-                                    appIconPath:   modelData.iconPath ? modelData.iconPath
-                                                                       : Quickshell.iconPath(modelData.icon, "application-x-executable")
+                                    appIconPath:   dockRoot.pinnedIconFor(modelData)
                                     instanceCount: _inst.length
                                     iconIndex:     index
                                     totalIcons:    _pinnedRepeater.count + 1 + _activeRepeater.count

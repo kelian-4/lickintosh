@@ -125,7 +125,7 @@ BoxGlass {
                         text:            root.notification ? root.notification.summary : ""
                         font.pixelSize:  14
                         font.weight:     Font.Bold
-                        font.family:     "SF Pro Rounded"
+                        font.family:     "SF Pro Text"
                         color:           "#ffffff"
                         elide:           Text.ElideRight
                         renderType:      Text.NativeRendering
@@ -135,7 +135,7 @@ BoxGlass {
                         Layout.alignment: Qt.AlignTop
                         text:           root.receivedTime
                         font.pixelSize: 10
-                        font.family:    "SF Pro Rounded"
+                        font.family:    "SF Pro Text"
                         color:          Qt.rgba(1, 1, 1, 0.45)
                         renderType:     Text.NativeRendering
                     }
@@ -146,7 +146,7 @@ BoxGlass {
                     visible:          root.notification !== null && root.notification.body !== ""
                     text:             root.notification ? root.notification.body : ""
                     font.pixelSize:   12
-                    font.family:      "SF Pro Rounded"
+                    font.family:      "SF Pro Text"
                     color:            Qt.rgba(1, 1, 1, 0.72)
                     wrapMode:         Text.Wrap
                     readOnly:         true
@@ -178,7 +178,7 @@ BoxGlass {
                                 text:            modelData.text
                                 font.pixelSize:  11
                                 font.weight:     Font.DemiBold
-                                font.family:     "SF Pro Rounded"
+                                font.family:     "SF Pro Text"
                                 color:           "#ffffff"
                                 renderType:      Text.NativeRendering
                             }
@@ -212,7 +212,7 @@ BoxGlass {
                         anchors.centerIn: parent
                         text:           "×"
                         font.pixelSize: 12
-                        font.family:    "SF Pro Rounded"
+                        font.family:    "SF Pro Text"
                         color:          Qt.rgba(1, 1, 1, 0.70)
                         renderType:     Text.NativeRendering
                     }
@@ -266,7 +266,7 @@ BoxGlass {
                         text: root.isStack ? "Effacer" : "Rappeler plus tard"
                         font.pixelSize: 13
                         font.weight: Font.DemiBold
-                        font.family: "SF Pro Rounded"
+                        font.family: "SF Pro Text"
                         color: "#ffffff"
                         renderType: Text.NativeRendering
                     }
@@ -298,7 +298,7 @@ BoxGlass {
                         text: "Options"
                         font.pixelSize: 13
                         font.weight: Font.DemiBold
-                        font.family: "SF Pro Rounded"
+                        font.family: "SF Pro Text"
                         color: "#ffffff"
                         renderType: Text.NativeRendering
                     }
@@ -332,7 +332,7 @@ BoxGlass {
                         anchors.margins: 8
                         text: root._remindInput
                         font.pixelSize: 14
-                        font.family: "SF Pro Rounded"
+                        font.family: "SF Pro Text"
                         color: "#ffffff"
                         horizontalAlignment: TextInput.AlignHCenter
                         verticalAlignment: TextInput.AlignVCenter
@@ -345,7 +345,7 @@ BoxGlass {
                 Text {
                     text: "minutes"
                     font.pixelSize: 12
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     color: Qt.rgba(1, 1, 1, 0.55)
                     renderType: Text.NativeRendering
                 }
@@ -363,7 +363,7 @@ BoxGlass {
                         text: "Confirmer"
                         font.pixelSize: 12
                         font.weight: Font.DemiBold
-                        font.family: "SF Pro Rounded"
+                        font.family: "SF Pro Text"
                         color: "#ffffff"
                         renderType: Text.NativeRendering
                     }

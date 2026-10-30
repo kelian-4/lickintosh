@@ -4,23 +4,40 @@ import Quickshell
 import Quickshell.Wayland
 import qs.components.glass
 import qs.components
+import qs.services
 
 Scope {
     id: root
 
     property bool failed: false
     property string errorString: ""
+    property bool dismissing: false
+
+    function dismiss() {
+        root.dismissing = true
+        _unload.restart()
+    }
+
+    Timer {
+        id: _unload
+        interval: ShellMotion.fade()
+        onTriggered: popupLoader.active = false
+    }
 
     Connections {
         target: Quickshell
 
         function onReloadCompleted() {
+            _unload.stop()
+            root.dismissing = false
             root.failed = false
             popupLoader.active = false
             popupLoader.active = true
         }
 
         function onReloadFailed(error) {
+            _unload.stop()
+            root.dismissing = false
             popupLoader.active = false
             root.failed = true
             root.errorString = error
@@ -33,6 +50,8 @@ Scope {
 
         PanelWindow {
             id: popupWindow
+            property bool entered: false
+            Component.onCompleted: popupWindow.entered = true
 
             WlrLayershell.namespace: "quickshell:reload-popup"
             WlrLayershell.layer: WlrLayer.Overlay
@@ -51,13 +70,15 @@ Scope {
             Timer {
                 running: !root.failed
                 interval: 2500
-                onTriggered: popupLoader.active = false
+                onTriggered: root.dismiss()
             }
 
             GlassBackdrop { id: glassBackdrop }
 
             BoxGlass {
                 anchors.fill: parent
+                opacity: (popupWindow.entered && !root.dismissing) ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                 radius: 14
                 backdrop: glassBackdrop
                 color: root.failed ? "#30ff4444" : "#18000000"
@@ -107,7 +128,7 @@ Scope {
             MouseArea {
                 anchors.fill: parent
                 visible: root.failed
-                onClicked: popupLoader.active = false
+                onClicked: root.dismiss()
             }
         }
     }

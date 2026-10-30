@@ -33,14 +33,14 @@ Item {
                 color: "#FFFFFF"
                 font.pixelSize: 13
                 font.bold: true
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 elide: Text.ElideRight
             }
             Text {
                 text: root._entry ? root._entry.subtitle : ""
                 color: "#4ADE80"
                 font.pixelSize: 12
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
             }
         }
     }

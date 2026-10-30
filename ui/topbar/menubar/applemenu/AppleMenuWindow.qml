@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import qs.components.glass
+import qs.components
 
 Scope {
     id: root
@@ -10,10 +11,16 @@ Scope {
     signal openAbout()
     signal lockRequested()
 
+    Presence { id: presence; wanted: root.opened }
+
     Loader {
-        active: root.opened
+        active: presence.present
         sourceComponent: Component {
             PanelWindow {
+                id: panel
+                property bool entered: false
+                Component.onCompleted: panel.entered = true
+
                 anchors {
                     top: true
                     left: true
@@ -37,7 +44,7 @@ Scope {
                     x: 12
                     y: 36
                     z: 1
-                    opened: root.opened
+                    opened: root.opened && panel.entered
                     onCloseRequested: root.closeRequested()
                     onOpenAbout: root.openAbout()
                     onLockRequested: root.lockRequested()

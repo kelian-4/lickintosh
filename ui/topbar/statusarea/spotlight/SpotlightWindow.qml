@@ -34,8 +34,6 @@ Scope {
     readonly property color glassColor: "#c01e1e1e"
     readonly property color textColor:  "#dfdfdf"
 
-    FontLoader { id: sfRounded;       source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf") }
-    FontLoader { id: sfRoundedMedium; source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/fonts/SFPR/SF-Pro-Rounded-Medium.otf") }
 
     property var fileIndex:  []
     property bool indexReady: false
@@ -207,12 +205,21 @@ Scope {
         }
     }
 
+    property bool _spotlightLoaded: false
+
     onOpenedChanged: {
         if (root.opened) {
+            const wasLoaded = spotlightLoader.item !== null
+            root._spotlightLoaded = true
+            if (wasLoaded) spotlightLoader.item.reopen()
             recentXbelProc.running = true
             root.refreshClipHistory()
             root.refreshUserActions()
             root.refreshWallpaperList()
+        } else if (spotlightLoader.item) {
+            spotlightLoader.item.closeGracefully()
+        } else {
+            root._spotlightLoaded = false
         }
     }
 
@@ -706,7 +713,7 @@ Scope {
 
     Loader {
         id: spotlightLoader
-        active: root.opened
+        active: root._spotlightLoaded
         sourceComponent: Component {
             PanelWindow {
                 id: win
@@ -728,6 +735,10 @@ Scope {
                 anchors { top: true; left: true; right: true; bottom: true }
 
                 property bool   actionsShown:   false
+                property bool   closing:        false
+                readonly property bool splitTarget: actionsShown && !closing
+                property real   splitProgress:  splitTarget ? 1 : 0
+                Behavior on splitProgress { NumberAnimation { duration: win.splitTarget ? splitGlass.totalDuration : splitGlass.totalDuration * 0.7; easing.type: Easing.Linear } }
                 property string selectedAction: ""
                 property string hoveredAction:  ""
                 property int    currentIdx:     0
@@ -1052,6 +1063,7 @@ Scope {
                 }
 
                 function doClose() {
+                    win.closing      = true
                     searchField.text = ""
                     actionsShown     = false
                     hoveredAction    = ""
@@ -1060,9 +1072,21 @@ Scope {
                     fileAnswers      = []
                     clipAnswers      = []
                     root.closeRequested()
+                    root._spotlightLoaded = false
                 }
 
-                function closeGracefully() { hideAnim.start() }
+                function closeGracefully() {
+                    if (win.closing) return
+                    win.closing = true
+                    showAnim.stop()
+                    hideAnim.start()
+                }
+
+                function reopen() {
+                    win.closing = false
+                    hideAnim.stop()
+                    showAnim.start()
+                }
 
                 function refreshClipboard(query) {
                     var q = query.toLowerCase()
@@ -1115,35 +1139,39 @@ Scope {
 
                 SequentialAnimation {
                     id: showAnim
-                    ParallelAnimation {
-                        PropertyAnimation { target: bgPanel; property: "opacity";  from: 0;   to: 1;   duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 }
-                        PropertyAnimation { target: bgPanel; property: "bgScaleX"; from: 1.3; to: 1.0; duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 }
-                    }
+                    PropertyAnimation { target: bgPanel; property: "opacity"; from: 0; to: 1; duration: ShellMotion.enter(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                 }
                 SequentialAnimation {
                     id: hideAnim
-                    ParallelAnimation {
-                        PropertyAnimation { target: bgPanel; property: "opacity";  from: 1; to: 0;   duration: 200 }
-                        PropertyAnimation { target: bgPanel; property: "bgScaleX"; from: 1; to: 1.1; duration: 130 }
-                    }
+                    PauseAnimation { duration: win.splitProgress > 0.02 ? splitGlass.totalDuration * 0.4 : 0 }
+                    PropertyAnimation { target: bgPanel; property: "opacity"; to: 0; duration: ShellMotion.exit(1.5); easing.type: Easing.InOutCubic }
                     ScriptAction { script: win.doClose() }
                 }
 
-                MouseArea { anchors.fill: parent; onClicked: hideAnim.start() }
+                MouseArea { anchors.fill: parent; onClicked: win.closeGracefully() }
+
+                SplitGlass {
+                    id: splitGlass
+                    progress: win.splitProgress
+                    bar: Qt.rect(bgPanel.x, bgPanel.y, bgPanel.width, bgPanel.height)
+                    barRadius: bgPanel.radius
+                    bubbleCenterY: bgPanel.y + 32
+                    rightEdge: win.width / 2 + 442
+                    baseColor: root.glassColor
+                    rimColor: Qt.rgba(1, 1, 1, 0.3)
+                    opacity: bgPanel.opacity
+                }
 
                 BoxGlass {
                     id: bgPanel
-                    property real bgScaleX: 1.0
                     z: 1; opacity: 0
                     anchors.top:              parent.top
                     anchors.topMargin:        200
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: (win.gridMode || win.showingShellOutput) ? 680 : (win.actionsShown ? 340 : 540)
-                    Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutBack; easing.overshoot: 2 } }
+                    Behavior on width { NumberAnimation { duration: ShellMotion.split(1.5); easing.type: Easing.InOutCubic } }
                     implicitHeight: panelCol.implicitHeight + 8
-                    radius: 30; color: root.glassColor; rimStrength: 1.7
-                    light: "#20ffffff"; lightDir: Qt.vector2d(1, 1); layer.enabled: true
-                    transform: Scale { xScale: bgPanel.bgScaleX; origin.x: bgPanel.width / 2 }
+                    radius: 30; transparent: true; highlightEnabled: false; layer.enabled: true
 
                     MouseArea {
                         anchors.fill: parent
@@ -1193,7 +1221,7 @@ Scope {
                                     anchors.leftMargin:     48
                                     anchors.right:          parent.right
                                     anchors.rightMargin:    8
-                                    font.family:    sfRoundedMedium.name
+                                    font.family:    "SF Pro Text"
                                     font.pixelSize: 26
                                     font.weight:    Font.Medium
                                     color:          root.textColor
@@ -1224,7 +1252,7 @@ Scope {
                                     visible: text !== "" && searchField.activeFocus
                                     color:   root.textColor
                                     opacity: 0.35
-                                    font.family:    sfRoundedMedium.name
+                                    font.family:    "SF Pro Text"
                                     font.pixelSize: 26
                                     font.weight:    Font.Medium
                                     renderType:     Text.NativeRendering
@@ -1245,8 +1273,9 @@ Scope {
                                         text: "—  " + win.topHitLabel
                                         color: root.textColor
                                         opacity: 0.7
-                                        font.family:    sfRoundedMedium.name
+                                        font.family:    "SF Pro Text"
                                         font.pixelSize: 13
+                                        font.weight:    Font.Medium
                                         renderType:     Text.NativeRendering
                                     }
                                 }
@@ -1256,8 +1285,9 @@ Scope {
                                     anchors.fill:        parent
                                     anchors.leftMargin:  48
                                     anchors.rightMargin: 14
-                                    font.family:         sfRoundedMedium.name
+                                    font.family:         "SF Pro Text"
                                     font.pixelSize:      26
+                                    font.weight:         Font.Medium
                                     color:               root.textColor
                                     renderType:          Text.NativeRendering
                                     background:          Item {}
@@ -1295,7 +1325,7 @@ Scope {
                                     Keys.onPressed: function(event) {
                                         if (event.key === Qt.Key_Escape) {
                                             if (win.showingShellOutput) { win.showingShellOutput = false; event.accepted = true; return }
-                                            hideAnim.start(); event.accepted = true; return
+                                            win.closeGracefully(); event.accepted = true; return
                                         }
                                         if (event.key === Qt.Key_Tab) {
                                             var t = searchField.text
@@ -1344,7 +1374,7 @@ Scope {
                                     : win.gridMode
                                         ? 480
                                         : (win.answers.length > 0 ? Math.min(400, results.implicitHeight + 20) : 0)
-                                Behavior on Layout.preferredHeight { NumberAnimation { duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 } }
+                                Behavior on Layout.preferredHeight { NumberAnimation { duration: ShellMotion.spatial(0.8); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                                 clip: true
 
                                 SpotlightCategoryGrid {
@@ -1356,9 +1386,9 @@ Scope {
                                     categoryOrder: win.selectedAction === "applications" ? root.appCategoryOrder : root.fileCategoryOrder
                                     sectioned:     win.selectedAction === "files"
                                     mode:          win.selectedAction === "applications" ? "apps" : "files"
-                                    fontFamily:       sfRounded.name
-                                    fontFamilyMedium: sfRoundedMedium.name
-                                    onItemClicked: function(data) { root.recordAppUsage(data); hideAnim.start() }
+                                    fontFamily:       "SF Pro Text"
+                                    fontFamilyMedium: "SF Pro Text"
+                                    onItemClicked: function(data) { root.recordAppUsage(data); win.closeGracefully() }
                                 }
 
                                 SpotlightResults {
@@ -1367,26 +1397,26 @@ Scope {
                                     visible: !win.gridMode && !win.showingShellOutput
                                     searchText:       searchField.text
                                     answers:          win.answers
-                                    fontFamily:       sfRounded.name
-                                    fontFamilyMedium: sfRoundedMedium.name
+                                    fontFamily:       "SF Pro Text"
+                                    fontFamilyMedium: "SF Pro Text"
                                     currentIdx:       win.currentIdx
                                     showWhenEmpty:    win.selectedAction === "clipboard"
                                     sectioned:        win.selectedAction === "search"
                                     onHoveredIdx:     function(idx) { win.currentIdx = idx }
                                     onItemClicked:    function(data) {
                                         if (data.isWallpaper) { root.setWallpaper(data.path, true) } else { root.recordAppUsage(data) }
-                                        if (data.instantClose) { win.doClose() } else { hideAnim.start() }
+                                        if (data.instantClose) { win.doClose() } else { win.closeGracefully() }
                                     }
                                     onReindexRequested: root.startReindex()
                                     onShellCmdRequested: function(cmd) {
                                         if (/^\s*sudo\b/.test(cmd)) {
                                             root.runShellCommand(cmd)
-                                            hideAnim.start()
+                                            win.closeGracefully()
                                         } else {
                                             win.runInlineShell(cmd)
                                         }
                                     }
-                                    onTodoAddRequested: function(text) { root.addTodo(text); hideAnim.start() }
+                                    onTodoAddRequested: function(text) { root.addTodo(text); win.closeGracefully() }
                                     onTodoItemActivated: function(id, done) {
                                         if (done) root.removeTodo(id); else root.toggleTodo(id)
                                     }
@@ -1412,7 +1442,7 @@ Scope {
                                             Layout.fillWidth: true
                                             text: "$ " + win.shellOutputCmd
                                             color: "#ffffff"
-                                            font.family: sfRoundedMedium.name
+                                            font.family: "SF Pro Text"
                                             font.pixelSize: 13
                                             font.weight: Font.DemiBold
                                             elide: Text.ElideRight
@@ -1479,7 +1509,7 @@ Scope {
                                                 width: parent.width
                                                 text: win.shellOutput
                                                 color: "#ffffff"
-                                                font.family: "monospace"
+                                                font.family: "SF Mono"
                                                 font.pixelSize: 12
                                                 wrapMode: Text.Wrap
                                                 textFormat: Text.PlainText
@@ -1494,10 +1524,11 @@ Scope {
 
                 Item {
                     anchors.fill: parent
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:0;action:"applications";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/applications.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:1;action:"files";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/files.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:2;action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:3;iconSize:36;action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    opacity: bgPanel.opacity
+                    SpotlightActionBtn { bud:splitGlass.buds[0];action:"applications";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/applications.svg");textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { bud:splitGlass.buds[1];action:"files";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/files.svg");textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { bud:splitGlass.buds[2];action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { bud:splitGlass.buds[3];action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");iconSize:36;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
                 }
 
                 GlassBackdrop {}
@@ -1507,28 +1538,18 @@ Scope {
 
     component SpotlightActionBtn: Item {
         id: btn
-        required property int    position
         required property string action
         required property url    iconSrc
-        required property bool   actionsShown
-        required property bool   isOpen
-        required property color  glassColor
+        required property var    bud
         required property color  textColor
-        required property real   screenW
+        readonly property bool   active: btn.bud.t > 0.9
         property int iconSize: 30
         signal hovered(string action)
         signal selected(string action)
         width: 58; height: 58
-        x: btn.screenW / 2 + 170 + 10 + (68 * btn.position)
-        BoxGlass {
-            anchors.fill:parent;radius:30;color:btn.glassColor;rimStrength:0.2
-            light:"#20ffffff";lightDir:Qt.vector2d(1,1);layer.enabled:true
-            scale:   btn.actionsShown && btn.isOpen ? 1.0 : 0.0
-            opacity: btn.actionsShown && btn.isOpen ? 1.0 : 0.0
-            Behavior on scale   { NumberAnimation { duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 } }
-            Behavior on opacity { NumberAnimation { duration: 200 } }
-            VectorImage { anchors.centerIn:parent;width:btn.iconSize;height:btn.iconSize;source:btn.iconSrc;preferredRendererType:VectorImage.CurveRenderer;layer.enabled:true;layer.effect:MultiEffect{colorization:1;colorizationColor:btn.textColor} }
-        }
-        MouseArea { anchors.fill:parent;enabled:btn.actionsShown&&btn.isOpen;hoverEnabled:true;cursorShape:Qt.PointingHandCursor;onEntered:btn.hovered(btn.actionsShown&&btn.isOpen?btn.action:"");onExited:btn.hovered("");onClicked:btn.selected(btn.action) }
+        x: btn.bud.x - btn.width / 2
+        y: btn.bud.y - btn.height / 2
+        VectorImage { anchors.centerIn:parent;width:btn.iconSize;height:btn.iconSize;opacity:Math.max(0, Math.min(1, (btn.bud.r / 29 - 0.7) / 0.3));source:btn.iconSrc;preferredRendererType:VectorImage.CurveRenderer;layer.enabled:true;layer.effect:MultiEffect{colorization:1;colorizationColor:btn.textColor} }
+        MouseArea { anchors.fill:parent;enabled:btn.active;hoverEnabled:true;cursorShape:Qt.PointingHandCursor;onEntered:btn.hovered(btn.active?btn.action:"");onExited:btn.hovered("");onClicked:btn.selected(btn.action) }
     }
 }

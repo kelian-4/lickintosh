@@ -1,20 +1,31 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.components
 import qs.ui.topbar.notch.dashboard
 
 ColumnLayout {
     id: root
     spacing: 8
 
-    NotchTabBar {
-        id: tabBar
+    RowLayout {
         Layout.fillWidth: true
+        spacing: 8
+
+        NotchTabBar {
+            id: tabBar
+            Layout.fillWidth: true
+        }
+
+        AmbientBadges {
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+        }
     }
 
-    Loader {
+    PageLoader {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        sourceComponent: tabBar.currentIndex === 1 ? performanceComp : dashboardComp
+        index: tabBar.currentIndex
+        pages: [dashboardComp, performanceComp]
     }
 
     Component { id: dashboardComp;   DashboardPage {} }
