@@ -23,6 +23,7 @@ Scope {
 
     property bool pinned:         !ShellConfig.options.dockAppearance.hoverToReveal
     property var  clientList:     []
+    property string _clientsSignature: ""
     property bool fullscreenActive: false
     property var  cycleIndex:     ({})
     property string tooltipText:    ""
@@ -341,6 +342,9 @@ Scope {
                     pinned:       c.pinned === true
                 })
             }
+            var signature = JSON.stringify(result)
+            if (signature === dockRoot._clientsSignature) return
+            dockRoot._clientsSignature = signature
             dockRoot.clientList = result
             dockRoot._rebuildGroupedClients()
         } catch (e) {}
