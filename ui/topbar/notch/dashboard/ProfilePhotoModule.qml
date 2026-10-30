@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 
@@ -44,14 +45,32 @@ Item {
         height: 88
         radius: width / 2
         color: "#2A2A3A"
-        clip: true
+
+        Item {
+            id: maskShape
+            anchors.fill: parent
+            layer.enabled: true
+            visible: false
+
+            Rectangle {
+                anchors.fill: parent
+                radius: width / 2
+                color: "#FFFFFF"
+            }
+        }
 
         Image {
             anchors.fill: parent
             source: root.avatarSource !== "" ? "file://" + root.avatarSource : ""
             fillMode: Image.PreserveAspectCrop
             visible: root.avatarSource !== ""
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: maskShape
+            }
         }
+
         Text {
             anchors.centerIn: parent
             visible: root.avatarSource === ""
