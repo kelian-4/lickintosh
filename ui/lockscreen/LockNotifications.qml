@@ -30,6 +30,8 @@ import qs.ui.topbar.statusarea.notifcenter
 Item {
     id: root
 
+    property Item glassBackdrop: null
+
     readonly property var cfg: ShellConfig.options.lockscreen
 
     // Nombre max de cartes affichées ; le reste est résumé en "+ N".
@@ -145,6 +147,7 @@ Item {
 
                     BoxGlass {
                         anchors.fill: parent
+                        backdrop: root.glassBackdrop
                         radius: 16
                         color: Qt.rgba(1, 1, 1, 0.10)
                         light: Qt.rgba(1, 1, 1, 0.28)
