@@ -6,7 +6,9 @@ import QtQuick.Shapes
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
+import qs.components
 import qs.components.glass
+import qs.services
 
 Scope {
     id: root
@@ -67,8 +69,14 @@ Scope {
         return "## Style\n- Use casual tone, don't be formal!\n- Always be brief and to the point, unless asked otherwise\n- Don't repeat the user's question\n- Be approachable: avoid jargon, use analogies\n\n## Context (ignore when irrelevant)\n- You are a helpful sidebar assistant on a " + root.sysDistro + " Linux system\n- Desktop environment: " + root.sysDe + "\n- Current date & time: " + root.sysDatetime + "\n- Focused app: " + w + "\n\n" + access + "\n## Presentation\n- Use **bold** for keywords\n- Split long answers with h2 headers + emoji\n- Prefer bullet points\n- For comparisons: table first, then elaboration\n- Use $$ for LaTeX math" + customSection
     }
 
+    Presence {
+        id: presence
+        wanted: root.opened
+        exitDuration: ShellMotion.fade()
+    }
+
     Loader {
-        active: root.opened
+        active: presence.present
         sourceComponent: Component {
             PanelWindow {
                 id: win
@@ -95,6 +103,15 @@ Scope {
                 readonly property bool pendingVisible: tools.current !== null
                 readonly property int  pendingCount:   tools.queue.length
                 readonly property bool toolsBusy:      tools.busy
+
+                property real showProgress: 0
+                Behavior on showProgress {
+                    NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+                }
+                Connections {
+                    target: root
+                    function onOpenedChanged() { win.showProgress = root.opened ? 1 : 0 }
+                }
 
                 property bool   slashMenuOpen: false
                 property bool   recentsOpen:   false
@@ -297,6 +314,7 @@ Scope {
                 }
 
                 Component.onCompleted: {
+                    win.showProgress = 1
                     for (var i = 0; i < root.sessionModel.length; i++) {
                         conversationModel.append(root.sessionModel[i])
                     }
@@ -325,6 +343,9 @@ Scope {
                     width: 320
                     height: Math.min(panelCol.implicitHeight, parent.height - anchors.topMargin - 10)
                     z: 1
+                    opacity: win.showProgress
+                    scale: 0.95 + 0.05 * win.showProgress
+                    transformOrigin: Item.TopRight
 
                     MouseArea {
                         anchors.fill: parent
@@ -346,18 +367,6 @@ Scope {
                             width:   320
                             spacing: 6
 
-                            opacity: 0
-                            Component.onCompleted: fadeIn.start()
-
-                            NumberAnimation {
-                                id: fadeIn
-                                target:   panelCol
-                                property: "opacity"
-                                from: 0
-                                to: 1
-                                duration: 180
-                                easing.type: Easing.OutCubic
-                            }
 
                     ListView {
                         id: chatView
@@ -476,7 +485,7 @@ Scope {
                         lightDir: Qt.vector2d(0.0, -1.0)
                         rimStrength: 0.7
                         clip: true
-                        Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                        Behavior on height { NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
 
                         Column {
                             id: confirmCol
@@ -534,7 +543,7 @@ Scope {
                                     text: win.pendingItem ? (win.pendingItem.cmd || "") : ""
                                     color: "#FFDD88"
                                     font.pixelSize: 12
-                                    font.family: "monospace"
+                                    font.family: "SF Mono"
                                     renderType: Text.NativeRendering
                                     wrapMode: Text.Wrap
                                 }
@@ -549,7 +558,7 @@ Scope {
                                     text: win.pendingItem ? win.pendingItem.path : ""
                                     color: "#FFDD88"
                                     font.pixelSize: 12
-                                    font.family: "monospace"
+                                    font.family: "SF Mono"
                                     renderType: Text.NativeRendering
                                 }
                                 Rectangle {
@@ -569,7 +578,7 @@ Scope {
                                             text: win.pendingItem ? win.pendingItem.newContent : ""
                                             color: "#88DD88"
                                             font.pixelSize: 11
-                                            font.family: "monospace"
+                                            font.family: "SF Mono"
                                             renderType: Text.NativeRendering
                                             wrapMode: Text.Wrap
                                         }
@@ -586,7 +595,7 @@ Scope {
                                     text: win.pendingItem ? win.pendingItem.path : ""
                                     color: "#FFDD88"
                                     font.pixelSize: 12
-                                    font.family: "monospace"
+                                    font.family: "SF Mono"
                                     renderType: Text.NativeRendering
                                 }
                                 Repeater {
@@ -606,7 +615,7 @@ Scope {
                                                 text: "- " + modelData.oldText
                                                 color: "#FF8888"
                                                 font.pixelSize: 11
-                                                font.family: "monospace"
+                                                font.family: "SF Mono"
                                                 renderType: Text.NativeRendering
                                                 wrapMode: Text.Wrap
                                             }
@@ -615,7 +624,7 @@ Scope {
                                                 text: "+ " + modelData.newText
                                                 color: "#88DD88"
                                                 font.pixelSize: 11
-                                                font.family: "monospace"
+                                                font.family: "SF Mono"
                                                 renderType: Text.NativeRendering
                                                 wrapMode: Text.Wrap
                                             }
@@ -895,7 +904,7 @@ Scope {
                         lightDir: Qt.vector2d(0.0, -1.0)
                         rimStrength: 0.5
                         clip: true
-                        Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                        Behavior on height { NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
 
                         Flickable {
                             anchors.fill: parent

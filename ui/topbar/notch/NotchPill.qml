@@ -6,8 +6,7 @@ import qs.services
 /*
     Contenu compact : icône réelle du projet (assets/icons/...), pas
     un glyphe inventé — chemins relatifs depuis ui/topbar/notch/ (3
-    niveaux jusqu'à la racine), même convention que le FontLoader de
-    TopBar.qml ("../../../assets/...").
+    niveaux jusqu'à la racine).
 */
 Item {
     id: root
@@ -89,9 +88,44 @@ Item {
             text: root._label(root.kind)
             color: "#FFFFFF"
             font.pixelSize: 12
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             elide: Text.ElideRight
             renderType: Text.NativeRendering
+        }
+
+        Item {
+            Layout.fillWidth: true
+            visible: !root.peek
+        }
+
+        Row {
+            id: wave
+            visible: root.kind === "media"
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredHeight: 14
+            spacing: 2
+
+            Repeater {
+                model: [520, 380, 610, 440]
+
+                delegate: Rectangle {
+                    id: bar
+                    required property var modelData
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 2.5
+                    height: 4
+                    radius: 1.25
+                    color: "#FFFFFF"
+
+                    SequentialAnimation on height {
+                        running: wave.visible
+                        loops: Animation.Infinite
+                        NumberAnimation { to: 14; duration: bar.modelData; easing.type: Easing.InOutSine }
+                        NumberAnimation { to: 4; duration: bar.modelData; easing.type: Easing.InOutSine }
+                    }
+                }
+            }
         }
     }
 }

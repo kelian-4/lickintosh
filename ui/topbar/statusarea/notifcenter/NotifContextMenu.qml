@@ -90,7 +90,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Effacer"
                     font.pixelSize: 13
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     color: "#ffffff"
                     renderType: Text.NativeRendering
                 }
@@ -128,7 +128,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "Rappeler plus tard"
                             font.pixelSize: 13
-                            font.family: "SF Pro Rounded"
+                            font.family: "SF Pro Text"
                             color: "#ffffff"
                             renderType: Text.NativeRendering
                         }
@@ -154,7 +154,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "Options"
                             font.pixelSize: 13
-                            font.family: "SF Pro Rounded"
+                            font.family: "SF Pro Text"
                             color: "#ffffff"
                             renderType: Text.NativeRendering
                         }
@@ -184,7 +184,7 @@ Item {
                     text: "Rappeler dans " + Math.round(root._remindMinutes) + " min"
                     font.pixelSize: 12
                     font.weight: Font.DemiBold
-                    font.family: "SF Pro Rounded"
+                    font.family: "SF Pro Text"
                     color: "#ffffff"
                     renderType: Text.NativeRendering
                 }
@@ -229,7 +229,7 @@ Item {
                         text: "Confirmer"
                         font.pixelSize: 12
                         font.weight: Font.DemiBold
-                        font.family: "SF Pro Rounded"
+                        font.family: "SF Pro Text"
                         color: "#ffffff"
                         renderType: Text.NativeRendering
                     }
