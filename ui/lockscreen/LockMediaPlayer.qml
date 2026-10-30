@@ -20,6 +20,8 @@ import qs.services
 Item {
     id: root
 
+    property Item glassBackdrop: null
+
     readonly property bool hasPlayer: MprisState.hasPlayer
     visible: root.hasPlayer
     implicitWidth: 280
@@ -37,6 +39,7 @@ Item {
 
         BoxGlass {
             anchors.fill: parent
+            backdrop: root.glassBackdrop
             radius: pill.radius
             color: Qt.rgba(1, 1, 1, 0.10)
             light: Qt.rgba(1, 1, 1, 0.28)

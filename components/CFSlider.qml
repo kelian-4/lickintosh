@@ -25,6 +25,7 @@ Slider {
     }
 
     handle: BoxGlass {
+        backdrop: null
         x: slider.leftPadding + Math.min(slider.availableWidth - width, Math.max(0, (slider.visualPosition * (slider.availableWidth - (width)))))
         y: slider.topPadding + slider.availableHeight / 2 - height / 2
         width: slider.pressed ? 40 : 30
