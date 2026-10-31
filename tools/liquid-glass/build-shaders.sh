@@ -30,3 +30,5 @@ build liquidglass LiquidGlassBlur "100 es,120,150,300 es,320 es,440"
 build tahoeglass TahoeGlass "150,300 es,320 es,440"
 build liquidglass WindowAlpha "100 es,120,150,300 es,320 es,440"
 build liquidglass GlyphGlass "100 es,120,150,300 es,320 es,440"
+build liquidglass SplitLiquidGlass "100 es,120,150,300 es,320 es,440"
+
