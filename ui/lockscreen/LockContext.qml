@@ -193,7 +193,6 @@ Scope {
 
     function triggerWallpaperCache() {
         if (root.wallpaperCachePath.length === 0) return
-        root.dbg("triggerWallpaperCache: checking " + root.wallpaperCachePath)
         // Differe au tour de boucle suivant : onWallpaperCachePathChanged
         // s'execute AVANT que le binding Process.command soit reevalue
         // (constate en logs reels : le run partait avec l'ANCIEN chemin).
@@ -204,10 +203,6 @@ Scope {
     function startWallpaperCheck() {
         if (root.wallpaperCachePath.length === 0) return
         wallpaperCacheCheckProc.running = true
-    }
-
-    function dbg(msg) {
-        console.log("[LockContext]", Date.now() + "ms:", msg)
     }
 
     // 1) Vérifie si le fichier cache existe déjà (évite de relancer une
@@ -228,12 +223,9 @@ Scope {
                 const lines = text.trim().split("\n")
                 const checkedPath = lines[0]
                 const state = lines.length > 1 ? lines[1] : ""
-                root.dbg("wallpaperCacheCheckProc result: " + state +
-                    " (path=" + checkedPath + ", current=" + root.wallpaperCachePath + ")")
                 if (checkedPath !== root.wallpaperCachePath) {
                     // Ignore, mais rien d'autre ne relancera forcement une
                     // verification pour le chemin actuel : on la relance.
-                    root.dbg("wallpaperCacheCheckProc: resultat perime, ignore (relance)")
                     Qt.callLater(root.startWallpaperCheck)
                     return
                 }
@@ -269,15 +261,12 @@ Scope {
             // ligne 2 = son mtime (seulement si le fichier existe).
             const out = wallpaperConvertOut.text.trim().split("\n")
             const convertedPath = out[0]
-            root.dbg("wallpaperConvertProc exited with code " + code +
-                " (target=" + convertedPath + ", current=" + root.wallpaperCachePath + ")")
 
             // Le chemin a change pendant cette conversion : le resultat
             // concerne un autre fichier. On ne touche a rien :
             // onWallpaperCachePathChanged a deja remis ready a false et
             // mis en file une nouvelle verification pour le chemin actuel.
             if (convertedPath !== root.wallpaperCachePath) {
-                root.dbg("wallpaperConvertProc: resultat perime, ignore")
                 return
             }
 

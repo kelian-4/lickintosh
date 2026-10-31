@@ -30,15 +30,10 @@ Item {
         id: _openSettings
         command: ["quickshell", "-p", Quickshell.shellDir + "/settings.qml"]
         running: false
-        stdout: SplitParser { onRead: data => console.log("[AppleMenu Settings stdout]", data) }
-        stderr: SplitParser { onRead: data => console.log("[AppleMenu Settings stderr]", data) }
-        onExited: (exitCode, exitStatus) => console.log("[AppleMenu Settings] exited", exitCode, exitStatus)
     }
 
     function openSettingsApp() {
-        console.log("[AppleMenu] launching settings via execDetached, shellDir=", Quickshell.shellDir)
         Quickshell.execDetached(["quickshell", "-p", Quickshell.shellDir + "/settings.qml"])
-        console.log("[AppleMenu] execDetached call returned")
     }
 
     Process { id: _suspend;  command: ["systemctl", "suspend"];  running: false }
@@ -175,7 +170,6 @@ Item {
             label: "System Settings…"
             icon: "dropdown/settings.svg"
             onActivated: {
-                console.log("[AppleMenu] System Settings clicked")
                 root.openSettingsApp()
                 root.closeRequested()
             }
