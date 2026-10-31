@@ -3,6 +3,7 @@ import QtQuick
 Row {
     id: root
 
+    property var look: null
     property string label: ""
     property string value: ""
     property color tint: "#ffffff"
@@ -13,7 +14,7 @@ Row {
     Text {
         width: root.labelWidth
         text: root.label
-        color: Qt.rgba(1, 1, 1, 0.6)
+        color: root.look ? root.look.secondary : Qt.rgba(1, 1, 1, 0.6)
         font.pixelSize: 11
         font.family: "SF Pro Text"
         renderType: Text.NativeRendering

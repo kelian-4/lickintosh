@@ -7,6 +7,8 @@ import qs.ui.widgets
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
 
     readonly property bool present: UPower.displayDevice.isLaptopBattery
@@ -50,6 +52,7 @@ Item {
     component Block: ColumnLayout {
         id: block
 
+        property var look: null
         property string name: ""
         property real percent: 0
         property color tint: "#30d158"
@@ -65,7 +68,7 @@ Item {
                 Layout.fillWidth: true
                 text: block.name
                 elide: Text.ElideRight
-                color: "#ffffff"
+                color: block.look.primary
                 font.pixelSize: 11
                 font.weight: Font.Bold
                 font.family: "SF Pro Text"
@@ -86,7 +89,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 5
             radius: 2.5
-            color: Qt.rgba(1, 1, 1, 0.14)
+            color: block.look.track
 
             Rectangle {
                 width: parent.width * Math.max(0, Math.min(1, block.percent / 100))
@@ -98,7 +101,7 @@ Item {
 
         Text {
             text: block.detail
-            color: Qt.rgba(1, 1, 1, 0.55)
+            color: block.look.secondary
             font.pixelSize: 10
             font.family: "SF Pro Text"
             renderType: Text.NativeRendering
@@ -106,6 +109,7 @@ Item {
     }
 
     ResourceTitle {
+        look: root.look
         id: title
         title: root.size === "s" ? "Battery" : (root.size === "m" ? "System Status" : "System Monitor")
         tint: root.level
@@ -116,7 +120,7 @@ Item {
         anchors.right: parent.right
         visible: root.size !== "s"
         text: title.updated
-        color: Qt.rgba(1, 1, 1, 0.55)
+        color: root.look.secondary
         font.pixelSize: 11
         font.family: "SF Pro Text"
         renderType: Text.NativeRendering
@@ -132,6 +136,7 @@ Item {
         spacing: 4
 
         ResourceRing {
+            look: root.look
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: 78
             Layout.preferredHeight: 78
@@ -162,7 +167,7 @@ Item {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: "State"
-                    color: Qt.rgba(1, 1, 1, 0.55)
+                    color: root.look.secondary
                     font.pixelSize: 10
                     font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
@@ -187,7 +192,7 @@ Item {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: root.charging ? "To full" : "Left"
-                    color: Qt.rgba(1, 1, 1, 0.55)
+                    color: root.look.secondary
                     font.pixelSize: 10
                     font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
@@ -208,6 +213,7 @@ Item {
         rowSpacing: 8
 
         Block {
+            look: root.look
             name: "Battery"
             percent: root.fraction * 100
             tint: root.level
@@ -215,6 +221,7 @@ Item {
         }
 
         Block {
+            look: root.look
             name: "Memory"
             percent: ResourcesState.memoryPercent
             tint: "#30d158"
@@ -222,6 +229,7 @@ Item {
         }
 
         Block {
+            look: root.look
             name: "CPU"
             percent: ResourcesState.cpuPercent
             tint: "#64d2ff"
@@ -229,6 +237,7 @@ Item {
         }
 
         Block {
+            look: root.look
             name: "Storage"
             percent: ResourcesState.storagePercent
             tint: "#ff9f0a"
@@ -250,6 +259,7 @@ Item {
             spacing: 6
 
             ResourceRing {
+                look: root.look
                 Layout.fillWidth: true
                 Layout.preferredHeight: 66
                 Layout.preferredWidth: 66
@@ -261,6 +271,7 @@ Item {
             }
 
             ResourceRing {
+                look: root.look
                 Layout.fillWidth: true
                 Layout.preferredHeight: 66
                 Layout.preferredWidth: 66
@@ -272,6 +283,7 @@ Item {
             }
 
             ResourceRing {
+                look: root.look
                 Layout.fillWidth: true
                 Layout.preferredHeight: 66
                 Layout.preferredWidth: 66
@@ -283,6 +295,7 @@ Item {
             }
 
             ResourceRing {
+                look: root.look
                 Layout.fillWidth: true
                 Layout.preferredHeight: 66
                 Layout.preferredWidth: 66
@@ -296,7 +309,7 @@ Item {
 
         Text {
             text: "Top Memory Users"
-            color: "#ffffff"
+            color: root.look.primary
             font.pixelSize: 12
             font.weight: Font.Bold
             font.family: "SF Pro Text"
@@ -312,7 +325,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 26
                 radius: 8
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: root.look.surface
 
                 Text {
                     anchors.left: parent.left
@@ -322,7 +335,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     text: row.modelData.name
                     elide: Text.ElideRight
-                    color: "#ffffff"
+                    color: root.look.primary
                     font.pixelSize: 11
                     font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
@@ -334,7 +347,7 @@ Item {
                     anchors.rightMargin: 8
                     anchors.verticalCenter: parent.verticalCenter
                     text: root.memory(row.modelData.mb)
-                    color: Qt.rgba(1, 1, 1, 0.65)
+                    color: root.look.secondary
                     font.pixelSize: 11
                     font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
@@ -347,7 +360,7 @@ Item {
         Text {
             Layout.fillWidth: true
             text: root.stateText + " · " + root.timeText
-            color: Qt.rgba(1, 1, 1, 0.65)
+            color: root.look.secondary
             font.pixelSize: 11
             font.family: "SF Pro Text"
             renderType: Text.NativeRendering

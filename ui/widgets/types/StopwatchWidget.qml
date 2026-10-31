@@ -6,6 +6,8 @@ import qs.ui.widgets
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
 
     ColumnLayout {
@@ -23,7 +25,7 @@ Item {
 
         Text {
             text: StopwatchState.formatElapsed(StopwatchState.elapsedMs)
-            color: "#ffffff"
+            color: root.look.primary
             font.pixelSize: root.size === "s" ? 26 : 40
             font.weight: Font.Light
             font.family: "SF Pro Text"
@@ -37,12 +39,14 @@ Item {
             spacing: 6
 
             WidgetButton {
+                look: root.look
                 text: StopwatchState.running ? "Stop" : "Start"
                 tint: StopwatchState.running ? "#ff453a" : "#30d158"
                 onClicked: StopwatchState.toggle()
             }
 
             WidgetButton {
+                look: root.look
                 visible: !StopwatchState.running && StopwatchState.elapsedMs > 0
                 text: "Reset"
                 onClicked: StopwatchState.reset()
