@@ -52,7 +52,7 @@ Singleton {
 
     Process {
         running: true
-        command: ["xdg-user-dir", "DESKTOP"]
+        command: ["sh", "-c", "command -v xdg-user-dir >/dev/null 2>&1 && xdg-user-dir DESKTOP || true"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var path = text.trim()

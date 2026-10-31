@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import qs.components.glass
 
 /*
     LockScreen — point d'entrée du lockscreen, intégré au shell principal
@@ -218,6 +219,12 @@ Scope {
         id: unlockCloseTimer
         interval: lockContext.unlockAnimDuration
         onTriggered: lockContext.unlocked()
+    }
+
+    Binding {
+        target: GlassTracker
+        property: "sessionLocked"
+        value: lock.locked
     }
 
     WlSessionLock {

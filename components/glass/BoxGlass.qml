@@ -30,15 +30,17 @@ Item {
 
     Behavior on color { PropertyAnimation { duration: animationSpeed; easing.type: Easing.InSine } }
     
-    GlassRim {
-        id: boxContainer
+    Loader {
         anchors.fill: parent
-        visible: !box.glassed
-        baseColor: box.transparent ? "transparent" : box.color
-        radius: box.radius
-        glowColor: box.highlightEnabled ? box.light : "#00000000"
-        lightDir: box.lightDir
-        glowEdgeBand: box.rimSize
+        active: !box.glassed
+
+        sourceComponent: GlassRim {
+            baseColor: box.transparent ? "transparent" : box.color
+            radius: box.radius
+            glowColor: box.highlightEnabled ? box.light : "#00000000"
+            lightDir: box.lightDir
+            glowEdgeBand: box.rimSize
+        }
     }
 
     Loader {
