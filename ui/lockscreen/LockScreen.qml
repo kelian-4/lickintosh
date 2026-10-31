@@ -79,10 +79,6 @@ Scope {
     // combien de temps s'est réellement écoulé jusqu'au commitLock().
     property real lockRequestedAt: 0
 
-    function dbg(msg) {
-        console.log("[LockScreen]", (Date.now() - root.lockRequestedAt) + "ms:", msg)
-    }
-
     // "Prêt" signifie explicitement Ready ou Error (échec définitif, le
     // repli visuel prendra le relais) — jamais se fier à "différent de
     // Loading" seul : au tout premier appel après démarrage du shell,
@@ -100,49 +96,29 @@ Scope {
         && (lockContext.avatarUrl.toString().length === 0 || root.imageIsSettled(avatarPreloader))
     readonly property bool readyForLock: wallpaperPreloadReady && avatarPreloadReady
 
-    onWallpaperPreloadReadyChanged: root.dbg("wallpaperPreloadReady -> " + root.wallpaperPreloadReady
-        + " (status=" + wallpaperPreloader.status + ")")
-    onAvatarPreloadReadyChanged: root.dbg("avatarPreloadReady -> " + root.avatarPreloadReady
-        + " (detectionDone=" + lockContext.avatarDetectionDone
-        + ", url=" + lockContext.avatarUrl
-        + ", status=" + avatarPreloader.status + ")")
     onReadyForLockChanged: {
-        root.dbg("readyForLock -> " + root.readyForLock)
         if (root.lockPending && root.readyForLock) {
-            root.dbg("readyForLock reached while pending -> commitLock() via normal path")
             root.commitLock()
         }
     }
 
     function lock() {
         root.lockRequestedAt = Date.now()
-        root.dbg("lock() called. locked=" + lock.locked + " lockPending=" + root.lockPending
-            + " readyForLock=" + root.readyForLock
-            + " wallpaperStatus=" + wallpaperPreloader.status
-            + " avatarStatus=" + avatarPreloader.status
-            + " avatarUrl=" + lockContext.avatarUrl
-            + " avatarDetectionDone=" + lockContext.avatarDetectionDone)
 
         if (lock.locked || root.lockPending) {
-            root.dbg("lock() ignored: already locked or already pending")
             return
         }
         lockContext.checkFprintAvailable()
 
         if (root.readyForLock) {
-            root.dbg("already ready -> commitLock() immediately")
             root.commitLock()
         } else {
-            root.dbg("not ready yet -> waiting (lockPending=true), timeout in " + lockTimeoutTimer.interval + "ms")
             root.lockPending = true
             lockTimeoutTimer.restart()
         }
     }
 
     function commitLock() {
-        root.dbg("commitLock() -> lock.locked = true"
-            + " (wallpaperReady=" + root.wallpaperPreloadReady
-            + " avatarReady=" + root.avatarPreloadReady + ")")
         root.lockPending = false
         lockTimeoutTimer.stop()
         lock.locked = true
@@ -160,9 +136,6 @@ Scope {
         interval: 1500
         onTriggered: {
             if (root.lockPending) {
-                root.dbg("TIMEOUT reached (" + lockTimeoutTimer.interval + "ms) -> commitLock() via timeout path"
-                    + " (wallpaperReady=" + root.wallpaperPreloadReady
-                    + " avatarReady=" + root.avatarPreloadReady + ")")
                 root.commitLock()
             }
         }
@@ -213,8 +186,6 @@ Scope {
             ? Qt.size(root.primaryScreen.width * (root.primaryScreen.devicePixelRatio ?? 1),
                        root.primaryScreen.height * (root.primaryScreen.devicePixelRatio ?? 1))
             : undefined
-        onStatusChanged: root.dbg("wallpaperPreloader.status -> " + status + " (source=" + source + ")")
-        onSourceChanged: root.dbg("wallpaperPreloader.source changed -> " + source)
     }
 
     // Même principe que le wallpaper ci-dessus, pour l'avatar : la
