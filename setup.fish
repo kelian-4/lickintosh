@@ -4,6 +4,7 @@ set -l repo (realpath (status dirname))
 set -l qs_dst ~/.config/quickshell
 set -l fonts_dst ~/.local/share/fonts/SF
 set -l icons_dst ~/.icons
+set -l hypr_dst ~/.config/hypr
 
 set -l setup_only_assets fonts icons_desktop MacOS-Tahoe-Cursor config
 set -l managed shell.qml settings.qml components services ui tools
@@ -638,6 +639,24 @@ if test $do_shell -eq 1
         end
     end
     pgrep -x quickshell >/dev/null 2>&1; and echo "    Quickshell tourne deja : relance-le completement pour charger la nouvelle copie."
+end
+
+say "Configuration Hyprland ($hypr_dst)"
+set -l hypr_src $repo/assets/config/hypr
+set -l hypr_files (find $hypr_src -type f 2>/dev/null | sort)
+if test (count $hypr_files) -eq 0
+    echo "    assets/config/hypr est absent, etape ignoree"
+else
+    set -l hypr_copied 0
+    for f in $hypr_files
+        set -l rel (string replace -- "$hypr_src/" "" $f)
+        set -l dst $hypr_dst/$rel
+        test -f $dst; and cmp -s $f $dst; and continue
+        backup $dst
+        mkdir -p (dirname $dst)
+        cp -f $f $dst; and set hypr_copied (math $hypr_copied + 1)
+    end
+    echo "    $hypr_copied fichier(s) installe(s)"
 end
 
 say "Applications GTK (dconf)"
