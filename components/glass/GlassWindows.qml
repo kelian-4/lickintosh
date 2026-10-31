@@ -117,7 +117,7 @@ Item {
                 && ipc.hidden !== true
                 && ipc.mapped !== false
                 && ipc.at !== undefined && ipc.size !== undefined
-            readonly property bool shown: onScreen
+            readonly property bool shown: onScreen && !GlassTracker.captureBlocked
                 && root.region.width > 0 && root.region.height > 0
                 && (ipc.at[0] - root.monitorX) < (root.region.x + root.region.width + root.attachMargin)
                 && (ipc.at[0] - root.monitorX + ipc.size[0]) > (root.region.x - root.attachMargin)

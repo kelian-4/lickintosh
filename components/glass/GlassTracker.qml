@@ -10,6 +10,18 @@ Singleton {
     property int captureUsers: 0
     property bool fast: false
     property int transitionEpoch: 0
+    property bool sessionLocked: false
+    readonly property bool captureBlocked: sessionLocked || unlockSettle.running
+
+    onSessionLockedChanged: {
+        if (!sessionLocked)
+            unlockSettle.restart()
+    }
+
+    Timer {
+        id: unlockSettle
+        interval: 1500
+    }
     property string lastSignature: ""
 
     property int captureFastInterval: 40
