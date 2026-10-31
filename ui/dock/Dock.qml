@@ -59,7 +59,7 @@ Scope {
         { name: "Settings", cmd: "__settings-app__", icon: "preferences-system", iconPath: "", autostart: false }
     ]
 
-    readonly property string _stateDir:  "$HOME/.config/quickshell/dock"
+    readonly property string _stateDir:  "$HOME/.config/lickintosh/dock"
     readonly property string _statePath: dockRoot._stateDir + "/dock-state.json"
     property bool _stateLoaded: false
 
@@ -493,8 +493,8 @@ Scope {
                       'end)\n'
         var escaped = content.replace(/'/g, "'\\''")
         _autostartWrite.command = ["sh", "-c",
-            "mkdir -p $HOME/.config/quickshell/dock-autostart && printf '%s' '" + escaped +
-            "' > $HOME/.config/quickshell/dock-autostart/dock-autostart.lua"]
+            "mkdir -p $HOME/.config/lickintosh/dock-autostart && printf '%s' '" + escaped +
+            "' > $HOME/.config/lickintosh/dock-autostart/dock-autostart.lua"]
         _autostartWrite.running = true
     }
 

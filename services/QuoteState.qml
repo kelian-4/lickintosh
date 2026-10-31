@@ -10,7 +10,7 @@ Singleton {
 
     reloadableId: "quoteState"
 
-    readonly property string filePath: Quickshell.env("HOME") + "/.config/quickshell/core/quote.json"
+    readonly property string filePath: Quickshell.env("HOME") + "/.config/lickintosh/core/quote.json"
     readonly property string endpoint: "https://zenquotes.io/api/today"
 
     property string dateKey: root._key()

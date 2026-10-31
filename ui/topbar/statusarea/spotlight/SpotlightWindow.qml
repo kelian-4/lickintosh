@@ -366,7 +366,7 @@ Scope {
     Process {
         id: userActionsProc
         running: true
-        command: ["bash", "-c", "dir=~/.config/quickshell/spotlight/actions; mkdir -p \"$dir\"; find \"$dir\" -maxdepth 1 -type f -executable -printf '%f\\n' 2>/dev/null | sort"]
+        command: ["bash", "-c", "dir=~/.config/lickintosh/spotlight/actions; mkdir -p \"$dir\"; find \"$dir\" -maxdepth 1 -type f -executable -printf '%f\\n' 2>/dev/null | sort"]
         stdout: StdioCollector { id: userActionsOut }
         onExited: {
             var lines = userActionsOut.text.trim().split("\n")
