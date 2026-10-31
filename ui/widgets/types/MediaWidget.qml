@@ -6,6 +6,8 @@ import qs.services
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
     readonly property bool large: root.size === "l"
     readonly property bool compact: root.size === "s"
@@ -52,7 +54,7 @@ Item {
                 Layout.fillWidth: true
                 text: MprisState.hasPlayer ? (MprisState.trackTitle !== "" ? MprisState.trackTitle : "Unknown") : "Not Playing"
                 elide: Text.ElideRight
-                color: "#ffffff"
+                color: root.look.primary
                 font.pixelSize: 14
                 font.weight: Font.Medium
                 font.family: "SF Pro Text"
@@ -64,7 +66,7 @@ Item {
                 visible: MprisState.trackArtist !== ""
                 text: MprisState.trackArtist
                 elide: Text.ElideRight
-                color: Qt.rgba(1, 1, 1, 0.6)
+                color: root.look.secondary
                 font.pixelSize: 12
                 font.family: "SF Pro Text"
                 renderType: Text.NativeRendering

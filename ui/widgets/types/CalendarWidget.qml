@@ -6,6 +6,8 @@ import qs.services
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
 
     readonly property date today: clock.date
@@ -54,7 +56,7 @@ Item {
 
                 Text {
                     text: Qt.locale().standaloneMonthName(root.today.getMonth(), Locale.LongFormat)
-                    color: Qt.rgba(1, 1, 1, 0.6)
+                    color: root.look.secondary
                     font.pixelSize: 12
                     font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
@@ -71,7 +73,7 @@ Item {
                     Layout.fillWidth: true
                     visible: root.events.length === 0
                     text: "No Events"
-                    color: Qt.rgba(1, 1, 1, 0.5)
+                    color: root.look.secondary
                     font.pixelSize: 13
                     font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
@@ -99,7 +101,7 @@ Item {
                                 Layout.fillWidth: true
                                 text: modelData.title
                                 elide: Text.ElideRight
-                                color: "#ffffff"
+                                color: root.look.primary
                                 font.pixelSize: 12
                                 font.weight: Font.Medium
                                 font.family: "SF Pro Text"
@@ -108,7 +110,7 @@ Item {
 
                             Text {
                                 text: modelData.time
-                                color: Qt.rgba(1, 1, 1, 0.55)
+                                color: root.look.secondary
                                 font.pixelSize: 11
                                 font.family: "SF Pro Text"
                                 renderType: Text.NativeRendering
@@ -149,7 +151,7 @@ Item {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                     text: Qt.locale().dayName((root.firstDay + index) % 7, Locale.NarrowFormat)
-                    color: Qt.rgba(1, 1, 1, 0.5)
+                    color: root.look.secondary
                     font.pixelSize: 11
                     font.weight: Font.Bold
                     font.family: "SF Pro Text"
@@ -183,7 +185,7 @@ Item {
                         anchors.centerIn: parent
                         visible: dayCell.valid
                         text: dayCell.day
-                        color: "#ffffff"
+                        color: dayCell.isToday ? "#ffffff" : root.look.primary
                         font.pixelSize: 12
                         font.weight: dayCell.isToday ? Font.Bold : Font.Normal
                         font.family: "SF Pro Text"

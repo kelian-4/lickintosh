@@ -6,6 +6,8 @@ import qs.components
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
 
     readonly property var sink: Pipewire.defaultAudioSink
@@ -43,7 +45,7 @@ Item {
 
             Text {
                 text: root.muted ? "Muted" : Math.round(root.level * 100) + "%"
-                color: "#ffffff"
+                color: root.look.primary
                 font.pixelSize: 13
                 font.family: "SF Pro Text"
                 renderType: Text.NativeRendering
@@ -55,7 +57,7 @@ Item {
             visible: root.size === "m" && root.ready
             text: root.sink.description !== "" ? root.sink.description : root.sink.name
             elide: Text.ElideRight
-            color: Qt.rgba(1, 1, 1, 0.55)
+            color: root.look.secondary
             font.pixelSize: 12
             font.family: "SF Pro Text"
             renderType: Text.NativeRendering
@@ -91,7 +93,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 10
                 radius: 5
-                color: Qt.rgba(1, 1, 1, 0.14)
+                color: root.look.track
 
                 Rectangle {
                     width: track.width * (root.muted ? 0 : Math.max(0, Math.min(1, root.level)))
