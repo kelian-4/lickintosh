@@ -4,12 +4,6 @@ set -l repo (realpath (status dirname))
 set -l qs_dst ~/.config/quickshell
 set -l fonts_dst ~/.local/share/fonts/SF
 set -l icons_dst ~/.icons
-set -l hypr_dst ~/.config/hypr
-set -q LICKINTOSH_HYPR; and set hypr_dst $LICKINTOSH_HYPR
-set -l autostart ~/.config/hypr/hyprlua/autostart.lua
-set -q LICKINTOSH_AUTOSTART; and set autostart $LICKINTOSH_AUTOSTART
-set -l env_lua ~/.config/hypr/hyprlua/env.lua
-set -q LICKINTOSH_ENV; and set env_lua $LICKINTOSH_ENV
 
 set -l setup_only_assets fonts icons_desktop MacOS-Tahoe-Cursor config
 set -l managed shell.qml settings.qml components services ui tools
@@ -295,7 +289,7 @@ function install_items --argument-names family
             if pkg_available $family $p
                 contains -- $p $pkgs; or set -a pkgs $p
             else
-                echo "    indisponible dans les depots : $p (a installer a la main)" >&2
+                echo "    indisponible : $p" >&2
             end
         end
     end
@@ -370,7 +364,7 @@ set -l auto 0
 set -l qs_bin
 
 if set -q _flag_skip_deps
-    echo "    ignore (--skip-deps)"
+    echo "    ignores"
     for c in qs quickshell
         if command -q $c
             set qs_bin $c
@@ -382,16 +376,10 @@ else
     set -l os_like (os_field /etc/os-release ID_LIKE)
     set family (detect_family "$os_id" "$os_like")
     contains -- $family arch debian fedora; and set auto 1
-    if test $auto -eq 1
-        echo "    distribution : $family (installation automatique)"
-    else
-        echo "    distribution : $family (verification seulement : installe les manques a la main)"
-    end
+    echo "    distribution : $family"
 
     set -l req 'magick|convert:imagemagick' brightnessctl:brightnessctl playerctl:playerctl wl-copy:wl-clipboard grim:grim slurp:slurp hyprpicker:hyprpicker jq:jq curl:curl xdg-open:xdg-utils xdg-user-dir:xdg-user-dirs pw-dump:pipewire wpctl:wireplumber nmcli:networkmanager bluetoothctl:bluez upower:upower powerprofilesctl:power-profiles-daemon
-    set -l rec hypridle:hypridle cliphist:cliphist nm-applet:nmapplet khal:khal powertop:powertop
     set -l missing_req (missing_items $req)
-    set -l missing_rec (missing_items $rec)
 
     if test $auto -eq 1
         if test (count $missing_req) -gt 0
@@ -400,19 +388,11 @@ else
                 refresh_index $family
                 install_items $family $missing_req
             else
-                set -a warnings "outils requis non installes : $missing_req"
-            end
-        end
-        if test (count $missing_rec) -gt 0
-            echo "    outils recommandes manquants (autostart Hyprland, calendrier, energie) : $missing_rec"
-            if ask "    Les installer ?"
-                refresh_index $family
-                install_items $family $missing_rec
+                set -a warnings "outils requis manquants : $missing_req"
             end
         end
     else
-        test (count $missing_req) -gt 0; and set -a warnings "outils requis manquants (a installer a la main) : $missing_req"
-        test (count $missing_rec) -gt 0; and set -a warnings "outils recommandes manquants : $missing_rec"
+        test (count $missing_req) -gt 0; and set -a warnings "outils requis manquants : $missing_req"
     end
 
     for c in qs quickshell
@@ -455,9 +435,9 @@ else
     end
 
     if test -n "$qs_bin"; and not contains -- "quickshell 0.2 ou plus est requis" $blocking
-        echo "    Quickshell $qs_ver ($qs_bin) ok"
+        echo "    Quickshell $qs_ver ok"
         if test "$qs_bin" != qs
-            set -a warnings "la commande qs est absente (seulement $qs_bin) : l'autostart Hyprland lance qs"
+            set -a warnings "la commande qs est absente (seulement $qs_bin)"
         end
         set -l mods QtQuick Quickshell QtQuick.Layouts QtQuick.Controls QtQuick.VectorImage QtQuick.Effects QtQuick.Window QtQuick.Shapes QtGraphs Qt.labs.folderlistmodel Quickshell.Io Quickshell.Wayland Quickshell.Hyprland Quickshell.Widgets Quickshell.Services.UPower Quickshell.Bluetooth Quickshell.Services.Pipewire Quickshell.Services.Notifications Quickshell.Services.SystemTray Quickshell.Services.Pam Quickshell.Services.Mpris
         set -l missing_mods (qml_missing $qs_bin $mods)
@@ -479,7 +459,7 @@ else
                     refresh_index $family
                     install_items $family $items
                 else
-                    echo "    paquets a installer a la main : "(for i in $items; pkg_for $family $i; end)
+                    echo "    paquets manquants : "(for i in $items; pkg_for $family $i; end)
                 end
                 set -l still
                 for m in (qml_missing $qs_bin $mods)
@@ -495,9 +475,7 @@ else
     end
 
     if test -d /run/systemd/system; and command -q systemctl
-        if test $family = nixos
-            echo "    NixOS : les services (NetworkManager, bluetooth, upower, power-profiles-daemon, pipewire) se declarent dans la configuration"
-        else
+        if test $family != nixos
             set -l sys_off
             for u in NetworkManager bluetooth upower power-profiles-daemon
                 systemctl cat $u.service >/dev/null 2>&1; or continue
@@ -568,7 +546,6 @@ else
     echo "    $installed police(s) installee(s), "(math (count $fonts) - $installed)" ignoree(s)"
     if test $installed -gt 0
         command -q fc-cache; and fc-cache -f $fonts_dst
-        echo "    Si le shell tourne deja, relance-le completement (qs kill, puis qs)."
     end
 end
 
@@ -623,8 +600,7 @@ end
 set -l do_shell 1
 if test (count $present) -gt 0
     echo "    deja present : $present"
-    echo "    (les donnees du shell comme dock/, core/ et spotlight/ ne sont pas touchees)"
-    if ask "    Remplacer le code du shell ? Une sauvegarde est faite avant."
+        if ask "    Remplacer le code du shell ? Une sauvegarde est faite avant."
         set -l backup $qs_dst.bak-(date +%Y%m%d-%H%M%S)
         mkdir -p $backup
         for e in $present
@@ -664,57 +640,6 @@ if test $do_shell -eq 1
     pgrep -x quickshell >/dev/null 2>&1; and echo "    Quickshell tourne deja : relance-le completement pour charger la nouvelle copie."
 end
 
-say "Configuration Hyprland ($hypr_dst)"
-set -l hypr_src $repo/assets/config/hypr
-set -l hypr_files (find $hypr_src -type f 2>/dev/null | sort)
-if test (count $hypr_files) -eq 0
-    echo "    aucun fichier dans assets/config/hypr, etape ignoree"
-else
-    set -l hypr_copied 0
-    for f in $hypr_files
-        set -l rel (string replace -- "$hypr_src/" "" $f)
-        set -l dst $hypr_dst/$rel
-        if test -f $dst; and cmp -s $f $dst
-            continue
-        end
-        if test -e $dst
-            echo "    $dst differe :"
-            diff -u $dst $f | sed 's/^/        /'
-            if not ask "    Remplacer ?"
-                echo "    $rel conserve"
-                continue
-            end
-            backup $dst
-        end
-        mkdir -p (dirname $dst)
-        cp -f $f $dst; and set hypr_copied (math $hypr_copied + 1)
-    end
-    echo "    $hypr_copied fichier(s) installe(s)"
-    test $hypr_copied -gt 0; and command -q hyprctl; and echo "    Si Hyprland tourne, applique avec : hyprctl reload"
-end
-
-say "Autostart ($autostart)"
-set -l block 'hl.on("hyprland.start", function()
-    hl.exec_cmd("qs")
-end)'
-
-if not test -f $autostart
-    echo "    $autostart n'existe pas, rien n'a ete modifie. Ajoute ce bloc dans ta config :"
-    echo $block | sed 's/^/        /'
-else if grep -qE 'exec_cmd\([[:space:]]*(["'\''](qs|quickshell)\b|programs\.shell)' $autostart
-    echo "    quickshell est deja lance dans autostart.lua, rien a faire"
-else
-    echo "    quickshell n'est pas dans autostart.lua. Bloc a ajouter a la fin du fichier :"
-    echo $block | sed 's/^/        /'
-    if ask "    L'ajouter ?"
-        cp -a $autostart $autostart.bak
-        printf '\n%s\n' $block >> $autostart
-        echo "    ajoute (sauvegarde : $autostart.bak)"
-    else
-        echo "    autostart conserve tel quel"
-    end
-end
-
 say "Applications GTK (dconf)"
 if not command -q dconf
     echo "    dconf est introuvable, etape ignoree"
@@ -742,7 +667,7 @@ else
 end
 
 say "Applications Qt (qt6ct, kdeglobals)"
-command -q qt6ct; or echo "    qt6ct n'est pas installe (QT_QPA_PLATFORMTHEME=qt6ct est necessaire pour que ces reglages comptent)"
+command -q qt6ct; or echo "    qt6ct n'est pas installe"
 set -l qt_files ~/.config/qt6ct/qt6ct.conf ~/.config/qt6ct/qt6ct.conf ~/.config/kdeglobals
 set -l qt_sections Appearance Fonts Icons
 set -l qt_keys icon_theme general Theme
@@ -797,30 +722,6 @@ else
 end
 rm -f $fc_tmp
 
-say "Variable QT_QPA_PLATFORMTHEME ($env_lua)"
-set -l env_line 'hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")'
-if not test -f $env_lua
-    echo "    $env_lua n'existe pas, rien n'a ete modifie. Ajoute cette ligne dans ta config :"
-    echo "        $env_line"
-else if grep -q 'QT_QPA_PLATFORMTHEME' $env_lua
-    if grep -q 'QT_QPA_PLATFORMTHEME.*qt6ct' $env_lua
-        echo "    deja defini sur qt6ct, rien a faire"
-    else
-        echo "    QT_QPA_PLATFORMTHEME est defini avec une autre valeur, non modifie :"
-        grep 'QT_QPA_PLATFORMTHEME' $env_lua | sed 's/^/        /'
-    end
-else
-    echo "    QT_QPA_PLATFORMTHEME n'est pas defini. Ligne a ajouter a la fin du fichier :"
-    echo "        $env_line"
-    if ask "    L'ajouter ?"
-        backup $env_lua
-        printf '\n%s\n' $env_line >> $env_lua
-        echo "    ajoute"
-    else
-        echo "    env.lua conserve tel quel"
-    end
-end
-
 say "Termine."
 
 if test (count $warnings) -gt 0
@@ -832,7 +733,7 @@ end
 
 say "Lancement du shell"
 if set -q _flag_no_launch
-    echo "    ignore (--no-launch)"
+    echo "    ignore"
 else if test -z "$qs_bin"
     echo "    quickshell est introuvable : shell non lance"
 else if test (count $blocking) -gt 0
@@ -841,7 +742,7 @@ else if test (count $blocking) -gt 0
         echo "      - $b"
     end
 else if test -z "$HYPRLAND_INSTANCE_SIGNATURE"
-    echo "    pas dans une session Hyprland : le shell demarre tout seul a la prochaine ouverture de session (autostart), ou lance : $qs_bin -d -n"
+    echo "    pas dans une session Hyprland : lance $qs_bin -d -n"
 else
     set -l running 0
     pgrep -x quickshell >/dev/null 2>&1; and set running 1
