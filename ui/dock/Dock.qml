@@ -395,7 +395,6 @@ Scope {
     }
 
     function launchSettingsApp() {
-        console.log("[Settings launch] execDetached, shellDir=", Quickshell.shellDir)
         Quickshell.execDetached(["quickshell", "-p", Quickshell.shellDir + "/settings.qml"])
     }
 
@@ -807,7 +806,6 @@ Scope {
                                     }
 
                                     onClicked: {
-                                        console.log("[Dock click]", "name=" + modelData.name, "cmd=" + appCmd, "instLen=" + _inst.length)
                                         if (_inst.length > 0)
                                             dockRoot.cycleWindow(_groupKey, _inst)
                                         else if (appCmd === "__settings-app__" || (appCmd === "" && modelData.name === "Settings"))

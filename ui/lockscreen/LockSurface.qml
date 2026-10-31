@@ -32,10 +32,6 @@ WlSessionLockSurface {
 
     color: "transparent"
 
-    Component.onCompleted: {
-        console.log("[LockSurface]", Date.now() + "ms:", "WlSessionLockSurface created for screen", root.screen)
-    }
-
     // Construction d'URL file:// encodées correctement : centralisée
     // dans LockContext.toFileUrl() (singleton partagé entre LockScreen,
     // LockSurface), pas dupliquée ici.
@@ -138,8 +134,6 @@ WlSessionLockSurface {
             // ci-dessus au bon moment, plutôt qu'un opacity fixe à 1 qui
             // laisse voir le "pop" au moment exact où Qt finit de décoder.
             onStatusChanged: {
-                console.log("[LockSurface]", Date.now() + "ms:", "wallpaperImage.status ->", status,
-                    "(0=Null,1=Ready,2=Loading,3=Error) source=" + source + " sourceSize=" + sourceSize)
                 if (status === Image.Ready) background.opacity = 1
             }
             // Léger zoom d'entrée, style eqsh : part de 1.04 et redescend
@@ -150,8 +144,6 @@ WlSessionLockSurface {
             }
             Component.onCompleted: {
                 wallpaperImage.scale = 1
-                console.log("[LockSurface]", Date.now() + "ms:", "wallpaperImage created, initial status =", status,
-                    "source=" + source)
             }
         }
 
@@ -466,13 +458,6 @@ WlSessionLockSurface {
                         // plus grand (ex: photo de profil haute
                         // résolution). Même stratégie que le wallpaper.
                         sourceSize: Qt.size(56 * (root.screen?.devicePixelRatio ?? 1), 56 * (root.screen?.devicePixelRatio ?? 1))
-
-                        Component.onCompleted: {
-                            console.log("[LockSurface]", Date.now() + "ms:", "avatarImg created, initial status =", status, "source=" + source)
-                        }
-                        onStatusChanged: {
-                            console.log("[LockSurface]", Date.now() + "ms:", "avatarImg.status ->", status, "source=" + source)
-                        }
 
                         // Fondu croisé avec le repli (initiale) ci-dessous
                         // plutôt qu'un basculement instantané au moment
