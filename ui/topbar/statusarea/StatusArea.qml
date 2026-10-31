@@ -56,6 +56,7 @@ RowLayout {
 
         BTDeviceTray {
             Layout.alignment: Qt.AlignVCenter
+            visible: implicitWidth > 0
         }
 
         Volume {
