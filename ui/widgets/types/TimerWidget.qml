@@ -6,6 +6,8 @@ import qs.ui.widgets
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
 
     readonly property bool paused: !TimerState.running && TimerState.remainingAtPauseMs > 0
@@ -27,7 +29,7 @@ Item {
 
         Text {
             text: TimerState.firing ? "Done" : (root.active ? TimerState.formatRemaining(TimerState.remainingMs) : "0:00")
-            color: TimerState.firing ? "#ff9f0a" : "#ffffff"
+            color: TimerState.firing ? "#ff9f0a" : root.look.primary
             font.pixelSize: root.size === "s" ? 34 : 44
             font.weight: Font.Light
             font.family: "SF Pro Text"
@@ -41,6 +43,7 @@ Item {
             spacing: 6
 
             WidgetButton {
+                look: root.look
                 visible: TimerState.firing
                 text: "OK"
                 tint: "#ff9f0a"
@@ -51,6 +54,7 @@ Item {
                 model: !root.active && !TimerState.firing ? root.presets : []
 
                 delegate: WidgetButton {
+                    look: root.look
                     required property int modelData
                     text: modelData + " min"
                     onClicked: TimerState.start(modelData * 60000)
@@ -58,6 +62,7 @@ Item {
             }
 
             WidgetButton {
+                look: root.look
                 visible: root.active
                 text: TimerState.running ? "Pause" : "Resume"
                 tint: "#ff9f0a"
@@ -65,6 +70,7 @@ Item {
             }
 
             WidgetButton {
+                look: root.look
                 visible: root.active
                 text: "Cancel"
                 onClicked: TimerState.cancel()

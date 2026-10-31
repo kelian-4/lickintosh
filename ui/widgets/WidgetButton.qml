@@ -3,9 +3,11 @@ import QtQuick
 Rectangle {
     id: root
 
+    property var look: null
     property string text: ""
-    property color tint: Qt.rgba(1, 1, 1, 0.16)
-    property color textColor: "#ffffff"
+    property color tint: root.look ? root.look.track : Qt.rgba(1, 1, 1, 0.16)
+    readonly property bool neutral: root.look ? Qt.colorEqual(root.tint, root.look.track) : true
+    property color textColor: root.neutral && root.look ? root.look.primary : "#ffffff"
     signal clicked()
 
     implicitWidth: label.implicitWidth + 22

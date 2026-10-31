@@ -5,6 +5,8 @@ import Quickshell
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
 
     SystemClock {
@@ -20,7 +22,7 @@ Item {
 
         Text {
             text: Qt.formatTime(clock.date, "HH:mm")
-            color: "#ffffff"
+            color: root.look.primary
             font.pixelSize: root.size === "s" ? 46 : 72
             font.weight: Font.Light
             font.family: "SF Pro Text"

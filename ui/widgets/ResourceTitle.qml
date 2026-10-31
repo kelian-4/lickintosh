@@ -4,6 +4,7 @@ import Quickshell
 Row {
     id: root
 
+    property var look: null
     property string title: ""
     property color tint: "#30d158"
     property bool showTime: false
@@ -26,7 +27,7 @@ Row {
     Text {
         anchors.verticalCenter: parent.verticalCenter
         text: root.title
-        color: "#ffffff"
+        color: root.look ? root.look.primary : "#ffffff"
         font.pixelSize: 13
         font.weight: Font.Bold
         font.family: "SF Pro Text"
