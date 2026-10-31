@@ -6,6 +6,8 @@ import qs.services
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
 
     readonly property var connected: BluetoothState.devices.filter(function(d) { return d.connected })
@@ -39,7 +41,7 @@ Item {
         Text {
             Layout.fillWidth: true
             text: !BluetoothState.enabled ? "Off" : (root.connected.length === 0 ? "No Devices" : root.connected.length + " connected")
-            color: "#ffffff"
+            color: root.look.primary
             font.pixelSize: root.size === "s" ? 18 : 15
             font.weight: Font.Medium
             font.family: "SF Pro Text"
@@ -58,7 +60,7 @@ Item {
                     Layout.fillWidth: true
                     text: modelData.name
                     elide: Text.ElideRight
-                    color: "#ffffff"
+                    color: root.look.primary
                     font.pixelSize: 13
                     font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
@@ -67,7 +69,7 @@ Item {
                 Text {
                     visible: BluetoothState.batteryPercent(modelData) >= 0
                     text: BluetoothState.batteryPercent(modelData) + "%"
-                    color: Qt.rgba(1, 1, 1, 0.6)
+                    color: root.look.secondary
                     font.pixelSize: 12
                     font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
