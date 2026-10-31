@@ -1,0 +1,11 @@
+local programs = require("hyprlua/programs")
+
+hl.on("hyprland.start", function()
+    hl.exec_cmd("hyprctl setcursor " .. programs.cursor.theme .. " " .. programs.cursor.size)
+    hl.exec_cmd(programs.shell)
+    hl.exec_cmd("pgrep -x hypridle > /dev/null || hypridle")
+    hl.exec_cmd("nm-applet -indicator &")
+    hl.exec_cmd("wl-paste --type text --watch cliphist store &")
+    hl.exec_cmd("wl-paste --type image --watch cliphist store &")
+    hl.exec_cmd("systemctl --user start hyprpolkitagent")
+end)
