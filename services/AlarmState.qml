@@ -10,7 +10,7 @@ Singleton {
 
     reloadableId: "alarmState"
 
-    readonly property string filePath: "$HOME/.config/quickshell/core/alarms.json"
+    readonly property string filePath: Quickshell.env("HOME") + "/.config/quickshell/core/alarms.json"
     property alias alarms: alarmAdapter.list
 
     property string firingAlarmId: ""
