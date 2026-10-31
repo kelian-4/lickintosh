@@ -470,7 +470,7 @@ Scope {
                 function parse(drag) {
                     if (!drag.hasText || drag.text.indexOf("widget:") !== 0) return null
                     var parts = drag.text.split(":")
-                    return { type: parts[1], size: parts[2], variant: parts[3] || "" }
+                    return { type: parts[1], size: parts[2], variant: parts[3] || "", theme: parts[4] || "glass" }
                 }
 
                 function track(drag) {
@@ -495,7 +495,7 @@ Scope {
                     dropGuide.active = false
                     if (!spec) return
                     drop.accept(Qt.CopyAction)
-                    WidgetState.addWidgetAt("desktop", spec.type, spec.size, spec.variant, dropGuide.gx, dropGuide.gy)
+                    WidgetState.addWidgetAt("desktop", spec.type, spec.size, spec.variant, dropGuide.gx, dropGuide.gy, spec.theme)
                 }
             }
         }
