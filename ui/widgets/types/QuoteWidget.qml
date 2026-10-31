@@ -5,6 +5,8 @@ import qs.services
 Item {
     id: root
 
+    property var look: null
+
     property string size: "m"
 
     ColumnLayout {
@@ -27,7 +29,7 @@ Item {
             wrapMode: Text.Wrap
             elide: Text.ElideRight
             verticalAlignment: root.size === "l" ? Text.AlignVCenter : Text.AlignTop
-            color: "#ffffff"
+            color: root.look.primary
             font.pixelSize: root.size === "l" ? 24 : 15
             font.weight: Font.Medium
             font.family: "SF Pro Text"
@@ -39,7 +41,7 @@ Item {
             visible: QuoteState.author !== ""
             text: "— " + QuoteState.author
             elide: Text.ElideRight
-            color: Qt.rgba(1, 1, 1, 0.6)
+            color: root.look.secondary
             font.pixelSize: 12
             font.family: "SF Pro Text"
             renderType: Text.NativeRendering

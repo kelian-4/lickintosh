@@ -20,6 +20,7 @@ Singleton {
 
     property string galleryZone: ""
     property bool typing: false
+    property string galleryTheme: "glass"
     property int areaWidth: 1280
     property int areaHeight: 720
 
@@ -133,9 +134,9 @@ Singleton {
         return best || { x: 0, y: 0 }
     }
 
-    function addWidget(zone, type, size, variant) {
+    function addWidget(zone, type, size, variant, theme) {
         var list = root.listOf(zone)
-        var entry = { id: "w_" + Date.now(), type: type, variant: variant || "", size: size, x: 0, y: 0 }
+        var entry = { id: "w_" + Date.now(), type: type, variant: variant || "", size: size, theme: theme || "glass", x: 0, y: 0 }
         if (zone === "desktop") {
             var p = root.freeSlot(list, "", size)
             entry.x = p.x
@@ -154,14 +155,14 @@ Singleton {
         return { x: nx, y: ny }
     }
 
-    function addWidgetAt(zone, type, size, variant, x, y) {
+    function addWidgetAt(zone, type, size, variant, x, y, theme) {
         if (zone !== "desktop") {
-            root.addWidget(zone, type, size, variant)
+            root.addWidget(zone, type, size, variant, theme)
             return
         }
         var list = root.listOf("desktop")
         var p = root.snap(size, x, y)
-        list.push({ id: "w_" + Date.now(), type: type, variant: variant || "", size: size, x: p.x, y: p.y })
+        list.push({ id: "w_" + Date.now(), type: type, variant: variant || "", size: size, theme: theme || "glass", x: p.x, y: p.y })
         root.setList("desktop", list)
     }
 
@@ -191,6 +192,14 @@ Singleton {
         }
         list[i] = Object.assign({}, list[i], { x: nx, y: ny })
         root.setList("desktop", list)
+    }
+
+    function setTheme(zone, id, theme) {
+        var list = root.listOf(zone)
+        var i = root.indexOfId(list, id)
+        if (i < 0) return
+        list[i] = Object.assign({}, list[i], { theme: theme })
+        root.setList(zone, list)
     }
 
     function resizeWidget(zone, id, size) {
@@ -228,12 +237,19 @@ Singleton {
 
     function closeGallery() {
         root.galleryZone = ""
+        root.galleryTheme = "glass"
     }
 
     function menuEntries(zone, widget) {
         var entries = []
         if (widget) {
             entries.push({ label: "Remove Widget", action: "remove" })
+            var current = widget.theme || "glass"
+            entries.push({ label: "Style", children: [
+                { label: "Glass", action: "theme:glass", checkable: true, checked: current === "glass" },
+                { label: "Light", action: "theme:light", checkable: true, checked: current === "light" },
+                { label: "Dark", action: "theme:dark", checkable: true, checked: current === "dark" }
+            ] })
             var resolved = WidgetRegistry.resolve(widget)
             var sizes = WidgetRegistry.sizesOf(resolved.type, resolved.variant)
             if (sizes.length > 1) {
@@ -259,6 +275,7 @@ Singleton {
         else if (action === "up") root.shiftWidget(zone, id, -1)
         else if (action === "down") root.shiftWidget(zone, id, 1)
         else if (action.indexOf("size:") === 0) root.resizeWidget(zone, id, action.slice(5))
+        else if (action.indexOf("theme:") === 0) root.setTheme(zone, id, action.slice(6))
     }
 
     function iconPosition(name) {

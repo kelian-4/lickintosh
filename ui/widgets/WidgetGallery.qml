@@ -46,6 +46,9 @@ Scope {
                     hint: "Click or drag a widget to add it to " + root.zoneTitle + "."
                     emptyText: "No Widgets Found"
                     empty: panel.filtered.length === 0
+                    showThemes: true
+                    theme: WidgetState.galleryTheme
+                    onThemePicked: function(theme) { WidgetState.galleryTheme = theme }
                     onDone: WidgetState.closeGallery()
 
                     Repeater {
@@ -95,12 +98,12 @@ Scope {
                                             Drag.dragType: Drag.Automatic
                                             Drag.supportedActions: Qt.CopyAction
                                             Drag.proposedAction: Qt.CopyAction
-                                            Drag.mimeData: ({ "text/plain": "widget:" + section.modelData.type + ":" + tile.modelData.size + ":" + tile.modelData.variant })
+                                            Drag.mimeData: ({ "text/plain": "widget:" + section.modelData.type + ":" + tile.modelData.size + ":" + tile.modelData.variant + ":" + WidgetState.galleryTheme })
                                             Drag.hotSpot.x: face.width / 2
                                             Drag.hotSpot.y: face.height / 2
 
                                             WidgetView {
-                                                widgetData: ({ id: "preview", type: section.modelData.type, variant: tile.modelData.variant, size: tile.modelData.size })
+                                                widgetData: ({ id: "preview", type: section.modelData.type, variant: tile.modelData.variant, size: tile.modelData.size, theme: WidgetState.galleryTheme })
                                             }
 
                                             Rectangle {
@@ -135,7 +138,7 @@ Scope {
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
                                                 onPressed: face.grabToImage(function(result) { face.Drag.imageSource = result.url }, Qt.size(face.width, face.height))
-                                                onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData.size, tile.modelData.variant)
+                                                onClicked: WidgetState.addWidget(WidgetState.galleryZone, section.modelData.type, tile.modelData.size, tile.modelData.variant, WidgetState.galleryTheme)
                                             }
 
                                             DragHandler {
