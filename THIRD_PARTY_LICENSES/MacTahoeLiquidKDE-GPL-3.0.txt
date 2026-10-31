@@ -9,6 +9,8 @@ Licence : GNU General Public License version 3 ou ulterieure (SPDX-License-Ident
 Fichiers de ce depot qui en derivent :
 - assets/shaders/tahoeglass/TahoeGlass.vert et TahoeGlass.frag (et leurs .qsb compiles par tools/liquid-glass/build-shaders.sh)
 - components/glass/TahoeGlass.qml (valeurs par defaut du dock et construction de colorMatrix)
+- assets/shaders/liquidglass/SplitLiquidGlass.frag (et .vert, .qsb) : reprend a l'identique, commentaires retires, les fonctions lgGaussianBlur, lgApplyRgbDrift, lgRimAngularWeight et lgApplyHighlight, ainsi que les constantes du dock (bande de refraction 18 x 1.25, derive RVB 12 x 0.24, liseré 3.5 et 0.1, saturation 1.33, couverture du centre 0.98). Le champ de distance (barre et bourgeons relies par un col lisse) vient du shader splitglass.frag de ce depot. Differences avec TahoeGlass : la lentille utilise la normale sortante du champ de distance seule, sans le melange avec la direction radiale, et son epaisseur vaut 0.35 fois la hauteur de la barre.
+- components/glass/SplitGlass.qml (calque de verre ajoute a la barre de Spotlight)
 
 Modifications apportees (portage KWin / OpenGL 1.4 vers Qt Quick ShaderEffect), datees du 2026-10-27 :
 1. Syntaxe Qt : #version 440, layout(location=...), uniforms regroupes dans un bloc layout(std140, binding = 0) uniform buf precede de qt_Matrix et qt_Opacity, un seul sampler layout(binding = 1) uniform sampler2D texUnit, sortie fragColor.
