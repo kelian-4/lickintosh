@@ -10,7 +10,7 @@ Singleton {
 
     reloadableId: "notesState"
 
-    readonly property string filePath: Quickshell.env("HOME") + "/.config/quickshell/core/notes.json"
+    readonly property string filePath: Quickshell.env("HOME") + "/.config/lickintosh/core/notes.json"
     property alias notes: notesAdapter.list
 
     FileView {

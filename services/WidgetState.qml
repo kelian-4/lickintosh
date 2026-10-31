@@ -10,7 +10,7 @@ Singleton {
 
     reloadableId: "widgetState"
 
-    readonly property string filePath: Quickshell.env("HOME") + "/.config/quickshell/core/widgets.json"
+    readonly property string filePath: Quickshell.env("HOME") + "/.config/lickintosh/core/widgets.json"
 
     property alias desktop: widgetsAdapter.desktop
     property alias notifCenter: widgetsAdapter.notifCenter
