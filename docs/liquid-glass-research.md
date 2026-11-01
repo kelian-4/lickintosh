@@ -361,7 +361,7 @@ Vérifié : shader comparé fonction par fonction au repo (identique, sauf synta
 - `GlassWindows` / `GlassTracker` : captures de fenêtres Hyprland, suspendues pendant le verrouillage et 1,5 s après.
 - `GlassWallpaper` : fond d'écran effectif, y compris l'aperçu de Spotlight.
 
-### Configuration (`services/shell-config.json`, section `glass`)
+### Configuration (`~/.config/lickintosh/shell-config.json`, section `glass`)
 
 - `captureWindows` (true) : désactive toute capture de fenêtres.
 - `windowOpacity` (1.0) : opacité des fenêtres capturées.
