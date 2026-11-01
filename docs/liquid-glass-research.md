@@ -341,3 +341,50 @@ Les sections 11 à 19 ci-dessus décrivent des variantes d'aspect qui ont été 
   - Fermeture au changement de workspace (`WorkspaceWatcher`, `shell.qml`, états locaux, control center) : inchangée, voir § 19.
 
 Vérifié : shader comparé fonction par fonction au repo (identique, sauf syntaxe et `GlowEdge`) ; sur un banc Qt, trois verres s'enregistrent et la région déduite est l'enveloppe exacte de leurs rectangles ; `GlassTracker` testé en exécution avec une doublure de `Quickshell.Hyprland` (≈5 rafraîchissements/s au repos, +25 en 1 s après `workspace`, retour au repos après 1,5 s, `windowtitle` ignoré, `transitionEpoch` +1). Non vérifié : tout ce qui touche Quickshell et Hyprland réels pour cette révision (la VM n'existait plus : `GlassWindows`, le chargement du shell, la fermeture des panneaux ont été vérifiés en VM sur des révisions précédentes de ces fichiers, pas sur celle-ci) ; le rendu avec ton fond d'écran et ton GPU ; les temps de capture, jamais mesurés.
+
+## 21. État final avant fusion dans dev
+
+### Décisions du propriétaire qui ont changé le plan initial
+
+- Le dock reprend « exactement » le verre du dock de MacTahoe Liquid KDE (shader `acrylic-glass`, GPL-3.0), et non plus les formules d'OverShifted. Les formules d'OverShifted ne produisent pas un rectangle arrondi à rayon constant ni une bande de réfraction de largeur constante sur un quad large.
+- Le control center et tous les autres composants (sauf le notch) reprennent la logique du dock. Les poignées de `CFSwitch` et `CFSlider` restent blanches, sans verre.
+- Le port fidèle d'OverShifted (`LiquidGlass.qml`, `assets/shaders/liquidglass/LiquidGlass*.frag`, `tools/liquid-glass/fidelity.py`) reste dans le dépôt, vérifié identique au dépôt d'origine, mais n'est plus utilisé par aucun composant.
+
+### Architecture
+
+- `components/glass/GlassBackdrop.qml` : à placer une fois par fenêtre ; trouve sa fenêtre (`QsWindow.window`), calcule sa position écran depuis ses ancres et marges (exact pour `exclusiveZone: -1`), s'enregistre dans `GlassRegistry`, et ne montre le contenu de la fenêtre que lorsque le verre est prêt (sécurité de 400 ms).
+- `components/glass/BoxGlass.qml` : API inchangée ; avec un backdrop (explicite ou trouvé via le registre) il charge `TahoeGlass`, sinon il garde `GlassRim`.
+- `components/glass/TahoeGlass.qml` + `assets/shaders/tahoeglass/` : port du shader de verre du dock (rayon constant, bande de bord, liseré). Contrôlé par `tools/liquid-glass/fidelity_tahoe.py`.
+- `components/glass/SplitGlass.qml` + `SplitLiquidGlass` : verre sur la barre et les boutons de Spotlight, avec le champ de distance d'origine (col lisse conservé).
+- `GlyphGlass` : verre en forme de texte, pour l'horloge de l'écran de verrouillage ; l'effet givré d'origine reste en repli.
+- `WindowAlpha` : restitue le fond translucide des fenêtres capturées (texte opaque), par classe de fenêtre.
+- `GlassWindows` / `GlassTracker` : captures de fenêtres Hyprland, suspendues pendant le verrouillage et 1,5 s après.
+- `GlassWallpaper` : fond d'écran effectif, y compris l'aperçu de Spotlight.
+
+### Configuration (`services/shell-config.json`, section `glass`)
+
+- `captureWindows` (true) : désactive toute capture de fenêtres.
+- `windowOpacity` (1.0) : opacité des fenêtres capturées.
+- `windowOpacityByClass` (`{ "kitty": 0.3 }`) : opacité par classe ; une valeur strictement entre 0 et 1 conserve le texte opaque, 0 désactive la capture de cette classe.
+
+### Vérifié (exécuté, banc PySide6 sur pilote logiciel)
+
+- Port OverShifted identique au dépôt d'origine (4 fonctions, `LiquidGlass()` aux adaptations près, 11 valeurs).
+- Port Tahoe identique à leurs shaders aux adaptations documentées près (10 fonctions, 9 valeurs) ; test négatif fait.
+- Tous les `.qsb` correspondent octet pour octet à leurs sources (`tools/liquid-glass/build-shaders.sh`, `qsb` 6.12, QSB_VERSION 9).
+- Rendu du dock, de la grille du control center, de Spotlight (barre, bourgeons, col), de l'horloge synthétique ; le dock rend à l'identique avant et après l'extension de `TahoeGlass` (0 pixel de différence).
+- Syntaxe QML (`qmllint`) sur tous les fichiers qui diffèrent de `dev`, ShellCheck et `py_compile` sur `tools/`.
+
+### Non vérifié dans Quickshell réel
+
+- Chargement de l'ensemble sur le matériel du propriétaire, performances et coût GPU (aucune mesure sur GPU réel).
+- `QsWindow.window`, `QsWindow.contentItem` et le calcul de position des fenêtres de couche.
+- Que la capture d'une fenêtre translucide revienne bien opaque noire (hypothèse), et que 0,3 pour `kitty` reproduise l'écran réel.
+- L'échec de capture suivi de `wl_display#1: error 0: invalid object` après le déverrouillage (hypothèse : capture pendant la réorganisation des fenêtres ; atténuée, non démontrée). `glass.captureWindows: false` l'écarte.
+- Écran de verrouillage, multi-écrans, échelle d'écran différente de 1, fenêtre de réglages (pas de verre).
+
+### Limites connues
+
+- Les teintes (`color`, `light`, `rimStrength`) des `BoxGlass` vitrés sont ignorées ; la lisibilité du texte sur verre clair dépend du fond.
+- La fenêtre de réglages et le notch n'ont pas de verre.
+- Les fichiers `TahoeGlass.frag`, `SplitLiquidGlass.frag` et le texte de licence sont sous GPL-3.0 (voir `THIRD_PARTY_LICENSES/`) ; le dépôt n'a pas de fichier de licence à la racine.
