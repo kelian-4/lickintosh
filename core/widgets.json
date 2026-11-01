@@ -1,0 +1,68 @@
+{
+    "desktop": [
+        {
+            "id": "w_1793369527769",
+            "size": "m",
+            "type": "battery",
+            "variant": "",
+            "x": 0,
+            "y": 0
+        },
+        {
+            "id": "w_1793369538639",
+            "size": "m",
+            "type": "quote",
+            "variant": "",
+            "x": 0,
+            "y": 167
+        }
+    ],
+    "desktopSort": "name",
+    "iconPositions": [
+        {
+            "col": 0,
+            "name": "Games",
+            "row": 0
+        },
+        {
+            "col": 0,
+            "name": "iso",
+            "row": 1
+        },
+        {
+            "col": 0,
+            "name": "server",
+            "row": 2
+        },
+        {
+            "col": 0,
+            "name": "taff",
+            "row": 3
+        },
+        {
+            "col": 0,
+            "name": "bottles-app-EAC.desktop",
+            "row": 4
+        },
+        {
+            "col": 0,
+            "name": "bottles-app-HollowKnightSilksong.desktop",
+            "row": 5
+        },
+        {
+            "col": 0,
+            "name": "bottles-app-hollow_knight.desktop",
+            "row": 6
+        }
+    ],
+    "notifCenter": [
+        {
+            "id": "w_default_weather",
+            "size": "m",
+            "type": "weather",
+            "x": 0,
+            "y": 0
+        }
+    ],
+    "showHidden": false
+}

@@ -5,6 +5,8 @@ import qs.services
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
     property bool adding: false
 
@@ -59,7 +61,7 @@ Item {
                 Layout.preferredWidth: 22
                 Layout.preferredHeight: 22
                 radius: 11
-                color: addArea.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.12)
+                color: addArea.containsMouse ? root.look.hover : root.look.track
 
                 Text {
                     anchors.centerIn: parent
@@ -86,7 +88,7 @@ Item {
             Layout.preferredHeight: 54
             visible: root.adding
             radius: 10
-            color: Qt.rgba(1, 1, 1, 0.10)
+            color: root.look.surface
             border.width: editor.activeFocus ? 1 : 0
             border.color: "#ffd60a"
             clip: true
@@ -107,7 +109,7 @@ Item {
                     onActiveFocusChanged: {
                         if (!editor.activeFocus && root.adding) root.commit()
                     }
-                    color: "#ffffff"
+                    color: root.look.primary
                     selectedTextColor: "#000000"
                     selectionColor: "#ffd60a"
                     font.pixelSize: 13
@@ -132,7 +134,7 @@ Item {
                     Text {
                         visible: editor.text === "" && !editor.preeditText
                         text: "New note…"
-                        color: Qt.rgba(1, 1, 1, 0.4)
+                        color: root.look.tertiary
                         font: editor.font
                         renderType: Text.NativeRendering
                     }
@@ -144,7 +146,7 @@ Item {
             Layout.fillWidth: true
             visible: NotesState.notes.length === 0 && !root.adding
             text: "No Notes"
-            color: Qt.rgba(1, 1, 1, 0.5)
+            color: root.look.secondary
             font.pixelSize: 13
             font.family: "SF Pro Text"
             renderType: Text.NativeRendering
@@ -183,7 +185,7 @@ Item {
                             wrapMode: Text.WrapAnywhere
                             maximumLineCount: root.size === "s" ? 5 : (root.size === "m" ? 2 : 3)
                             elide: Text.ElideRight
-                            color: "#ffffff"
+                            color: root.look.primary
                             font.pixelSize: 13
                             font.family: "SF Pro Text"
                             renderType: Text.NativeRendering
@@ -194,7 +196,7 @@ Item {
                             anchors.right: parent.right
                             anchors.top: parent.top
                             text: "×"
-                            color: removeArea.containsMouse ? "#ff453a" : Qt.rgba(1, 1, 1, 0.4)
+                            color: removeArea.containsMouse ? "#ff453a" : root.look.tertiary
                             font.pixelSize: 16
                             font.family: "SF Pro Text"
                             renderType: Text.NativeRendering

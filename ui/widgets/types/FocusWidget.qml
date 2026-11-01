@@ -6,6 +6,8 @@ import qs.ui.widgets
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
 
     readonly property bool working: PomodoroState.phase === "work"
@@ -32,7 +34,7 @@ Item {
             Text {
                 visible: root.size === "m"
                 text: "Cycle " + ((PomodoroState.cyclesCompleted % PomodoroState.cyclesBeforeLongBreak) + 1) + " of " + PomodoroState.cyclesBeforeLongBreak
-                color: Qt.rgba(1, 1, 1, 0.55)
+                color: root.look.secondary
                 font.pixelSize: 12
                 font.family: "SF Pro Text"
                 renderType: Text.NativeRendering
@@ -41,7 +43,7 @@ Item {
 
         Text {
             text: TimerState.formatRemaining(PomodoroState.remainingMs)
-            color: "#ffffff"
+            color: root.look.primary
             font.pixelSize: root.size === "s" ? 34 : 44
             font.weight: Font.Light
             font.family: "SF Pro Text"
@@ -55,18 +57,21 @@ Item {
             spacing: 6
 
             WidgetButton {
+                look: root.look
                 text: PomodoroState.running ? "Pause" : "Start"
                 tint: root.phaseColor
                 onClicked: PomodoroState.running ? PomodoroState.pause() : PomodoroState.start()
             }
 
             WidgetButton {
+                look: root.look
                 visible: root.size === "m"
                 text: "Skip"
                 onClicked: PomodoroState.skip()
             }
 
             WidgetButton {
+                look: root.look
                 text: "Reset"
                 onClicked: PomodoroState.reset()
             }

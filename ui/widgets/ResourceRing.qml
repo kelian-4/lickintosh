@@ -3,6 +3,9 @@ import QtQuick
 Item {
     id: root
 
+    property var look: null
+    readonly property color trackColor: root.look ? root.look.track : Qt.rgba(1, 1, 1, 0.14)
+    readonly property color captionColor: root.look ? root.look.secondary : Qt.rgba(1, 1, 1, 0.6)
     property real percent: 0
     property color tint: "#30d158"
     property string caption: ""
@@ -11,6 +14,7 @@ Item {
 
     onPercentChanged: canvas.requestPaint()
     onTintChanged: canvas.requestPaint()
+    onTrackColorChanged: canvas.requestPaint()
     onWidthChanged: canvas.requestPaint()
 
     Canvas {
@@ -25,7 +29,7 @@ Item {
             var start = -Math.PI / 2
             ctx.lineWidth = root.thickness
             ctx.lineCap = "round"
-            ctx.strokeStyle = Qt.rgba(1, 1, 1, 0.14)
+            ctx.strokeStyle = root.trackColor
             ctx.beginPath()
             ctx.arc(cx, cy, r, 0, Math.PI * 2)
             ctx.stroke()
@@ -55,7 +59,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             visible: root.caption !== ""
             text: root.caption
-            color: Qt.rgba(1, 1, 1, 0.6)
+            color: root.captionColor
             font.pixelSize: Math.max(9, root.valueSize * 0.5)
             font.family: "SF Pro Text"
             renderType: Text.NativeRendering

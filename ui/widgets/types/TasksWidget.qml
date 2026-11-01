@@ -5,6 +5,8 @@ import qs.services
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
 
     ColumnLayout {
@@ -27,7 +29,7 @@ Item {
 
             Text {
                 text: TasksState.pending.length
-                color: "#ffffff"
+                color: root.look.primary
                 font.pixelSize: root.size === "s" ? 38 : 20
                 font.weight: Font.Light
                 font.family: "SF Pro Text"
@@ -39,7 +41,7 @@ Item {
             Layout.fillWidth: true
             visible: root.size === "s"
             text: TasksState.pending.length === 1 ? "task left" : "tasks left"
-            color: Qt.rgba(1, 1, 1, 0.55)
+            color: root.look.secondary
             font.pixelSize: 12
             font.family: "SF Pro Text"
             renderType: Text.NativeRendering
@@ -49,7 +51,7 @@ Item {
             Layout.fillWidth: true
             visible: root.size !== "s" && TasksState.pending.length === 0
             text: "Nothing to do"
-            color: Qt.rgba(1, 1, 1, 0.5)
+            color: root.look.secondary
             font.pixelSize: 13
             font.family: "SF Pro Text"
             renderType: Text.NativeRendering
@@ -97,7 +99,7 @@ Item {
                             Layout.fillWidth: true
                             text: taskRow.modelData.text
                             elide: Text.ElideRight
-                            color: "#ffffff"
+                            color: root.look.primary
                             font.pixelSize: 13
                             font.family: "SF Pro Text"
                             renderType: Text.NativeRendering

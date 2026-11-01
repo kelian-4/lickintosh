@@ -4,6 +4,8 @@ import Quickshell
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
     property string variant: "analog"
 
@@ -16,7 +18,10 @@ Item {
         anchors.fill: parent
         active: root.variant === "digital"
         source: "DigitalClockWidget.qml"
-        onLoaded: item.size = Qt.binding(function() { return root.size })
+        onLoaded: {
+            item.size = Qt.binding(function() { return root.size })
+            item.look = Qt.binding(function() { return root.look })
+        }
     }
 
     Item {
@@ -29,7 +34,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: width / 2
-            color: "#f4f4f6"
+            color: root.look.faceColor
         }
 
         Repeater {
@@ -46,7 +51,7 @@ Item {
                     width: index % 3 === 0 ? 3 : 2
                     height: index % 3 === 0 ? 10 : 6
                     radius: 1
-                    color: "#2b2b30"
+                    color: root.look.faceTick
                 }
             }
         }
@@ -61,7 +66,7 @@ Item {
                 width: 5
                 height: face.height * 0.24
                 radius: 2.5
-                color: "#1c1c1f"
+                color: root.look.faceInk
             }
         }
 
@@ -75,7 +80,7 @@ Item {
                 width: 4
                 height: face.height * 0.36
                 radius: 2
-                color: "#1c1c1f"
+                color: root.look.faceInk
             }
         }
 

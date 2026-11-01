@@ -36,7 +36,12 @@ Singleton {
 
     reloadableId: "shellConfig"
 
-    readonly property string filePath: Quickshell.shellDir + "/services/shell-config.json"
+    Process {
+        running: true
+        command: ["mkdir", "-p", Quickshell.env("HOME") + "/.config/lickintosh/core"]
+    }
+
+    readonly property string filePath: Quickshell.env("HOME") + "/.config/lickintosh/shell-config.json"
     property alias options: configAdapter
     property bool ready: false
 
