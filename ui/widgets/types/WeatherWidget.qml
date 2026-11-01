@@ -6,6 +6,8 @@ import qs.services
 Item {
     id: root
 
+    property var look: null
+
     property string size: "s"
     readonly property bool fullBleed: true
 
@@ -18,8 +20,8 @@ Item {
         radius: 22
         gradient: Gradient {
             orientation: Gradient.Vertical
-            GradientStop { position: 0.0; color: "#0d3f9e" }
-            GradientStop { position: 1.0; color: "#1f6fd6" }
+            GradientStop { position: 0.0; color: root.look.skyTop }
+            GradientStop { position: 1.0; color: root.look.skyBottom }
         }
     }
 

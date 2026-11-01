@@ -33,7 +33,7 @@ RowLayout {
         Layout.alignment: Qt.AlignVCenter
         implicitWidth:  systemTray.implicitWidth
         implicitHeight: systemTray.implicitHeight
-        visible: ShellConfig.options.topbar.showSystemTray
+        visible: ShellConfig.options.topbar.showSystemTray && systemTray.implicitWidth > 0
 
         SystemTray {
             id: systemTray
@@ -56,6 +56,7 @@ RowLayout {
 
         BTDeviceTray {
             Layout.alignment: Qt.AlignVCenter
+            visible: implicitWidth > 0
         }
 
         Volume {

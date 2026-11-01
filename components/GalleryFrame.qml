@@ -14,6 +14,9 @@ Rectangle {
     property bool empty: false
     property color accent: "#a35cf0"
     property var window: null
+    property bool showThemes: false
+    property string theme: "glass"
+    signal themePicked(string theme)
     signal done()
 
     default property alias content: contentColumn.data
@@ -234,6 +237,52 @@ Rectangle {
                     font.pixelSize: 12
                     font.family: "SF Pro Text"
                     renderType: Text.NativeRendering
+                }
+
+                Rectangle {
+                    visible: root.showThemes
+                    Layout.preferredWidth: 168
+                    Layout.preferredHeight: 28
+                    radius: 14
+                    color: "#14ffffff"
+
+                    Row {
+                        anchors.fill: parent
+
+                        Repeater {
+                            model: [{ key: "glass", title: "Glass" }, { key: "light", title: "Light" }, { key: "dark", title: "Dark" }]
+
+                            delegate: Rectangle {
+                                id: themeOption
+                                required property var modelData
+
+                                width: 56
+                                height: 28
+                                radius: 14
+                                color: root.theme === themeOption.modelData.key ? Qt.rgba(1, 1, 1, 0.22) : "transparent"
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 140 }
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: themeOption.modelData.title
+                                    color: "#ffffff"
+                                    font.pixelSize: 12
+                                    font.weight: Font.Medium
+                                    font.family: "SF Pro Rounded"
+                                    renderType: Text.NativeRendering
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.themePicked(themeOption.modelData.key)
+                                }
+                            }
+                        }
+                    }
                 }
 
                 Rectangle {
