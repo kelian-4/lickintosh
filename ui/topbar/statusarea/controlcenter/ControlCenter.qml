@@ -188,17 +188,34 @@ Scope {
 
     Process { id: _kdeConnect; command: ["kdeconnect-app"] }
 
-    Connections {
-        target: WorkspaceWatcher
-
-        function onChanged() {
-            if (!root.opened)
-                return
-            root.wifiOpened = false
-            root.btOpened   = false
-            root.playerExpanded = false
-            root.closing()
+    property string _currentWs: ""
+    Process {
+        id: _wsGet
+        command: ["hyprctl", "activeworkspace", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    var ws = JSON.parse(text.trim())
+                    if (root._currentWs === "") {
+                        root._currentWs = ws.name
+                    } else if (ws.name !== root._currentWs) {
+                        root._currentWs = ws.name
+                        root.wifiOpened = false
+                        root.btOpened   = false
+                        root.playerExpanded = false
+                        root.closing()
+                    }
+                } catch(e) {}
+            }
         }
+    }
+
+    Timer {
+        interval: 300
+        running: root.opened
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: _wsGet.running = true
     }
 
     property bool   wifiOn:   false
