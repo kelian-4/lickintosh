@@ -631,6 +631,12 @@ Scope {
     // ShellConfig.
     property string previewWallpaper: ""
 
+    Binding {
+        target: GlassWallpaper
+        property: "preview"
+        value: root.previewWallpaper
+    }
+
     readonly property string currentWallpaper: root.previewWallpaper !== ""
         ? root.previewWallpaper
         : ShellConfig.options.wallpaper.path
@@ -1538,6 +1544,8 @@ Scope {
                     SpotlightActionBtn { bud:splitGlass.buds[2];action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
                     SpotlightActionBtn { bud:splitGlass.buds[3];action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");iconSize:36;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
                 }
+
+                GlassBackdrop {}
             }
         }
     }

@@ -180,9 +180,9 @@ Scope {
 
     readonly property int _visibleGridHeight: (box*(_lastVisibleRow+1)) + (boxMargin*(_lastVisibleRow+1)) + boxMargin
 
-    readonly property color glassColor: "#20000000"
+    readonly property color glassColor: "transparent"
     readonly property color textColor:  "#ffffff"
-    readonly property color glassRimColor: "#80ffffff"
+    readonly property color glassRimColor: "transparent"
     readonly property real  glassRimStrength: 1.0
 
 
@@ -487,6 +487,8 @@ Scope {
                     Region { item: editPill }
                 }
 
+                GlassBackdrop { id: ccBackdrop }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -681,6 +683,7 @@ Scope {
                     component BoxButton: BoxGlass {
                         id: boxbutton
                         radius: 40
+                        backdrop: ccBackdrop
                         property bool enabled: false
                         property bool hideCause: false
                         property bool scaleCause: false
@@ -922,6 +925,7 @@ Scope {
                                         }
 
                                         BoxGlass {
+                                            backdrop: null
                                             anchors.fill: parent
                                             radius: 12
                                             color: root.glassColor
@@ -1057,6 +1061,7 @@ Scope {
                                         }
 
                                         BoxGlass {
+                                            backdrop: null
                                             anchors.fill: parent
                                             radius: 12
                                             color: root.glassColor

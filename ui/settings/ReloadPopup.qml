@@ -73,14 +73,24 @@ Scope {
                 onTriggered: root.dismiss()
             }
 
+            GlassBackdrop { id: glassBackdrop }
+
             BoxGlass {
                 anchors.fill: parent
                 opacity: (popupWindow.entered && !root.dismissing) ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                 radius: 14
+                backdrop: glassBackdrop
                 color: root.failed ? "#30ff4444" : "#18000000"
                 light: "#20ffffff"
                 rimStrength: 1.0
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 14
+                    color: "#30ff4444"
+                    visible: root.failed
+                }
 
                 RowLayout {
                     id: _content

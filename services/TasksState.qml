@@ -62,6 +62,7 @@ Singleton {
     FileView {
         id: tasksFile
         path: root.filePath
+        printErrors: false
         watchChanges: true
         onFileChanged: reload()
         onLoaded: root.parse(text())

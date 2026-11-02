@@ -311,6 +311,8 @@ Scope {
                         WidgetState.applyAction("notifCenter", _widgetMenu.target, action)
                     }
                 }
+
+                GlassBackdrop {}
             }
         }
     }

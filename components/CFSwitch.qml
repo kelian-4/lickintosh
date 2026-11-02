@@ -27,6 +27,7 @@ Switch {
 
         BoxGlass {
             id: handle
+            backdrop: null
             anchors.verticalCenter: parent.verticalCenter
             x: control.checked ? bg.width - width - 2 : 2
             width: control.down ? (control.switchWidth / 2) + 14 : (control.switchWidth / 2) + 8

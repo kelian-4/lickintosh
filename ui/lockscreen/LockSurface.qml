@@ -17,13 +17,20 @@ WlSessionLockSurface {
     required property LockContext context
 
     readonly property bool unlocking: unlockAnim.running
+
+    LiquidGlassBackdrop {
+        id: lockBackdrop
+        wallpaperPath: root.context.wallpaperSource.toString().replace(/^file:\/\//, "")
+        screenSize: Qt.size(root.width, root.height)
+        windowPosition: Qt.point(0, 0)
+        blurRadius: 1.0
+
+        Component.onCompleted: GlassRegistry.register(root, lockBackdrop)
+        Component.onDestruction: GlassRegistry.unregister(lockBackdrop)
+    }
     readonly property bool reduceMotion: ShellConfig.options.appearance.reduceMotion
 
     color: "transparent"
-
-    Component.onCompleted: {
-        console.log("[LockSurface]", Date.now() + "ms:", "WlSessionLockSurface created for screen", root.screen)
-    }
 
     // Construction d'URL file:// encodées correctement : centralisée
     // dans LockContext.toFileUrl() (singleton partagé entre LockScreen,
@@ -127,8 +134,6 @@ WlSessionLockSurface {
             // ci-dessus au bon moment, plutôt qu'un opacity fixe à 1 qui
             // laisse voir le "pop" au moment exact où Qt finit de décoder.
             onStatusChanged: {
-                console.log("[LockSurface]", Date.now() + "ms:", "wallpaperImage.status ->", status,
-                    "(0=Null,1=Ready,2=Loading,3=Error) source=" + source + " sourceSize=" + sourceSize)
                 if (status === Image.Ready) background.opacity = 1
             }
             // Léger zoom d'entrée, style eqsh : part de 1.04 et redescend
@@ -139,8 +144,6 @@ WlSessionLockSurface {
             }
             Component.onCompleted: {
                 wallpaperImage.scale = 1
-                console.log("[LockSurface]", Date.now() + "ms:", "wallpaperImage created, initial status =", status,
-                    "source=" + source)
             }
         }
 
@@ -350,6 +353,50 @@ WlSessionLockSurface {
             // dents de scie / "résidus" visibles autour des lettres.
             maskThresholdMin: 0.5
             maskSpreadAtMin: 1.0
+            visible: !clockGlass.glassOn
+        }
+
+        ShaderEffect {
+            id: clockGlass
+            anchors.fill: clockRow
+            blending: true
+
+            readonly property bool glassOn: lockBackdrop.ready && lockBackdrop.captureSettled
+            visible: glassOn && clockRow.width > 0 && clockRow.height > 0
+
+            property variant maskTex: clockRow
+            property variant backTex: lockBackdrop.blurSource
+            property vector2d size: Qt.vector2d(clockRow.width, clockRow.height)
+            property vector2d screenOrigin: Qt.vector2d(0, 0)
+            property vector2d backgroundSize: Qt.vector2d(lockBackdrop.screenSize.width, lockBackdrop.screenSize.height)
+            property real ringRadius: Math.max(3, clockRow.digitSize * 0.075)
+            property real thickness: clockRow.digitSize * 0.09
+            property real highlightStrength: 0.55
+            property real highlightWidth: Math.max(1.5, clockRow.digitSize * 0.033)
+            property real saturation: 1.33
+            property real lift: 0.10
+
+            function syncOrigin() {
+                var p = clockRow.mapToItem(null, 0, 0)
+                if (p.x !== screenOrigin.x || p.y !== screenOrigin.y)
+                    screenOrigin = Qt.vector2d(p.x, p.y)
+            }
+
+            Component.onCompleted: syncOrigin()
+            onWidthChanged: syncOrigin()
+            onHeightChanged: syncOrigin()
+
+            Connections {
+                target: clockGlass.Window.window
+                ignoreUnknownSignals: true
+
+                function onAfterAnimating() {
+                    clockGlass.syncOrigin()
+                }
+            }
+
+            vertexShader: Qt.resolvedUrl(Quickshell.shellDir + "/assets/shaders/liquidglass/GlyphGlass.vert.qsb")
+            fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/assets/shaders/liquidglass/GlyphGlass.frag.qsb")
         }
 
         // --- Notifications, au-dessus du mini lecteur ----------------
@@ -359,6 +406,7 @@ WlSessionLockSurface {
         // seul grâce à son propre anchors.bottom: notifStack.top.
         LockNotifications {
             id: notifStack
+            glassBackdrop: lockBackdrop
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: mediaPlayer.top
             anchors.bottomMargin: visible ? 16 : 0
@@ -371,6 +419,7 @@ WlSessionLockSurface {
         // positionnement de l'avatar/mot de passe selon sa présence.
         LockMediaPlayer {
             id: mediaPlayer
+            glassBackdrop: lockBackdrop
             visible: ShellConfig.options.lockscreen.showMediaPlayer
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: loginArea.top
@@ -409,13 +458,6 @@ WlSessionLockSurface {
                         // plus grand (ex: photo de profil haute
                         // résolution). Même stratégie que le wallpaper.
                         sourceSize: Qt.size(56 * (root.screen?.devicePixelRatio ?? 1), 56 * (root.screen?.devicePixelRatio ?? 1))
-
-                        Component.onCompleted: {
-                            console.log("[LockSurface]", Date.now() + "ms:", "avatarImg created, initial status =", status, "source=" + source)
-                        }
-                        onStatusChanged: {
-                            console.log("[LockSurface]", Date.now() + "ms:", "avatarImg.status ->", status, "source=" + source)
-                        }
 
                         // Fondu croisé avec le repli (initiale) ci-dessous
                         // plutôt qu'un basculement instantané au moment
@@ -516,6 +558,7 @@ WlSessionLockSurface {
 
                     BoxGlass {
                         anchors.fill: parent
+                        backdrop: lockBackdrop
                         radius: pill.radius
                         color: Qt.rgba(1, 1, 1, 0.14)
                         light: Qt.rgba(1, 1, 1, 0.32)

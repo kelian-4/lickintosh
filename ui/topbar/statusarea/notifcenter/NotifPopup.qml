@@ -207,6 +207,8 @@ Scope {
                         }
                     }
                 }
+
+                GlassBackdrop {}
             }
         }
     }
