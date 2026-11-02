@@ -1,11 +1,20 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.services
 
 Item {
     id: root
 
     property string expandedKind: ""
     property bool expandedOpen: false
+
+    Connections {
+        target: WorkspaceWatcher
+
+        function onChanged() {
+            root.expandedOpen = false
+        }
+    }
     property real originX: 0
     property real originWidth: 0
     property real progress: root.expandedOpen ? 1 : 0

@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Io
 import qs.services
+import qs.components.glass
 
 Scope {
     id: dockRoot
@@ -14,7 +15,7 @@ Scope {
     readonly property int  dockPadH:     14
     readonly property int  dockPadV:     10
     readonly property int  dockHeight:   baseIconSize + dockPadV * 2 + 12
-    readonly property int  dockRadius:   22
+    readonly property int  dockRadius:   20
     readonly property int  iconSpacing:  8
     readonly property real magScale1:    ShellConfig.options.dockAppearance.magnificationEnabled ? ShellConfig.options.dockAppearance.magnification : 1.0
     readonly property real magScale2:    ShellConfig.options.dockAppearance.magnificationEnabled ? (1.0 + (ShellConfig.options.dockAppearance.magnification - 1.0) * 0.5) : 1.0
@@ -398,7 +399,6 @@ Scope {
     }
 
     function launchSettingsApp() {
-        console.log("[Settings launch] execDetached, shellDir=", Quickshell.shellDir)
         Quickshell.execDetached(["quickshell", "-p", Quickshell.shellDir + "/settings.qml"])
     }
 
@@ -655,6 +655,18 @@ Scope {
 
                 mask: Region { item: dockMouseArea }
 
+                LiquidGlassBackdrop {
+                    id: dockBackdrop
+                    wallpaperPath: GlassWallpaper.path
+                    screenSize: Qt.size(dockWin.screen.width, dockWin.screen.height)
+                    windowPosition: Qt.point(0, dockWin.screen.height - dockWin.height)
+                    captureWindows: ShellConfig.options.glass.captureWindows
+                    windowOpacity: ShellConfig.options.glass.windowOpacity
+                    windowOpacityByClass: ShellConfig.options.glass.windowOpacityByClass
+                    monitorName: dockWin.screen.name
+                    blurRadius: 1.0
+                }
+
                 MouseArea {
                     id: dockMouseArea
                     height: parent.height
@@ -741,19 +753,10 @@ Scope {
                             z:            500
                         }
 
-                        Rectangle {
+                        TahoeGlass {
                             anchors.fill: parent
-                            radius:       dockRoot.dockRadius
-                            color:        "#22ffffff"
-                            border.color: "#38ffffff"
-                            border.width: 1
-                            Rectangle {
-                                anchors {
-                                    top: parent.top; left: parent.left; right: parent.right
-                                    leftMargin: 28; rightMargin: 28; topMargin: 1
-                                }
-                                height: 1; radius: 1; color: "#55ffffff"
-                            }
+                            backdrop:     dockBackdrop
+                            cornerRadius: dockRoot.dockRadius
                         }
 
                         Row {
@@ -807,7 +810,6 @@ Scope {
                                     }
 
                                     onClicked: {
-                                        console.log("[Dock click]", "name=" + modelData.name, "cmd=" + appCmd, "instLen=" + _inst.length)
                                         if (_inst.length > 0)
                                             dockRoot.cycleWindow(_groupKey, _inst)
                                         else if (appCmd === "__settings-app__" || (appCmd === "" && modelData.name === "Settings"))

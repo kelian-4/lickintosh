@@ -181,6 +181,12 @@ Singleton {
                 property string lockscreenPath: ""
             }
 
+            property JsonObject glass: JsonObject {
+                property bool captureWindows: true
+                property real windowOpacity: 1.0
+                property var windowOpacityByClass: ({ "kitty": 0.3 })
+            }
+
             // Réglages > Écran de verrouillage : apparence de l'horloge,
             // notifications et mini lecteur affichés sur le lockscreen.
             // Lus par LockSurface, LockNotifications, LockMediaPlayer et

@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
+import qs.components.glass
 import qs.components
 
 Scope {
@@ -48,6 +49,8 @@ Scope {
                     onOpenAbout: root.openAbout()
                     onLockRequested: root.lockRequested()
                 }
+
+                GlassBackdrop {}
             }
         }
     }
