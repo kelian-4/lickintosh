@@ -21,6 +21,11 @@ Scope {
         color: "transparent"
         anchors { top: true; right: true; bottom: true; left: true }
 
+        IdleInhibitor {
+            window: win
+            enabled: KeepAwake.enabled
+        }
+
         GlassBackdrop {
             captureWindows: false
             gateEnabled: false

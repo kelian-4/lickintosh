@@ -47,7 +47,8 @@ Singleton {
         { id: "gameModeWidget",  title: "Game Mode",     icon: "notch/zap.svg",                   category: "gaming",       w: 1, h: 1, subtitle: "" },
         { id: "timerWidget",     title: "Timer",         icon: "notch/clock.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" },
         { id: "alarmWidget",     title: "Alarm",         icon: "notch/bell.svg",                  category: "utilities",    w: 1, h: 1, subtitle: "" },
-        { id: "stopwatchWidget", title: "Stopwatch",     icon: "notch/watch.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" }
+        { id: "stopwatchWidget", title: "Stopwatch",     icon: "notch/watch.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" },
+        { id: "keepAwakeWidget", title: "Keep Awake",    icon: "notch/coffee.svg",                category: "utilities",    w: 1, h: 1, subtitle: "" }
     ]
 
     readonly property var built: root.build(root.savedPositions(), "")
