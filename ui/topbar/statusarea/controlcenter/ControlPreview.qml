@@ -90,6 +90,7 @@ Item {
         anchors.fill: parent
 
         CFSlider {
+            autoHideHandle: true
             anchors.fill: parent
             anchors.leftMargin: 40
             anchors.rightMargin: 40
