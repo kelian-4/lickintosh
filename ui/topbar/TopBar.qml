@@ -8,6 +8,7 @@ import qs.services
 import qs.ui.topbar.menubar
 import qs.ui.topbar.notch
 import qs.ui.topbar.statusarea
+import qs.ui.topbar.statusarea.notifcenter
 
 Rectangle {
     id: root
@@ -53,6 +54,7 @@ Rectangle {
     Connections {
         target: root.notifServer
         function onNotification(notification) {
+            if (NotifService.dndEnabled) return
             NotchState.notifyIncoming(notification.appName, notification.summary, notification.appIcon)
         }
     }
