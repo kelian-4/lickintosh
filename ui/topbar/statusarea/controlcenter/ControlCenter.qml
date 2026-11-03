@@ -1962,6 +1962,41 @@ Scope {
 
                     Repeater {
                         model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("keepAwakeWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: keepAwakeWidget
+                                widgetId: keepAwakeWidget.modelData.uid
+                                xPos: root.packedX(keepAwakeWidget.widgetId)
+                                yPos: root.packedY(keepAwakeWidget.widgetId)
+                                width: root.box
+                                height: root.box
+                                radius: 40
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                enabled: KeepAwake.enabled
+                                light: keepAwakeWidget.enabled ? "transparent" : root.glassRimColor
+                                rimStrength: keepAwakeWidget.enabled ? 0 : root.glassRimStrength
+                                color: keepAwakeWidget.enabled ? "#fff" : root.glassColor
+                                CFVI {
+                                    anchors.centerIn: parent
+                                    size: 26
+                                    icon: "notch/coffee.svg"
+                                    color: KeepAwake.enabled ? "#1C7AFF" : "#fff"
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: KeepAwake.toggle()
+                                    onPressed: if (!root.subOpened) keepAwakeWidget.isPressed = true
+                                    onReleased: keepAwakeWidget.isPressed = false
+                                    onCanceled: keepAwakeWidget.isPressed = false
+                                }
+                            }
+                    }
+
+                    Repeater {
+                        model: ScriptModel {
                             values: ControlCatalog.instancesOfType("timerWidget")
                             objectProp: "uid"
                         }

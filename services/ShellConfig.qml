@@ -51,7 +51,10 @@ Singleton {
         watchChanges: true
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
-        onLoaded: root.ready = true
+        onLoaded: {
+            root.ready = true
+            root.seedKeepAwake()
+        }
         onLoadFailed: function(error) {
             if (error === FileViewError.FileNotFound) {
                 writeAdapter()
@@ -207,6 +210,7 @@ Singleton {
             }
 
             property JsonObject controlCenter: JsonObject {
+                property bool keepAwakeSeeded: false
                 property list<var> items: [
                     { "uid": "wifiWidget", "type": "wifiWidget" },
                     { "uid": "btWidget", "type": "btWidget" },
@@ -237,6 +241,12 @@ Singleton {
             if (list[i].type === type) return true
         }
         return false
+    }
+
+    function seedKeepAwake() {
+        if (root.options.controlCenter.keepAwakeSeeded) return
+        root.setCcWidgetVisible("keepAwakeWidget", true)
+        root.options.controlCenter.keepAwakeSeeded = true
     }
 
     function setCcWidgetVisible(type, visible) {
