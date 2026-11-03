@@ -1681,6 +1681,7 @@ Scope {
                                 hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
 
                                 CFSlider {
+                                    autoHideHandle: true
                                     anchors.fill: parent
                                     anchors.leftMargin: 40
                                     anchors.rightMargin: 40
@@ -1725,6 +1726,7 @@ Scope {
                                 hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
 
                                 CFSlider {
+                                    autoHideHandle: true
                                     anchors.fill: parent
                                     anchors.leftMargin: 40
                                     anchors.rightMargin: 40
