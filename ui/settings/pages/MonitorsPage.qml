@@ -39,7 +39,7 @@ ContentPage {
             CFText {
                 text: "Écrans détectés"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -61,7 +61,7 @@ ContentPage {
                     horizontalAlignment: Text.AlignHCenter
                     text: MonitorState.loading ? "…" : "Actualiser"
                     font.pixelSize: 11
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                 }
 
@@ -118,7 +118,7 @@ ContentPage {
                     CFText {
                         text: "Résolution"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -153,7 +153,7 @@ ContentPage {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: _modeRow.modelData
                                 font.pixelSize: 12
-                                color: "#fff"
+                                color: Theme.textPrimary
                             }
 
                             MouseArea {
@@ -199,7 +199,7 @@ ContentPage {
                     CFText {
                         text: "Position"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         Layout.fillWidth: true
                     }
 
@@ -217,7 +217,7 @@ ContentPage {
                     CFText {
                         text: "Orientation"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -255,7 +255,7 @@ ContentPage {
                                 return "Normal"
                             }
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                         }
 
@@ -290,7 +290,7 @@ ContentPage {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: _transformRow.modelData.label
                                 font.pixelSize: 13
-                                color: "#fff"
+                                color: Theme.textPrimary
                             }
 
                             MouseArea {
@@ -350,7 +350,7 @@ ContentPage {
                     CFText {
                         text: "Gestion des couleurs"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -389,7 +389,7 @@ ContentPage {
                                 return "Auto"
                             }
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                         }
 
@@ -424,7 +424,7 @@ ContentPage {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: _cmRow.modelData.label
                                 font.pixelSize: 13
-                                color: "#fff"
+                                color: Theme.textPrimary
                             }
 
                             MouseArea {
@@ -498,7 +498,7 @@ ContentPage {
                     CFText {
                         text: "Miroir de"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -531,7 +531,7 @@ ContentPage {
                             width: _mirrorButton.width - 10 - 8 - _mirrorChevron.width - 4
                             text: (_monSection.modelData.mirrorOf && _monSection.modelData.mirrorOf !== "none" && _monSection.modelData.mirrorOf.length > 0) ? _monSection.modelData.mirrorOf : "Aucun"
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                         }
 
@@ -562,7 +562,7 @@ ContentPage {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "Aucun"
                             font.pixelSize: 13
-                            color: "#fff"
+                            color: Theme.textPrimary
                         }
 
                         MouseArea {
@@ -600,7 +600,7 @@ ContentPage {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: _mirrorRow.modelData.name
                                 font.pixelSize: 13
-                                color: "#fff"
+                                color: Theme.textPrimary
                             }
 
                             MouseArea {
@@ -652,7 +652,7 @@ ContentPage {
                             horizontalAlignment: Text.AlignHCenter
                             text: "Réinitialiser"
                             font.pixelSize: 11
-                            color: "#fff"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                         }
 

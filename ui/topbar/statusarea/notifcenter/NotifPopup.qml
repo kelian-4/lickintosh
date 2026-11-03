@@ -6,6 +6,7 @@ import Quickshell.Hyprland
 import qs.components.glass
 import qs.components
 import qs.ui.topbar.statusarea.notifcenter
+import qs.services
 
 Scope {
     id: root
@@ -184,7 +185,7 @@ Scope {
                                             font.pixelSize:  14
                                             font.weight:     Font.Bold
                                             font.family:     "SF Pro Text"
-                                            color:           "#ffffff"
+                                            color: Theme.ink(parent, false)
                                             elide:           Text.ElideRight
                                             renderType:      Text.NativeRendering
                                         }

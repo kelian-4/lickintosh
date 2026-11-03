@@ -281,7 +281,7 @@ ContentPage {
                     anchors.centerIn: parent
                     text: "Aléatoire"
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {
@@ -315,7 +315,7 @@ ContentPage {
                     anchors.centerIn: parent
                     text: "Revenir au fond par défaut"
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {

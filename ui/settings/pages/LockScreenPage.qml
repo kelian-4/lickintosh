@@ -145,7 +145,7 @@ ContentPage {
             CFText {
                 text: "Style"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
             }
 
             RowLayout {
@@ -173,7 +173,7 @@ ContentPage {
                         Text {
                             anchors.centerIn: parent
                             text: "12"
-                            color: "#fff"
+                            color: Theme.textPrimary
                             font.family: tile.modelData.family
                             font.italic: tile.modelData.italic
                             font.letterSpacing: tile.modelData.spacing

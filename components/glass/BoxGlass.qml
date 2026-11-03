@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import QtQuick.Controls
 import QtQuick.Effects
+import qs.services
 
 Item {
     id: box
@@ -25,7 +26,7 @@ Item {
     property int animationSpeed: 16
     property int animationSpeed2: 16
 
-    property Item backdrop: GlassRegistry.lookup(QsWindow.window)
+    property Item backdrop: Theme.useGlass(box) ? GlassRegistry.lookup(QsWindow.window) : null
     readonly property bool glassed: backdrop !== null
 
     Behavior on color { PropertyAnimation { duration: animationSpeed; easing.type: Easing.InSine } }
@@ -35,9 +36,9 @@ Item {
         active: !box.glassed
 
         sourceComponent: GlassRim {
-            baseColor: box.transparent ? "transparent" : box.color
+            baseColor: box.transparent ? "transparent" : Theme.boxColor(box, box.color)
             radius: box.radius
-            glowColor: box.highlightEnabled ? box.light : "#00000000"
+            glowColor: box.highlightEnabled ? Theme.boxRim(box, box.light) : "#00000000"
             lightDir: box.lightDir
             glowEdgeBand: box.rimSize
         }

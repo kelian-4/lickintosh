@@ -12,6 +12,7 @@ import qs.ui.topbar.statusarea.notifcenter
 
 Rectangle {
     id: root
+    readonly property bool themed: true
     signal toggleCC()
     signal toggleAppleMenu()
     signal toggleSpotlight()
@@ -30,7 +31,7 @@ Rectangle {
 
     readonly property alias notchExpandedPanel: notchPill
 
-    readonly property color themeBackground: "transparent"
+    readonly property color themeBackground: Theme.bar
     readonly property int   themeHeight:     32
     readonly property int   themeMargin:     20
 

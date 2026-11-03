@@ -116,7 +116,7 @@ ContentPage {
                     text: NetworkManager.active ? NetworkManager.active.ssid
                           : (NetworkManager.wifiEnabled ? "Non connecté" : "Wi-Fi désactivé")
                     font.pixelSize: 14
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 CFText {
@@ -149,7 +149,7 @@ ContentPage {
                     anchors.centerIn: parent
                     text: "Détails…"
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {
@@ -218,7 +218,7 @@ ContentPage {
                     anchors.centerIn: parent
                     text: "Autre…"
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {
@@ -418,7 +418,7 @@ ContentPage {
                 height: 32
                 echoMode: TextInput.Password
                 placeholderText: "Mot de passe"
-                color: "#ffffff"
+                color: Theme.textPrimary
                 font.pixelSize: 13
                 renderType: Text.NativeRendering
                 selectionColor: "#50ffffff"
@@ -458,7 +458,7 @@ ContentPage {
                     text: "Joindre"
                     font.pixelSize: 13
                     font.weight: Font.DemiBold
-                    color: "#ffffff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {
@@ -663,7 +663,7 @@ ContentPage {
                         Layout.preferredWidth: 28
                         Layout.preferredHeight: 28
                         radius: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
 
                         CFVI {
                             anchors.centerIn: parent
@@ -681,7 +681,7 @@ ContentPage {
                             text: NetworkManager.detailsSSID
                             font.pixelSize: 15
                             font.weight: Font.Bold
-                            color: "#fff"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                         }
 
@@ -750,7 +750,7 @@ ContentPage {
                         CFText {
                             text: value
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                         }
@@ -786,7 +786,7 @@ ContentPage {
                                 CFText {
                                     text: _ddRoot.value
                                     font.pixelSize: 12
-                                    color: "#fff"
+                                    color: Theme.textPrimary
                                     Layout.fillWidth: true
                                     elide: Text.ElideRight
                                 }
@@ -831,7 +831,7 @@ ContentPage {
                                 anchors.centerIn: parent
                                 text: "Renouveler le bail DHCP"
                                 font.pixelSize: 12
-                                color: "#fff"
+                                color: Theme.textPrimary
                             }
 
                             MouseArea {
@@ -913,7 +913,7 @@ ContentPage {
                             anchors.centerIn: parent
                             text: "Annuler"
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                         }
 
                         MouseArea {
@@ -936,7 +936,7 @@ ContentPage {
                             anchors.centerIn: parent
                             text: "OK"
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                         }
 
                         MouseArea {
@@ -997,7 +997,7 @@ ContentPage {
                         text: "Autre réseau"
                         font.pixelSize: 15
                         font.weight: Font.Bold
-                        color: "#fff"
+                        color: Theme.textPrimary
                     }
 
                     CFText {
@@ -1028,7 +1028,7 @@ ContentPage {
                                 if (text.trim().length > 0) root._manualError = false
                             }
                             placeholderText: "Nom du réseau"
-                            color: "#ffffff"
+                            color: Theme.textPrimary
                             font.pixelSize: 13
                             renderType: Text.NativeRendering
                             selectionColor: "#50ffffff"
@@ -1075,7 +1075,7 @@ ContentPage {
                             onTextChanged: root._manualPassword = text
                             echoMode: TextInput.Password
                             placeholderText: "Mot de passe"
-                            color: "#ffffff"
+                            color: Theme.textPrimary
                             font.pixelSize: 13
                             renderType: Text.NativeRendering
                             selectionColor: "#50ffffff"
@@ -1111,7 +1111,7 @@ ContentPage {
                                 anchors.centerIn: parent
                                 text: "Annuler"
                                 font.pixelSize: 12
-                                color: "#fff"
+                                color: Theme.textPrimary
                             }
 
                             MouseArea {
@@ -1134,7 +1134,7 @@ ContentPage {
                                 anchors.centerIn: parent
                                 text: "Joindre"
                                 font.pixelSize: 12
-                                color: "#fff"
+                                color: Theme.textPrimary
                             }
 
                             MouseArea {

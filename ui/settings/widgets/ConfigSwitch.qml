@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.components
+import qs.services
 
 Item {
     id: root
@@ -17,7 +18,7 @@ Item {
         anchors.fill: parent
         anchors.margins: -6
         radius: 8
-        color: _mouse.containsMouse ? "#0cffffff" : "transparent"
+        color: _mouse.containsMouse ? Theme.fillRow : "transparent"
         Behavior on color { ColorAnimation { duration: 120 } }
     }
 
@@ -36,7 +37,7 @@ Item {
             CFText {
                 text: root.text
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 width: parent.width
             }

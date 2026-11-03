@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
+import qs.services
 
 Text {
     id: activeWindowText
@@ -70,7 +71,7 @@ Text {
     }
 
     text: appName
-    color: "#FFFFFF"
+    color: Theme.ink(parent, false)
     font.pixelSize: 14
     font.bold: true
     renderType: Text.NativeRendering

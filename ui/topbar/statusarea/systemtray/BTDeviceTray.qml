@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Bluetooth
 import qs.components
 import qs.ui.osd
+import qs.services
 
 RowLayout {
     id: root
@@ -31,7 +32,7 @@ RowLayout {
                 CFVI {
                     icon:  _item._deviceIcon()
                     size:  16
-                    color: "#ffffff"
+                    color: Theme.ink(parent, false)
                     Layout.alignment: Qt.AlignVCenter
                 }
 

@@ -91,7 +91,7 @@ ContentPage {
                     anchors.centerIn: parent
                     text: "Rechercher"
                     font.pixelSize: 11
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {
@@ -166,7 +166,7 @@ ContentPage {
                 CFText {
                     text: _dr.dev ? _dr.dev.name : ""
                     font.pixelSize: 14
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                     width: parent.width
                 }
@@ -212,7 +212,7 @@ ContentPage {
                     anchors.centerIn: parent
                     text: "Options…"
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {

@@ -461,7 +461,7 @@ Scope {
                                     }
                                     width:             maxBubbleW - 24
                                     text:              content
-                                    color:             "#FFFFFF"
+                                    color: Theme.ink(parent, false)
                                     font.pixelSize:    13
                                     renderType:        Text.NativeRendering
                                     wrapMode:          Text.WrapAtWordBoundaryOrAnywhere
@@ -724,7 +724,7 @@ Scope {
                                     width:               inputScroll.width
                                     placeholderText:     win.loading ? "Thinking…" : (speech.recording ? "Écoute…" : "Ask AI… (/ pour les commandes)")
                                     placeholderTextColor: "#555"
-                                    color:               "#FFF"
+                                    color: Theme.ink(parent, false)
                                     background:          null
                                     font.pixelSize:      13
                                     renderType:          Text.NativeRendering
@@ -920,7 +920,7 @@ Scope {
                                 Text {
                                     visible: AiChats.chats.length === 0
                                     text: "Aucune conversation sauvegardée pour l'instant."
-                                    color: "#FFFFFF"
+                                    color: Theme.ink(parent, false)
                                     font.pixelSize: 12
                                     wrapMode: Text.Wrap
                                     width: parent.width
@@ -950,7 +950,7 @@ Scope {
                                                 spacing: 1
                                                 Text {
                                                     text: modelData.title
-                                                    color: "#FFFFFF"
+                                                    color: Theme.ink(parent, false)
                                                     font.pixelSize: 12
                                                     elide: Text.ElideRight
                                                     width: parent.width

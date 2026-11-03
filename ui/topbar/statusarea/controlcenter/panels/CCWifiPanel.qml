@@ -388,7 +388,7 @@ Item {
                 height:                  32
                 echoMode:                TextInput.Password
                 placeholderText:         "Mot de passe"
-                color:                   "#ffffff"
+                color: Theme.ink(parent, false)
                 font.pixelSize:          13
                 font.family:             "SF Pro Text"
                 renderType:              Text.NativeRendering
@@ -428,7 +428,7 @@ Item {
                     text:           "Joindre"
                     font.pixelSize: 13
                     font.weight:    Font.DemiBold
-                    color:          "#ffffff"
+                    color: Theme.ink(parent, false)
                 }
 
                 MouseArea {

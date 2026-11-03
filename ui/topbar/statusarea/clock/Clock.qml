@@ -7,7 +7,7 @@ Row {
 
     Text {
         id: dateText
-        color: "#FFFFFF"
+        color: Theme.ink(parent, false)
         font.pixelSize: 13
         font.bold: true
         renderType: Text.NativeRendering
@@ -16,7 +16,7 @@ Row {
 
     Text {
         id: timeText
-        color: "#FFFFFF"
+        color: Theme.ink(parent, false)
         font.pixelSize: 13
         font.bold: true
         renderType: Text.NativeRendering

@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.components.glass
 import qs.components
+import qs.services
 
 ColumnLayout {
     id: root
@@ -79,7 +80,7 @@ ColumnLayout {
                 font.pixelSize: 10
                 font.weight:    Font.Bold
                 font.family:    "SF Pro Text"
-                color:          "#ffffff"
+                color: Theme.ink(parent, false)
                 renderType:     Text.NativeRendering
             }
         }
@@ -109,7 +110,7 @@ ColumnLayout {
                 font.pixelSize: 13
                 font.weight: Font.Bold
                 font.family: "SF Pro Text"
-                color: "#ffffff"
+                color: Theme.ink(parent, false)
                 renderType: Text.NativeRendering
             }
 
@@ -125,7 +126,7 @@ ColumnLayout {
                     text: "Show less"
                     font.pixelSize: 11
                     font.family: "SF Pro Text"
-                    color: "#ffffff"
+                    color: Theme.ink(parent, false)
                     renderType: Text.NativeRendering
                 }
 
@@ -149,7 +150,7 @@ ColumnLayout {
                     text: "×"
                     font.pixelSize: 13
                     font.family: "SF Pro Text"
-                    color: "#ffffff"
+                    color: Theme.ink(parent, false)
                     renderType: Text.NativeRendering
                 }
 

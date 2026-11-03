@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.VectorImage
+import QtQuick.Effects
 import Quickshell.Services.UPower
 import qs.services
 
@@ -40,6 +41,8 @@ RowLayout {
             source: "../../../../assets/icons/battery/" + root.batIcon
             anchors.fill: parent
             preferredRendererType: VectorImage.CurveRenderer
+            layer.enabled: Theme.themed(root) && Theme.isLight
+            layer.effect: MultiEffect { colorization: 1; colorizationColor: Theme.textPrimary }
         }
 
         MouseArea {
@@ -53,7 +56,7 @@ RowLayout {
     Text {
         id: _pctText
         text:           Math.round(root.batPercentage * 100) + "%"
-        color:          "#FFFFFF"
+        color: Theme.ink(parent, false)
         font.family:    "SF Pro Text"
         font.pixelSize: 13
         renderType:     Text.NativeRendering

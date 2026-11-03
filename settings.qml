@@ -10,6 +10,7 @@ import QtQuick.Window
 import Quickshell
 import qs.components.glass
 import qs.components
+import qs.services
 import qs.ui.settings.widgets
 import qs.ui.settings.pages
 
@@ -27,7 +28,11 @@ FloatingWindow {
         target: Quickshell
         function onReloadCompleted() { Quickshell.watchFiles = false }
     }
-    Component.onCompleted: Quickshell.watchFiles = false
+    Component.onCompleted: {
+        Quickshell.watchFiles = false
+        // Une seule instance (le shell principal) applique le flou à Hyprland.
+        Theme.applyToCompositor = false
+    }
 
     readonly property var sections: [
         {
@@ -50,7 +55,7 @@ FloatingWindow {
             title: "Système",
             items: [
                 { name: "Général",                  icon: "settings/general.svg",       component: "GeneralPage", implemented: true },
-                { name: "Apparence",                 icon: "settings/appearance.svg",    implemented: false },
+                { name: "Apparence",                 icon: "settings/appearance.svg",    component: "AppearancePage", implemented: true },
                 { name: "IA",                         icon: "ai.svg",                     component: "AiSettingsPage", implemented: true },
                 { name: "Control Center",             icon: "control-center.svg",         component: "ControlCenterPage", implemented: true },
                 { name: "Bureau et Dock",             icon: "settings/dock.svg",          component: "DockPage", implemented: true },
@@ -119,8 +124,9 @@ FloatingWindow {
 
     Rectangle {
         id: _windowCard
+        readonly property bool themed: true
         anchors.fill: parent
-        color: "#0d0d0d"
+        color: Theme.window
         clip: true
 
         RowLayout {
@@ -139,7 +145,7 @@ FloatingWindow {
                     anchors.fill: _sidebarRoot
                     anchors.margins: -6
                     radius: _sidebarRoot.radius + 6
-                    color: "#40000000"
+                    color: Theme.shadow
                 }
 
                 Rectangle {
@@ -149,8 +155,8 @@ FloatingWindow {
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     radius: 18
-                    color: "#30161616"
-                    border.color: "#20ffffff"
+                    color: Theme.panel
+                    border.color: Theme.panelRim
                     border.width: 1
                     clip: true
 
@@ -265,7 +271,7 @@ FloatingWindow {
                         Rectangle {
                             anchors.fill: parent
                             radius: height / 2
-                            color: "#12ffffff"
+                            color: Theme.fillSubtle
 
                             RowLayout {
                                 anchors.fill: parent
@@ -282,7 +288,7 @@ FloatingWindow {
                                 TextInput {
                                     id: _searchField
                                     Layout.fillWidth: true
-                                    color: "#fff"
+                                    color: Theme.textPrimary
                                     font.pixelSize: 13
                                     clip: true
                                     selectByMouse: true
@@ -371,7 +377,7 @@ FloatingWindow {
                                             height: _matchesSearch ? 36 : 0
                                             visible: _matchesSearch
                                             radius: 8
-                                            color: _row._selected ? "#1C7AFF" : (_mouse.containsMouse ? "#10ffffff" : "transparent")
+                                            color: _row._selected ? Theme.accent : (_mouse.containsMouse ? Theme.fillHover : "transparent")
                                             Behavior on color { ColorAnimation { duration: 100 } }
 
                                             RowLayout {
@@ -396,7 +402,7 @@ FloatingWindow {
                                                 CFText {
                                                     text: _row.modelData.name
                                                     font.pixelSize: 14
-                                                    color: "#fff"
+                                                    color: _row._selected ? Theme.onAccent : Theme.textPrimary
                                                     Layout.fillWidth: true
                                                     elide: Text.ElideRight
                                                 }
@@ -442,15 +448,15 @@ FloatingWindow {
                                 anchors.fill: _navBg
                                 anchors.margins: -4
                                 radius: _navBg.radius + 4
-                                color: "#30000000"
+                                color: Theme.shadow
                             }
 
                             Rectangle {
                                 id: _navBg
                                 anchors.fill: parent
                                 radius: 16
-                                color: "#18ffffff"
-                                border.color: "#14ffffff"
+                                color: Theme.fillControl
+                                border.color: Theme.controlRim
                                 border.width: 1
 
                             Row {
@@ -480,7 +486,7 @@ FloatingWindow {
                                     width: 1
                                     height: 18
                                     anchors.verticalCenter: parent.verticalCenter
-                                    color: "#18ffffff"
+                                    color: Theme.separator
                                 }
 
                                 Item {
@@ -509,7 +515,7 @@ FloatingWindow {
                             text: root.currentItem ? root.currentItem.name : ""
                             font.pixelSize: 22
                             font.weight: Font.Bold
-                            color: "#fff"
+                            color: Theme.textPrimary
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                         }
@@ -537,6 +543,7 @@ FloatingWindow {
                                 case "MonitorsPage": return _monitorsComp
                                 case "SpotlightPage": return _spotlightComp
                                 case "WallpaperPage": return _wallpaperComp
+                                case "AppearancePage": return _appearanceComp
                                 case "LockScreenPage": return _lockScreenComp
                                 default:              return _placeholderComp
                             }
@@ -558,6 +565,7 @@ FloatingWindow {
     Component { id: _ccPageComp; ControlCenterPage {} }
     Component { id: _monitorsComp; MonitorsPage {} }
     Component { id: _spotlightComp; SpotlightPage {} }
+    Component { id: _appearanceComp; AppearancePage {} }
     Component { id: _wallpaperComp; WallpaperPage {} }
     Component { id: _lockScreenComp; LockScreenPage {} }
 }

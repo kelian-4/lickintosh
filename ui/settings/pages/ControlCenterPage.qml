@@ -32,7 +32,7 @@ ContentPage {
         CFText {
             text: "Contrôles disponibles"
             font.pixelSize: 14
-            color: "#fff"
+            color: Theme.textPrimary
             Layout.fillWidth: true
         }
 
@@ -87,7 +87,7 @@ ContentPage {
                             anchors.margins: 3
                             height: 4
                             radius: 1
-                            color: "#a0ffffff"
+                            color: Theme.textSecondary
                         }
                         Grid {
                             anchors.left: parent.left
@@ -105,7 +105,7 @@ ContentPage {
                                     width: 2
                                     height: 2
                                     radius: 1
-                                    color: "#a0ffffff"
+                                    color: Theme.textSecondary
                                 }
                             }
                         }
@@ -127,7 +127,7 @@ ContentPage {
                             width: 6
                             height: 1.5
                             radius: 0.75
-                            color: "#a0ffffff"
+                            color: Theme.textSecondary
                             anchors.left: parent.left
                             anchors.leftMargin: 4
                             anchors.verticalCenter: parent.verticalCenter
@@ -136,7 +136,7 @@ ContentPage {
                             width: 1.5
                             height: 6
                             radius: 0.75
-                            color: "#a0ffffff"
+                            color: Theme.textSecondary
                             anchors.left: parent.left
                             anchors.leftMargin: 6.5
                             anchors.verticalCenter: parent.verticalCenter
@@ -145,7 +145,7 @@ ContentPage {
                             width: 3
                             height: 3
                             radius: 1.5
-                            color: "#a0ffffff"
+                            color: Theme.textSecondary
                             anchors.right: parent.right
                             anchors.rightMargin: 3
                             anchors.top: parent.top
@@ -155,7 +155,7 @@ ContentPage {
                             width: 3
                             height: 3
                             radius: 1.5
-                            color: "#a0ffffff"
+                            color: Theme.textSecondary
                             anchors.right: parent.right
                             anchors.rightMargin: 6.5
                             anchors.bottom: parent.bottom
@@ -167,7 +167,7 @@ ContentPage {
                 CFText {
                     text: _widgetRow.modelData.name
                     font.pixelSize: 14
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
@@ -184,7 +184,7 @@ ContentPage {
                         width: 20
                         height: 20
                         radius: 10
-                        color: "#fff"
+                        color: Theme.textPrimary
                         anchors.verticalCenter: parent.verticalCenter
                         x: (_widgetRow.modelData.locked || ShellConfig.ccWidgetVisible(_widgetRow.modelData.id)) ? parent.width - width - 2 : 2
                         Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }

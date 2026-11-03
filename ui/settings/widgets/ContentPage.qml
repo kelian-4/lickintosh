@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import qs.services
 
 ScrollView {
     id: root
@@ -22,7 +23,7 @@ ScrollView {
         contentItem: Rectangle {
             implicitWidth: 4
             radius: 2
-            color: "#50ffffff"
+            color: Theme.scrollbar
             opacity: _vbar.pressed ? 0.9 : (_vbar.hovered ? 0.7 : 0.0)
             Behavior on opacity { NumberAnimation { duration: 150 } }
         }
