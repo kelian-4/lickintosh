@@ -62,7 +62,7 @@ Scope {
 
                             Text {
                                 text: section.modelData.cat.title
-                                color: "#ffffff"
+                                color: Theme.ink(parent, false)
                                 font.pixelSize: 13
                                 font.weight: Font.Bold
                                 font.family: "SF Pro Text"
@@ -143,7 +143,7 @@ Scope {
                                                         anchors.centerIn: parent
                                                         visible: !tile.added
                                                         text: "+"
-                                                        color: "#ffffff"
+                                                        color: Theme.ink(parent, false)
                                                         font.pixelSize: 17
                                                         font.family: "SF Pro Text"
                                                         renderType: Text.NativeRendering
@@ -156,7 +156,7 @@ Scope {
                                                 horizontalAlignment: Text.AlignHCenter
                                                 text: tile.modelData.title
                                                 elide: Text.ElideRight
-                                                color: "#ffffff"
+                                                color: Theme.ink(parent, false)
                                                 font.pixelSize: 11
                                                 font.weight: Font.Medium
                                                 font.family: "SF Pro Text"

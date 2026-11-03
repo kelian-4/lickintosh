@@ -3,6 +3,7 @@ import QtQuick.VectorImage
 import QtQuick.Effects
 import Quickshell
 import qs.components.glass
+import qs.services
 
 ListView {
     id: root
@@ -109,7 +110,7 @@ ListView {
             bottomPadding: 4
             leftPadding: 12
             text: row.modelData._section || ""
-            color: "#ffffff"
+            color: Theme.ink(parent, false)
             opacity: 0.5
             font.family:    root.fontFamilyMedium
             font.pixelSize: 12
@@ -177,7 +178,7 @@ ListView {
                 anchors.centerIn: parent
                 visible:  (!row.isApp && !row.modelData.isWallpaper && !row.modelData.clipImage && !row.modelData.isImage && !row.modelData.isEmoji && !row.modelData.icon) || (ico.status !== Image.Ready && !row.modelData.icon)
                 text:     row.modelData.isEmoji ? row.modelData.value : (row.modelData.name || row.modelData.title || "?")[0].toUpperCase()
-                color:          "#ffffff"
+                color: Theme.ink(parent, false)
                 font.pixelSize: row.modelData.isEmoji ? 20 : 16
                 font.weight:    Font.Bold
                 renderType:     Text.NativeRendering

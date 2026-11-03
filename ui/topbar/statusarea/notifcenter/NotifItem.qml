@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.components.glass
 import qs.components
+import qs.services
 
 BoxGlass {
     id: root
@@ -126,7 +127,7 @@ BoxGlass {
                         font.pixelSize:  14
                         font.weight:     Font.Bold
                         font.family:     "SF Pro Text"
-                        color:           "#ffffff"
+                        color: Theme.ink(parent, false)
                         elide:           Text.ElideRight
                         renderType:      Text.NativeRendering
                     }
@@ -179,7 +180,7 @@ BoxGlass {
                                 font.pixelSize:  11
                                 font.weight:     Font.DemiBold
                                 font.family:     "SF Pro Text"
-                                color:           "#ffffff"
+                                color: Theme.ink(parent, false)
                                 renderType:      Text.NativeRendering
                             }
 
@@ -267,7 +268,7 @@ BoxGlass {
                         font.pixelSize: 13
                         font.weight: Font.DemiBold
                         font.family: "SF Pro Text"
-                        color: "#ffffff"
+                        color: Theme.ink(parent, false)
                         renderType: Text.NativeRendering
                     }
 
@@ -299,7 +300,7 @@ BoxGlass {
                         font.pixelSize: 13
                         font.weight: Font.DemiBold
                         font.family: "SF Pro Text"
-                        color: "#ffffff"
+                        color: Theme.ink(parent, false)
                         renderType: Text.NativeRendering
                     }
 
@@ -333,7 +334,7 @@ BoxGlass {
                         text: root._remindInput
                         font.pixelSize: 14
                         font.family: "SF Pro Text"
-                        color: "#ffffff"
+                        color: Theme.ink(parent, false)
                         horizontalAlignment: TextInput.AlignHCenter
                         verticalAlignment: TextInput.AlignVCenter
                         validator: IntValidator { bottom: 1; top: 1440 }
@@ -364,7 +365,7 @@ BoxGlass {
                         font.pixelSize: 12
                         font.weight: Font.DemiBold
                         font.family: "SF Pro Text"
-                        color: "#ffffff"
+                        color: Theme.ink(parent, false)
                         renderType: Text.NativeRendering
                     }
 

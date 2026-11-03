@@ -650,7 +650,7 @@ Scope {
                             id: _editControlsLabel
                             anchors.centerIn: parent
                             text: "Edit Controls…"
-                            color: "#ffffff"
+                            color: Theme.ink(parent, false)
                             font.pixelSize: 12
                             font.weight: Font.Medium
                             font.family: "SF Pro Text"
@@ -773,7 +773,7 @@ Scope {
                                 width: 10
                                 height: 2
                                 radius: 1
-                                color: "#ffffff"
+                                color: Theme.ink(parent, false)
                             }
 
                             MouseArea {
@@ -865,7 +865,7 @@ Scope {
                             width: 12
                             height: 12
                             radius: 6
-                            color: "#fff"
+                            color: Theme.ink(parent, false)
                             visible: flatSlider._active
                             anchors.verticalCenter: parent.verticalCenter
                             x: Math.min(Math.max(flatSlider.value * parent.width - width/2, 0), parent.width - width)
@@ -983,7 +983,7 @@ Scope {
                                                 text: "Wi-Fi"
                                                 font.weight: Font.Bold
                                                 font.pixelSize: 12
-                                                color: "#fff"
+                                                color: Theme.ink(parent, false)
                                             }
                                             CFText {
                                                 text: root.wifiSSID
@@ -1847,7 +1847,7 @@ Scope {
                                         anchors.margins: 4
                                         height: 6
                                         radius: 1.5
-                                        color: "#fff"
+                                        color: Theme.ink(parent, false)
                                     }
                                     Grid {
                                         anchors.left: parent.left
@@ -1865,7 +1865,7 @@ Scope {
                                                 width: 3
                                                 height: 3
                                                 radius: 1
-                                                color: "#fff"
+                                                color: Theme.ink(parent, false)
                                             }
                                         }
                                     }
@@ -2055,7 +2055,7 @@ Scope {
                                             text: "Minuteur"
                                             font.pixelSize: 15
                                             font.weight: Font.Bold
-                                            color: "#fff"
+                                            color: Theme.ink(parent, false)
                                         }
 
                                         CFText {
@@ -2072,7 +2072,7 @@ Scope {
                                             text: TimerState.formatRemaining(TimerState.remainingMs)
                                             font.pixelSize: 30
                                             font.weight: Font.Bold
-                                            color: "#fff"
+                                            color: Theme.ink(parent, false)
                                             Layout.alignment: Qt.AlignHCenter
                                         }
 
@@ -2095,7 +2095,7 @@ Scope {
                                                         anchors.centerIn: parent
                                                         text: _presetBtn.modelData + "m"
                                                         font.pixelSize: 12
-                                                        color: "#fff"
+                                                        color: Theme.ink(parent, false)
                                                     }
                                                     MouseArea {
                                                         id: _presetMouse
@@ -2123,7 +2123,7 @@ Scope {
                                                     anchors.centerIn: parent
                                                     text: TimerState.running ? "Pause" : "Reprendre"
                                                     font.pixelSize: 12
-                                                    color: "#fff"
+                                                    color: Theme.ink(parent, false)
                                                 }
                                                 MouseArea {
                                                     id: _pauseMouse
@@ -2244,7 +2244,7 @@ Scope {
                                                 text: "Alarmes"
                                                 font.pixelSize: 15
                                                 font.weight: Font.Bold
-                                                color: "#fff"
+                                                color: Theme.ink(parent, false)
                                                 Layout.fillWidth: true
                                             }
 
@@ -2308,7 +2308,7 @@ Scope {
                                                                 width: 18
                                                                 height: 18
                                                                 radius: 9
-                                                                color: "#fff"
+                                                                color: Theme.ink(parent, false)
                                                                 anchors.verticalCenter: parent.verticalCenter
                                                                 x: _alarmRow.modelData.enabled ? parent.width - width - 2 : 2
                                                                 Behavior on x { NumberAnimation { duration: 150 } }
@@ -2437,14 +2437,14 @@ Scope {
                                             text: "Chronomètre"
                                             font.pixelSize: 15
                                             font.weight: Font.Bold
-                                            color: "#fff"
+                                            color: Theme.ink(parent, false)
                                         }
 
                                         CFText {
                                             text: StopwatchState.formatElapsed(StopwatchState.elapsedMs)
                                             font.pixelSize: 30
                                             font.weight: Font.Bold
-                                            color: "#fff"
+                                            color: Theme.ink(parent, false)
                                             Layout.alignment: Qt.AlignHCenter
                                         }
 
@@ -2461,7 +2461,7 @@ Scope {
                                                     anchors.centerIn: parent
                                                     text: StopwatchState.running ? "Arrêter" : "Démarrer"
                                                     font.pixelSize: 12
-                                                    color: "#fff"
+                                                    color: Theme.ink(parent, false)
                                                 }
                                                 MouseArea {
                                                     id: _swToggleMouse

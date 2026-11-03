@@ -4,6 +4,7 @@ import QtQuick.Controls
 import qs.ui.topbar.statusarea.ai
 import qs.components
 import qs.ui.settings.widgets
+import qs.services
 
 ContentPage {
     id: root
@@ -45,7 +46,7 @@ ContentPage {
             CFText {
                 text: "Fournisseur IA"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -78,7 +79,7 @@ ContentPage {
                     width: _providerButton.width - 10 - 8 - _providerChevron.width - 4
                     text: root._currentProviderLabel
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                 }
 
@@ -114,7 +115,7 @@ ContentPage {
                         anchors.verticalCenter: parent.verticalCenter
                         text: _providerRow.modelData.label
                         font.pixelSize: 13
-                        color: "#fff"
+                        color: Theme.textPrimary
                     }
 
                     MouseArea {
@@ -141,7 +142,7 @@ ContentPage {
             CFText {
                 text: "Modèle"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -161,7 +162,7 @@ ContentPage {
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
                     verticalAlignment: TextInput.AlignVCenter
-                    color: "#fff"
+                    color: Theme.textPrimary
                     font.pixelSize: 12
                     clip: true
                     selectByMouse: true
@@ -200,7 +201,7 @@ ContentPage {
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
                         verticalAlignment: TextInput.AlignVCenter
-                        color: "#fff"
+                        color: Theme.textPrimary
                         font.pixelSize: 13
                         echoMode: root._apiKeyVisible ? TextInput.Normal : TextInput.Password
                         text: root._apiKeyDraft
@@ -286,7 +287,7 @@ ContentPage {
             CFText {
                 text: "Hôte"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -307,7 +308,7 @@ ContentPage {
             CFText {
                 text: "Modèle"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -341,7 +342,7 @@ ContentPage {
                     width: _ollamaModelButton.width - 10 - 8 - _ollamaModelChevron.width - 4
                     text: AiConfig.ollamaModel.length > 0 ? AiConfig.ollamaModel : "Aucun modèle"
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                 }
 
@@ -370,7 +371,7 @@ ContentPage {
                     horizontalAlignment: Text.AlignHCenter
                     text: "Actualiser"
                     font.pixelSize: 11
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                 }
 
@@ -407,7 +408,7 @@ ContentPage {
                         anchors.verticalCenter: parent.verticalCenter
                         text: _ollamaModelRow.modelData
                         font.pixelSize: 13
-                        color: "#fff"
+                        color: Theme.textPrimary
                     }
 
                     MouseArea {
@@ -444,7 +445,7 @@ ContentPage {
             CFText {
                 text: "Modèle Whisper"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -463,7 +464,7 @@ ContentPage {
             CFText {
                 text: "Langue"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -494,7 +495,7 @@ ContentPage {
             CFText {
                 text: "Conversations enregistrées"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -563,7 +564,7 @@ ContentPage {
                 anchors.fill: parent
                 anchors.margins: 8
                 text: AiConfig.systemPrompt
-                color: "#fff"
+                color: Theme.textPrimary
                 font.pixelSize: 13
                 wrapMode: TextArea.Wrap
                 selectByMouse: true
@@ -579,7 +580,7 @@ ContentPage {
         CFText {
             text: "Clique sur l'icône IA dans la barre du haut pour ouvrir l'assistant à tout moment, depuis n'importe quel espace de travail."
             font.pixelSize: 12
-            color: "#fff"
+            color: Theme.textPrimary
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
         }
@@ -617,7 +618,7 @@ ContentPage {
                     text: modelData.cmd
                     font.pixelSize: 13
                     font.family: "SF Mono"
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }

@@ -78,7 +78,7 @@ RowLayout {
             required property int index
             visible: index < root.overflowStart
             text: modelData.label
-            color: "#FFFFFF"
+            color: Theme.ink(parent, false)
             font.pixelSize: 13
             renderType: Text.NativeRendering
             Layout.alignment: Qt.AlignVCenter
@@ -109,7 +109,7 @@ RowLayout {
         id: overflowBtn
         visible: root.overflowStart < GlobalMenuService.menus.length
         text: "··"
-        color: "#FFFFFF"
+        color: Theme.ink(parent, false)
         font.pixelSize: 13
         renderType: Text.NativeRendering
         Layout.alignment: Qt.AlignVCenter

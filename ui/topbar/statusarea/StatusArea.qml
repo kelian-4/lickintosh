@@ -109,7 +109,7 @@ RowLayout {
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     colorization: 1
-                    colorizationColor: spotlightBtn.hovered ? "#AAAAAA" : "#FFFFFF"
+                    colorizationColor: spotlightBtn.hovered ? Theme.ink(spotlightBtn, true) : Theme.ink(spotlightBtn, false)
                 }
             }
 
@@ -141,7 +141,7 @@ RowLayout {
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     colorization: 1
-                    colorizationColor: parent.containsMouse ? "#AAAAAA" : "#FFFFFF"
+                    colorizationColor: parent.containsMouse ? Theme.ink(parent, true) : Theme.ink(parent, false)
                 }
             }
         }
@@ -200,7 +200,7 @@ RowLayout {
                     font.pixelSize: 10
                     font.weight:    Font.Bold
                     font.family:    "SF Pro Text"
-                    color:          "#fff"
+                    color: "#FFFFFF"   // sur le badge rouge : reste blanc dans tous les modes
                     renderType:     Text.NativeRendering
                 }
             }
@@ -210,8 +210,8 @@ RowLayout {
                 hoverEnabled: true
                 cursorShape:  Qt.PointingHandCursor
                 onClicked:    root.toggleNotifCenter()
-                onEntered:    _clock.color = Qt.rgba(1, 1, 1, 0.70)
-                onExited:     _clock.color = "#FFFFFF"
+                onEntered:    _clock.opacity = 0.70
+                onExited:     _clock.opacity = 1
             }
         }
         }

@@ -3,11 +3,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.VectorImage
 import QtQuick.Effects
+import qs.services
 
 VectorImage {
     id: vi
     property bool gray: false
-    property color color: gray ? "#a0ffffff" : "#fff"
+    property color color: Theme.ink(vi, gray)
     property int size: 16
     property bool colorized: true
     property string icon: ""

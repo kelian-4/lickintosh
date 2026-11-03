@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.components.glass
 import qs.components
+import qs.services
 
 ColumnLayout {
     id: root
@@ -25,8 +26,8 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: _inner.implicitHeight + 28
         radius: 14
-        color: "#18000000"
-        light: "#20ffffff"
+        color: Theme.card
+        light: Theme.cardRim
         rimStrength: 0.8
 
         ColumnLayout {

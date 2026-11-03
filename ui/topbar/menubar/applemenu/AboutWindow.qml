@@ -154,7 +154,7 @@ Scope {
                         anchors.topMargin: 14
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: _procOS.result !== "" ? _procOS.result : "NixOS"
-                        color: "#ffffff"
+                        color: Theme.ink(parent, false)
                         font.pixelSize: 22
                         font.weight: Font.Bold
                         font.family: "SF Pro Display"
@@ -206,7 +206,7 @@ Scope {
                                 Text {
                                     width: root.winWidth - 40 - 80 - 12
                                     text: modelData.v !== "" ? modelData.v : "…"
-                                    color: "#ffffff"
+                                    color: Theme.ink(parent, false)
                                     font.pixelSize: 12
                                     font.family: "SF Pro Display"
                                     renderType: Text.NativeRendering
@@ -235,7 +235,7 @@ Scope {
                         Text {
                             anchors.centerIn: parent
                             text: "More Info…"
-                            color: "#ffffff"
+                            color: Theme.ink(parent, false)
                             font.pixelSize: 12
                             font.family: "SF Pro Display"
                             renderType: Text.NativeRendering

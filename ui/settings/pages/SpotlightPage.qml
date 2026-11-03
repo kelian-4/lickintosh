@@ -117,7 +117,7 @@ ContentPage {
                 CFText {
                     text: _aliasRow.modelData.label
                     font.pixelSize: 14
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
@@ -136,7 +136,7 @@ ContentPage {
                         anchors.margins: 8
                         horizontalAlignment: TextInput.AlignHCenter
                         verticalAlignment: TextInput.AlignVCenter
-                        color: "#fff"
+                        color: Theme.textPrimary
                         font.pixelSize: 14
                         maximumLength: 3
                         text: ShellConfig.options.spotlight.aliases[_aliasRow.modelData.key]
@@ -163,7 +163,7 @@ ContentPage {
             CFText {
                 text: "Dossier des fonds d'écran"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -182,7 +182,7 @@ ContentPage {
                     anchors.fill: parent
                     anchors.margins: 8
                     verticalAlignment: TextInput.AlignVCenter
-                    color: "#fff"
+                    color: Theme.textPrimary
                     font.pixelSize: 12
                     clip: true
                     text: ShellConfig.options.spotlight.indexing.wallpaperDir
@@ -198,7 +198,7 @@ ContentPage {
             CFText {
                 text: "Dossiers exclus de la recherche"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 Layout.fillWidth: true
             }
 
@@ -225,7 +225,7 @@ ContentPage {
                             anchors.verticalCenter: parent.verticalCenter
                             text: _excludeChip.modelData
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                         }
 
                         Rectangle {
@@ -305,7 +305,7 @@ ContentPage {
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
                         verticalAlignment: TextInput.AlignVCenter
-                        color: "#fff"
+                        color: Theme.textPrimary
                         font.pixelSize: 12
                         onAccepted: {
                             if (text.trim().length > 0) {
@@ -337,7 +337,7 @@ ContentPage {
             CFText {
                 text: "Réindexation incrémentale"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -365,7 +365,7 @@ ContentPage {
             CFText {
                 text: "Réindexation complète"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }

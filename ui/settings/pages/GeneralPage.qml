@@ -77,7 +77,7 @@ Item {
                         CFText {
                             text: _row.modelData.name
                             font.pixelSize: 14
-                            color: "#fff"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -140,7 +140,7 @@ Item {
                 text: root._currentSubpageLabel
                 font.pixelSize: 16
                 font.weight: Font.Bold
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -183,7 +183,7 @@ Item {
                             text: GeneralState.hostname.length > 0 ? GeneralState.hostname : "Inconnu"
                             font.pixelSize: 17
                             font.weight: Font.Bold
-                            color: "#fff"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -210,7 +210,7 @@ Item {
                     CFText {
                         text: "OS"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -232,7 +232,7 @@ Item {
                     CFText {
                         text: "Host"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -253,7 +253,7 @@ Item {
                     CFText {
                         text: "Noyau"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -273,7 +273,7 @@ Item {
                     CFText {
                         text: "Uptime"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -295,7 +295,7 @@ Item {
                     CFText {
                         text: "Paquets"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -324,7 +324,7 @@ Item {
                     CFText {
                         text: "Shell"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -346,7 +346,7 @@ Item {
                     CFText {
                         text: "WM"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -373,7 +373,7 @@ Item {
                     CFText {
                         text: "CPU"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -395,7 +395,7 @@ Item {
                     CFText {
                         text: "GPU"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -421,7 +421,7 @@ Item {
                         CFText {
                             text: "Mémoire"
                             font.pixelSize: 14
-                            color: "#fff"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -456,7 +456,7 @@ Item {
                     CFText {
                         text: "Swap"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -476,7 +476,7 @@ Item {
                     CFText {
                         text: "IP locale"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -496,7 +496,7 @@ Item {
                     CFText {
                         text: "Batterie"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -518,7 +518,7 @@ Item {
                     CFText {
                         text: "Locale"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -542,7 +542,7 @@ Item {
                     CFText {
                         text: "État"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
@@ -578,7 +578,7 @@ Item {
                             horizontalAlignment: Text.AlignHCenter
                             text: "Vérifier"
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                         }
 
@@ -621,7 +621,7 @@ Item {
                             CFText {
                                 text: modelData.mountPoint
                                 font.pixelSize: 14
-                                color: "#fff"
+                                color: Theme.textPrimary
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
@@ -668,7 +668,7 @@ Item {
                     CFText {
                         text: "Fuseau horaire"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -699,7 +699,7 @@ Item {
                     CFText {
                         text: "Langue système"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -718,7 +718,7 @@ Item {
                     CFText {
                         text: "Locale"
                         font.pixelSize: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }

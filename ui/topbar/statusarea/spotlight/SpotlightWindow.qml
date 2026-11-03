@@ -1455,7 +1455,7 @@ Scope {
                                         Text {
                                             Layout.fillWidth: true
                                             text: "$ " + win.shellOutputCmd
-                                            color: "#ffffff"
+                                            color: Theme.ink(parent, false)
                                             font.family: "SF Pro Text"
                                             font.pixelSize: 13
                                             font.weight: Font.DemiBold
@@ -1471,7 +1471,7 @@ Scope {
                                                 id: copyLabel
                                                 anchors.centerIn: parent
                                                 text: "Copier"
-                                                color: "#ffffff"
+                                                color: Theme.ink(parent, false)
                                                 opacity: 0.75
                                                 font.pixelSize: 11
                                             }
@@ -1491,7 +1491,7 @@ Scope {
                                                 id: closeLabel
                                                 anchors.centerIn: parent
                                                 text: "Fermer (Échap)"
-                                                color: "#ffffff"
+                                                color: Theme.ink(parent, false)
                                                 opacity: 0.75
                                                 font.pixelSize: 11
                                             }
@@ -1522,7 +1522,7 @@ Scope {
                                                 id: outputText
                                                 width: parent.width
                                                 text: win.shellOutput
-                                                color: "#ffffff"
+                                                color: Theme.ink(parent, false)
                                                 font.family: "SF Mono"
                                                 font.pixelSize: 12
                                                 wrapMode: Text.Wrap

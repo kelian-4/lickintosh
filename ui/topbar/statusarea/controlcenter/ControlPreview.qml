@@ -68,7 +68,7 @@ Item {
 
             Text {
                 text: root.info ? root.info.title : ""
-                color: "#ffffff"
+                color: Theme.ink(parent, false)
                 font.pixelSize: 12
                 font.weight: Font.Bold
                 font.family: "SF Pro Text"

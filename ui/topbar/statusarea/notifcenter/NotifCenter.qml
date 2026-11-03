@@ -170,7 +170,7 @@ Scope {
                                         font.pixelSize: 13
                                         font.weight: Font.Bold
                                         font.family: "SF Pro Text"
-                                        color: "#ffffff"
+                                        color: Theme.ink(parent, false)
                                         renderType: Text.NativeRendering
                                     }
 
@@ -186,7 +186,7 @@ Scope {
                                             text: "×"
                                             font.pixelSize: 15
                                             font.family: "SF Pro Text"
-                                            color: "#ffffff"
+                                            color: Theme.ink(parent, false)
                                             renderType: Text.NativeRendering
                                         }
 
@@ -279,7 +279,7 @@ Scope {
                                         id: _editLabel
                                         anchors.centerIn: parent
                                         text: "Edit Widgets…"
-                                        color: "#ffffff"
+                                        color: Theme.ink(parent, false)
                                         font.pixelSize: 12
                                         font.weight: Font.Medium
                                         font.family: "SF Pro Text"

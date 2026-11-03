@@ -2,6 +2,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Controls
 import qs.components.glass
+import qs.services
 
 Switch {
     id: control
@@ -17,7 +18,7 @@ Switch {
         x: control.leftPadding
         y: parent.height / 2 - height / 2
         radius: 999
-        color: control.checked ? "#1C7AFF" : "#20000000"
+        color: Theme.themed(control) ? (control.checked ? Theme.accent : Theme.controlTrack) : (control.checked ? "#1C7AFF" : "#20000000")
         Behavior on color {
             ColorAnimation {
                 duration: 500

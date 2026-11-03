@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import qs.services
 
 Item {
     id: root
@@ -57,7 +58,7 @@ Item {
             id: pillLabel
             anchors.centerIn: parent
             text: pill.label
-            color: "#ffffff"
+            color: Theme.ink(parent, false)
             font.family: root.fontFamilyMedium
             font.weight: Font.Medium
             font.pixelSize: 12
@@ -125,7 +126,7 @@ Item {
                         Text {
                             visible: section.modelData.title !== ""
                             text:    section.modelData.title
-                            color:   "#ffffff"
+                            color: Theme.ink(parent, false)
                             opacity: 0.55
                             font.family:    root.fontFamilyMedium
                             font.pixelSize: 13
@@ -175,7 +176,7 @@ Item {
                                             anchors.centerIn: parent
                                             visible: ico.status !== Image.Ready
                                             text:    (tile.modelData.name || tile.modelData.title || "?")[0].toUpperCase()
-                                            color:          "#ffffff"
+                                            color: Theme.ink(parent, false)
                                             font.pixelSize: 20
                                             font.weight:    Font.Bold
                                             renderType:     Text.NativeRendering
@@ -189,7 +190,7 @@ Item {
                                         anchors.right:      parent.right
                                         horizontalAlignment: Text.AlignHCenter
                                         text:           tile.modelData.name || tile.modelData.title || ""
-                                        color:          "#ffffff"
+                                        color: Theme.ink(parent, false)
                                         font.family:    root.fontFamily
                                         font.pixelSize: 11
                                         wrapMode:       Text.WordWrap

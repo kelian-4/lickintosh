@@ -2,6 +2,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Controls
 import qs.components.glass
+import qs.services
 
 Slider {
     id: slider
@@ -36,12 +37,12 @@ Slider {
         width: slider.availableWidth
         height: implicitHeight
         radius: 10
-        color: "#30000000"
+        color: Theme.themed(slider) ? Theme.controlTrack : "#30000000"
 
         Rectangle {
             width: slider.visualPosition * parent.width
             height: parent.height
-            color: "#fff"
+            color: (Theme.isGlass || !Theme.themed(slider)) ? "#fff" : Theme.accent
             radius: 10
         }
     }

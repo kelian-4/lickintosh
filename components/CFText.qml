@@ -1,5 +1,6 @@
 import Quickshell
 import QtQuick
+import qs.services
 
 Text {
     id: uitext
@@ -7,6 +8,6 @@ Text {
     renderType: Text.NativeRendering
     renderTypeQuality: Text.VeryHighRenderTypeQuality
     font.family: "SF Pro Display"
-    color: gray ? "#a0ffffff" : "#ffffff"
+    color: Theme.ink(uitext, gray)
     Behavior on color { ColorAnimation { duration: 300 } }
 }

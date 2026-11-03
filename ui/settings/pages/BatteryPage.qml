@@ -29,7 +29,7 @@ ContentPage {
             CFText {
                 text: "Santé de la batterie"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 Layout.fillWidth: true
             }
 
@@ -48,7 +48,7 @@ ContentPage {
             CFText {
                 text: root._chargingStateLabel
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 Layout.fillWidth: true
             }
 
@@ -87,7 +87,7 @@ ContentPage {
             CFText {
                 text: "Mode basse consommation"
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
@@ -121,7 +121,7 @@ ContentPage {
                     width: _lowPowerButton.width - 10 - 8 - _lowPowerChevron.width - 4
                     text: root._lowPowerRuleLabel
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                 }
 
@@ -157,7 +157,7 @@ ContentPage {
                         anchors.verticalCenter: parent.verticalCenter
                         text: _ruleRow.modelData.label
                         font.pixelSize: 13
-                        color: "#fff"
+                        color: Theme.textPrimary
                     }
 
                     MouseArea {
@@ -226,7 +226,7 @@ ContentPage {
                         text: _tabButton.modelData.label
                         font.pixelSize: 12
                         font.weight: _tabButton.active ? Font.DemiBold : Font.Normal
-                        color: "#fff"
+                        color: Theme.textPrimary
                     }
 
                     MouseArea {
@@ -378,7 +378,7 @@ ContentPage {
                 CFText {
                     text: modelData.name
                     font.pixelSize: 14
-                    color: "#fff"
+                    color: Theme.textPrimary
                     Layout.fillWidth: true
                 }
 

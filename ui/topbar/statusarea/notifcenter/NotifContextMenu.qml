@@ -91,7 +91,7 @@ Item {
                     text: "Effacer"
                     font.pixelSize: 13
                     font.family: "SF Pro Text"
-                    color: "#ffffff"
+                    color: Theme.ink(parent, false)
                     renderType: Text.NativeRendering
                 }
 
@@ -129,7 +129,7 @@ Item {
                             text: "Rappeler plus tard"
                             font.pixelSize: 13
                             font.family: "SF Pro Text"
-                            color: "#ffffff"
+                            color: Theme.ink(parent, false)
                             renderType: Text.NativeRendering
                         }
 
@@ -155,7 +155,7 @@ Item {
                             text: "Options"
                             font.pixelSize: 13
                             font.family: "SF Pro Text"
-                            color: "#ffffff"
+                            color: Theme.ink(parent, false)
                             renderType: Text.NativeRendering
                         }
 
@@ -185,7 +185,7 @@ Item {
                     font.pixelSize: 12
                     font.weight: Font.DemiBold
                     font.family: "SF Pro Text"
-                    color: "#ffffff"
+                    color: Theme.ink(parent, false)
                     renderType: Text.NativeRendering
                 }
 
@@ -199,7 +199,7 @@ Item {
                     Rectangle {
                         height: parent.height
                         radius: 3
-                        color: "#ffffff"
+                        color: Theme.ink(parent, false)
                         width: parent.width * ((root._remindMinutes - 1) / 119)
                     }
 
@@ -230,7 +230,7 @@ Item {
                         font.pixelSize: 12
                         font.weight: Font.DemiBold
                         font.family: "SF Pro Text"
-                        color: "#ffffff"
+                        color: Theme.ink(parent, false)
                         renderType: Text.NativeRendering
                     }
 

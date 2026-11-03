@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.VectorImage
+import QtQuick.Effects
+import qs.services
 import Quickshell
 import Quickshell.Bluetooth
 
@@ -21,5 +23,7 @@ Item {
         anchors.centerIn: parent
         preferredRendererType: VectorImage.CurveRenderer
         opacity: bluetoothOn ? 1.0 : 0.4
+        layer.enabled: Theme.themed(root) && Theme.isLight
+        layer.effect: MultiEffect { colorization: 1; colorizationColor: Theme.textPrimary }
     }
 }

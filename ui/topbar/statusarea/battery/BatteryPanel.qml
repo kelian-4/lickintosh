@@ -125,7 +125,7 @@ Item {
                                     anchors.centerIn: parent
                                     icon: modelData.icon
                                     size: 16
-                                    color: "#ffffff"
+                                    color: Theme.ink(parent, false)
                                 }
                             }
 

@@ -116,7 +116,7 @@ Item {
                     text:           "Mes appareils"
                     font.pixelSize: 13
                     font.weight:    Font.Bold
-                    color:          "#fff"
+                    color: Theme.ink(parent, false)
                     visible:        root._devices.some(function(d) { return d.paired })
                     leftPadding:    20
                     bottomPadding:  4
@@ -136,7 +136,7 @@ Item {
                     text:          "Autres appareils"
                     font.pixelSize: 13
                     font.weight:    Font.Bold
-                    color:          "#fff"
+                    color: Theme.ink(parent, false)
                     visible:        root._devices.some(function(d) { return !d.paired })
                     leftPadding:    20
                     bottomPadding:  4
@@ -171,7 +171,7 @@ Item {
                 text:           "Paramètres Bluetooth…"
                 font.pixelSize: 14
                 font.weight:    Font.Bold
-                color:          "#fff"
+                color: Theme.ink(parent, false)
                 anchors.left:        parent.left
                 anchors.leftMargin:  20
                 anchors.verticalCenter: parent.verticalCenter
@@ -222,7 +222,7 @@ Item {
                 text:           _dr.modelData !== null ? _dr.modelData.name : ""
                 font.pixelSize: 14
                 font.weight:    Font.Bold
-                color:          "#fff"
+                color: Theme.ink(parent, false)
                 Layout.fillWidth: true
                 elide:            Text.ElideRight
             }
@@ -231,7 +231,7 @@ Item {
                 text:           _dr.modelData !== null ? BluetoothState.statusText(_dr.modelData) : ""
                 font.pixelSize: 12
                 font.weight:    Font.Bold
-                color:          "#fff"
+                color: Theme.ink(parent, false)
                 visible:        _dr._connecting || _dr._disconnecting || _dr._pairing
             }
 
@@ -245,7 +245,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     text:           parent._pct
                     font.weight:    Font.Bold
-                    color:          "#fff"
+                    color: Theme.ink(parent, false)
                     font.pixelSize: 16
                 }
 
@@ -253,7 +253,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     icon:  parent._battIcon
                     size:  26
-                    color: "#fff"
+                    color: Theme.ink(parent, false)
                 }
             }
         }
