@@ -7,6 +7,7 @@ Slider {
     id: slider
 
     property bool autoHideHandle: false
+    property Item glassBackdrop: GlassRegistry.lookup(QsWindow.window)
     property bool recentlyChanged: false
     readonly property bool handleShown: !slider.autoHideHandle || slider.pressed || slider.recentlyChanged
 
@@ -46,7 +47,7 @@ Slider {
     }
 
     handle: BoxGlass {
-        backdrop: null
+        backdrop: slider.glassBackdrop
         opacity: slider.handleShown ? 1 : 0
         visible: opacity > 0
         x: slider.leftPadding + Math.min(slider.availableWidth - width, Math.max(0, (slider.visualPosition * (slider.availableWidth - (width)))))

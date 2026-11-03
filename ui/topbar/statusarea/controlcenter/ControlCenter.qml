@@ -1682,6 +1682,7 @@ Scope {
 
                                 CFSlider {
                                     autoHideHandle: true
+                                    glassBackdrop: ccBackdrop
                                     anchors.fill: parent
                                     anchors.leftMargin: 40
                                     anchors.rightMargin: 40
@@ -1727,6 +1728,7 @@ Scope {
 
                                 CFSlider {
                                     autoHideHandle: true
+                                    glassBackdrop: ccBackdrop
                                     anchors.fill: parent
                                     anchors.leftMargin: 40
                                     anchors.rightMargin: 40
