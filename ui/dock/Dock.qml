@@ -84,53 +84,23 @@ Scope {
     }
 
     function resolveIcon(appId) {
-        if (!appId || appId === "") return ""
-        var de = DesktopEntries.heuristicLookup(appId)
-        if (de && de.icon) {
-            var p = Quickshell.iconPath(de.icon, true)
-            if (p !== "") return p
-        }
-        return ""
+        return IconResolver.forAppId(appId)
     }
 
-    // First name of `names` that exists in the icon theme, or the theme's
-    // "missing" icon when none does. Empty names are skipped.
-    function _firstThemeIcon(names) {
-        for (var i = 0; i < names.length; i++) {
-            if (!names[i]) continue
-            var p = Quickshell.iconPath(names[i], true)
-            if (p !== "") return p
-        }
-        return Quickshell.iconPath("image-missing")
-    }
-
-    function _genericAppIcon() {
-        return dockRoot._firstThemeIcon(["application-x-executable", "application-x-executable-symbolic", "unknown"])
-    }
-
-    // A plain theme name ("kitty"), as opposed to an absolute path such as
-    // /nix/store/<hash>-pkg/..., which changes on every package update.
     function _isThemeName(s) {
         return !!s && s.charAt(0) !== "/" && s.indexOf("image://") !== 0
     }
 
-    // Icon of a pinned app, resolved on every render. Order matters:
-    //  1. the entry's own theme name (curated names such as "kitty"),
-    //  2. the live desktop entry, which always carries the current icon,
-    //  3. the stored path, only as a last resort since it can be stale,
-    //  4. a generic application icon instead of the missing-texture checkerboard.
     function pinnedIconFor(entry) {
         if (dockRoot._isThemeName(entry.icon)) {
-            var byName = Quickshell.iconPath(entry.icon, true)
+            var byName = IconResolver.byName(entry.icon)
             if (byName !== "") return byName
         }
         var de = entry.cmd ? DesktopEntries.heuristicLookup(entry.cmd) : null
-        if (de && de.icon) {
-            var live = Quickshell.iconPath(de.icon, true)
-            if (live !== "") return live
-        }
+        var live = IconResolver.forApp(de)
+        if (live !== "") return live
         if (entry.iconPath) return entry.iconPath
-        return dockRoot._genericAppIcon()
+        return IconResolver.generic()
     }
 
     function _findDesktopEntry(name) {
@@ -181,10 +151,8 @@ Scope {
             var ititle = (c.initialTitle || "").trim()
             if (ititle !== "") {
                 var entry = dockRoot._findDesktopEntry(ititle)
-                if (entry && entry.icon) {
-                    var p = Quickshell.iconPath(entry.icon, true)
-                    if (p !== "") return p
-                }
+                var fromEntry = IconResolver.forApp(entry)
+                if (fromEntry !== "") return fromEntry
             }
         }
         return resolveIcon(resolveAppId(c))
@@ -402,9 +370,15 @@ Scope {
         Quickshell.execDetached(["quickshell", "-p", Quickshell.shellDir + "/settings.qml"])
     }
 
+    function pinnedKey(entry) {
+        var cmd = entry.cmd ? entry.cmd.toLowerCase() : ""
+        if (cmd === "__settings-app__" || (cmd === "" && entry.name === "Settings")) return "settings-app"
+        return cmd
+    }
+
     function pinnedGroupInstances(entry) {
         if (!entry) return []
-        var cmd    = entry.cmd ? entry.cmd.toLowerCase() : ""
+        var cmd    = dockRoot.pinnedKey(entry)
         var result = []
         for (var i = 0; i < clientList.length; i++) {
             var c     = clientList[i]
@@ -555,15 +529,8 @@ Scope {
     }
 
     function fileIconPath(entry) {
-        if (entry.isDir) return Quickshell.iconPath("folder", true)
-        var name = entry.path.split("/").pop()
-        var ext  = name.indexOf(".") > 0 ? name.split(".").pop().toLowerCase() : ""
-        var iconName = "text-x-generic"
-        if (ext === "pdf") iconName = "application-pdf"
-        else if (ext === "png" || ext === "jpg" || ext === "jpeg" || ext === "webp") iconName = "image-x-generic"
-        else if (ext === "mp4" || ext === "mkv") iconName = "video-x-generic"
-        else if (ext === "mp3" || ext === "flac") iconName = "audio-x-generic"
-        return Quickshell.iconPath(iconName, true)
+        if (entry.isDir) return IconResolver.forFolder()
+        return IconResolver.forFile(entry.path.split("/").pop())
     }
 
     function emptyTrash() {
@@ -778,7 +745,7 @@ Scope {
                                     required property int index
 
                                     property var    _inst:     dockRoot.pinnedGroupInstances(modelData)
-                                    property string _groupKey: modelData.cmd.toLowerCase()
+                                    property string _groupKey: dockRoot.pinnedKey(modelData)
 
                                     appName:       modelData.name
                                     appCmd:        modelData.cmd
@@ -824,7 +791,7 @@ Scope {
                                 id: _activeRepeater
                                 model: {
                                     var pinned = dockRoot.pinnedApps.map(function(a) {
-                                        return a.cmd.toLowerCase()
+                                        return dockRoot.pinnedKey(a)
                                     })
                                     return dockRoot.groupedClients.filter(function(g) {
                                         for (var j = 0; j < pinned.length; j++) {
@@ -908,7 +875,7 @@ Scope {
                                 id: _trashIcon
                                 appName:       "Corbeille"
                                 appCmd:        ""
-                                appIconPath:   Quickshell.iconPath("user-trash", true)
+                                appIconPath:   IconResolver.byName("user-trash")
                                 instanceCount: 0
                                 dockHovered:   _magArea.containsMouse
                                 mouseXInDock:  _magArea.mouseX

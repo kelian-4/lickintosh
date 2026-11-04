@@ -163,7 +163,7 @@ Item {
                                                 if (tile.modelData.isImage && !directLoadFailed) return "file://" + tile.modelData.path
                                                 if (tile.modelData.isWallpaper && !directLoadFailed) return "file://" + tile.modelData.path
                                                 if (tile.modelData.clipImage && !directLoadFailed) return "file://" + tile.modelData.clipImage
-                                                return Quickshell.iconPath(tile.modelData.icon || "image-x-generic", true)
+                                                return IconResolver.byName(tile.modelData.icon || "image-x-generic")
                                             }
                                             fillMode: (tile.modelData.isImage || tile.modelData.isWallpaper || tile.modelData.clipImage) ? Image.PreserveAspectCrop : Image.PreserveAspectFit
                                             sourceSize.width:  112

@@ -1020,15 +1020,10 @@ Scope {
                 function makeFileEntry(p) {
                     var parts = p.split("/")
                     var name  = parts[parts.length - 1]
-                    var ext   = name.indexOf(".") > 0 ? name.split(".").pop().toLowerCase() : ""
                     var cat   = root.categoryForFile(p)
                     return {
                         name: name, title: name, description: p,
-                        icon: ext === "pdf" ? "application-pdf"
-                            : cat === "Images" ? "image-x-generic"
-                            : (ext === "mp4" || ext === "mkv") ? "video-x-generic"
-                            : (ext === "mp3" || ext === "flac") ? "audio-x-generic"
-                            : "text-x-generic",
+                        icon: IconResolver.fileIconName(name),
                         path: p,
                         isImage: cat === "Images",
                         _category: cat
