@@ -6,29 +6,20 @@ import qs.components
 import qs.services
 import qs.ui.settings.widgets
 
-/*
-    Réglages > Apparence
-
-    Style de l'interface (Liquid Glass / Clair / Sombre) et préréglages de
-    flou fournis par Hyprland. Chaque choix passe par Theme.setMode() :
-    application immédiate, persistance dans ShellConfig.options.appearance.mode.
-*/
 ContentPage {
     id: root
 
-    // Vignette cliquable façon Réglages Système de macOS : aperçu d'une
-    // fenêtre dessiné avec la palette du mode, anneau d'accent si choisi.
     component StyleTile: Item {
         id: tile
 
-        required property string modeId
         required property string label
-        property string palette: "glass"          // clé de Theme.palettes
-        property color  windowTint: tile.pal.window
-        property color  sidebarTint: tile.pal.panel
+        required property bool selected
+        property string palette: "glass"
+        property color windowTint: tile.pal.window
+        property color sidebarTint: tile.pal.panel
+        signal picked()
 
-        readonly property var  pal: Theme.palettes[tile.palette]
-        readonly property bool selected: Theme.mode === tile.modeId
+        readonly property var pal: Theme.palettes[tile.palette]
 
         implicitWidth: 132
         implicitHeight: 84 + 8 + _label.implicitHeight
@@ -46,7 +37,6 @@ ContentPage {
             }
 
             Rectangle {
-                id: _win
                 x: 10
                 y: 10
                 width: 84
@@ -104,7 +94,7 @@ ContentPage {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: Theme.setMode(tile.modeId)
+            onClicked: tile.picked()
         }
     }
 
@@ -116,33 +106,40 @@ ContentPage {
             spacing: 20
 
             StyleTile {
-                modeId: "glass"
                 label: "Liquid Glass"
+                selected: Theme.mode === "glass"
                 palette: "glass"
                 windowTint: "#40ffffff"
                 sidebarTint: "#30ffffff"
+                onPicked: Theme.setMode("glass")
             }
 
             StyleTile {
-                modeId: "light"
                 label: "Clair"
+                selected: Theme.mode === "light"
                 palette: "light"
+                windowTint: "#99ffffff"
+                sidebarTint: "#66ffffff"
+                onPicked: Theme.setMode("light")
             }
 
             StyleTile {
-                modeId: "dark"
                 label: "Sombre"
+                selected: Theme.mode === "dark"
                 palette: "dark"
+                windowTint: "#99000000"
+                sidebarTint: "#66000000"
+                onPicked: Theme.setMode("dark")
             }
         }
     }
 
     ContentSection {
-        title: "Flou Hyprland"
+        title: "Thème de flou Hyprland"
 
         CFText {
             Layout.fillWidth: true
-            text: "Remplace le Liquid Glass par un flou fourni par le compositeur (Hyprland 0.57)."
+            text: "Rend toutes les fenêtres translucides avec le flou choisi, quel que soit le style de l'interface."
             font.pixelSize: 12
             gray: true
             wrapMode: Text.WordWrap
@@ -152,17 +149,29 @@ ContentPage {
             Layout.fillWidth: true
             spacing: 20
 
+            StyleTile {
+                label: "Aucun"
+                selected: !Theme.compositorBlur
+                palette: "glass"
+                windowTint: "#40ffffff"
+                sidebarTint: "#30ffffff"
+                onPicked: Theme.setBlurPreset("")
+            }
+
             Repeater {
                 model: Theme.blurPresets
 
                 StyleTile {
+                    id: presetTile
+
                     required property var modelData
 
-                    modeId: "blur:" + modelData.id
-                    label: modelData.name
-                    palette: "blur"
+                    label: presetTile.modelData.name
+                    selected: Theme.blurPreset === presetTile.modelData.id
+                    palette: "glass"
                     windowTint: "#a0101010"
                     sidebarTint: "#50101010"
+                    onPicked: Theme.setBlurPreset(presetTile.modelData.id)
                 }
             }
         }
@@ -174,6 +183,16 @@ ContentPage {
             font.pixelSize: 12
             gray: true
             wrapMode: Text.WordWrap
+        }
+
+        ConfigSlider {
+            visible: Theme.compositorBlur
+            text: "Opacité des fenêtres"
+            from: 0.3
+            to: 1.0
+            decimals: 2
+            value: Theme.blurWindowOpacity
+            onMoved: function(v) { Theme.setBlurWindowOpacity(v) }
         }
 
         CFText {

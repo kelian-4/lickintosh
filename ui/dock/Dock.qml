@@ -1014,7 +1014,7 @@ Scope {
                             width:        _globalTipText.implicitWidth + 20
                             height:       28
                             radius:       8
-                            color:        "#E8111111"
+                            color:        Theme.popup("#E8111111")
                             border.color: "#55ffffff"
                             border.width: 1
 
@@ -1022,7 +1022,7 @@ Scope {
                                 id: _globalTipText
                                 anchors.centerIn: parent
                                 text:             dockRoot.tooltipText
-                                color:            "#f2f2f2"
+                                color:            Theme.pick(Theme.textPrimary, "#f2f2f2")
                                 font.pixelSize:   12
                                 font.weight:      Font.Medium
                                 renderType:       Text.NativeRendering
@@ -1088,7 +1088,7 @@ Scope {
                     width:        204
                     height:       _ctxCol.implicitHeight + 12
                     radius:       10
-                    color:        "#EE181818"
+                    color:        Theme.popup("#EE181818")
                     border.color: "#33ffffff"
                     border.width: 1
                     x: Math.max(4, Math.min(dockRoot.menuX - width / 2, parent.width - width - 4))
@@ -1243,7 +1243,7 @@ Scope {
                     width:        192
                     height:       _subCol.implicitHeight + 12
                     radius:       10
-                    color:        "#EE181818"
+                    color:        Theme.popup("#EE181818")
                     border.color: "#33ffffff"
                     border.width: 1
                     x: {
@@ -1365,7 +1365,7 @@ Scope {
                 verticalCenter: parent.verticalCenter
             }
             text:           "›"
-            color:          "#aaffffff"
+            color:          Theme.pick(Theme.textSecondary, "#aaffffff")
             font.pixelSize: 14
             renderType:     Text.NativeRendering
         }
@@ -1522,7 +1522,7 @@ Scope {
                     anchors.centerIn: parent
                     text:             iconItem.appName.length > 0
                                       ? iconItem.appName[0].toUpperCase() : "?"
-                    color:            "white"
+                    color: Theme.ink(parent, false)
                     font.pixelSize:   22
                     font.weight:      Font.Bold
                     renderType:       Text.NativeRendering
@@ -1654,7 +1654,7 @@ Scope {
                 model: Math.min(iconItem.instanceCount, 4)
                 delegate: Rectangle {
                     width: 5; height: 5; radius: 2.5
-                    color: "#e8e8e8"; opacity: 0.88
+                    color: Theme.pick(Theme.textPrimary, "#e8e8e8"); opacity: 0.88
                 }
             }
         }

@@ -12,7 +12,6 @@ import qs.ui.topbar.statusarea.notifcenter
 
 Rectangle {
     id: root
-    readonly property bool themed: true
     signal toggleCC()
     signal toggleAppleMenu()
     signal toggleSpotlight()

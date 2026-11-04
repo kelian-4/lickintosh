@@ -26,7 +26,7 @@ Item {
     property int animationSpeed: 16
     property int animationSpeed2: 16
 
-    property Item backdrop: Theme.useGlass(box) ? GlassRegistry.lookup(QsWindow.window) : null
+    property Item backdrop: GlassRegistry.lookup(QsWindow.window)
     readonly property bool glassed: backdrop !== null
 
     Behavior on color { PropertyAnimation { duration: animationSpeed; easing.type: Easing.InSine } }

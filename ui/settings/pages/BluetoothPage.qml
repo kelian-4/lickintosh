@@ -309,7 +309,7 @@ ContentPage {
             y: root._ctxY
             width: 170
             radius: 10
-            color: "#e6202020"
+            color: Theme.popup("#e6202020")
             border.color: "#20ffffff"
             border.width: 1
             implicitHeight: _ctxCol.implicitHeight + 8

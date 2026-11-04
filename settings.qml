@@ -30,7 +30,6 @@ FloatingWindow {
     }
     Component.onCompleted: {
         Quickshell.watchFiles = false
-        // Une seule instance (le shell principal) applique le flou à Hyprland.
         Theme.applyToCompositor = false
     }
 
@@ -124,7 +123,6 @@ FloatingWindow {
 
     Rectangle {
         id: _windowCard
-        readonly property bool themed: true
         anchors.fill: parent
         color: Theme.window
         clip: true

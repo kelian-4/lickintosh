@@ -7,6 +7,7 @@ import Quickshell.Io
 import Quickshell.Services.Pipewire
 import qs.components.glass
 import qs.components
+import qs.services
 
 Scope {
     id: root
@@ -331,7 +332,7 @@ Scope {
                             text:           root._currentLabel
                             font.pixelSize: 12
                             font.weight:    Font.Bold
-                            color:          "#ffffff"
+                            color: Theme.ink(parent, false)
                         }
 
                         Item {
