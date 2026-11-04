@@ -1,10 +1,12 @@
 import QtQuick
 import Quickshell
+import qs.services
 
 Item {
     id: root
 
     property string wallpaperPath: ""
+    property color tint: Theme.glassTint
     property size screenSize: Qt.size(1920, 1080)
     property point windowPosition: Qt.point(0, 0)
 
@@ -110,6 +112,11 @@ Item {
                 windowOpacity: root.windowOpacity
                 opacityByClass: root.windowOpacityByClass
             }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: root.tint
         }
     }
 

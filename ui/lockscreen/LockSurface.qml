@@ -13,6 +13,8 @@ import qs.ui.topbar.statusarea.notifcenter
 WlSessionLockSurface {
     id: root
 
+    readonly property bool themed: false
+
     required property WlSessionLock lock
     required property LockContext context
 
@@ -20,6 +22,7 @@ WlSessionLockSurface {
 
     LiquidGlassBackdrop {
         id: lockBackdrop
+        tint: "transparent"
         wallpaperPath: root.context.wallpaperSource.toString().replace(/^file:\/\//, "")
         screenSize: Qt.size(root.width, root.height)
         windowPosition: Qt.point(0, 0)

@@ -762,7 +762,7 @@ Scope {
                             width: 22
                             height: 22
                             radius: 11
-                            color: "#e0303034"
+                            color: Theme.popup("#e0303034")
                             border.width: 1
                             border.color: "#50ffffff"
                             visible: boxbutton.editing

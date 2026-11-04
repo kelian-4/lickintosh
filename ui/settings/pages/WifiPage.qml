@@ -571,7 +571,7 @@ ContentPage {
                 y: root._ctxY
                 width: 170
                 radius: 10
-                color: "#e6202020"
+                color: Theme.popup("#e6202020")
                 border.color: "#20ffffff"
                 border.width: 1
                 implicitHeight: _wifiCtxCol.implicitHeight + 8
@@ -638,7 +638,7 @@ ContentPage {
             height: _detailsCol.implicitHeight + 32
             anchors.centerIn: parent
             radius: 14
-            color: "#e6202020"
+            color: Theme.popup("#e6202020")
             border.color: "#20ffffff"
             border.width: 1
 
@@ -976,7 +976,7 @@ ContentPage {
                 height: _manualCol.implicitHeight + 32
                 anchors.centerIn: parent
                 radius: 14
-                color: "#e6202020"
+                color: Theme.popup("#e6202020")
                 border.color: "#20ffffff"
                 border.width: 1
 

@@ -200,7 +200,7 @@ RowLayout {
                     font.pixelSize: 10
                     font.weight:    Font.Bold
                     font.family:    "SF Pro Text"
-                    color: "#FFFFFF"   // sur le badge rouge : reste blanc dans tous les modes
+                    color: "#FFFFFF"
                     renderType:     Text.NativeRendering
                 }
             }

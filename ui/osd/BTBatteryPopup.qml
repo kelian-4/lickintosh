@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.components.glass
 import qs.components
+import qs.services
 
 Scope {
     id: root
@@ -152,7 +153,7 @@ Scope {
                                 text:                root.deviceName
                                 font.pixelSize:      13
                                 font.weight:         Font.Bold
-                                color:               "#ffffff"
+                                color: Theme.ink(parent, false)
                                 elide:               Text.ElideRight
                                 Layout.fillWidth:    true
                                 horizontalAlignment: Text.AlignHCenter
@@ -223,7 +224,7 @@ Scope {
                                 text:             root.pct >= 0 ? Math.round(root.pct).toString() : ""
                                 font.pixelSize:   12
                                 font.weight:      Font.Bold
-                                color:            "#ffffff"
+                                color: Theme.ink(parent, false)
                             }
                         }
 

@@ -124,13 +124,9 @@ Singleton {
                 property string accentColor:  "#1C7AFF"
                 property real   panelOpacity: 0.85
                 property bool   reduceMotion: false
-
-                // Réglages > Apparence. Lu par le singleton Theme.
-                //   "glass" | "light" | "dark" | "blur:<id de préréglage>"
                 property string mode:         "glass"
-                // true tant qu'un préréglage de flou a été poussé à Hyprland
-                // à chaud : sert à savoir s'il faut un `hyprctl reload` en
-                // quittant le mode blur (y compris après un redémarrage).
+                property string blurPreset:   ""
+                property real   blurWindowOpacity: 0.80
                 property bool   blurApplied:  false
             }
 

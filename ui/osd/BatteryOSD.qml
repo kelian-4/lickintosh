@@ -7,6 +7,7 @@ import Quickshell.Hyprland
 import Quickshell.Services.UPower
 import qs.components.glass
 import qs.components
+import qs.services
 
 Scope {
     id: root
@@ -260,7 +261,7 @@ Scope {
                                 text:                root._deviceName
                                 font.pixelSize:      13
                                 font.weight:         Font.Bold
-                                color:               "#ffffff"
+                                color: Theme.ink(parent, false)
                                 elide:               Text.ElideRight
                                 Layout.fillWidth:    true
                                 horizontalAlignment: Text.AlignHCenter
@@ -332,7 +333,7 @@ Scope {
                                 text:             Math.round(root._percentage).toString()
                                 font.pixelSize:   12
                                 font.weight:      Font.Bold
-                                color:            "#ffffff"
+                                color: Theme.ink(parent, false)
                             }
                         }
                     }

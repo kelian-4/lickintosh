@@ -31,8 +31,8 @@ Scope {
         }
     }
 
-    readonly property color glassColor: "#c01e1e1e"
-    readonly property color textColor:  "#dfdfdf"
+    readonly property color glassColor: Theme.pick("#c0f2f2f2", "#c01e1e1e")
+    readonly property color textColor:  Theme.pick(Theme.textPrimary, "#dfdfdf")
 
 
     property var fileIndex:  []

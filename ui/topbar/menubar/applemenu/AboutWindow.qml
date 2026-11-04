@@ -108,7 +108,7 @@ Scope {
                             width: 13
                             height: 13
                             radius: 7
-                            color: "#a0282828"
+                            color: Theme.popup("#a0282828")
                             border.color: Qt.rgba(0,0,0,0.2)
                             border.width: 0.5
                         }
@@ -117,7 +117,7 @@ Scope {
                             width: 13
                             height: 13
                             radius: 7
-                            color: "#a0282828"
+                            color: Theme.popup("#a0282828")
                             border.color: Qt.rgba(0,0,0,0.2)
                             border.width: 0.5
                         }
