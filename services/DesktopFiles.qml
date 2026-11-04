@@ -96,84 +96,55 @@ Singleton {
         return DesktopEntries.byId(name.slice(0, -8))
     }
 
-    // First name of `names` that exists in the icon theme, or the theme's
-    // "missing" icon when none does. Avoids the missing-texture checkerboard
-    // when a theme lacks the generic file icons (MacTahoe-dark ships only the
-    // symbolic ones unless the base MacTahoe theme is installed next to it).
-    function firstThemeIcon(names) {
-        for (var i = 0; i < names.length; i++) {
-            if (!names[i]) continue
-            var p = Quickshell.iconPath(names[i], true)
-            if (p !== "") return p
-        }
-        return Quickshell.iconPath("image-missing")
-    }
+    property var launcherIcons: ({})
 
-    // Icon hints for the files of the desktop, filled by one shell pass over
-    // the directory: { "<file name>": { kind: "icon" | "mime", value } }.
-    //  - "icon": the Icon= value of a .desktop file. Launchers saved on the
-    //    desktop (Bottles, ...) are not registered applications, so
-    //    DesktopEntries does not know them.
-    //  - "mime": the mime type of any other file, to pick a specific icon
-    //    (package, script, ...) instead of the generic document.
-    property var fileHints: ({})
-
-    function scanHints() {
-        hintDebounce.restart()
+    function scanLaunchers() {
+        launcherDebounce.restart()
     }
 
     Timer {
-        id: hintDebounce
+        id: launcherDebounce
         interval: 300
-        onTriggered: hintScan.running = true
+        onTriggered: launcherScan.running = true
     }
 
     Process {
-        id: hintScan
+        id: launcherScan
         running: true
         command: ["sh", "-c",
-            'for f in "$1"/* "$1"/.[!.]*; do [ -f "$f" ] || continue; n=${f##*/}; ' +
-            'case "$n" in *.desktop) k=icon; v=$(sed -n "s/^Icon=//p" "$f" | head -n 1);; ' +
-            '*) k=mime; v=$(xdg-mime query filetype "$f" 2>/dev/null);; esac; ' +
-            'printf "%s\\t%s\\t%s\\n" "$n" "$k" "$v"; done',
+            'for f in "$1"/*.desktop "$1"/.[!.]*.desktop; do [ -f "$f" ] || continue; ' +
+            'printf "%s\\t%s\\n" "${f##*/}" "$(sed -n "s/^Icon=//p" "$f" | head -n 1)"; done',
             "sh", root.dir]
         stdout: StdioCollector {
             onStreamFinished: {
-                var hints = {}
+                var icons = {}
                 var lines = text.split("\n")
                 for (var i = 0; i < lines.length; i++) {
                     var parts = lines[i].split("\t")
-                    if (parts.length >= 3 && parts[2].trim() !== "")
-                        hints[parts[0]] = { kind: parts[1], value: parts[2].trim() }
+                    if (parts.length >= 2 && parts[1].trim() !== "") icons[parts[0]] = parts[1].trim()
                 }
-                root.fileHints = hints
+                root.launcherIcons = icons
             }
         }
     }
 
-    onDirChanged: root.scanHints()
+    onDirChanged: root.scanLaunchers()
 
     Connections {
         target: folderModel
-        function onCountChanged() { root.scanHints() }
-    }
-
-    // Icon naming spec: "image/png" -> "image-png", then "<media>-x-generic".
-    function mimeIconNames(mime) {
-        return [mime.replace("/", "-"), mime.split("/")[0] + "-x-generic"]
+        function onCountChanged() { root.scanLaunchers() }
     }
 
     function iconPathFor(name, isDir) {
-        if (isDir) return Quickshell.iconPath("folder", "inode-directory")
-        var hint = root.fileHints[name]
-        var names = []
-        var entry = root.entryFor(name)
-        if (entry && entry.icon !== "") names.push(entry.icon)
-        if (hint && hint.kind === "icon") names.push(hint.value)
-        if (names.length > 0)
-            return root.firstThemeIcon(names.concat(["application-x-executable", "application-x-executable-symbolic", "unknown"]))
-        if (hint && hint.kind === "mime") names = root.mimeIconNames(hint.value)
-        return root.firstThemeIcon(names.concat(["text-x-generic", "text-x-generic-symbolic", "application-x-executable", "unknown"]))
+        if (isDir) return IconResolver.forFolder()
+        if (name.endsWith(".desktop")) {
+            var fromEntry = IconResolver.forApp(root.entryFor(name))
+            if (fromEntry !== "") return fromEntry
+            var fromFile = IconResolver.resolve(root.launcherIcons[name] || "")
+            return fromFile !== "" ? fromFile : IconResolver.generic()
+        }
+        var path = IconResolver.forFile(name)
+        return path !== "" ? path : IconResolver.generic()
     }
 
     function labelFor(name) {

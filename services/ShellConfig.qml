@@ -363,7 +363,7 @@ Singleton {
                                     cpu:   cpuPct,
                                     rssMb: rssMb,
                                     swap:  swapMb,
-                                    icon:  Quickshell.iconPath(key, true)
+                                    icon:  IconResolver.byName(key)
                                 })
                             }
                         }

@@ -261,16 +261,21 @@ Singleton {
         }
     }
 
+    readonly property string iconTheme: root.isLight ? "MacTahoe-light" : "MacTahoe-dark"
+
     function applySystem() {
         if (!root.applyToCompositor)
             return
         var scheme = root.isLight ? "prefer-light" : "prefer-dark"
-        var icons = root.isLight ? "MacTahoe-light" : "MacTahoe-dark"
         var script = "gsettings set org.gnome.desktop.interface color-scheme \"$1\"; "
             + "for d in \"$HOME/.local/share/icons\" \"$HOME/.icons\" /usr/share/icons; do "
-            + "if [ -d \"$d/$2\" ]; then gsettings set org.gnome.desktop.interface icon-theme \"$2\"; break; fi; done"
+            + "if [ -d \"$d/$2\" ]; then gsettings set org.gnome.desktop.interface icon-theme \"$2\"; "
+            + "for q in \"$HOME/.config/qt6ct/qt6ct.conf\" \"$HOME/.config/qt5ct/qt5ct.conf\"; do "
+            + "[ -f \"$q\" ] && sed -i \"s/^icon_theme=.*/icon_theme=$2/\" \"$q\"; done; "
+            + "[ -f \"$HOME/.config/kdeglobals\" ] && sed -i \"/^\\[Icons\\]/,/^\\[/ s/^Theme=.*/Theme=$2/\" \"$HOME/.config/kdeglobals\"; "
+            + "break; fi; done"
         systemProc.running = false
-        systemProc.command = ["sh", "-c", script, "sh", scheme, icons]
+        systemProc.command = ["sh", "-c", script, "sh", scheme, root.iconTheme]
         systemProc.running = true
     }
 

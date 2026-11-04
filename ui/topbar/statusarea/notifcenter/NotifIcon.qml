@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.VectorImage
 import Quickshell
+import qs.services
 
 Item {
     id: root
@@ -11,12 +12,10 @@ Item {
 
     function resolveFromDesktop(name) {
         if (!name || name === "") return ""
+        var fromEntry = IconResolver.forAppId(name)
+        if (fromEntry !== "") return fromEntry
         var de = DesktopEntries.heuristicLookup(name)
-        if (de && de.icon) {
-            var p = Quickshell.iconPath(de.icon, true)
-            if (p !== "") return p
-            if (de.icon.indexOf("/") === 0) return de.icon
-        }
+        if (de && de.icon && de.icon.indexOf("/") === 0) return de.icon
         return ""
     }
 
@@ -24,7 +23,7 @@ Item {
         if (root.icon !== "") {
             if (root.icon.startsWith("file://")) return root.icon
             if (root.icon.startsWith("/"))        return "file://" + root.icon
-            var byIconName = Quickshell.iconPath(root.icon, true)
+            var byIconName = IconResolver.byName(root.icon)
             if (byIconName !== "") return byIconName
         }
         var byAppName = root.resolveFromDesktop(root.appName)

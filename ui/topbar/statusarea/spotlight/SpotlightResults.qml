@@ -144,13 +144,13 @@ ListView {
                 property bool directLoadFailed: false
                 onStatusChanged: if (status === Image.Error) directLoadFailed = true
                 source: {
-                    if (row.isApp) return Quickshell.iconPath(row.modelData.icon, true)
+                    if (row.isApp) return IconResolver.byName(row.modelData.icon)
                     if (row.modelData.isWallpaper && !directLoadFailed) return "file://" + row.modelData.path
                     if (row.modelData.clipImage && !directLoadFailed) return "file://" + row.modelData.clipImage
                     if (row.modelData.isImage && !directLoadFailed) return "file://" + row.modelData.path
                     if (row.modelData.isEmoji) return row.modelData.emojiUrl
-                    if (row.modelData.icon && !row.modelData.icon.endsWith(".svg")) return Quickshell.iconPath(row.modelData.icon, true)
-                    return Quickshell.iconPath("image-x-generic", true)
+                    if (row.modelData.icon && !row.modelData.icon.endsWith(".svg")) return IconResolver.byName(row.modelData.icon)
+                    return IconResolver.byName("image-x-generic")
                 }
                 fillMode: (row.modelData.isWallpaper || row.modelData.clipImage || row.modelData.isImage) ? Image.PreserveAspectCrop : Image.PreserveAspectFit
                 sourceSize.width:  72
