@@ -1,7 +1,5 @@
 import QtQuick
 import QtQuick.VectorImage
-import QtQuick.Effects
-import qs.services
 import Quickshell
 import Quickshell.Io
 
@@ -68,7 +66,5 @@ Item {
         height: root.iconSize
         anchors.centerIn: parent
         preferredRendererType: VectorImage.CurveRenderer
-        layer.enabled: Theme.themed(root) && Theme.isLight
-        layer.effect: MultiEffect { colorization: 1; colorizationColor: Theme.textPrimary }
     }
 }

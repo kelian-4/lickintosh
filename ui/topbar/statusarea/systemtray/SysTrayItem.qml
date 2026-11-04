@@ -98,7 +98,7 @@ MouseArea {
         Text {
             visible: root.showLabel
             text: root.labelText
-            color: Theme.ink(parent, false)
+            color: "#FFFFFF"
             font.pixelSize: 13
             renderType: Text.NativeRendering
             Layout.alignment: Qt.AlignVCenter

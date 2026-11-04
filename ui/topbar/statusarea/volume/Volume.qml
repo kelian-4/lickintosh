@@ -1,9 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.VectorImage
-import QtQuick.Effects
 import Quickshell.Services.Pipewire
-import qs.services
 
 RowLayout {
     id: root
@@ -40,8 +38,6 @@ RowLayout {
             anchors.fill: parent
             source: "../../../../assets/icons/volume/" + root.volumeIconName()
             preferredRendererType: VectorImage.CurveRenderer
-            layer.enabled: Theme.themed(root) && Theme.isLight
-            layer.effect: MultiEffect { colorization: 1; colorizationColor: Theme.textPrimary }
         }
 
         MouseArea {
@@ -54,7 +50,7 @@ RowLayout {
 
     Text {
         text: Math.round(root.volume * 100) + "%"
-        color: Theme.ink(parent, false)
+        color: "#FFFFFF"
         font.pixelSize: 13
         renderType: Text.NativeRendering
         visible: Pipewire.ready && !root.muted && root.volume > 0

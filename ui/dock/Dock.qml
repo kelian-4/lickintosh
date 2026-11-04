@@ -722,8 +722,15 @@ Scope {
 
                         TahoeGlass {
                             anchors.fill: parent
-                            backdrop:     dockBackdrop
+                            backdrop:     Theme.compositorBlur ? null : dockBackdrop
                             cornerRadius: dockRoot.dockRadius
+                        }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius:       dockRoot.dockRadius
+                            color:        Theme.blurSurface
+                            visible:      Theme.compositorBlur
                         }
 
                         Row {

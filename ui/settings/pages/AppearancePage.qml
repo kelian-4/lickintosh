@@ -9,6 +9,17 @@ import qs.ui.settings.widgets
 ContentPage {
     id: root
 
+    readonly property var accents: [
+        { name: "Bleu",     hex: "#0088ff" },
+        { name: "Violet",   hex: "#cb30e0" },
+        { name: "Rose",     hex: "#ff2d55" },
+        { name: "Rouge",    hex: "#ff383c" },
+        { name: "Orange",   hex: "#ff8d28" },
+        { name: "Jaune",    hex: "#ffcc00" },
+        { name: "Vert",     hex: "#34c759" },
+        { name: "Graphite", hex: "#8e8e93" }
+    ]
+
     component StyleTile: Item {
         id: tile
 
@@ -98,6 +109,70 @@ ContentPage {
         }
     }
 
+    component ParamSlider: ConfigSlider {
+        id: ps
+
+        property real source: 0
+        signal committed(real v)
+
+        Binding {
+            target: ps
+            property: "value"
+            value: ps.source
+        }
+
+        onMoved: function(v) { ps.committed(v) }
+    }
+
+    component ParamSwitch: ConfigSwitch {
+        id: pw
+
+        property bool source: false
+        signal committed(bool v)
+
+        Binding {
+            target: pw
+            property: "checked"
+            value: pw.source
+        }
+
+        onToggled: function(v) { pw.committed(v) }
+    }
+
+    component BlurParam: Loader {
+        id: param
+
+        required property var spec
+
+        Layout.fillWidth: true
+        sourceComponent: param.spec.type === "bool" ? _boolComp : _numComp
+
+        Component {
+            id: _numComp
+
+            ParamSlider {
+                text: param.spec.label
+                from: param.spec.min
+                to: param.spec.max
+                decimals: param.spec.type === "int" ? 0 : (param.spec.max <= 2 ? 3 : 1)
+                source: Number(Theme.blurValue(param.spec.key))
+                onCommitted: function(v) {
+                    Theme.setBlurParam(param.spec.key, param.spec.type === "int" ? Math.round(v) : v)
+                }
+            }
+        }
+
+        Component {
+            id: _boolComp
+
+            ParamSwitch {
+                text: param.spec.label
+                source: Theme.blurValue(param.spec.key) === true
+                onCommitted: function(v) { Theme.setBlurParam(param.spec.key, v) }
+            }
+        }
+    }
+
     ContentSection {
         title: "Style de l'interface"
 
@@ -135,11 +210,89 @@ ContentPage {
     }
 
     ContentSection {
+        title: "Personnalisation du style"
+
+        ParamSlider {
+            visible: !Theme.isGlass
+            text: "Intensité de la teinte du verre"
+            from: 0
+            to: 0.9
+            decimals: 2
+            source: Theme.isLight ? ShellConfig.options.appearance.glassTintLight : ShellConfig.options.appearance.glassTintDark
+            onCommitted: function(v) {
+                if (Theme.isLight)
+                    ShellConfig.options.appearance.glassTintLight = v
+                else
+                    ShellConfig.options.appearance.glassTintDark = v
+            }
+        }
+
+        Column {
+            Layout.fillWidth: true
+            spacing: 10
+
+            CFText {
+                text: "Couleur d'accentuation"
+                font.pixelSize: 14
+            }
+
+            Flow {
+                width: parent.width
+                spacing: 10
+
+                Rectangle {
+                    width: 54
+                    height: 26
+                    radius: 13
+                    color: Theme.fillControl
+                    border.width: ShellConfig.options.appearance.accentOverride === "" ? 2 : 0
+                    border.color: Theme.accent
+
+                    CFText {
+                        anchors.centerIn: parent
+                        text: "Défaut"
+                        font.pixelSize: 12
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Theme.setAccent("")
+                    }
+                }
+
+                Repeater {
+                    model: root.accents
+
+                    Rectangle {
+                        id: swatch
+
+                        required property var modelData
+
+                        width: 26
+                        height: 26
+                        radius: 13
+                        color: swatch.modelData.hex
+                        border.width: ShellConfig.options.appearance.accentOverride === swatch.modelData.hex ? 3 : 0
+                        border.color: Theme.textPrimary
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: Theme.setAccent(swatch.modelData.hex)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    ContentSection {
         title: "Thème de flou Hyprland"
 
         CFText {
             Layout.fillWidth: true
-            text: "Rend toutes les fenêtres translucides avec le flou choisi, quel que soit le style de l'interface."
+            text: "Applique le flou choisi à toutes les fenêtres et aux couches Quickshell, quel que soit le style de l'interface."
             font.pixelSize: 12
             gray: true
             wrapMode: Text.WordWrap
@@ -185,16 +338,6 @@ ContentPage {
             wrapMode: Text.WordWrap
         }
 
-        ConfigSlider {
-            visible: Theme.compositorBlur
-            text: "Opacité des fenêtres"
-            from: 0.3
-            to: 1.0
-            decimals: 2
-            value: Theme.blurWindowOpacity
-            onMoved: function(v) { Theme.setBlurWindowOpacity(v) }
-        }
-
         CFText {
             Layout.fillWidth: true
             visible: Theme.lastError.length > 0
@@ -202,6 +345,111 @@ ContentPage {
             font.pixelSize: 12
             color: "#ff453a"
             wrapMode: Text.WordWrap
+        }
+    }
+
+    ContentSection {
+        title: "Fenêtres et couches"
+        visible: Theme.compositorBlur
+
+        ParamSlider {
+            text: "Opacité des fenêtres actives"
+            from: 0.3
+            to: 1.0
+            decimals: 2
+            source: Theme.blurWindowOpacity
+            onCommitted: function(v) { ShellConfig.options.appearance.blurWindowOpacity = v }
+        }
+
+        ParamSlider {
+            text: "Opacité des fenêtres inactives"
+            from: 0.3
+            to: 1.0
+            decimals: 2
+            source: Theme.blurWindowOpacityInactive
+            onCommitted: function(v) { ShellConfig.options.appearance.blurWindowOpacityInactive = v }
+        }
+
+        ParamSwitch {
+            text: "Appliquer le flou aux couches Quickshell"
+            description: "Barre, dock, panneaux, Spotlight, notifications et OSD."
+            source: ShellConfig.options.appearance.blurLayers
+            onCommitted: function(v) { ShellConfig.options.appearance.blurLayers = v }
+        }
+
+        ParamSwitch {
+            visible: ShellConfig.options.appearance.blurLayers
+            text: "Flou des menus des couches"
+            source: ShellConfig.options.appearance.blurLayerPopups
+            onCommitted: function(v) { ShellConfig.options.appearance.blurLayerPopups = v }
+        }
+
+        ParamSlider {
+            visible: ShellConfig.options.appearance.blurLayers
+            text: "Seuil de transparence des couches"
+            from: 0
+            to: 1
+            decimals: 2
+            source: ShellConfig.options.appearance.layerIgnoreAlpha
+            onCommitted: function(v) { ShellConfig.options.appearance.layerIgnoreAlpha = v }
+        }
+
+        ParamSlider {
+            text: "Opacité des surfaces du shell"
+            from: 0
+            to: 1
+            decimals: 2
+            source: ShellConfig.options.appearance.blurSurfaceAlpha
+            onCommitted: function(v) { ShellConfig.options.appearance.blurSurfaceAlpha = v }
+        }
+    }
+
+    ContentSection {
+        title: "Réglages du flou"
+        visible: Theme.compositorBlur
+
+        Repeater {
+            model: Theme.blurGeneral
+
+            BlurParam {
+                required property var modelData
+                spec: modelData
+            }
+        }
+    }
+
+    ContentSection {
+        title: Theme.blurPresetData ? "Réglages " + Theme.blurPresetData.name : ""
+        visible: Theme.compositorBlur && Theme.variantSpecList.length > 0
+
+        Repeater {
+            model: Theme.variantSpecList
+
+            BlurParam {
+                required property var modelData
+                spec: modelData
+            }
+        }
+    }
+
+    Rectangle {
+        Layout.preferredWidth: 150
+        Layout.preferredHeight: 32
+        radius: 16
+        color: Theme.accent
+        visible: Theme.compositorBlur
+
+        CFText {
+            anchors.centerIn: parent
+            text: "Réinitialiser le flou"
+            font.pixelSize: 13
+            color: Theme.onAccent
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: Theme.resetBlurParams()
         }
     }
 }

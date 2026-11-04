@@ -10,6 +10,7 @@ ScrollView {
     property string pageTitle: ""
 
     clip: true
+    contentHeight: _col.implicitHeight + 56
     background: Item {}
     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 

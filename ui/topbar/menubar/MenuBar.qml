@@ -1,4 +1,3 @@
-import qs.services
 import QtQuick
 import QtQuick.Layouts
 import qs.ui.topbar.menubar.activewindows
@@ -13,7 +12,7 @@ RowLayout {
     Text {
         id: appleBtn
         text: ""
-        color: appleActive ? Qt.alpha(Theme.ink(menuBarRoot, false), 0.7) : Theme.ink(menuBarRoot, false)
+        color: appleActive ? Qt.rgba(1, 1, 1, 0.7) : "#FFFFFF"
         font.pixelSize: 18
         renderType: Text.NativeRendering
         Layout.alignment: Qt.AlignVCenter
