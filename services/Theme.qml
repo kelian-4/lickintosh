@@ -15,16 +15,37 @@ Singleton {
     property bool settled: false
     property string lastError: ""
 
-    readonly property var blurBase: ({
-        enabled: true,
-        size: 8,
-        passes: 3,
-        noise: 0.0117,
-        brightness: 1.0,
-        contrast: 0.8916,
-        vibrancy: 0.1696,
-        new_optimizations: true,
-        xray: false
+    readonly property var blurGeneral: [
+        { key: "size", label: "Taille du flou", type: "int", min: 1, max: 50, def: 8 },
+        { key: "passes", label: "Passes", type: "int", min: 1, max: 10, def: 3 },
+        { key: "noise", label: "Bruit", type: "float", min: 0, max: 1, def: 0.0117 },
+        { key: "brightness", label: "Luminosité", type: "float", min: 0, max: 2, def: 1.0 },
+        { key: "contrast", label: "Contraste", type: "float", min: 0, max: 2, def: 0.8916 },
+        { key: "vibrancy", label: "Vibrance", type: "float", min: 0, max: 1, def: 0.1696 },
+        { key: "vibrancy_darkness", label: "Vibrance des zones sombres", type: "float", min: 0, max: 1, def: 0.0 },
+        { key: "xray", label: "Flou xray", type: "bool", def: false },
+        { key: "new_optimizations", label: "Optimisations du flou", type: "bool", def: true },
+        { key: "popups", label: "Flou des menus contextuels", type: "bool", def: false }
+    ]
+
+    readonly property var glassSpecs: [
+        { key: "glass.refraction", label: "Réfraction", type: "float", min: 0, max: 20, def: 20.0 },
+        { key: "glass.roughness", label: "Rugosité", type: "float", min: 0, max: 1, def: 1.0 },
+        { key: "glass.size", label: "Taille du motif", type: "float", min: 4, max: 512, def: 40.0 }
+    ]
+
+    readonly property var variantTable: ({
+        kawase: [],
+        frost: [],
+        prism: root.glassSpecs,
+        haze: [
+            { key: "haze.intensity", label: "Intensité du voile", type: "float", min: 0, max: 1, def: 0.35 },
+            { key: "haze.iridescence", label: "Iridescence", type: "float", min: 0, max: 1, def: 0.7 }
+        ],
+        aurora: [
+            { key: "aurora.intensity", label: "Intensité de l'aurore", type: "float", min: 0, max: 1, def: 0.35 },
+            { key: "aurora.speed", label: "Vitesse", type: "float", min: 0, max: 10, def: 1.0 }
+        ].concat(root.glassSpecs)
     })
 
     readonly property var blurPresets: [
@@ -59,6 +80,10 @@ Singleton {
     readonly property var blurPresetData: root.presetById(root.blurPreset)
     readonly property bool compositorBlur: root.blurPreset !== ""
     readonly property real blurWindowOpacity: Math.max(0.3, Math.min(1.0, ShellConfig.options.appearance.blurWindowOpacity))
+    readonly property real blurWindowOpacityInactive: Math.max(0.3, Math.min(1.0, ShellConfig.options.appearance.blurWindowOpacityInactive))
+    readonly property var blurParams: ShellConfig.options.appearance.blurParams
+    readonly property var variantSpecList: root.blurPresetData ? root.variantTable[root.blurPresetData.variant] : []
+    readonly property color blurSurface: root.isLight ? Qt.rgba(1, 1, 1, ShellConfig.options.appearance.blurSurfaceAlpha) : Qt.rgba(0, 0, 0, ShellConfig.options.appearance.blurSurfaceAlpha)
 
     readonly property bool isGlass: root.mode === "glass"
     readonly property bool isLight: root.mode === "light"
@@ -69,11 +94,46 @@ Singleton {
     }
 
     function setBlurPreset(id) {
+        ShellConfig.options.appearance.blurParams = ({})
         ShellConfig.options.appearance.blurPreset = id
     }
 
-    function setBlurWindowOpacity(v) {
-        ShellConfig.options.appearance.blurWindowOpacity = v
+    function setBlurParam(key, v) {
+        var p = Object.assign({}, ShellConfig.options.appearance.blurParams)
+        p[key] = v
+        ShellConfig.options.appearance.blurParams = p
+    }
+
+    function resetBlurParams() {
+        ShellConfig.options.appearance.blurParams = ({})
+    }
+
+    function effective() {
+        var flat = {}
+        var i
+        for (i = 0; i < root.blurGeneral.length; i++)
+            flat[root.blurGeneral[i].key] = root.blurGeneral[i].def
+        var list = root.variantSpecList
+        for (i = 0; i < list.length; i++)
+            flat[list[i].key] = list[i].def
+        if (root.blurPresetData) {
+            for (var k in root.blurPresetData.overrides)
+                flat[k] = root.blurPresetData.overrides[k]
+        }
+        var p = root.blurParams
+        for (var key in p) {
+            if (flat.hasOwnProperty(key))
+                flat[key] = p[key]
+        }
+        return flat
+    }
+
+    function blurValue(key) {
+        return root.effective()[key]
+    }
+
+    function setAccent(hex) {
+        ShellConfig.options.appearance.accentOverride = hex
     }
 
     readonly property var palettes: ({
@@ -97,8 +157,7 @@ Singleton {
             controlRim:     "#14ffffff",
             controlTrack:   "#20000000",
             scrollbar:      "#50ffffff",
-            shadow:         "#40000000",
-            glassTint:      "transparent"
+            shadow:         "#40000000"
         },
         light: {
             textPrimary:    Qt.rgba(0, 0, 0, 0.847),
@@ -120,8 +179,7 @@ Singleton {
             controlRim:     Qt.rgba(0, 0, 0, 0.098),
             controlTrack:   Qt.rgba(0, 0, 0, 0.12),
             scrollbar:      Qt.rgba(0, 0, 0, 0.35),
-            shadow:         Qt.rgba(0, 0, 0, 0.18),
-            glassTint:      Qt.rgba(1, 1, 1, 0.45)
+            shadow:         Qt.rgba(0, 0, 0, 0.18)
         },
         dark: {
             textPrimary:    Qt.rgba(1, 1, 1, 0.847),
@@ -143,8 +201,7 @@ Singleton {
             controlRim:     Qt.rgba(1, 1, 1, 0.098),
             controlTrack:   Qt.rgba(1, 1, 1, 0.16),
             scrollbar:      Qt.rgba(1, 1, 1, 0.35),
-            shadow:         Qt.rgba(0, 0, 0, 0.45),
-            glassTint:      Qt.rgba(0, 0, 0, 0.40)
+            shadow:         Qt.rgba(0, 0, 0, 0.45)
         }
     })
 
@@ -155,7 +212,7 @@ Singleton {
     readonly property color textTertiary:   root.current.textTertiary
     readonly property color textQuaternary: root.current.textQuaternary
     readonly property color separator:      root.current.separator
-    readonly property color accent:         root.current.accent
+    readonly property color accent:         ShellConfig.options.appearance.accentOverride !== "" ? ShellConfig.options.appearance.accentOverride : root.current.accent
     readonly property color onAccent:       root.current.onAccent
     readonly property color window:         root.current.window
     readonly property color panel:          root.current.panel
@@ -170,7 +227,7 @@ Singleton {
     readonly property color controlTrack:   root.current.controlTrack
     readonly property color scrollbar:      root.current.scrollbar
     readonly property color shadow:         root.current.shadow
-    readonly property color glassTint:      root.current.glassTint
+    readonly property color glassTint:      root.isLight ? Qt.rgba(1, 1, 1, ShellConfig.options.appearance.glassTintLight) : (root.isDark ? Qt.rgba(0, 0, 0, ShellConfig.options.appearance.glassTintDark) : "transparent")
     readonly property color bar:            "transparent"
 
     function themed(item) {
@@ -192,6 +249,10 @@ Singleton {
         if (root.themed(item))
             return secondary ? root.textSecondary : root.textPrimary
         return secondary ? "#a0ffffff" : "#ffffff"
+    }
+
+    function useGlass(item) {
+        return !root.compositorBlur || !root.themed(item)
     }
 
     function pick(lightValue, legacy) {
@@ -228,32 +289,57 @@ Singleton {
         return String(v)
     }
 
-    function blurLua(preset) {
-        var merged = {}
-        var k
-        for (k in root.blurBase)
-            merged[k] = root.blurBase[k]
-        for (k in preset.overrides)
-            merged[k] = preset.overrides[k]
-        merged.variant = preset.variant
-
-        var parts = []
-        for (k in merged)
-            parts.push(k + " = " + root._luaValue(merged[k]))
-
-        var a = root.blurWindowOpacity.toFixed(2)
-        var name = "lickintosh-blur-" + Date.now()
-
-        return "hl.config({ decoration = { blur = { " + parts.join(", ") + " } } })\n"
-            + "pcall(function() if _G.lickintosh_rule then _G.lickintosh_rule:set_enabled(false) end end)\n"
-            + "_G.lickintosh_rule = hl.window_rule({ name = \"" + name + "\", match = { class = \".*\" }, opacity = \"" + a + " override " + a + " override 1.0 override\" })"
+    function _nest(flat) {
+        var out = {}
+        for (var key in flat) {
+            var parts = key.split(".")
+            var cur = out
+            for (var i = 0; i < parts.length - 1; i++) {
+                if (cur[parts[i]] === undefined)
+                    cur[parts[i]] = {}
+                cur = cur[parts[i]]
+            }
+            cur[parts[parts.length - 1]] = flat[key]
+        }
+        return out
     }
+
+    function _luaTable(o) {
+        var parts = []
+        for (var k in o) {
+            var v = o[k]
+            parts.push(k + " = " + (typeof v === "object" ? root._luaTable(v) : root._luaValue(v)))
+        }
+        return "{ " + parts.join(", ") + " }"
+    }
+
+    function blurPayload() {
+        if (root.blurPresetData === null)
+            return ""
+        var flat = root.effective()
+        flat.enabled = true
+        flat.variant = root.blurPresetData.variant
+        var a = root.blurWindowOpacity.toFixed(2)
+        var b = root.blurWindowOpacityInactive.toFixed(2)
+        var lua = "hl.config({ decoration = { blur = " + root._luaTable(root._nest(flat)) + " } })\n"
+            + "pcall(function() if _G.lickintosh_rule then _G.lickintosh_rule:set_enabled(false) end end)\n"
+            + "_G.lickintosh_rule = hl.window_rule({ name = \"lickintosh-blur-@TS@\", match = { class = \".*\" }, opacity = \"" + a + " override " + b + " override 1.0 override\" })\n"
+            + "pcall(function() if _G.lickintosh_layer then _G.lickintosh_layer:set_enabled(false) end end)\n"
+        if (ShellConfig.options.appearance.blurLayers) {
+            lua += "_G.lickintosh_layer = hl.layer_rule({ name = \"lickintosh-layers-@TS@\", match = { namespace = \"^quickshell\" }, blur = true, blur_popups = "
+                + (ShellConfig.options.appearance.blurLayerPopups ? "true" : "false")
+                + ", ignore_alpha = " + ShellConfig.options.appearance.layerIgnoreAlpha.toFixed(2) + " })"
+        }
+        return lua
+    }
+
+    readonly property string blurSignature: root.compositorBlur ? root.blurPayload() : ""
 
     function sync() {
         if (!root.applyToCompositor)
             return
         if (root.compositorBlur && root.blurPresetData !== null) {
-            root._run(["hyprctl", "eval", root.blurLua(root.blurPresetData)])
+            root._run(["hyprctl", "eval", root.blurPayload().split("@TS@").join(String(Date.now()))])
             ShellConfig.options.appearance.blurApplied = true
         } else if (ShellConfig.options.appearance.blurApplied) {
             ShellConfig.options.appearance.blurApplied = false
@@ -335,7 +421,7 @@ Singleton {
 
     onModeChanged: if (root.settled) systemTimer.restart()
     onBlurPresetChanged: if (ShellConfig.ready) syncTimer.restart()
-    onBlurWindowOpacityChanged: if (ShellConfig.ready && root.compositorBlur) syncTimer.restart()
+    onBlurSignatureChanged: if (ShellConfig.ready) syncTimer.restart()
 
     Connections {
         target: ShellConfig

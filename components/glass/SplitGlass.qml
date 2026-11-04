@@ -18,7 +18,7 @@ Item {
     property color rimColor: "#20ffffff"
     property vector2d lightDir: Qt.vector2d(1, 1)
 
-    property Item backdrop: GlassRegistry.lookup(QsWindow.window)
+    property Item backdrop: Theme.useGlass(root) ? GlassRegistry.lookup(QsWindow.window) : null
     readonly property bool glassOn: backdrop !== null && backdrop.ready && backdrop.captureSettled
     property point screenOrigin: Qt.point(0, 0)
 

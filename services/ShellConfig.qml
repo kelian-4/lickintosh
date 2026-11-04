@@ -127,6 +127,15 @@ Singleton {
                 property string mode:         "glass"
                 property string blurPreset:   ""
                 property real   blurWindowOpacity: 0.80
+                property real   blurWindowOpacityInactive: 0.80
+                property var    blurParams:   ({})
+                property bool   blurLayers:   true
+                property bool   blurLayerPopups: true
+                property real   layerIgnoreAlpha: 0.05
+                property real   blurSurfaceAlpha: 0.30
+                property real   glassTintLight: 0.45
+                property real   glassTintDark: 0.40
+                property string accentOverride: ""
                 property bool   blurApplied:  false
             }
 
