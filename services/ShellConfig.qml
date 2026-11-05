@@ -222,6 +222,7 @@ Singleton {
                 property bool   showNotifications:         true
                 property bool   showNotificationPreviews:  true
                 property bool   showMediaPlayer:            true
+                property bool   lockAtStartup:              false
             }
 
             property JsonObject controlCenter: JsonObject {

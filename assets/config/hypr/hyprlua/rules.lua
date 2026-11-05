@@ -20,6 +20,12 @@ floatCentered({ class = "^(org\\.pulseaudio\\.pavucontrol|pavucontrol|com\\.saiv
 floatCentered({ class = "^(nm-connection-editor|blueman-manager)$" }, 0.45, 0.45)
 
 hl.window_rule({
+    match = { title = "^Réglages$" },
+    float = true,
+    center = true,
+})
+
+hl.window_rule({
     match = { title = "^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$" },
     float = true,
     pin = true,
