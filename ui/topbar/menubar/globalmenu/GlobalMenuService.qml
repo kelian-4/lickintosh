@@ -51,6 +51,9 @@ Item {
         case "media": return Media.menus
         case "pdf": return Pdf.menus
         case "zathura": return Zathura.menus
+        case "mail": return Mail.menus
+        case "texteditor": return TextEditor.menus
+        case "imageviewer": return ImageViewer.menus
         default: return Fallback.menus
         }
     }

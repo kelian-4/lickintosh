@@ -14,6 +14,7 @@ Item {
     signal closeRequested()
     signal openAbout()
     signal lockRequested()
+    signal powerRequested(string action)
 
     readonly property int menuWidth: 260
     readonly property int rowHeight: 30
@@ -37,9 +38,6 @@ Item {
     }
 
     Process { id: _suspend;  command: ["systemctl", "suspend"];  running: false }
-    Process { id: _reboot;   command: ["systemctl", "reboot"];   running: false }
-    Process { id: _poweroff; command: ["systemctl", "poweroff"]; running: false }
-    Process { id: _exit;     command: ["sh", "-c", "hyprctl dispatch 'hl.dsp.exit()'"]; running: false }
     Process { id: _kill;     command: ["sh", "-c", "hyprctl kill"];          running: false }
 
     
@@ -208,12 +206,18 @@ Item {
         MenuRow {
             label: "Restart…"
             icon: "dropdown/reload.svg"
-            onActivated: _reboot.running = true
+            onActivated: {
+                root.powerRequested("reboot")
+                root.closeRequested()
+            }
         }
         MenuRow {
             label: "Shut Down…"
             icon: "dropdown/power.svg"
-            onActivated: _poweroff.running = true
+            onActivated: {
+                root.powerRequested("poweroff")
+                root.closeRequested()
+            }
         }
 
         MenuSep {}
@@ -221,7 +225,10 @@ Item {
         MenuRow {
             label: "Log Out…"
             icon: "notch/log-out.svg"
-            onActivated: _exit.running = true
+            onActivated: {
+                root.powerRequested("logout")
+                root.closeRequested()
+            }
         }
 
         MenuSep {}

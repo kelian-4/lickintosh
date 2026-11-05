@@ -393,7 +393,7 @@ Singleton {
         return "{ " + parts.join(", ") + " }"
     }
 
-    readonly property var blurLayerNamespaces: ["dock", "globalmenu", "applemenu", "notifcenter", "notifpopup", "ai", "spotlight", "cc", "statusmenu", "about", "reload-popup", "osd", "btbattery", "batteryosd"]
+    readonly property var blurLayerNamespaces: ["dock", "globalmenu", "applemenu", "notifcenter", "notifpopup", "ai", "spotlight", "cc", "statusmenu", "about", "power", "reload-popup", "osd", "btbattery", "batteryosd"]
 
     function layerIgnoreEffective() {
         var lowest = root.glassValue("*", "surfaceAlpha")
