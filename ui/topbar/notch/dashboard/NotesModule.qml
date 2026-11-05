@@ -120,7 +120,7 @@ Item {
                 Layout.preferredHeight: 18
                 Layout.preferredWidth: newLabel.implicitWidth + 16
                 radius: 9
-                color: "#1C7AFF"
+                color: Theme.accent
 
                 Text {
                     id: newLabel
@@ -192,7 +192,7 @@ Item {
             radius: 10
             color: "#141414"
             border.width: 1
-            border.color: editor.activeFocus ? "#1C7AFF" : "#262626"
+            border.color: editor.activeFocus ? Theme.accent : "#262626"
 
             Behavior on border.color { ColorAnimation { duration: 160 } }
 
@@ -253,7 +253,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 22
                 radius: 11
-                color: root.canValidate ? "#1C7AFF" : "#1F1F1F"
+                color: root.canValidate ? Theme.accent : "#1F1F1F"
 
                 Behavior on color { ColorAnimation { duration: 140 } }
 

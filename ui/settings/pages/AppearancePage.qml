@@ -9,6 +9,8 @@ import qs.ui.settings.widgets
 ContentPage {
     id: root
 
+    property string glassTarget: "*"
+
     readonly property var accents: [
         { name: "Bleu",     hex: "#0088ff" },
         { name: "Violet",   hex: "#cb30e0" },
@@ -283,6 +285,90 @@ ContentPage {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    ContentSection {
+        title: "Liquid Glass par élément"
+
+        CFText {
+            Layout.fillWidth: true
+            text: "Chaque réglage s'applique à l'élément choisi. « Tous » sert de base : un élément sans réglage propre en hérite."
+            font.pixelSize: 12
+            gray: true
+            wrapMode: Text.WordWrap
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: 8
+
+            Repeater {
+                model: Theme.glassElements
+
+                Rectangle {
+                    id: chip
+
+                    required property var modelData
+
+                    width: _chipText.implicitWidth + 24
+                    height: 28
+                    radius: 14
+                    color: root.glassTarget === chip.modelData.id ? Theme.accent : Theme.fillControl
+
+                    CFText {
+                        id: _chipText
+                        anchors.centerIn: parent
+                        text: chip.modelData.name
+                        font.pixelSize: 12
+                        color: root.glassTarget === chip.modelData.id ? Theme.onAccent : Theme.textPrimary
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.glassTarget = chip.modelData.id
+                    }
+                }
+            }
+        }
+
+        Repeater {
+            model: Theme.elementSpecs
+
+            ParamSlider {
+                id: gs
+
+                required property var modelData
+
+                Layout.fillWidth: true
+                text: gs.modelData.label
+                from: gs.modelData.min
+                to: gs.modelData.max
+                decimals: gs.modelData.max <= 2 ? 2 : 1
+                source: Theme.glassValue(root.glassTarget, gs.modelData.key)
+                onCommitted: function(v) { Theme.setGlassParam(root.glassTarget, gs.modelData.key, v) }
+            }
+        }
+
+        Rectangle {
+            Layout.preferredWidth: 190
+            Layout.preferredHeight: 32
+            radius: 16
+            color: Theme.accent
+
+            CFText {
+                anchors.centerIn: parent
+                text: "Réinitialiser cet élément"
+                font.pixelSize: 13
+                color: Theme.onAccent
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Theme.resetGlassElement(root.glassTarget)
             }
         }
     }

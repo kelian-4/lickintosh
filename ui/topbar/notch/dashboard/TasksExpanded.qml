@@ -34,8 +34,8 @@ Item {
             width: 14
             height: 14
             radius: 7
-            color: row.finished ? "#1C7AFF" : "transparent"
-            border.color: row.finished ? "#1C7AFF" : "#8A8A8A"
+            color: row.finished ? Theme.accent : "transparent"
+            border.color: row.finished ? Theme.accent : "#8A8A8A"
             border.width: 1.5
         }
 

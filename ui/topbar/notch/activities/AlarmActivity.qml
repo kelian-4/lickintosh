@@ -49,7 +49,7 @@ Item {
                 Layout.preferredWidth: 100
                 Layout.preferredHeight: 30
                 radius: 15
-                color: "#1C7AFF"
+                color: Theme.accent
                 Text { anchors.centerIn: parent; text: "Arrêter"; color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Text" }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: AlarmState.dismissFiringAlarm() }
             }

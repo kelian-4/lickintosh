@@ -487,7 +487,7 @@ Scope {
                     Region { item: editPill }
                 }
 
-                GlassBackdrop { id: ccBackdrop }
+                GlassBackdrop { id: ccBackdrop; element: "cc" }
 
                 MouseArea {
                     anchors.fill: parent
@@ -972,7 +972,7 @@ Scope {
                                                 width: 25
                                                 height: 25
                                                 icon: "wifi/nm-signal-100-symbolic.svg"
-                                                color: root.wifiOn ? "#1C7AFF" : "#fff"
+                                                color: root.wifiOn ? Theme.accent : "#fff"
                                             }
                                         }
                                         Column {
@@ -1103,7 +1103,7 @@ Scope {
                                             anchors.centerIn: parent
                                             width: 30; height: 30
                                             icon: "bluetooth/bluetooth.svg"
-                                            color: btWidget.enabled ? "#1C7AFF" : "#fff"
+                                            color: btWidget.enabled ? Theme.accent : "#fff"
                                             Behavior on color { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                                         }
                                     }
@@ -1152,7 +1152,7 @@ Scope {
                                     width: 30
                                     height: 30
                                     icon: "devices/smartphone.svg"
-                                    color: "#1C7AFF"
+                                    color: Theme.accent
                                 }
                                 MouseArea {
                                     anchors.fill: parent
@@ -1644,7 +1644,7 @@ Scope {
                                     width: 26
                                     height: 20
                                     icon: "screenshare.svg"
-                                    color: root.recording ? "#1C7AFF" : "#fff"
+                                    color: root.recording ? Theme.accent : "#fff"
                                 }
                                 MouseArea {
                                     anchors.fill: parent
@@ -1910,14 +1910,14 @@ Scope {
                                         anchors.fill: parent
                                         radius: height/2
                                         color: "transparent"
-                                        border.color: GameMode.enabled ? "#1C7AFF" : "#fff"
+                                        border.color: GameMode.enabled ? Theme.accent : "#fff"
                                         border.width: 2
                                     }
                                     Rectangle {
                                         width: 8
                                         height: 2
                                         radius: 1
-                                        color: GameMode.enabled ? "#1C7AFF" : "#fff"
+                                        color: GameMode.enabled ? Theme.accent : "#fff"
                                         anchors.left: parent.left
                                         anchors.leftMargin: 6
                                         anchors.verticalCenter: parent.verticalCenter
@@ -1926,7 +1926,7 @@ Scope {
                                         width: 2
                                         height: 8
                                         radius: 1
-                                        color: GameMode.enabled ? "#1C7AFF" : "#fff"
+                                        color: GameMode.enabled ? Theme.accent : "#fff"
                                         anchors.left: parent.left
                                         anchors.leftMargin: 9
                                         anchors.verticalCenter: parent.verticalCenter
@@ -1935,7 +1935,7 @@ Scope {
                                         width: 4
                                         height: 4
                                         radius: 2
-                                        color: GameMode.enabled ? "#1C7AFF" : "#fff"
+                                        color: GameMode.enabled ? Theme.accent : "#fff"
                                         anchors.right: parent.right
                                         anchors.rightMargin: 5
                                         anchors.top: parent.top
@@ -1945,7 +1945,7 @@ Scope {
                                         width: 4
                                         height: 4
                                         radius: 2
-                                        color: GameMode.enabled ? "#1C7AFF" : "#fff"
+                                        color: GameMode.enabled ? Theme.accent : "#fff"
                                         anchors.right: parent.right
                                         anchors.rightMargin: 10
                                         anchors.bottom: parent.bottom
@@ -1987,7 +1987,7 @@ Scope {
                                     anchors.centerIn: parent
                                     size: 26
                                     icon: "notch/coffee.svg"
-                                    color: KeepAwake.enabled ? "#1C7AFF" : "#fff"
+                                    color: KeepAwake.enabled ? Theme.accent : "#fff"
                                 }
                                 MouseArea {
                                     anchors.fill: parent
@@ -2025,7 +2025,7 @@ Scope {
                                     width: 22
                                     height: 22
                                     icon: "notch/clock.svg"
-                                    color: (TimerState.running || TimerState.firing) ? "#1C7AFF" : "#fff"
+                                    color: (TimerState.running || TimerState.firing) ? Theme.accent : "#fff"
                                 }
                                 Rectangle {
                                     opacity: (!root.timerOpened && !root.timerClosing && (TimerState.running || TimerState.firing)) ? 1 : 0
@@ -2034,7 +2034,7 @@ Scope {
                                     width: 8
                                     height: 8
                                     radius: 4
-                                    color: TimerState.firing ? "#ff453a" : "#1C7AFF"
+                                    color: TimerState.firing ? "#ff453a" : Theme.accent
                                     anchors.top: parent.top
                                     anchors.right: parent.right
                                     anchors.margins: 10
@@ -2223,7 +2223,7 @@ Scope {
                                     width: 22
                                     height: 22
                                     icon: "notch/bell.svg"
-                                    color: alarmWidget.enabled ? "#1C7AFF" : "#fff"
+                                    color: alarmWidget.enabled ? Theme.accent : "#fff"
                                 }
 
                                 Item {
@@ -2419,7 +2419,7 @@ Scope {
                                     width: 22
                                     height: 22
                                     icon: "notch/watch.svg"
-                                    color: (StopwatchState.running || StopwatchState.accumulatedMs > 0) ? "#1C7AFF" : "#fff"
+                                    color: (StopwatchState.running || StopwatchState.accumulatedMs > 0) ? Theme.accent : "#fff"
                                 }
 
                                 Item {

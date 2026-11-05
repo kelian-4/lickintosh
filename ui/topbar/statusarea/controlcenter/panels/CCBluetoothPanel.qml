@@ -214,7 +214,7 @@ Item {
                     anchors.centerIn: parent
                     icon:  _dr.modelData !== null ? BluetoothState.deviceIcon(_dr.modelData) : "bluetooth/bluetooth.svg"
                     size:  root.iconSize
-                    color: _dr.modelData !== null && _dr.modelData.connected ? "#1C7AFF" : "#fff"
+                    color: _dr.modelData !== null && _dr.modelData.connected ? Theme.accent : "#fff"
                 }
             }
 

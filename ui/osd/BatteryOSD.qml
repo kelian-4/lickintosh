@@ -193,7 +193,7 @@ Scope {
                 implicitWidth:  324
                 implicitHeight: 108
 
-                GlassBackdrop { id: glassBackdrop }
+                GlassBackdrop { id: glassBackdrop; element: "osd" }
 
                 Item {
                     id: pill

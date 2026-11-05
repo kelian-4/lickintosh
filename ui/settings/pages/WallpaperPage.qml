@@ -226,7 +226,7 @@ ContentPage {
                             radius: 12
                             color: "transparent"
                             border.width: 2
-                            border.color: "#1C7AFF"
+                            border.color: Theme.accent
                             visible: _preview.isActive
                         }
 
@@ -274,7 +274,7 @@ ContentPage {
                 radius: 7
                 opacity: _randomBtn.enabled ? 1 : 0.4
                 enabled: root.shippedList.length + root.userList.length > 0
-                color: _randomMouse.containsMouse ? Qt.rgba(0.15, 0.51, 1, 1) : "#1C7AFF"
+                color: _randomMouse.containsMouse ? Qt.lighter(Theme.accent, 1.15) : Theme.accent
                 Behavior on color { ColorAnimation { duration: 100 } }
 
                 CFText {

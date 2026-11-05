@@ -50,7 +50,7 @@ Scope {
                     onLockRequested: root.lockRequested()
                 }
 
-                GlassBackdrop {}
+                GlassBackdrop { element: "menus" }
             }
         }
     }

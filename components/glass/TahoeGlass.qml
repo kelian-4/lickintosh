@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import qs.services
 
 Item {
     id: root
@@ -8,14 +9,15 @@ Item {
 
     property real cornerRadius: 20.0
     property real cornerSquircle: 0.0
-    property real refractionWidth: 18.0
-    property real magnifyGlassStrength: 0.1
-    property real rgbDriftStrength: 12.0
-    property real highlightWidth: 3.5
-    property real highlightStrength: 0.1
-    property real saturation: 1.33
-    property real materialOpacity: 1.0
-    property real centerOpacity: 0.98
+    readonly property string element: backdrop ? backdrop.element : ""
+    property real refractionWidth: Theme.glassValue(root.element, "refractionWidth")
+    property real magnifyGlassStrength: Theme.glassValue(root.element, "magnifyGlassStrength")
+    property real rgbDriftStrength: Theme.glassValue(root.element, "rgbDriftStrength")
+    property real highlightWidth: Theme.glassValue(root.element, "highlightWidth")
+    property real highlightStrength: Theme.glassValue(root.element, "highlightStrength")
+    property real saturation: Theme.glassValue(root.element, "saturation")
+    property real materialOpacity: Theme.glassValue(root.element, "materialOpacity")
+    property real centerOpacity: Theme.glassValue(root.element, "centerOpacity")
 
     property point screenPosition: Qt.point(0, 0)
     property size screenExtent: Qt.size(0, 0)

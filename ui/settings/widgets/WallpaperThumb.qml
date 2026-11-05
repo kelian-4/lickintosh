@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import qs.components
+import qs.services
 
 // Vignette d'un fond d'ecran dans la grille de selection.
 //
@@ -128,7 +129,7 @@ Item {
                 radius: 10
                 color: "transparent"
                 border.width: 2
-                border.color: "#1C7AFF"
+                border.color: Theme.accent
                 visible: root.selected
             }
 

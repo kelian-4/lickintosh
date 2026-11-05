@@ -1,10 +1,11 @@
 import QtQuick
+import qs.services
 
 Item {
     id: root
 
     property var values: []
-    property color lineColor: "#1C7AFF"
+    property color lineColor: Theme.accent
 
     implicitWidth: 120
     implicitHeight: 56

@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.VectorImage
 import Quickshell.Services.Pipewire
 import qs.components
+import qs.services
 
 Item {
     id: root
@@ -174,7 +175,7 @@ Item {
                                 width: 28
                                 height: 28
                                 radius: 14
-                                color: outputRow.isActive ? "#1C7AFF" : "transparent"
+                                color: outputRow.isActive ? Theme.accent : "transparent"
                                 Layout.alignment: Qt.AlignVCenter
 
                                 Behavior on color {

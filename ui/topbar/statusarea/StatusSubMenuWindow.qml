@@ -90,7 +90,7 @@ Scope {
                     }
                 }
 
-                GlassBackdrop {}
+                GlassBackdrop { element: "menus" }
             }
         }
     }

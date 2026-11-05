@@ -18,7 +18,10 @@ Item {
     property color rimColor: "#20ffffff"
     property vector2d lightDir: Qt.vector2d(1, 1)
 
-    property Item backdrop: Theme.useGlass(root) ? GlassRegistry.lookup(QsWindow.window) : null
+    readonly property Item registered: GlassRegistry.lookup(QsWindow.window)
+    readonly property string element: registered ? registered.element : ""
+    property Item backdrop: Theme.useGlass(root) ? registered : null
+    readonly property color effectiveBase: Theme.compositorBlur && Theme.themed(root) ? Theme.surfaceFor(root.element) : root.baseColor
     readonly property bool glassOn: backdrop !== null && backdrop.ready && backdrop.captureSettled
     property point screenOrigin: Qt.point(0, 0)
 
@@ -96,7 +99,7 @@ Item {
         property real barRadius: root.barRadius
         property real rimWidth: root.rimWidth
         property vector2d lightDir: root.lightDir
-        property vector4d baseColor: root.glassOn ? Qt.vector4d(0, 0, 0, 0) : Qt.vector4d(root.baseColor.r, root.baseColor.g, root.baseColor.b, root.baseColor.a)
+        property vector4d baseColor: root.glassOn ? Qt.vector4d(0, 0, 0, 0) : Qt.vector4d(root.effectiveBase.r, root.effectiveBase.g, root.effectiveBase.b, root.effectiveBase.a)
         property vector4d rimColor: root.glassOn ? Qt.vector4d(0, 0, 0, 0) : Qt.vector4d(root.rimColor.r, root.rimColor.g, root.rimColor.b, root.rimColor.a)
         property vector4d bud0: root.budVector(0)
         property vector4d bud1: root.budVector(1)

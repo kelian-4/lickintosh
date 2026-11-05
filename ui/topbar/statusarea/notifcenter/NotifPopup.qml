@@ -209,7 +209,7 @@ Scope {
                     }
                 }
 
-                GlassBackdrop {}
+                GlassBackdrop { element: "notifpopup" }
             }
         }
     }

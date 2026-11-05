@@ -1540,7 +1540,7 @@ Scope {
                     SpotlightActionBtn { bud:splitGlass.buds[3];action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");iconSize:36;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
                 }
 
-                GlassBackdrop {}
+                GlassBackdrop { element: "spotlight" }
             }
         }
     }

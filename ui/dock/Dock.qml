@@ -631,7 +631,7 @@ Scope {
                     windowOpacity: ShellConfig.options.glass.windowOpacity
                     windowOpacityByClass: ShellConfig.options.glass.windowOpacityByClass
                     monitorName: dockWin.screen.name
-                    blurRadius: 1.0
+                    element: "dock"
                 }
 
                 MouseArea {
@@ -729,7 +729,7 @@ Scope {
                         Rectangle {
                             anchors.fill: parent
                             radius:       dockRoot.dockRadius
-                            color:        Theme.blurSurface
+                            color:        Theme.surfaceFor("dock")
                             visible:      Theme.compositorBlur
                         }
 

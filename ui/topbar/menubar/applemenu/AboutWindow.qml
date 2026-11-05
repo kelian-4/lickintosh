@@ -286,7 +286,7 @@ Scope {
                     stdout: StdioCollector { onStreamFinished: _procRAM.result = text.trim() }
                 }
 
-                GlassBackdrop {}
+                GlassBackdrop { element: "menus" }
             }
         }
     }
