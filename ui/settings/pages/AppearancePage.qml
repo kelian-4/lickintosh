@@ -215,7 +215,6 @@ ContentPage {
         title: "Personnalisation du style"
 
         ParamSlider {
-            visible: !Theme.isGlass
             text: "Intensité de la teinte du verre"
             from: 0
             to: 0.9
@@ -436,7 +435,6 @@ ContentPage {
 
     ContentSection {
         title: "Fenêtres et couches"
-        visible: Theme.compositorBlur
 
         ParamSlider {
             text: "Opacité des fenêtres actives"
@@ -464,14 +462,12 @@ ContentPage {
         }
 
         ParamSwitch {
-            visible: ShellConfig.options.appearance.blurLayers
             text: "Flou des menus des couches"
             source: ShellConfig.options.appearance.blurLayerPopups
             onCommitted: function(v) { ShellConfig.options.appearance.blurLayerPopups = v }
         }
 
         ParamSlider {
-            visible: ShellConfig.options.appearance.blurLayers
             text: "Seuil de transparence des couches"
             from: 0
             to: 1
@@ -492,7 +488,6 @@ ContentPage {
 
     ContentSection {
         title: "Réglages du flou"
-        visible: Theme.compositorBlur
 
         Repeater {
             model: Theme.blurGeneral
@@ -506,7 +501,7 @@ ContentPage {
 
     ContentSection {
         title: Theme.blurPresetData ? "Réglages " + Theme.blurPresetData.name : ""
-        visible: Theme.compositorBlur && Theme.variantSpecList.length > 0
+        visible: Theme.variantSpecList.length > 0
 
         Repeater {
             model: Theme.variantSpecList
@@ -523,7 +518,6 @@ ContentPage {
         Layout.preferredHeight: 32
         radius: 16
         color: Theme.accent
-        visible: Theme.compositorBlur
 
         CFText {
             anchors.centerIn: parent

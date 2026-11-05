@@ -8,6 +8,7 @@ Slider {
     id: slider
 
     property bool autoHideHandle: false
+    property color fillColor: (Theme.isGlass || !Theme.themed(slider)) ? "#fff" : Theme.accent
     property Item glassBackdrop: GlassRegistry.lookup(QsWindow.window)
     property bool recentlyChanged: false
     readonly property bool handleShown: !slider.autoHideHandle || slider.pressed || slider.recentlyChanged
@@ -42,7 +43,7 @@ Slider {
         Rectangle {
             width: slider.visualPosition * parent.width
             height: parent.height
-            color: (Theme.isGlass || !Theme.themed(slider)) ? "#fff" : Theme.accent
+            color: slider.fillColor
             radius: 10
         }
     }
