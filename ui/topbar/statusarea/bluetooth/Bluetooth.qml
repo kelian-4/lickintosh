@@ -6,7 +6,7 @@ import Quickshell.Bluetooth
 Item {
     id: root
 
-    property int iconSize: 18
+    property int iconSize: 16
     property string color: "#fff"
     property var adapter: Bluetooth.defaultAdapter
     property bool bluetoothOn: adapter ? adapter.enabled : false

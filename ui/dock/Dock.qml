@@ -92,6 +92,8 @@ Scope {
     }
 
     function pinnedIconFor(entry) {
+        if (dockRoot.pinnedKey(entry) === "settings-app")
+            return Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons_desktop/" + Theme.iconTheme + "/apps/scalable/preferences-system.svg")
         if (dockRoot._isThemeName(entry.icon)) {
             var byName = IconResolver.byName(entry.icon)
             if (byName !== "") return byName
