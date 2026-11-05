@@ -48,7 +48,7 @@ FloatingWindow {
         {
             title: "",
             items: [
-                { name: "Compte",    icon: "user.svg",                   implemented: false }
+                { name: "Compte",    icon: "user.svg",                   component: "AccountPage", implemented: true }
             ]
         },
         {
@@ -215,7 +215,7 @@ FloatingWindow {
                                     cursorShape: Qt.PointingHandCursor
                                     onEntered: _trafficLights._hovered = true
                                     onExited:  _trafficLights._hovered = false
-                                    onClicked: root.close()
+                                    onClicked: Qt.quit()
                                 }
                             }
 
@@ -239,7 +239,7 @@ FloatingWindow {
                                     cursorShape: Qt.PointingHandCursor
                                     onEntered: _trafficLights._hovered = true
                                     onExited:  _trafficLights._hovered = false
-                                    onClicked: root.showMinimized()
+                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.window.move({ workspace = \"special:minimized\" })"])
                                 }
                             }
 
@@ -263,9 +263,7 @@ FloatingWindow {
                                     cursorShape: Qt.PointingHandCursor
                                     onEntered: _trafficLights._hovered = true
                                     onExited:  _trafficLights._hovered = false
-                                    onClicked: root.visibility === Window.Maximized
-                                               ? root.showNormal()
-                                               : root.showMaximized()
+                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.window.fullscreen({ mode = \"maximized\", action = \"toggle\" })"])
                                 }
                             }
                         }
@@ -541,6 +539,7 @@ FloatingWindow {
                             if (!root.currentItem) return _placeholderComp
                             if (!root.currentItem.implemented) return _placeholderComp
                             switch (root.currentItem.component) {
+                                case "AccountPage":   return _accountComp
                                 case "WifiPage":      return _wifiComp
                                 case "BluetoothPage": return _btComp
                                 case "BatteryPage":   return _battComp
@@ -564,6 +563,7 @@ FloatingWindow {
     }
 
     Component { id: _placeholderComp; PlaceholderPage { pageTitle: root.currentItem ? root.currentItem.name : ""; icon: root.currentItem ? root.currentItem.icon : "" } }
+    Component { id: _accountComp; AccountPage {} }
     Component { id: _wifiComp;   WifiPage {} }
     Component { id: _btComp;     BluetoothPage {} }
     Component { id: _battComp;   BatteryPage {} }
