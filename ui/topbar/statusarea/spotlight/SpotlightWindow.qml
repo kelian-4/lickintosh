@@ -199,26 +199,6 @@ Scope {
         return out
     }
 
-    property var recentFiles: []
-
-    Process {
-        id: recentXbelProc
-        command: ["bash", "-c",
-            "f=~/.local/share/recently-used.xbel; " +
-            "[ -f \"$f\" ] || exit 0; " +
-            "awk '/<bookmark / { href=\"\"; visited=\"\"; if (match($0, /href=\"[^\"]*\"/)) { href=substr($0, RSTART+6, RLENGTH-7) } if (match($0, /visited=\"[^\"]*\"/)) { visited=substr($0, RSTART+9, RLENGTH-10) } if (href != \"\") print visited \"\\t\" href }' \"$f\" " +
-            "| sort -r | cut -f2- | sed 's#^file://##' " +
-            "| while IFS= read -r p; do printf '%b\\n' \"${p//%/\\\\x}\"; done"
-        ]
-        stdout: StdioCollector { id: recentXbelOut }
-        onExited: {
-            var lines = recentXbelOut.text.trim().split("\n")
-            var out = []
-            for (var i = 0; i < lines.length; i++) { if (lines[i]) out.push(lines[i]) }
-            root.recentFiles = out
-        }
-    }
-
     property bool _spotlightLoaded: false
 
     onOpenedChanged: {
@@ -226,7 +206,7 @@ Scope {
             const wasLoaded = spotlightLoader.item !== null
             root._spotlightLoaded = true
             if (wasLoaded) spotlightLoader.item.reopen()
-            recentXbelProc.running = true
+            RecentFiles.refresh()
             root.refreshClipHistory()
             root.refreshUserActions()
             root.refreshWallpaperList()
@@ -1035,8 +1015,8 @@ Scope {
                     if (query === "") {
                         var seen = {}
                         var combined = []
-                        for (var ri = 0; ri < root.recentFiles.length; ri++) {
-                            var rp = root.recentFiles[ri]
+                        for (var ri = 0; ri < RecentFiles.files.length; ri++) {
+                            var rp = RecentFiles.files[ri]
                             if (!seen[rp]) { seen[rp] = true; combined.push(rp) }
                         }
                         for (var fi = 0; fi < root.fileIndex.length && combined.length < 150; fi++) {
