@@ -407,7 +407,7 @@ Singleton {
             + "_G.lickintosh_rule = hl.window_rule({ name = \"lickintosh-blur-@TS@\", match = { class = \".*\" }, opacity = \"" + a + " override " + b + " override 1.0 override\" })\n"
             + "pcall(function() if _G.lickintosh_layer then _G.lickintosh_layer:set_enabled(false) end end)\n"
         if (ShellConfig.options.appearance.blurLayers) {
-            lua += "_G.lickintosh_layer = hl.layer_rule({ name = \"lickintosh-layers-@TS@\", match = { namespace = \"^quickshell\" }, blur = true, blur_popups = "
+            lua += "_G.lickintosh_layer = hl.layer_rule({ name = \"lickintosh-layers-@TS@\", match = { namespace = \"quickshell:(dock|globalmenu|applemenu|notifcenter|notifpopup|ai|spotlight|cc|statusmenu|reload-popup|osd|btbattery|batteryosd)\" }, blur = true, blur_popups = "
                 + (ShellConfig.options.appearance.blurLayerPopups ? "true" : "false")
                 + ", ignore_alpha = " + ShellConfig.options.appearance.layerIgnoreAlpha.toFixed(2) + " })"
         }
