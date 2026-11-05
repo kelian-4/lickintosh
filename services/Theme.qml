@@ -396,6 +396,13 @@ Singleton {
 
     readonly property var blurLayerNamespaces: ["dock", "globalmenu", "applemenu", "notifcenter", "notifpopup", "ai", "spotlight", "cc", "statusmenu", "reload-popup", "osd", "btbattery", "batteryosd"]
 
+    function layerIgnoreEffective() {
+        var lowest = root.glassValue("*", "surfaceAlpha")
+        for (var i = 0; i < root.glassElements.length; i++)
+            lowest = Math.min(lowest, root.glassValue(root.glassElements[i].id, "surfaceAlpha"))
+        return Math.max(0, Math.min(ShellConfig.options.appearance.layerIgnoreAlpha, lowest * 0.5))
+    }
+
     function blurPayload() {
         if (root.blurPresetData === null)
             return ""
@@ -411,7 +418,7 @@ Singleton {
             + "_G.lickintosh_layers = {}\n"
         if (ShellConfig.options.appearance.blurLayers) {
             var popups = ShellConfig.options.appearance.blurLayerPopups ? "true" : "false"
-            var ignore = ShellConfig.options.appearance.layerIgnoreAlpha.toFixed(2)
+            var ignore = root.layerIgnoreEffective().toFixed(2)
             for (var n = 0; n < root.blurLayerNamespaces.length; n++) {
                 var ns = root.blurLayerNamespaces[n]
                 lua += "table.insert(_G.lickintosh_layers, hl.layer_rule({ name = \"lickintosh-layer-" + ns + "-@TS@\", match = { namespace = \"quickshell:" + ns + "\" }, blur = true, blur_popups = " + popups + ", ignore_alpha = " + ignore + " }))\n"
@@ -476,9 +483,21 @@ Singleton {
                 var out = text.trim()
                 if (out.length > 0 && out !== "ok") {
                     root.lastError = out
+                    ShellConfig.options.appearance.blurStatus = out
                     console.warn("Theme: hyprctl a répondu : " + out)
                 } else {
                     root.lastError = ""
+                    ShellConfig.options.appearance.blurStatus = out === "ok" ? "ok" : ""
+                }
+            }
+        }
+        stderr: StdioCollector {
+            onStreamFinished: {
+                var err = text.trim()
+                if (err.length > 0) {
+                    root.lastError = err
+                    ShellConfig.options.appearance.blurStatus = err
+                    console.warn("Theme: hyprctl erreur : " + err)
                 }
             }
         }
