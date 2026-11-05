@@ -41,6 +41,8 @@ ShellRoot {
     property int  batteryX:          0
     property bool volumeOpened:      false
     property int  volumeX:           0
+    property bool interfaceShown:    false
+    property bool startupDecided:    false
 
     Connections {
         target: WorkspaceWatcher
@@ -64,7 +66,7 @@ ShellRoot {
         batteryOpened || volumeOpened || NotchState.expanded
 
     Variants {
-        model: Quickshell.screens
+        model: appRoot.interfaceShown ? Quickshell.screens : []
         PanelWindow {
             id: topBarWindow
             required property var modelData
@@ -221,9 +223,9 @@ ShellRoot {
         onClosing: appRoot.ccOpened = false
     }
     ControlGallery {}
-    DesktopLayer {}
+    LazyLoader { active: appRoot.interfaceShown; DesktopLayer {} }
     WidgetGallery {}
-    Dock {}
+    LazyLoader { active: appRoot.interfaceShown; Dock {} }
     SpotlightWindow {
         opened: appRoot.spotlightOpened
         onCloseRequested: appRoot.spotlightOpened = false
@@ -273,22 +275,41 @@ ShellRoot {
         id: startupLockCheck
         command: ["sh", "-c", "m=\"${XDG_RUNTIME_DIR:-/tmp}/lickintosh-startup-lock\"; if [ -e \"$m\" ]; then echo skip; else : > \"$m\"; echo lock; fi"]
         stdout: StdioCollector {
-            onStreamFinished: if (text.trim() === "lock") lockScreen.lock()
+            onStreamFinished: {
+                if (text.trim() === "lock") lockScreen.lock()
+                else appRoot.interfaceShown = true
+            }
         }
+    }
+
+    function decideStartup() {
+        if (startupDecided || !ShellConfig.ready) return
+        startupDecided = true
+        if (ShellConfig.options.lockscreen.lockAtStartup) startupLockCheck.running = true
+        else interfaceShown = true
     }
 
     Connections {
         target: ShellConfig
-        function onReadyChanged() {
-            if (ShellConfig.ready && ShellConfig.options.lockscreen.lockAtStartup)
-                startupLockCheck.running = true
+        function onReadyChanged() { appRoot.decideStartup() }
+    }
+
+    Connections {
+        target: lockScreen
+        function onLockedChanged() {
+            if (!lockScreen.locked && appRoot.startupDecided) appRoot.interfaceShown = true
         }
     }
 
-    Component.onCompleted: {
-        if (ShellConfig.ready && ShellConfig.options.lockscreen.lockAtStartup)
-            startupLockCheck.running = true
+    Timer {
+        interval: 6000
+        running: true
+        onTriggered: {
+            if (!appRoot.interfaceShown && !lockScreen.locked) appRoot.interfaceShown = true
+        }
     }
+
+    Component.onCompleted: appRoot.decideStartup()
 
     StatusSubMenuWindow {
         opened: appRoot.wifiOpened

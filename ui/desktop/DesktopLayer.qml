@@ -207,6 +207,14 @@ Scope {
                 return best || { col: col, row: row }
             }
 
+            property bool settled: false
+
+            Timer {
+                interval: 700
+                running: true
+                onTriggered: stage.settled = true
+            }
+
             onIconColsChanged: stage.relayout()
             onIconRowsChanged: stage.relayout()
             Component.onCompleted: stage.relayout()
@@ -309,6 +317,7 @@ Scope {
                     cellWidth: stage.iconW
                     cellHeight: stage.iconH
                     instant: icon.selected && stage.groupDragging
+                    animate: stage.settled
                     followX: icon.selected && !icon.dragActive && stage.groupDragging ? stage.groupDX : 0
                     followY: icon.selected && !icon.dragActive && stage.groupDragging ? stage.groupDY : 0
 
@@ -360,11 +369,11 @@ Scope {
                     scale: slot.dragging ? 1.04 : 1
 
                     Behavior on x {
-                        enabled: !slot.dragging
+                        enabled: stage.settled && !slot.dragging
                         NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                     }
                     Behavior on y {
-                        enabled: !slot.dragging
+                        enabled: stage.settled && !slot.dragging
                         NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
                     }
                     Behavior on scale {

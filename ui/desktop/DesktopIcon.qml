@@ -15,6 +15,7 @@ Item {
     property real followX: 0
     property real followY: 0
     property bool instant: false
+    property bool animate: true
     readonly property bool dragActive: area.drag.active
 
     signal dragMoved(real dx, real dy)
@@ -40,12 +41,12 @@ Item {
     }
 
     Behavior on x {
-        enabled: !area.drag.active && !root.instant
+        enabled: root.animate && !area.drag.active && !root.instant
         NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
     }
 
     Behavior on y {
-        enabled: !area.drag.active && !root.instant
+        enabled: root.animate && !area.drag.active && !root.instant
         NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
     }
 
