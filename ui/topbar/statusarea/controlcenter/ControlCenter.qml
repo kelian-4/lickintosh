@@ -407,7 +407,7 @@ Scope {
         interval: 50
         repeat: false
         onTriggered: {
-            _brtSet.command = ["brightnessctl", "-e4", "-n2", "set", Math.round(root.brtValue * 100) + "%"]
+            _brtSet.command = ["brightnessctl", "-e4", "set", Math.round(root.brtValue * 100) + "%"]
             _brtSet.running = true
         }
     }
