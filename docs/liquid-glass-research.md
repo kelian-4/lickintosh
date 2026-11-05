@@ -388,3 +388,49 @@ Vérifié : shader comparé fonction par fonction au repo (identique, sauf synta
 - Les teintes (`color`, `light`, `rimStrength`) des `BoxGlass` vitrés sont ignorées ; la lisibilité du texte sur verre clair dépend du fond.
 - La fenêtre de réglages et le notch n'ont pas de verre.
 - Les fichiers `TahoeGlass.frag`, `SplitLiquidGlass.frag` et le texte de licence sont sous GPL-3.0 (voir `THIRD_PARTY_LICENSES/`) ; le dépôt n'a pas de fichier de licence à la racine.
+
+## 22. Plantage « invalid object », variables exposées, limites (avant la beta 1)
+
+### Plantage `wl_display#1: error 0: invalid object N`
+
+Lecture du code de Quickshell (mirroir GitHub, dernier commit relu : 2026-10-17) :
+
+- `src/wayland/screencopy/hyprland_screencopy/hyprland_screencopy.cpp` : sur l'évènement `failed`, le gestionnaire se contente de journaliser « Ending recording due to screencopy failure » et d'émettre `stopped()` ; sur `ready`, il appelle `destroy()`.
+- `src/wayland/screencopy/view.cpp` : `stopped()` déclenche `destroyContextWithUpdate`, qui fait `delete this->context` ; le destructeur du contexte envoie `destroy()` sur l'objet de la trame s'il est encore référencé.
+
+Hypothèse non démontrée sur le côté Hyprland : après avoir envoyé `failed`, Hyprland a déjà détruit l'objet de la trame ; la requête `destroy` de Quickshell vise alors un objet inexistant, d'où l'erreur fatale `invalid object N` et la fin de la connexion Wayland. Hyprland fait échouer une capture de fenêtre notamment quand la taille de la fenêtre change entre l'annonce du tampon et la copie (animations, redimensionnement) ou quand la fenêtre disparaît. Il faut donc éviter de provoquer un échec ; la cause elle-même est à signaler à Quickshell et à Hyprland.
+
+Parades dans ce dépôt :
+
+- `glass.captureWindows` vaut `false` par défaut : aucune capture de fenêtre, donc aucun risque. Le verre ne montre alors que le fond d'écran.
+- Quand la capture est activée, `GlassWindows` n'utilise plus un flux continu (`live: true`) mais une trame à la demande (`live: false`). Le composant `CaptureGate` n'arme un contexte de capture que lorsque la fenêtre est visible et que `GlassTracker.fast` est faux (aucune géométrie de fenêtre n'a bougé depuis 1,5 s), puis demande une trame toutes les `glass.captureIntervalMs` millisecondes seulement tant que tout est calme. Entre deux trames, aucun objet de trame n'existe : rien ne peut échouer.
+- La capture est suspendue pendant le verrouillage de session et 1,5 s après.
+- Testé sur banc : le composant réel `CaptureGate` avec une chronologie simulée (aucune requête de trame pendant l'agitation, reprise au calme, relance après échec simulé, arrêt à la fermeture). Non testé : le comportement réel avec Hyprland.
+
+### Installation : relancer Quickshell après `setup.fish`
+
+`setup.fish` copie le dépôt vers `~/.config/quickshell` avec `cp -r` pendant que Quickshell tourne : le rechargement à chaud peut survenir au milieu de la copie (`shell.qml` avant `services/WorkspaceWatcher.qml`) et produire `WorkspaceWatcher is not defined`. Après toute mise à jour, arrêter puis relancer Quickshell plutôt que compter sur le rechargement à chaud. Les traces `DEBUG` et les avertissements `TasksState` / `xdg-user-dir` vus dans certains journaux viennent d'une ancienne copie installée.
+
+### Variables du verre exposées aux Réglages
+
+**Réglages de rendu, par élément (déjà dans la page Apparence, section « Liquid Glass par élément »).** Ils vivent dans `services/Theme.qml` (`elementSpecs` : clé, libellé, min, max, valeur par défaut) et sont stockés dans `ShellConfig.options.appearance.glassElements` (objet élément → clé → valeur ; `*` sert de base). `Theme.glassValue(élément, clé)` les lit ; `TahoeGlass` et `LiquidGlassBackdrop` s'en servent. Éléments : `*`, `dock`, `spotlight`, `cc`, `notifcenter`, `notifpopup`, `osd`, `ai`, `menus`. Clés : `refractionWidth` (18), `magnifyGlassStrength` (0,1), `rgbDriftStrength` (12), `highlightWidth` (3,5), `highlightStrength` (0,1), `saturation` (1,33), `materialOpacity` (1), `centerOpacity` (0,98), `blurRadius` (1), `tintAlpha`, `surfaceAlpha`. Il n'y a pas d'interrupteur propre au verre : `appearance.mode` (`glass`, `light`, `dark` ou un préréglage de flou Hyprland) décide, via `Theme.useGlass`. Ces valeurs par défaut sont contrôlées contre les shaders d'origine par `tools/liquid-glass/fidelity_tahoe.py` ; les changer s'éloigne volontairement de MacTahoe Liquid KDE.
+
+**Options de capture des fenêtres (`~/.config/lickintosh/shell-config.json`, section `glass`) : pas encore dans les Réglages.** Relues à chaud.
+
+| Clé | Type | Défaut | Effet | Contrôle suggéré (page Apparence, nouvelle section « Fenêtres derrière le verre ») |
+|---|---|---|---|---|
+| `captureWindows` | bool | `false` | Fait voir les fenêtres derrière le verre ; expérimental (voir le plantage ci-dessus) | interrupteur avec avertissement |
+| `captureIntervalMs` | entier | `400` | Période de rafraîchissement des fenêtres capturées | curseur 200 à 2000 (avancé) |
+| `windowOpacity` | réel | `1.0` | Opacité des fenêtres capturées | curseur 0 à 1 (avancé) |
+| `windowOpacityByClass` | objet | `{ "kitty": 0.3 }` | Opacité par classe de fenêtre ; 0 exclut la classe | éditeur de liste (avancé) ; classes via `hyprctl clients -j` |
+
+Non exposé, par choix : délai de révélation des popups (400 ms), suspension de la capture après le déverrouillage (1,5 s), délai de relance (8 s), intervalles de sondage de `GlassTracker`, paramètres propres à l'horloge de verrouillage (`GlyphGlass`), à Spotlight (`SplitLiquidGlass`) et à `WindowAlpha`, rayons de coin par composant. Ce sont des valeurs de mise au point plus que des préférences.
+
+Autres options d'apparence : `appearance.accentColor` (utilisée), `appearance.reduceMotion` (lue par l'écran de verrouillage, sans bouton dans Apparence), `appearance.panelOpacity` (déclarée dans `ShellConfig`, lue nulle part d'après un `grep` : à brancher ou à retirer, décision du propriétaire).
+
+### Limites connues avant la beta 1
+
+- Les éléments de la couche `quickshell:desktop` (icônes et widgets du bureau) ne sont pas dans l'arrière-plan du verre : un verre posé dessus ne les montre pas. Piste après la beta : rendre une copie légère des icônes dans la scène de chaque backdrop.
+- Avec `captureWindows: false`, le verre ne reflète jamais les fenêtres.
+- Notch et fenêtre de réglages sans verre ; poignées de curseurs sans verre ; verrouillage non testé en conditions réelles.
+- Le travail sur ce sujet reprend sur la branche `liquid_Glass_Reseacrh` (conservée) après la publication de la beta 1.
