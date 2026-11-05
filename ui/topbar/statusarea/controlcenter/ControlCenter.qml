@@ -1094,6 +1094,13 @@ Scope {
                                         Behavior on opacity {
                                             NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                                         }
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: Math.min(40, width / 2)
+                                        color: "#fff"
+                                        opacity: btWidget.enabled ? 1 : 0
+                                        Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                    }
                                     CFClippingRect {
                                         anchors.centerIn: parent
                                         width: 38; height: 38; radius: 19

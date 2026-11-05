@@ -189,9 +189,13 @@ Scope {
                                     enabled: !menuRow.isDisabled
                                     cursorShape: Qt.PointingHandCursor
                                     onEntered: {
-                                        if (menuRow.hasSubmenu && root.subIndex !== -1 && root.subIndex !== menuRow.index) {
-                                            var p = menuRow.mapToItem(null, menuRow.width, 0)
-                                            root.openSub(menuRow.index, p.x, p.y)
+                                        if (menuRow.hasSubmenu) {
+                                            if (root.subIndex !== menuRow.index) {
+                                                var p = menuRow.mapToItem(null, menuRow.width, 0)
+                                                root.openSub(menuRow.index, p.x, p.y)
+                                            }
+                                        } else if (!menuRow.modelData.separator) {
+                                            root.subIndex = -1
                                         }
                                     }
                                     onClicked: {
