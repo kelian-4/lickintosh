@@ -338,8 +338,7 @@ Singleton {
 
     function popup(legacy) {
         if (root.compositorBlur) {
-            var a = Math.min(1, ShellConfig.options.appearance.blurSurfaceAlpha + 0.2)
-            return root.isLight ? Qt.rgba(1, 1, 1, a) : Qt.rgba(0.08, 0.08, 0.08, a)
+            return root.surfaceFor("spotlight")
         }
         return root.isLight ? "#f2f6f6f8" : legacy
     }
