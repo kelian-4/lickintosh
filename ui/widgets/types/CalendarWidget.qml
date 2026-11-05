@@ -91,7 +91,7 @@ Item {
                             Layout.preferredWidth: 3
                             Layout.preferredHeight: 28
                             radius: 1.5
-                            color: "#0a84ff"
+                            color: Theme.accent
                         }
 
                         ColumnLayout {

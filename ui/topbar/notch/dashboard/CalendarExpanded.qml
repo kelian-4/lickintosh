@@ -165,7 +165,7 @@ Item {
                             width: Math.min(parent.height, 24)
                             height: width
                             radius: width / 2
-                            color: "#1C7AFF"
+                            color: Theme.accent
                             visible: cell.isToday
                         }
                         Text {

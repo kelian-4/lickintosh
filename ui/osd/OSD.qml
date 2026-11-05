@@ -95,7 +95,7 @@ Scope {
         _currentType  = "brightness"
         _currentValue = root.brtValue
         _currentLabel = "Luminosité"
-        _currentFill  = "#1C7AFF"
+        _currentFill  = Theme.accent
         _currentIconL = "sun-small.svg"
         _currentIconH = "sun-huge.svg"
         _currentSteps = 10
@@ -275,7 +275,7 @@ Scope {
                 implicitWidth:  320
                 implicitHeight: 106
 
-                GlassBackdrop { id: glassBackdrop }
+                GlassBackdrop { id: glassBackdrop; element: "osd" }
 
                 Item {
                     id: pill

@@ -85,6 +85,83 @@ Singleton {
     readonly property var variantSpecList: root.blurPresetData ? root.variantTable[root.blurPresetData.variant] : []
     readonly property color blurSurface: root.isLight ? Qt.rgba(1, 1, 1, ShellConfig.options.appearance.blurSurfaceAlpha) : Qt.rgba(0, 0, 0, ShellConfig.options.appearance.blurSurfaceAlpha)
 
+    readonly property var elementSpecs: [
+        { key: "refractionWidth",     label: "Réfraction",              min: 0, max: 60,  def: 18 },
+        { key: "magnifyGlassStrength", label: "Grossissement",          min: 0, max: 0.5, def: 0.1 },
+        { key: "rgbDriftStrength",    label: "Dispersion chromatique",  min: 0, max: 30,  def: 12 },
+        { key: "highlightWidth",      label: "Largeur du reflet",       min: 0, max: 12,  def: 3.5 },
+        { key: "highlightStrength",   label: "Intensité du reflet",     min: 0, max: 1,   def: 0.1 },
+        { key: "saturation",          label: "Saturation",              min: 0, max: 2.5, def: 1.33 },
+        { key: "materialOpacity",     label: "Opacité du matériau",     min: 0, max: 1,   def: 1 },
+        { key: "centerOpacity",       label: "Opacité du centre",       min: 0, max: 1,   def: 0.98 },
+        { key: "blurRadius",          label: "Rayon de flou",           min: 0, max: 8,   def: 1 },
+        { key: "tintAlpha",           label: "Teinte du verre",         min: 0, max: 0.9, def: -1 },
+        { key: "surfaceAlpha",        label: "Opacité en flou Hyprland", min: 0, max: 1,  def: -1 }
+    ]
+
+    readonly property var glassElements: [
+        { id: "*",           name: "Tous" },
+        { id: "dock",        name: "Dock" },
+        { id: "spotlight",   name: "Spotlight" },
+        { id: "cc",          name: "Centre de contrôle" },
+        { id: "notifcenter", name: "Notifications" },
+        { id: "notifpopup",  name: "Bannières" },
+        { id: "osd",         name: "OSD et alertes" },
+        { id: "ai",          name: "Assistant IA" },
+        { id: "menus",       name: "Menus" }
+    ]
+
+    function glassDefault(key) {
+        if (key === "tintAlpha")
+            return root.isLight ? ShellConfig.options.appearance.glassTintLight : (root.isDark ? ShellConfig.options.appearance.glassTintDark : 0)
+        if (key === "surfaceAlpha")
+            return ShellConfig.options.appearance.blurSurfaceAlpha
+        for (var i = 0; i < root.elementSpecs.length; i++)
+            if (root.elementSpecs[i].key === key)
+                return root.elementSpecs[i].def
+        return 0
+    }
+
+    function glassValue(element, key) {
+        var all = ShellConfig.options.appearance.glassElements
+        if (all) {
+            if (element && all[element] && all[element][key] !== undefined)
+                return all[element][key]
+            if (all["*"] && all["*"][key] !== undefined)
+                return all["*"][key]
+        }
+        return root.glassDefault(key)
+    }
+
+    function glassOverridden(element, key) {
+        var all = ShellConfig.options.appearance.glassElements
+        return !!(all && all[element] && all[element][key] !== undefined)
+    }
+
+    function setGlassParam(element, key, value) {
+        var all = JSON.parse(JSON.stringify(ShellConfig.options.appearance.glassElements || {}))
+        if (!all[element])
+            all[element] = {}
+        all[element][key] = value
+        ShellConfig.options.appearance.glassElements = all
+    }
+
+    function resetGlassElement(element) {
+        var all = JSON.parse(JSON.stringify(ShellConfig.options.appearance.glassElements || {}))
+        delete all[element]
+        ShellConfig.options.appearance.glassElements = all
+    }
+
+    function glassTintFor(element) {
+        var a = root.glassValue(element, "tintAlpha")
+        return root.isLight ? Qt.rgba(1, 1, 1, a) : Qt.rgba(0, 0, 0, a)
+    }
+
+    function surfaceFor(element) {
+        var a = root.glassValue(element, "surfaceAlpha")
+        return root.isLight ? Qt.rgba(1, 1, 1, a) : Qt.rgba(0, 0, 0, a)
+    }
+
     readonly property bool isGlass: root.mode === "glass"
     readonly property bool isLight: root.mode === "light"
     readonly property bool isDark:  root.mode === "dark"
@@ -260,6 +337,10 @@ Singleton {
     }
 
     function popup(legacy) {
+        if (root.compositorBlur) {
+            var a = Math.min(1, ShellConfig.options.appearance.blurSurfaceAlpha + 0.2)
+            return root.isLight ? Qt.rgba(1, 1, 1, a) : Qt.rgba(0.08, 0.08, 0.08, a)
+        }
         return root.isLight ? "#f2f6f6f8" : legacy
     }
 

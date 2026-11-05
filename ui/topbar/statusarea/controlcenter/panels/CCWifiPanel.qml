@@ -323,7 +323,7 @@ Item {
                     anchors.centerIn: parent
                     icon:  _nr.signalIcon
                     size:  root.iconSize
-                    color: _nr.isActive ? "#1C7AFF" : "#fff"
+                    color: _nr.isActive ? Theme.accent : "#fff"
                 }
             }
 

@@ -81,7 +81,7 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: 6
-                        color: ShellConfig.options.appearance.accentColor
+                        color: Theme.accent
                         visible: !row.isSeparator && !row.isDisabled && area.containsMouse
                     }
 

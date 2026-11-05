@@ -40,7 +40,7 @@ Item {
 
         property string title: ""
         property var history: []
-        property color accent: "#1C7AFF"
+        property color accent: Theme.accent
         property real percent: 0
         property string detail: ""
 
@@ -86,7 +86,7 @@ Item {
         Metric {
             title: "CPU"
             history: ResourcesState.cpuHistory
-            accent: "#1C7AFF"
+            accent: Theme.accent
             percent: ResourcesState.cpuPercent
             detail: ResourcesState.cpuTempAvailable ? Math.round(ResourcesState.cpuTempC) + "°C" : (ResourcesState.cpuName || "Processeur")
         }

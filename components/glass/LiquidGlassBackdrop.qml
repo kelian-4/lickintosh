@@ -6,7 +6,8 @@ Item {
     id: root
 
     property string wallpaperPath: ""
-    property color tint: Theme.glassTint
+    property string element: ""
+    property color tint: Theme.glassTintFor(root.element)
     property size screenSize: Qt.size(1920, 1080)
     property point windowPosition: Qt.point(0, 0)
 
@@ -21,7 +22,7 @@ Item {
     property bool warm: false
     property bool instantReveal: false
 
-    property real blurRadius: 2.0
+    property real blurRadius: Theme.glassValue(root.element, "blurRadius")
     property real blurDownscale: 0.5
     property real aa: GlassTracker.backdropScale
 

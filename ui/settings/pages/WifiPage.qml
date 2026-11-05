@@ -104,7 +104,7 @@ ContentPage {
                     anchors.centerIn: parent
                     icon: root._signalIcon(NetworkManager.active)
                     size: root.iconSize
-                    color: NetworkManager.active ? "#1C7AFF" : "#fff"
+                    color: NetworkManager.active ? Theme.accent : "#fff"
                 }
             }
 
@@ -355,7 +355,7 @@ ContentPage {
                     anchors.centerIn: parent
                     icon: _nr.signalIcon
                     size: root.iconSize
-                    color: _nr.isActive ? "#1C7AFF" : "#fff"
+                    color: _nr.isActive ? Theme.accent : "#fff"
                 }
             }
 
@@ -669,7 +669,7 @@ ContentPage {
                             anchors.centerIn: parent
                             icon: root._signalIcon(NetworkManager.active && NetworkManager.active.ssid === NetworkManager.detailsSSID ? NetworkManager.active : null)
                             size: 16
-                            color: "#1C7AFF"
+                            color: Theme.accent
                         }
                     }
 
@@ -929,7 +929,7 @@ ContentPage {
                         Layout.preferredWidth: 60
                         Layout.preferredHeight: 28
                         radius: 7
-                        color: _okBtnMouse.containsMouse ? Qt.rgba(0.15, 0.51, 1, 1) : "#1C7AFF"
+                        color: _okBtnMouse.containsMouse ? Qt.lighter(Theme.accent, 1.15) : Theme.accent
                         Behavior on color { ColorAnimation { duration: 100 } }
 
                         CFText {
@@ -1127,7 +1127,7 @@ ContentPage {
                             Layout.preferredWidth: 70
                             Layout.preferredHeight: 28
                             radius: 7
-                            color: _manualJoinMouse.containsMouse ? Qt.rgba(0.15, 0.51, 1, 1) : "#1C7AFF"
+                            color: _manualJoinMouse.containsMouse ? Qt.lighter(Theme.accent, 1.15) : Theme.accent
                             Behavior on color { ColorAnimation { duration: 100 } }
 
                             CFText {

@@ -118,7 +118,7 @@ Item {
                                 width: 28
                                 height: 28
                                 radius: 14
-                                color: modelData.id === root.currentProfile ? "#1C7AFF" : "transparent"
+                                color: modelData.id === root.currentProfile ? Theme.accent : "transparent"
                                 Layout.alignment: Qt.AlignVCenter
 
                                 CFVI {

@@ -312,7 +312,7 @@ Scope {
                     }
                 }
 
-                GlassBackdrop {}
+                GlassBackdrop { element: "notifcenter" }
             }
         }
     }

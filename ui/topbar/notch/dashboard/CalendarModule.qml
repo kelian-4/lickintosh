@@ -52,7 +52,7 @@ Item {
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: Qt.locale("fr_FR").standaloneDayName(parent.cellDate.getDay(), Locale.ShortFormat).toUpperCase().replace(".", "")
-                        color: parent.isToday ? "#1C7AFF" : (parent.isWeekend ? "#EC4899" : "#8A8A8A")
+                        color: parent.isToday ? Theme.accent : (parent.isWeekend ? "#EC4899" : "#8A8A8A")
                         font.pixelSize: 10
                         font.bold: parent.isToday
                         font.family: "SF Pro Text"
@@ -60,7 +60,7 @@ Item {
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: parent.cellDate.getDate()
-                        color: parent.isToday ? "#1C7AFF" : (parent.isWeekend ? "#EC4899" : "#FFFFFF")
+                        color: parent.isToday ? Theme.accent : (parent.isWeekend ? "#EC4899" : "#FFFFFF")
                         font.pixelSize: parent.isToday ? 20 : 15
                         font.bold: parent.isToday
                         font.family: "SF Pro Text"

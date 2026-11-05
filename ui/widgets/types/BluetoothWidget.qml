@@ -22,7 +22,7 @@ Item {
 
             Text {
                 text: "Bluetooth"
-                color: "#0a84ff"
+                color: Theme.accent
                 font.pixelSize: 13
                 font.weight: Font.Bold
                 font.family: "SF Pro Text"

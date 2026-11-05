@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.Pipewire
 import qs.components
+import qs.services
 
 Item {
     id: root
@@ -34,7 +35,7 @@ Item {
 
             Text {
                 text: "Volume"
-                color: "#0a84ff"
+                color: Theme.accent
                 font.pixelSize: 13
                 font.weight: Font.Bold
                 font.family: "SF Pro Text"
@@ -99,7 +100,7 @@ Item {
                     width: track.width * (root.muted ? 0 : Math.max(0, Math.min(1, root.level)))
                     height: track.height
                     radius: 5
-                    color: "#0a84ff"
+                    color: Theme.accent
                 }
 
                 MouseArea {

@@ -129,6 +129,7 @@ Singleton {
                 property real   blurWindowOpacity: 0.80
                 property real   blurWindowOpacityInactive: 0.80
                 property var    blurParams:   ({})
+                property var    glassElements: ({})
                 property bool   blurLayers:   true
                 property bool   blurLayerPopups: true
                 property real   layerIgnoreAlpha: 0.05

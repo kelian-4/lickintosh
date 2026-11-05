@@ -21,7 +21,7 @@ Singleton {
     property var leaving: []
 
     readonly property var categories: [
-        { key: "connectivity", title: "Connectivity", icon: "notch/bluetooth.svg",  tint: "#0a84ff" },
+        { key: "connectivity", title: "Connectivity", icon: "notch/bluetooth.svg",  tint: Theme.accent },
         { key: "media",        title: "Media",        icon: "music/play.svg",        tint: "#ff375f" },
         { key: "display",      title: "Display",      icon: "sun-small.svg",         tint: "#ff9f0a" },
         { key: "focus",        title: "Focus",        icon: "dnd.svg",               tint: "#5e5ce6" },

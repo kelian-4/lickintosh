@@ -155,7 +155,7 @@ ContentPage {
                     anchors.centerIn: parent
                     icon: _dr.dev ? BluetoothState.deviceIcon(_dr.dev) : "bluetooth/bluetooth.svg"
                     size: root.iconSize
-                    color: _dr.dev && _dr.dev.connected ? "#1C7AFF" : "#fff"
+                    color: _dr.dev && _dr.dev.connected ? Theme.accent : "#fff"
                 }
             }
 

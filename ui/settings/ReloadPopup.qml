@@ -73,7 +73,7 @@ Scope {
                 onTriggered: root.dismiss()
             }
 
-            GlassBackdrop { id: glassBackdrop }
+            GlassBackdrop { id: glassBackdrop; element: "osd" }
 
             BoxGlass {
                 anchors.fill: parent
