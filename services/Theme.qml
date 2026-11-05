@@ -402,7 +402,7 @@ Singleton {
         flat.variant = root.blurPresetData.variant
         var a = root.blurWindowOpacity.toFixed(2)
         var b = root.blurWindowOpacityInactive.toFixed(2)
-        var lua = "hl.config({ decoration = { blur = " + root._luaTable(root._nest(flat)) + " } })\n"
+        var lua = "hl.config({ decoration = { active_opacity = " + a + ", inactive_opacity = " + b + ", blur = " + root._luaTable(root._nest(flat)) + " } })\n"
             + "pcall(function() if _G.lickintosh_rule then _G.lickintosh_rule:set_enabled(false) end end)\n"
             + "_G.lickintosh_rule = hl.window_rule({ name = \"lickintosh-blur-@TS@\", match = { class = \".*\" }, opacity = \"" + a + " override " + b + " override 1.0 override\" })\n"
             + "pcall(function() if _G.lickintosh_layer then _G.lickintosh_layer:set_enabled(false) end end)\n"

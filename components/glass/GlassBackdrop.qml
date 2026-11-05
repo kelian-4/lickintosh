@@ -20,11 +20,12 @@ LiquidGlassBackdrop {
         return Qt.point(x, y)
     }
 
-    property bool gateEnabled: true
+    property bool gateEnabled: !Theme.compositorBlur
     property int gateTimeout: 400
     property bool revealed: !gateEnabled
     readonly property bool glassReady: ready && captureSettled
 
+    ready: !Theme.compositorBlur
     instantReveal: gateEnabled
 
     onGlassReadyChanged: {

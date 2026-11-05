@@ -632,6 +632,7 @@ Scope {
                     windowOpacityByClass: ShellConfig.options.glass.windowOpacityByClass
                     monitorName: dockWin.screen.name
                     element: "dock"
+                    ready: !Theme.compositorBlur
                 }
 
                 MouseArea {

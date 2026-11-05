@@ -42,6 +42,7 @@ Item {
 
         CFSlider {
             width: parent.width
+            fillColor: Theme.accent
             value: (root.value - root.from) / (root.to - root.from)
             onMoved: {
                 var real = root.from + value * (root.to - root.from)
