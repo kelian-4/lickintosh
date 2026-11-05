@@ -1,14 +1,14 @@
 # CI Status
 
-Commit: 4f90637df86db92de5dbbca5001041e89ca30ab6
+Commit: 4d3eb0b5dd27ee6fa87c283bf9fa098ec624de1f
 Branche: dev
-Date: 2026-11-05 19:19:34 UTC
-Run: https://github.com/kelian-4/lickintosh/actions/runs/42092762398
+Date: 2026-11-05 19:21:27 UTC
+Run: https://github.com/kelian-4/lickintosh/actions/runs/42093069688
 
 | Etape | Resultat |
 |---|---|
 | Syntaxe Python | success |
-| ShellCheck | failure |
+| ShellCheck | success |
 
 ## Log complet - Syntaxe Python
 ```
@@ -16,11 +16,4 @@ Run: https://github.com/kelian-4/lickintosh/actions/runs/42092762398
 
 ## Log complet - ShellCheck
 ```
-
-In tools/energy-usage/sample-processes copie.sh line 73:
-        while IFS=' ' read -r key value unit _; do
-                                        ^--^ SC2034 (warning): unit appears unused. Verify use (or export if used externally).
-
-For more information:
-  https://www.shellcheck.net/wiki/SC2034 -- unit appears unused. Verify use (...
 ```
