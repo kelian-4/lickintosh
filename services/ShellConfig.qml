@@ -112,6 +112,8 @@ Singleton {
                 property bool hoverToReveal:     true
                 property bool monochromeIcons:   true
                 property int  iconSize:          54
+                property real iconScale:         1.15
+                property int  iconOverflow:      4
                 property real magnification:     1.50
                 property bool magnificationEnabled: true
             }

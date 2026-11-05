@@ -184,6 +184,7 @@ Scope {
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color:         "transparent"
                 exclusiveZone: -1
+                mask:          Region { item: pill }
 
                 anchors {
                     top:   true

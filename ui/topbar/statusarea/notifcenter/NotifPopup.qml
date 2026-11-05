@@ -37,6 +37,7 @@ Scope {
                 WlrLayershell.layer:         WlrLayer.Overlay
                 color:         "transparent"
                 exclusiveZone: -1
+                mask:          Region { item: _col }
                 anchors { top: true; right: true }
 
                 implicitWidth:  root.popupWidth + root.rightMargin

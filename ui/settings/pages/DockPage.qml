@@ -27,6 +27,25 @@ ContentPage {
             onMoved: function(v) { ShellConfig.options.dockAppearance.iconSize = Math.round(v) }
         }
 
+        ConfigSlider {
+            text: "Échelle du Dock"
+            value: ShellConfig.options.dockAppearance.iconScale
+            from: 0.8
+            to: 1.6
+            decimals: 2
+            onMoved: function(v) { ShellConfig.options.dockAppearance.iconScale = v }
+        }
+
+        ConfigSlider {
+            text: "Débordement des icônes"
+            value: ShellConfig.options.dockAppearance.iconOverflow
+            from: -4
+            to: 14
+            decimals: 0
+            valueSuffix: " px"
+            onMoved: function(v) { ShellConfig.options.dockAppearance.iconOverflow = Math.round(v) }
+        }
+
         ConfigSwitch {
             text: "Grossissement à l'approche du curseur"
             checked: ShellConfig.options.dockAppearance.magnificationEnabled

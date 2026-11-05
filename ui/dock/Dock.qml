@@ -11,7 +11,7 @@ import qs.components.glass
 Scope {
     id: dockRoot
 
-    readonly property int  baseIconSize: Math.round(ShellConfig.options.dockAppearance.iconSize * 1.15)
+    readonly property int  baseIconSize: Math.round(ShellConfig.options.dockAppearance.iconSize * ShellConfig.options.dockAppearance.iconScale)
     readonly property int  dockPadH:     14
     readonly property int  dockPadV:     10
     readonly property int  dockHeight:   baseIconSize + dockPadV * 2 + 12
@@ -1470,7 +1470,7 @@ Scope {
             Image {
                 id: _iconImg
                 anchors.fill:    parent
-                anchors.margins: -4
+                anchors.margins: -ShellConfig.options.dockAppearance.iconOverflow
                 source:          iconItem.appIconPath
                 fillMode:        Image.PreserveAspectFit
                 sourceSize:      Qt.size(256, 256)

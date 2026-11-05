@@ -266,6 +266,7 @@ Scope {
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color:         "transparent"
                 exclusiveZone: -1
+                mask:          Region {}
 
                 anchors {
                     top:   true
@@ -304,6 +305,13 @@ Scope {
                     }
 
                     transformOrigin: Item.TopRight
+
+                    property bool armed: false
+                    Timer {
+                        interval: 50
+                        running:  true
+                        onTriggered: pill.armed = true
+                    }
 
                     BoxGlass {
                         anchors.fill: parent
@@ -382,12 +390,10 @@ Scope {
                                     anchors.bottom: parent.bottom
                                     radius:         3
                                     color:          root._currentFill
-                                    width: {
-                                        var v = Math.max(0.0, Math.min(1.0, root._currentValue))
-                                        return Math.max(6, parent.width * v)
-                                    }
+                                    width: parent.width * Math.max(0.0, Math.min(1.0, root._currentValue))
 
                                     Behavior on width {
+                                        enabled: pill.armed
                                         NumberAnimation {
                                             duration:    90
                                             easing.type: Easing.OutQuad
@@ -424,6 +430,7 @@ Scope {
                                                : Qt.rgba(1, 1, 1, 0.28)
 
                                         Behavior on color {
+                                            enabled: pill.armed
                                             ColorAnimation { duration: 80 }
                                         }
                                     }
