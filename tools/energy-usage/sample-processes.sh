@@ -59,7 +59,7 @@ for stat_file in /proc/[0-9]*/stat; do
     swap_kb=0
 
     if [ -r "/proc/$pid/smaps_rollup" ]; then
-        while IFS=' ' read -r key value unit _; do
+        while IFS=' ' read -r key value _; do
             case "$key" in
                 Pss:)
                     rss_kb="${value:-0}"
@@ -70,7 +70,7 @@ for stat_file in /proc/[0-9]*/stat; do
             esac
         done < "/proc/$pid/smaps_rollup" 2>/dev/null
     elif [ -r "/proc/$pid/status" ]; then
-        while IFS=' ' read -r key value unit _; do
+        while IFS=' ' read -r key value _; do
             case "$key" in
                 VmRSS:)
                     rss_kb="${value:-0}"

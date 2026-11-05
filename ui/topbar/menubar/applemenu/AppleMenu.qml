@@ -37,6 +37,37 @@ Item {
         SettingsLauncher.open("")
     }
 
+    readonly property var packageSites: ({
+        "arch": "https://archlinux.org/packages/",
+        "manjaro": "https://packages.manjaro.org/",
+        "debian": "https://packages.debian.org/",
+        "ubuntu": "https://packages.ubuntu.com/",
+        "fedora": "https://packages.fedoraproject.org/",
+        "opensuse": "https://software.opensuse.org/",
+        "nixos": "https://search.nixos.org/packages",
+        "gentoo": "https://packages.gentoo.org/",
+        "alpine": "https://pkgs.alpinelinux.org/packages",
+        "void": "https://voidlinux.org/packages/"
+    })
+    property string distroIds: ""
+    readonly property string packagesUrl: {
+        const ids = distroIds.split(/\s+/).filter(x => x.length > 0)
+        for (const id of ids) {
+            if (packageSites[id]) return packageSites[id]
+            if (id.indexOf("opensuse") === 0) return packageSites["opensuse"]
+        }
+        return ""
+    }
+
+    Process {
+        id: _distro
+        command: ["sh", "-c", ". /etc/os-release 2>/dev/null; echo \"$ID $ID_LIKE\""]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: root.distroIds = text.trim().toLowerCase()
+        }
+    }
+
     Process { id: _suspend;  command: ["systemctl", "suspend"];  running: false }
     Process { id: _kill;     command: ["sh", "-c", "hyprctl kill"];          running: false }
 
@@ -175,7 +206,12 @@ Item {
         MenuRow {
             label: "App Store"
             icon: "dropdown/store.svg"
-            dimmed: true
+            dimmed: root.packagesUrl === ""
+            onActivated: {
+                if (root.packagesUrl === "") return
+                Quickshell.execDetached(["xdg-open", root.packagesUrl])
+                root.closeRequested()
+            }
         }
 
         MenuSep {}
