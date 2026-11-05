@@ -384,7 +384,7 @@ Scope {
                     var c = parseFloat(p[0])
                     var m = parseFloat(p[1])
                     if (m > 0) {
-                        var val = c / m
+                        var val = Math.pow(c / m, 0.25)
                         if (Math.abs(root.brtValue - val) > 0.01) {
                             root.brtValue = val
                         }
@@ -408,7 +408,7 @@ Scope {
         interval: 50
         repeat: false
         onTriggered: {
-            _brtSet.command = ["brightnessctl", "set", Math.round(root.brtValue * 100) + "%"]
+            _brtSet.command = ["brightnessctl", "-e4", "-n2", "set", Math.round(root.brtValue * 100) + "%"]
             _brtSet.running = true
         }
     }
@@ -633,7 +633,7 @@ Scope {
                     Rectangle {
                         id: editPill
                         y: ccContent.height + 10
-                        anchors.right: parent.right
+                        anchors.horizontalCenter: parent.horizontalCenter
                         width: _editControlsLabel.implicitWidth + 28
                         height: 28
                         radius: 14

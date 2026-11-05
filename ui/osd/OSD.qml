@@ -156,7 +156,7 @@ Scope {
                     var cur = parseFloat(parts[0])
                     var max = parseFloat(parts[1])
                     if (max > 0) {
-                        var v = cur / max
+                        var v = Math.pow(cur / max, 0.25)
                         if (Math.abs(v - root._lastBrtValue) > 0.005) {
                             root._lastBrtValue = v
                             root.brtValue = v
