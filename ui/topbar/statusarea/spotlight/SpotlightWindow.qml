@@ -901,16 +901,16 @@ Scope {
                                             if (todoRest !== null) {
                                                 var task = todoRest.trim()
                                                 if (task !== "") {
-                                                    out.push({ title: "Ajouter : '" + task + "'", description: "Entrée pour enregistrer", icon: "task-due", isTodoAdd: true, value: task })
+                                                    out.push({ title: "Ajouter : '" + task + "'", description: "Entrée pour enregistrer", icon: "notch/plus-circle.svg", isTodoAdd: true, value: task })
                                                 } else if (root.todos.length === 0) {
-                                                    out.push({ title: "Aucune tâche", description: "Tape du texte après >todo pour en ajouter", icon: "task-due", dummy: true, targetPrefix: ">todo " })
+                                                    out.push({ title: "Aucune tâche", description: "Tape du texte après >todo pour en ajouter", icon: "notch/list.svg", dummy: true, targetPrefix: ">todo " })
                                                 } else {
                                                     for (var ti = 0; ti < root.todos.length; ti++) {
                                                         var td = root.todos[ti]
                                                         out.push({
                                                             title: td.text,
                                                             description: td.done ? "Terminé · Entrée pour supprimer" : "Entrée pour marquer comme terminé",
-                                                            icon: td.done ? "checkbox-checked" : "checkbox",
+                                                            icon: td.done ? "notch/check-circle.svg" : "notch/circle.svg",
                                                             isTodoItem: true,
                                                             todoId: td.id,
                                                             todoDone: td.done
@@ -926,7 +926,7 @@ Scope {
                                                     out.push({ title: "Fonds d'écran",   description: "Prefix: >~ ou >wall",    icon: "image-x-generic",        dummy: true, targetPrefix: ">wall " })
                                                     out.push({ title: "Emoji",           description: "Prefix: >: ou >emoji",   icon: "face-smile",             dummy: true, targetPrefix: ">emoji " })
                                                     out.push({ title: "Commande shell",  description: "Prefix: >$ ou >sh",      icon: "utilities-terminal",     dummy: true, targetPrefix: ">sh " })
-                                                    out.push({ title: "Todo",            description: "Prefix: >+ ou >todo — vide pour voir la liste",    icon: "task-due",               dummy: true, targetPrefix: ">todo " })
+                                                    out.push({ title: "Todo",            description: "Prefix: >+ ou >todo — vide pour voir la liste",    icon: "notch/check-circle.svg",               dummy: true, targetPrefix: ">todo " })
                                                 }
                                                 var sys2 = root.allActions.filter(function(a) {
                                                     if (filter === "") return true

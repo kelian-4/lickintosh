@@ -659,6 +659,24 @@ else
     echo "    $hypr_copied fichier(s) installe(s)"
 end
 
+say "Configuration fastfetch (~/.config/fastfetch)"
+set -l ff_src $repo/assets/config/fastfetch
+set -l ff_dst ~/.config/fastfetch
+if not test -d $ff_src
+    echo "    assets/config/fastfetch est absent, etape ignoree"
+else
+    command -q fastfetch; or echo "    fastfetch n'est pas installe, la configuration est copiee quand meme"
+    set -l ff_copied 0
+    for f in (find $ff_src -type f | sort)
+        set -l dst $ff_dst/(string replace -- "$ff_src/" "" $f)
+        test -f $dst; and cmp -s $f $dst; and continue
+        backup $dst
+        mkdir -p (dirname $dst)
+        cp -f $f $dst; and set ff_copied (math $ff_copied + 1)
+    end
+    echo "    $ff_copied fichier(s) installe(s)"
+end
+
 say "Applications GTK (dconf)"
 if not command -q dconf
     echo "    dconf est introuvable, etape ignoree"
