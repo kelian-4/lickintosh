@@ -3,6 +3,7 @@
 //@ pragma ShellId main-shell
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
 import Quickshell.Services.Notifications
@@ -247,6 +248,27 @@ ShellRoot {
 
     LockScreen {
         id: lockScreen
+    }
+
+    Process {
+        id: startupLockCheck
+        command: ["sh", "-c", "m=\"${XDG_RUNTIME_DIR:-/tmp}/lickintosh-startup-lock\"; if [ -e \"$m\" ]; then echo skip; else : > \"$m\"; echo lock; fi"]
+        stdout: StdioCollector {
+            onStreamFinished: if (text.trim() === "lock") lockScreen.lock()
+        }
+    }
+
+    Connections {
+        target: ShellConfig
+        function onReadyChanged() {
+            if (ShellConfig.ready && ShellConfig.options.lockscreen.lockAtStartup)
+                startupLockCheck.running = true
+        }
+    }
+
+    Component.onCompleted: {
+        if (ShellConfig.ready && ShellConfig.options.lockscreen.lockAtStartup)
+            startupLockCheck.running = true
     }
 
     StatusSubMenuWindow {

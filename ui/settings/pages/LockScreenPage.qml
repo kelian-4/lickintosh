@@ -208,6 +208,17 @@ ContentPage {
         }
     }
 
+    ContentSection {
+        title: "Démarrage"
+
+        ConfigSwitch {
+            text: "Verrouiller l'écran au démarrage de la session"
+            description: "Le verrouillage n'est lancé qu'une fois par session, pas à chaque rechargement du shell."
+            checked: root.cfg.lockAtStartup
+            onToggled: function(v) { root.cfg.lockAtStartup = v }
+        }
+    }
+
     // --- Notifications -------------------------------------------------
     ContentSection {
         title: "Notifications"
