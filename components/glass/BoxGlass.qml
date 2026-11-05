@@ -30,6 +30,9 @@ Item {
     readonly property string element: registered ? registered.element : ""
     property Item backdrop: Theme.useGlass(box) ? registered : null
     readonly property bool glassed: backdrop !== null
+    readonly property bool plainBackground: box.color.a >= 0.45
+        && Math.max(box.color.r, box.color.g, box.color.b) - Math.min(box.color.r, box.color.g, box.color.b) < 0.12
+        && Theme.luma(box.color) < 0.4
 
     Behavior on color { PropertyAnimation { duration: animationSpeed; easing.type: Easing.InSine } }
     
@@ -43,7 +46,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Math.min(box.radius, Math.min(width, height) / 2)
-        color: box.transparent ? "transparent" : Theme.boxColor(box, box.color)
+        color: box.transparent || box.plainBackground ? "transparent" : Theme.boxColor(box, box.color)
         visible: Theme.compositorBlur && Theme.themed(box)
     }
 
