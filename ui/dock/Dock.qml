@@ -1473,7 +1473,9 @@ Scope {
                 anchors.margins: 2
                 source:          iconItem.appIconPath
                 fillMode:        Image.PreserveAspectFit
+                sourceSize:      Qt.size(256, 256)
                 smooth:          true
+                mipmap:          true
                 antialiasing:    true
                 visible:         status === Image.Ready && source !== ""
                 layer.enabled:   ShellConfig.options.dockAppearance.monochromeIcons

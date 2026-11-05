@@ -1044,12 +1044,6 @@ Scope {
 
                                 z: (root.btOpened || root.btClosing) ? 100 : 0
                                 forceTransparentRim: root.btOpened
-                                light: btWidget.forceTransparentRim ? "transparent" : (btWidget.enabled ? "transparent" : root.glassRimColor)
-                                rimStrength: btWidget.forceTransparentRim ? 0 : (btWidget.enabled ? 0 : root.glassRimStrength)
-                                color: btWidget.forceTransparentRim ? "transparent" : (btWidget.enabled ? "#fff" : root.glassColor)
-                                Behavior on color { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                                Behavior on light { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-                                Behavior on rimStrength { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                                     CFClippingRect {
                                         anchors.fill: parent

@@ -18,6 +18,8 @@ VectorImage {
     preferredRendererType: VectorImage.CurveRenderer
     layer.enabled: colorized
     layer.samples: 16
+    layer.smooth: true
+    layer.textureSize: Qt.size(Math.ceil(vi.width * 3), Math.ceil(vi.height * 3))
     layer.effect: MultiEffect {
         colorization: vi.colorized ? 1 : 0
         colorizationColor: vi.color
