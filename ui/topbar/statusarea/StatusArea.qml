@@ -124,8 +124,8 @@ RowLayout {
         }
 
         MouseArea {
-            width: 16
-            height: 16
+            width: 14
+            height: 14
             Layout.alignment: Qt.AlignVCenter
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
@@ -134,8 +134,8 @@ RowLayout {
 
             VectorImage {
                 anchors.centerIn: parent
-                width: 16
-                height: 16
+                width: 14
+                height: 14
                 source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/control-center.svg")
                 preferredRendererType: VectorImage.CurveRenderer
                 layer.enabled: true
