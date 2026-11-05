@@ -1470,7 +1470,7 @@ Scope {
             Image {
                 id: _iconImg
                 anchors.fill:    parent
-                anchors.margins: 2
+                anchors.margins: -6
                 source:          iconItem.appIconPath
                 fillMode:        Image.PreserveAspectFit
                 sourceSize:      Qt.size(256, 256)
