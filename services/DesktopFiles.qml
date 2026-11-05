@@ -263,7 +263,7 @@ Singleton {
     }
 
     function openSettings() {
-        Quickshell.execDetached(["quickshell", "-p", Quickshell.shellDir + "/settings.qml"])
+        SettingsLauncher.open("WallpaperPage")
     }
 
     function desktopMenu() {

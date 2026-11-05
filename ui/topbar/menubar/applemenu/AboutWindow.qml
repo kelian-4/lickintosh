@@ -34,6 +34,7 @@ Scope {
                 color: "transparent"
                 exclusiveZone: -1
                 WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.namespace: "quickshell:about"
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
                 
@@ -108,7 +109,7 @@ Scope {
                             width: 13
                             height: 13
                             radius: 7
-                            color: Theme.popup("#a0282828")
+                            color: Qt.rgba(1, 1, 1, 0.22)
                             border.color: Qt.rgba(0,0,0,0.2)
                             border.width: 0.5
                         }
@@ -117,7 +118,7 @@ Scope {
                             width: 13
                             height: 13
                             radius: 7
-                            color: Theme.popup("#a0282828")
+                            color: Qt.rgba(1, 1, 1, 0.22)
                             border.color: Qt.rgba(0,0,0,0.2)
                             border.width: 0.5
                         }

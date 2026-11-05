@@ -271,7 +271,10 @@ Item {
             Layout.fillWidth: true
             height: 24
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.closeRequested()
+            onClicked: {
+                SettingsLauncher.open("BatteryPage")
+                root.closeRequested()
+            }
 
             CFText {
                 anchors.verticalCenter: parent.verticalCenter

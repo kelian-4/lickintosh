@@ -266,6 +266,15 @@ Item {
                 anchors.leftMargin:     20
                 anchors.verticalCenter: parent.verticalCenter
             }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape:  Qt.PointingHandCursor
+                onClicked: {
+                    SettingsLauncher.open("WifiPage")
+                    root.closeRequested()
+                }
+            }
         }
     }
 
