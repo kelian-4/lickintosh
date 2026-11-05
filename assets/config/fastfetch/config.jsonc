@@ -1,0 +1,44 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "type": "file",
+        "source": "~/.config/fastfetch/logo.txt",
+        "color": { "1": "blue", "2": "magenta" },
+        "padding": { "top": 1, "left": 2, "right": 4 }
+    },
+    "display": {
+        "separator": "  ",
+        "color": { "keys": "blue", "title": "magenta" },
+        "percent": { "type": 2 },
+        "size": { "binaryPrefix": "iec" }
+    },
+    "modules": [
+        "title",
+        { "type": "separator", "string": "─" },
+        { "type": "custom", "key": "Lickintosh", "keyColor": "magenta", "format": "macOS Tahoe pour Hyprland" },
+        { "type": "command", "key": "Version", "keyColor": "magenta", "text": "git -C ~/.config/quickshell describe --always --dirty 2>/dev/null || echo dev" },
+        "break",
+        { "type": "os", "key": "Système" },
+        { "type": "host", "key": "Machine" },
+        { "type": "kernel", "key": "Noyau" },
+        { "type": "uptime", "key": "Activité" },
+        { "type": "packages", "key": "Paquets" },
+        "break",
+        { "type": "wm", "key": "Compositeur" },
+        { "type": "custom", "key": "Interface", "format": "Quickshell" },
+        { "type": "display", "key": "Écran" },
+        { "type": "icons", "key": "Icônes" },
+        { "type": "cursor", "key": "Curseur" },
+        { "type": "font", "key": "Police" },
+        { "type": "shell", "key": "Shell" },
+        { "type": "terminal", "key": "Terminal" },
+        "break",
+        { "type": "cpu", "key": "Processeur" },
+        { "type": "gpu", "key": "Graphismes" },
+        { "type": "memory", "key": "Mémoire" },
+        { "type": "disk", "key": "Disque", "folders": "/" },
+        { "type": "battery", "key": "Batterie" },
+        "break",
+        { "type": "colors", "symbol": "circle" }
+    ]
+}
