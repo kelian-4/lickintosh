@@ -153,7 +153,6 @@ Scope {
                                     spacing: 8
 
                                     VectorImage {
-                                        visible: menuRow.modelData.icon ? true : false
                                         Layout.preferredWidth: 14
                                         Layout.preferredHeight: 14
                                         source: menuRow.modelData.icon ? Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + menuRow.modelData.icon) : ""

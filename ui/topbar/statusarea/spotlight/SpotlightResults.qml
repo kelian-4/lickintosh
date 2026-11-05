@@ -94,6 +94,9 @@ ListView {
             } else if (row.modelData.reindex) {
                 root.reindexRequested()
                 root.itemClicked(row.modelData)
+            } else if (row.modelData.powerAction) {
+                PowerState.request(row.modelData.powerAction)
+                root.itemClicked(row.modelData)
             } else if (row.modelData.cmd) {
                 Quickshell.execDetached(["sh", "-c", row.modelData.cmd])
                 root.itemClicked(row.modelData)
