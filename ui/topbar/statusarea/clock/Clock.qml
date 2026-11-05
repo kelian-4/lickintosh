@@ -5,9 +5,11 @@ Row {
     id: clockRoot
     spacing: 6
 
+    property color color: "#FFFFFF"
+
     Text {
         id: dateText
-        color: "#FFFFFF"
+        color: clockRoot.color
         font.pixelSize: 13
         font.bold: true
         renderType: Text.NativeRendering
@@ -16,7 +18,7 @@ Row {
 
     Text {
         id: timeText
-        color: "#FFFFFF"
+        color: clockRoot.color
         font.pixelSize: 13
         font.bold: true
         renderType: Text.NativeRendering
