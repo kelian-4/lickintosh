@@ -16,7 +16,10 @@ QtObject {
                 { label: "Lecture/Pause", mods: "", key: "space" },
                 { label: "Suivant", mods: "", key: "N" },
                 { label: "Précédent", mods: "", key: "P" },
-                { label: "Muet", mods: "", key: "M" }
+                { label: "Muet", mods: "", key: "M" },
+                { separator: true },
+                { label: "Avancer", mods: "", key: "Right" },
+                { label: "Reculer", mods: "", key: "Left" }
             ]
         },
         {

@@ -29,6 +29,7 @@ ShellRoot {
     id: appRoot
     property bool ccOpened:          false
     property bool appleMenuOpened:   false
+    property string powerAction:     ""
     property bool aboutOpened:       false
     property bool spotlightOpened:   false
     property bool aiOpened:          false
@@ -192,6 +193,20 @@ ShellRoot {
         onCloseRequested: appRoot.appleMenuOpened = false
         onOpenAbout:      appRoot.aboutOpened     = true
         onLockRequested:  lockScreen.lock()
+        onPowerRequested: function(action) { appRoot.powerAction = action }
+    }
+    PowerConfirmWindow {
+        action: appRoot.powerAction
+        onCancelled: appRoot.powerAction = ""
+        onConfirmed: function(action) {
+            appRoot.powerAction = ""
+            if (action === "poweroff")
+                Quickshell.execDetached(["systemctl", "poweroff"])
+            else if (action === "reboot")
+                Quickshell.execDetached(["systemctl", "reboot"])
+            else if (action === "logout")
+                Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.exit()"])
+        }
     }
     AboutWindow {
         opened: appRoot.aboutOpened

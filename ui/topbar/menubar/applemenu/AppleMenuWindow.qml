@@ -10,6 +10,7 @@ Scope {
     signal closeRequested()
     signal openAbout()
     signal lockRequested()
+    signal powerRequested(string action)
 
     Presence { id: presence; wanted: root.opened }
 
@@ -48,6 +49,7 @@ Scope {
                     onCloseRequested: root.closeRequested()
                     onOpenAbout: root.openAbout()
                     onLockRequested: root.lockRequested()
+                    onPowerRequested: function(action) { root.powerRequested(action) }
                 }
 
                 GlassBackdrop { element: "menus" }
