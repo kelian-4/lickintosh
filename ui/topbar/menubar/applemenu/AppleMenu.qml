@@ -217,10 +217,10 @@ Item {
         MenuSep {}
 
         MenuRow {
+            id: recentRow
             label: "Recent Items"
             icon: "dropdown/clock.svg"
             hasSub: true
-            dimmed: true
         }
 
         MenuSep {}
@@ -280,6 +280,139 @@ Item {
         }
 
         Item { height: 4; width: 1 }
+    }
+
+    readonly property bool recentOpen: recentRow._hovered || recentSub.hovered
+    property bool recentShown: false
+
+    onRecentOpenChanged: {
+        if (recentOpen) {
+            recentHide.stop()
+            recentShown = true
+        } else {
+            recentHide.restart()
+        }
+    }
+
+    onOpenedChanged: {
+        if (opened) RecentFiles.refresh()
+        else recentShown = false
+    }
+
+    Timer {
+        id: recentHide
+        interval: 120
+        onTriggered: root.recentShown = false
+    }
+
+    Item {
+        id: recentSub
+        readonly property bool hovered: subHover.hovered
+        readonly property var items: RecentFiles.files.slice(0, 10)
+        x: root.menuWidth - 4
+        y: menuCol.y + recentRow.y - 6
+        width: 280
+        height: subCol.implicitHeight + 12
+        visible: opacity > 0
+        opacity: root.recentShown ? 1 : 0
+        z: 5
+
+        Behavior on opacity {
+            NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+        }
+
+        HoverHandler { id: subHover }
+
+        BoxGlass {
+            anchors.fill: parent
+            radius: 12
+            color: Qt.rgba(0.08, 0.08, 0.08, 0.75)
+            rimStrength: 1.7
+            light: "#20ffffff"
+        }
+
+        Column {
+            id: subCol
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 6
+            spacing: 2
+
+            Item {
+                visible: recentSub.items.length === 0
+                width: recentSub.width
+                height: root.rowHeight
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 14
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "No Recent Items"
+                    color: root.dimColor
+                    font.pixelSize: 13
+                    renderType: Text.NativeRendering
+                }
+            }
+
+            Repeater {
+                model: recentSub.items
+
+                delegate: Item {
+                    id: recentItem
+                    required property string modelData
+                    property bool hovered: false
+
+                    width: recentSub.width
+                    height: root.rowHeight
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.leftMargin: 5
+                        anchors.rightMargin: 5
+                        radius: 5
+                        color: recentItem.hovered ? root.hoverColor : "transparent"
+                    }
+
+                    Image {
+                        id: recentIcon
+                        anchors.left: parent.left
+                        anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 16
+                        height: 16
+                        sourceSize: Qt.size(64, 64)
+                        mipmap: true
+                        source: Quickshell.iconPath(IconResolver.fileIconName(RecentFiles.nameOf(recentItem.modelData)), true)
+                    }
+
+                    Text {
+                        anchors.left: recentIcon.right
+                        anchors.leftMargin: 10
+                        anchors.right: parent.right
+                        anchors.rightMargin: 14
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: RecentFiles.nameOf(recentItem.modelData)
+                        elide: Text.ElideMiddle
+                        color: recentItem.hovered ? root.hoverTextColor : root.textColor
+                        font.pixelSize: 13
+                        renderType: Text.NativeRendering
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: recentItem.hovered = true
+                        onExited: recentItem.hovered = false
+                        onClicked: {
+                            Quickshell.execDetached(["xdg-open", recentItem.modelData])
+                            root.closeRequested()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     opacity: opened ? 1 : 0
