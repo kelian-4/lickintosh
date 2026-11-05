@@ -88,6 +88,7 @@ Singleton {
             // système, seulement l'apparence des composants du shell.
             // ---------------------------------------------------------
             property JsonObject topbar: JsonObject {
+                property bool notchVisible:      true
                 property bool clockVisible:      true
                 property bool clockTextVisible:  true
                 property bool clockBadgeVisible: true

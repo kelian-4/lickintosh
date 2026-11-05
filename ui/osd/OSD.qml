@@ -35,6 +35,18 @@ Scope {
     property string _currentIconH: ""
     property int    _currentSteps: 10
 
+    readonly property real liveValue: {
+        if (_currentType === "volume") {
+            var sink = Pipewire.defaultAudioSink
+            if (!sink || !sink.audio) return 0
+            return sink.audio.muted ? 0 : sink.audio.volume
+        }
+        if (_currentType === "brightness") return brtValue
+        if (_currentType === "kbdbrt") return kbdBrtValue
+        return _currentValue
+    }
+    readonly property int livePercent: Math.round(Math.max(0, liveValue) * 100)
+
     property real _lastKbdValue: -1.0
     property real _lastBrtValue: -1.0
 
@@ -343,6 +355,14 @@ Scope {
                             color: Theme.ink(parent, false)
                         }
 
+                        CFText {
+                            anchors.top:   parent.top
+                            anchors.right: parent.right
+                            text:           root.livePercent + " %"
+                            font.pixelSize: 12
+                            color: Qt.rgba(1, 1, 1, 0.65)
+                        }
+
                         Item {
                             id: sliderRow
                             anchors.top:       _label.bottom
@@ -384,21 +404,20 @@ Scope {
                                     color:        Qt.rgba(1, 1, 1, 0.20)
                                 }
 
+                                property real shown: Math.max(0.0, Math.min(1.0, root.liveValue))
+
+                                Behavior on shown {
+                                    enabled: pill.armed
+                                    SmoothedAnimation { velocity: 3.0 }
+                                }
+
                                 Rectangle {
                                     anchors.left:   parent.left
                                     anchors.top:    parent.top
                                     anchors.bottom: parent.bottom
                                     radius:         3
                                     color:          root._currentFill
-                                    width: parent.width * Math.max(0.0, Math.min(1.0, root._currentValue))
-
-                                    Behavior on width {
-                                        enabled: pill.armed
-                                        NumberAnimation {
-                                            duration:    90
-                                            easing.type: Easing.OutQuad
-                                        }
-                                    }
+                                    width:          parent.width * parent.shown
                                 }
                             }
                         }
@@ -425,7 +444,7 @@ Scope {
                                         width:   3
                                         height:  3
                                         radius:  1.5
-                                        color: (index + 1) <= Math.round(root._currentValue * root._currentSteps)
+                                        color: (index + 1) <= Math.round(root.liveValue * root._currentSteps)
                                                ? "#ffffffff"
                                                : Qt.rgba(1, 1, 1, 0.28)
 

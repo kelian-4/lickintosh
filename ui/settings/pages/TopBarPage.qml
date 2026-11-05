@@ -7,6 +7,16 @@ ContentPage {
     id: root
 
     ContentSection {
+        title: "Notch"
+
+        ConfigSwitch {
+            text: "Afficher la notch"
+            checked: ShellConfig.options.topbar.notchVisible
+            onToggled: function(v) { ShellConfig.options.topbar.notchVisible = v }
+        }
+    }
+
+    ContentSection {
         title: "Horloge"
 
         ConfigSwitch {
