@@ -108,7 +108,8 @@ Singleton {
         { id: "notifpopup",  name: "Bannières" },
         { id: "osd",         name: "OSD et alertes" },
         { id: "ai",          name: "Assistant IA" },
-        { id: "menus",       name: "Menus" }
+        { id: "menus",       name: "Menus" },
+        { id: "power",       name: "Alimentation" }
     ]
 
     function glassDefault(key) {

@@ -28,6 +28,12 @@ Scope {
             button: "Redémarrer",
             icon: "dropdown/reload.svg"
         },
+        bios: {
+            title: "Voulez-vous vraiment redémarrer vers le BIOS maintenant ?",
+            detail: "Si vous ne faites rien, l'ordinateur redémarrera vers le BIOS dans",
+            button: "Redémarrer",
+            icon: "dropdown/reload.svg"
+        },
         logout: {
             title: "Voulez-vous vraiment fermer la session maintenant ?",
             detail: "Si vous ne faites rien, la session se fermera automatiquement dans",
@@ -74,9 +80,11 @@ Scope {
                 WlrLayershell.namespace: "quickshell:power"
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
+                GlassBackdrop { element: "power" }
+
                 Rectangle {
                     anchors.fill: parent
-                    color: "#40000000"
+                    color: "#26000000"
                     opacity: root.opened && panel.entered ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: ShellMotion.fade() } }
 
@@ -160,11 +168,16 @@ Scope {
                             anchors.horizontalCenter: parent.horizontalCenter
                             spacing: 10
 
-                            Rectangle {
+                            Item {
                                 width: 150
                                 height: 32
-                                radius: 16
-                                color: _cancelArea.containsMouse ? Qt.rgba(1, 1, 1, 0.28) : Qt.rgba(1, 1, 1, 0.18)
+
+                                BoxGlass {
+                                    anchors.fill: parent
+                                    radius: 16
+                                    color: _cancelArea.containsMouse ? Qt.rgba(1, 1, 1, 0.26) : Qt.rgba(1, 1, 1, 0.14)
+                                    light: Qt.rgba(1, 1, 1, 0.3)
+                                }
 
                                 Text {
                                     anchors.centerIn: parent

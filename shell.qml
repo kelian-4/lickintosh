@@ -29,7 +29,6 @@ ShellRoot {
     id: appRoot
     property bool ccOpened:          false
     property bool appleMenuOpened:   false
-    property string powerAction:     ""
     property bool aboutOpened:       false
     property bool spotlightOpened:   false
     property bool aiOpened:          false
@@ -193,19 +192,24 @@ ShellRoot {
         onCloseRequested: appRoot.appleMenuOpened = false
         onOpenAbout:      appRoot.aboutOpened     = true
         onLockRequested:  lockScreen.lock()
-        onPowerRequested: function(action) { appRoot.powerAction = action }
+        onPowerRequested: function(action) { PowerState.request(action) }
     }
     PowerConfirmWindow {
-        action: appRoot.powerAction
-        onCancelled: appRoot.powerAction = ""
+        action: PowerState.action
+        onCancelled: PowerState.clear()
         onConfirmed: function(action) {
-            appRoot.powerAction = ""
+            PowerState.clear()
+            var cmd = ""
             if (action === "poweroff")
-                Quickshell.execDetached(["systemctl", "poweroff"])
+                cmd = "hyprshutdown -t 'Extinction...' --post-cmd 'systemctl poweroff' || systemctl poweroff"
             else if (action === "reboot")
-                Quickshell.execDetached(["systemctl", "reboot"])
+                cmd = "hyprshutdown -t 'Redémarrage...' --post-cmd 'systemctl reboot' || systemctl reboot"
+            else if (action === "bios")
+                cmd = "hyprshutdown -t 'Redémarrage vers le BIOS...' --post-cmd 'systemctl reboot --firmware-setup' || systemctl reboot --firmware-setup"
             else if (action === "logout")
-                Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.exit()"])
+                cmd = "hyprshutdown -t 'Déconnexion...' || hyprctl dispatch 'hl.dsp.exit()'"
+            if (cmd.length > 0)
+                Quickshell.execDetached(["sh", "-c", cmd])
         }
     }
     AboutWindow {
