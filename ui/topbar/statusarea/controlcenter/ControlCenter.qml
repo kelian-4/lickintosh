@@ -376,7 +376,7 @@ Scope {
 
     Process {
         id: _brtGet
-        command: ["brightnessctl", "-e4", "-m"]
+        command: ["brightnessctl", "-e2", "-m"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var f = text.trim().split(",")
@@ -407,7 +407,7 @@ Scope {
         interval: 50
         repeat: false
         onTriggered: {
-            _brtSet.command = ["brightnessctl", "-e4", "set", Math.round(root.brtValue * 100) + "%"]
+            _brtSet.command = ["brightnessctl", "-e2", "-n1", "set", Math.round(root.brtValue * 100) + "%"]
             _brtSet.running = true
         }
     }

@@ -146,7 +146,7 @@ Scope {
 
     Process {
         id: _brtRead
-        command: ["brightnessctl", "-e4", "-m"]
+        command: ["brightnessctl", "-e2", "-m"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var fields = text.trim().split(",")
