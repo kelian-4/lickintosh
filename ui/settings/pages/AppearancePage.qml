@@ -425,10 +425,10 @@ ContentPage {
 
         CFText {
             Layout.fillWidth: true
-            visible: Theme.lastError.length > 0
-            text: "Hyprland a refusé le préréglage : " + Theme.lastError
+            visible: Theme.compositorBlur && ShellConfig.options.appearance.blurStatus.length > 0
+            text: ShellConfig.options.appearance.blurStatus === "ok" ? "Hyprland a accepté le préréglage et les règles de couches." : "Hyprland a répondu : " + ShellConfig.options.appearance.blurStatus
             font.pixelSize: 12
-            color: "#ff453a"
+            color: ShellConfig.options.appearance.blurStatus === "ok" ? Theme.textSecondary : "#ff453a"
             wrapMode: Text.WordWrap
         }
     }

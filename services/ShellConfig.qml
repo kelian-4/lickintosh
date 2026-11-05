@@ -138,6 +138,7 @@ Singleton {
                 property real   glassTintDark: 0.40
                 property string accentOverride: ""
                 property bool   blurApplied:  false
+                property string blurStatus:   ""
             }
 
             property JsonObject spotlight: JsonObject {
