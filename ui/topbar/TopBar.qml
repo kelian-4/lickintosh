@@ -46,6 +46,12 @@ Rectangle {
     readonly property real notchZoneLeft:  root.themeMargin + menuBarItem.width
     readonly property real notchZoneRight: root.width - root.themeMargin - statusAreaItem.width
 
+    readonly property bool notchEnabled: ShellConfig.options.topbar.notchVisible
+
+    onNotchEnabledChanged: {
+        if (!notchEnabled && NotchState.expanded) NotchState.toggleExpanded()
+    }
+
     Binding {
         target: NotchState
         property: "topbarZoneWidth"
@@ -55,7 +61,7 @@ Rectangle {
     Connections {
         target: root.notifServer
         function onNotification(notification) {
-            if (NotifService.dndEnabled) return
+            if (NotifService.dndEnabled || !root.notchEnabled) return
             NotchState.notifyIncoming(notification.appName, notification.summary, notification.appIcon)
         }
     }
@@ -140,6 +146,7 @@ Rectangle {
 
     Rectangle {
         id: notchPill
+        visible: root.notchEnabled
         readonly property real _safeHalfWidth: 65
         readonly property real notchCenterX: Math.max(root.notchZoneLeft + _safeHalfWidth,
                                                         Math.min(root.width / 2, root.notchZoneRight - _safeHalfWidth))
