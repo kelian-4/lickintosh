@@ -146,17 +146,14 @@ Scope {
 
     Process {
         id: _brtRead
-        command: ["sh", "-c",
-            "cat " + root._brtPath + " 2>/dev/null && cat " + root._brtPath.replace("/brightness", "/max_brightness") + " 2>/dev/null"
-        ]
+        command: ["brightnessctl", "-e4", "-m"]
         stdout: StdioCollector {
             onStreamFinished: {
-                var parts = text.trim().split("\n")
-                if (parts.length === 2) {
-                    var cur = parseFloat(parts[0])
-                    var max = parseFloat(parts[1])
-                    if (max > 0) {
-                        var v = Math.pow(cur / max, 0.25)
+                var fields = text.trim().split(",")
+                if (fields.length >= 5) {
+                    var pct = parseFloat(fields[3])
+                    if (isFinite(pct)) {
+                        var v = pct / 100
                         if (Math.abs(v - root._lastBrtValue) > 0.005) {
                             root._lastBrtValue = v
                             root.brtValue = v
