@@ -95,8 +95,8 @@ RowLayout {
 
         Item {
             id: spotlightBtn
-            width: 18
-            height: 18
+            width: 16
+            height: 16
             Layout.alignment: Qt.AlignVCenter
             visible: ShellConfig.options.topbar.showSpotlight
 
@@ -124,8 +124,8 @@ RowLayout {
         }
 
         MouseArea {
-            width: 18
-            height: 18
+            width: 16
+            height: 16
             Layout.alignment: Qt.AlignVCenter
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
@@ -134,8 +134,8 @@ RowLayout {
 
             VectorImage {
                 anchors.centerIn: parent
-                width: 18
-                height: 18
+                width: 16
+                height: 16
                 source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/control-center.svg")
                 preferredRendererType: VectorImage.CurveRenderer
                 layer.enabled: true
@@ -148,8 +148,8 @@ RowLayout {
 
         Item {
             id: aiBtn
-            width: 18
-            height: 18
+            width: 16
+            height: 16
             Layout.alignment: Qt.AlignVCenter
             visible: ShellConfig.options.topbar.showAI
 
