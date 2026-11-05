@@ -31,8 +31,8 @@ RowLayout {
 
     Item {
         id: _batBtn
-        width:  22
-        height: 22
+        width:  18
+        height: 18
         Layout.alignment: Qt.AlignVCenter
         visible: ShellConfig.options.topbar.batteryIconVisible
 

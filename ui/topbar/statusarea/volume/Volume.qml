@@ -30,8 +30,8 @@ RowLayout {
 
     Item {
         id: _volBtn
-        width: 16
-        height: 16
+        width: 18
+        height: 18
         Layout.alignment: Qt.AlignVCenter
 
         VectorImage {
