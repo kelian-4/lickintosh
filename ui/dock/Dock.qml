@@ -369,7 +369,7 @@ Scope {
     }
 
     function launchSettingsApp() {
-        Quickshell.execDetached(["quickshell", "-p", Quickshell.shellDir + "/settings.qml"])
+        SettingsLauncher.open("")
     }
 
     function pinnedKey(entry) {

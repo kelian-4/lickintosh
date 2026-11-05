@@ -32,6 +32,16 @@ FloatingWindow {
     Component.onCompleted: {
         Quickshell.watchFiles = false
         Theme.applyToCompositor = false
+        var wanted = Quickshell.env("LICKINTOSH_PAGE")
+        if (wanted) {
+            for (var i = 0; i < root.flatItems.length; i++) {
+                if (root.flatItems[i].component === wanted) {
+                    root.currentIndex = i
+                    root._navHistory = [i]
+                    break
+                }
+            }
+        }
     }
 
     readonly property var sections: [

@@ -33,7 +33,7 @@ Item {
     }
 
     function openSettingsApp() {
-        Quickshell.execDetached(["quickshell", "-p", Quickshell.shellDir + "/settings.qml"])
+        SettingsLauncher.open("")
     }
 
     Process { id: _suspend;  command: ["systemctl", "suspend"];  running: false }

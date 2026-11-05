@@ -222,7 +222,10 @@ Item {
             Layout.fillWidth: true
             height: 24
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.closeRequested()
+            onClicked: {
+                SettingsLauncher.open("GeneralPage")
+                root.closeRequested()
+            }
 
             CFText {
                 anchors.verticalCenter: parent.verticalCenter
