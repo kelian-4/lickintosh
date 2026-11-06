@@ -1,5 +1,3 @@
-
-<img width="315" height="402" alt="2026-11-06_12:56:03" src="https://github.com/user-attachments/assets/3046dd1f-4fb9-4690-b929-6a4bd5731239" />
 # 【 lickintosh 】
 
 **Une interface de bureau inspirée de macOS Tahoe pour Hyprland, écrite avec [Quickshell](https://quickshell.org).**
@@ -25,6 +23,9 @@
 **Barre supérieure**
 - **Menu Apple** : À propos, Réglages Système, App Store (ouvre la page des paquets officiels de ta distribution), Éléments récents, Forcer à quitter, Suspendre, Redémarrer, Éteindre, Se déconnecter, Verrouiller.
 - **Menu global** : le menu de l'application active, avec des modèles par type d'application (navigateur, gestionnaire de fichiers, IDE, messagerie, lecteur multimédia, design, etc.).
+
+<img width="315" height="402" alt="2026-11-06_12:56:03" src="https://github.com/user-attachments/assets/3046dd1f-4fb9-4690-b929-6a4bd5731239" />
+
 - **Zone d'état** : Wi-Fi, Bluetooth, volume, batterie, Spotlight, assistant IA, Centre de contrôle, centre de notifications, zone de notification (tray), horloge.
 - **Notch** : une pastille qui s'étend pour les notifications et les contenus en cours. Elle respecte le mode Concentration et peut être désactivée dans les réglages.
 
