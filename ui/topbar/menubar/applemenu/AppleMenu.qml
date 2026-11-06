@@ -71,7 +71,6 @@ Item {
     Process { id: _suspend;  command: ["systemctl", "suspend"];  running: false }
     Process { id: _kill;     command: ["sh", "-c", "hyprctl kill"];          running: false }
 
-    
     BoxGlass {
         anchors.fill: parent
         radius: 12
@@ -79,8 +78,6 @@ Item {
         rimStrength: 1.7
         light: "#20ffffff"
     }
-
-    
 
     component MenuRow: Item {
         id: _mr
@@ -175,7 +172,6 @@ Item {
         color: root.sepColor
     }
 
-    
     Column {
         id: menuCol
         anchors.top: parent.top

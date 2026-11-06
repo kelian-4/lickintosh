@@ -93,13 +93,7 @@ Singleton {
 
     Process {
         id: _uptimeProc
-        // uptime -p (execute directement, sans shell) n'est pas
-        // fiable dans l'environnement de Quickshell sur NixOS : le
-        // binaire "uptime" peut ne pas etre resolu (PATH minimal du
-        // process manager, hors d'un shell de login). /proc/uptime
-        // est un pseudo-fichier toujours present sur Linux, lu ici
-        // via un builtin shell (read) plutot qu'un binaire externe
-        // supplementaire, pour eviter le meme probleme.
+
         command: ["sh", "-c", "read s _ < /proc/uptime && echo \"$s\""]
         stdout: StdioCollector {
             onStreamFinished: {

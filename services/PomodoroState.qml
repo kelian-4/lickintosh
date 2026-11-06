@@ -16,7 +16,7 @@ Singleton {
     property int cyclesBeforeLongBreak: 4
 
     property bool running: false
-    // "work" | "break" | "longBreak"
+
     property string phase: "work"
     property int cyclesCompleted: 0
 

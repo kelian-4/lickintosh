@@ -37,7 +37,6 @@ Scope {
                 WlrLayershell.namespace: "quickshell:about"
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
-                
                 Rectangle {
                     anchors.fill: parent
                     color: "transparent"
@@ -48,7 +47,6 @@ Scope {
                     }
                 }
 
-                
                 Item {
                     id: win
                     width: root.winWidth
@@ -62,7 +60,6 @@ Scope {
                         onClicked: function(e) { e.accepted = true }
                     }
 
-                    
                     BoxGlass {
                         anchors.fill: parent
                         radius: 14
@@ -73,7 +70,6 @@ Scope {
                         lightDir: Qt.vector2d(0.5, -1.0)
                     }
 
-                    
                     Row {
                         x: 14
                         y: 14
@@ -124,7 +120,6 @@ Scope {
                         }
                     }
 
-                    
                     Text {
                         anchors.top: parent.top
                         anchors.topMargin: 13
@@ -136,7 +131,6 @@ Scope {
                         renderType: Text.NativeRendering
                     }
 
-                    
                     VectorImage {
                         id: _deviceImg
                         anchors.top: parent.top
@@ -148,7 +142,6 @@ Scope {
                         preferredRendererType: VectorImage.CurveRenderer
                     }
 
-                    
                     Text {
                         id: _osName
                         anchors.top: _deviceImg.bottom
@@ -162,7 +155,6 @@ Scope {
                         renderType: Text.NativeRendering
                     }
 
-                    
                     Rectangle {
                         id: _sep
                         anchors.top: _osName.bottom
@@ -173,7 +165,6 @@ Scope {
                         color: Qt.rgba(1, 1, 1, 0.10)
                     }
 
-                    
                     Column {
                         id: _infoCol
                         anchors.top: _sep.bottom
@@ -218,7 +209,6 @@ Scope {
                         }
                     }
 
-                    
                     Rectangle {
                         id: _moreBtn
                         anchors.top: _infoCol.bottom
@@ -250,7 +240,6 @@ Scope {
                     }
                 }
 
-                
                 Process {
                     id: _procOS
                     property string result: ""

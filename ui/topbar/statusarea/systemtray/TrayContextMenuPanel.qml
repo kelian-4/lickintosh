@@ -9,8 +9,6 @@ Item {
     property bool needsKeyboard: false
     property var menuHandle: null
 
-    // Pile de navigation : [] = racine, [entry1] = sous-menu de entry1,
-    // [entry1, entry2] = sous-menu de entry2 dans entry1, etc.
     property var _menuStack: []
 
     readonly property var _currentMenu: _menuStack.length > 0

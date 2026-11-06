@@ -28,10 +28,6 @@ Singleton {
     property string _pendingSSID:     ""
     property string _pendingPassword: ""
 
-    // ---------------------------------------------------------------
-    // Détails de connexion (IPv4/IPv6, DHCP) pour la connexion active
-    // demandée. Rempli à la demande via fetchConnectionDetails().
-    // ---------------------------------------------------------------
     property string detailsSSID:       ""
     property string detailsIPv4Method: ""
     property string detailsIPv4:       ""
@@ -81,11 +77,7 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = text.trim().split("\n")
-                // Champs demandés dans l'ordre : IP4.ADDRESS, IP4.GATEWAY,
-                // IP4.ROUTE, ipv4.method, IP6.ADDRESS, ipv6.method.
-                // nmcli -g sépare les valeurs multi-lignes du même champ
-                // par des retours à la ligne dans l'ordre de la requête ;
-                // on reste défensif si le format diffère légèrement.
+
                 var addr4  = lines[0] || ""
                 var gw4    = lines[1] || ""
                 var route4 = lines[2] || ""
@@ -171,9 +163,6 @@ Singleton {
         _rescanBackground.running = true
     }
 
-    // Filet de sécurité : si aucune réponse claire n'arrive dans les 6s
-    // (ni connexion réussie, ni erreur détectée), on considère l'essai
-    // comme échoué plutôt que de laisser l'UI bloquée sur "Connexion…".
     Timer {
         id: _connectTimeoutTimer
         interval: 6000

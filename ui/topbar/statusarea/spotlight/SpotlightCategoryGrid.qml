@@ -6,13 +6,13 @@ import qs.services
 Item {
     id: root
 
-    required property var    items              // liste plate, chaque item a `_category`
-    required property var    categoryOrder       // ordre des catégories pour les pastilles
-    property bool             sectioned: false   // true => "Suggestions" / "Récents" (fichiers)
+    required property var    items
+    required property var    categoryOrder
+    property bool             sectioned: false
     property int              suggestionsCount: 6
     required property string  fontFamily
     required property string  fontFamilyMedium
-    required property string  mode               // "apps" | "files"
+    required property string  mode
 
     signal itemClicked(var data)
 

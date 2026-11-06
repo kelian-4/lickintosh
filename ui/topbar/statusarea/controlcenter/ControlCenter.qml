@@ -185,7 +185,6 @@ Scope {
     readonly property color glassRimColor: "transparent"
     readonly property real  glassRimStrength: 1.0
 
-
     Process { id: _kdeConnect; command: ["kdeconnect-app"] }
 
     property string _currentWs: ""
@@ -432,7 +431,6 @@ Scope {
             onRead: line => console.warn("Screenshot error: " + line)
         }
     }
-
 
     property bool _ccLoaderActive: false
     onOpenedChanged: {
@@ -889,7 +887,6 @@ Scope {
                         }
                     }
 
-
                     Repeater {
                         model: ScriptModel {
                             values: ControlCatalog.instancesOfType("wifiWidget")
@@ -1018,7 +1015,6 @@ Scope {
                             }
                     }
 
-
                     Repeater {
                         model: ScriptModel {
                             values: ControlCatalog.instancesOfType("btWidget")
@@ -1136,7 +1132,6 @@ Scope {
                             }
                     }
 
-
                     Repeater {
                         model: ScriptModel {
                             values: ControlCatalog.instancesOfType("adWidget")
@@ -1171,7 +1166,6 @@ Scope {
                                 }
                             }
                     }
-
 
                     Repeater {
                         model: ScriptModel {
@@ -1538,7 +1532,6 @@ Scope {
                             }
                     }
 
-
                     Repeater {
                         model: ScriptModel {
                             values: ControlCatalog.instancesOfType("focusWidget")
@@ -1594,7 +1587,6 @@ Scope {
                             }
                     }
 
-
                     Repeater {
                         model: ScriptModel {
                             values: ControlCatalog.instancesOfType("stageWidget")
@@ -1628,7 +1620,6 @@ Scope {
                             }
                     }
 
-
                     Repeater {
                         model: ScriptModel {
                             values: ControlCatalog.instancesOfType("shareWidget")
@@ -1659,7 +1650,7 @@ Scope {
                                         if (root.recording) {
                                             _shOn.running = true
                                         } else {
-                                            _shOn.signal(2) // SIGINT, laisse wf-recorder finaliser le mp4 proprement
+                                            _shOn.signal(2)
                                         }
                                     }
                                     onPressed: shareWidget.isPressed = true
@@ -1668,7 +1659,6 @@ Scope {
                                 }
                             }
                     }
-
 
                     Repeater {
                         model: ScriptModel {
@@ -1715,7 +1705,6 @@ Scope {
                             }
                     }
 
-
                     Repeater {
                         model: ScriptModel {
                             values: ControlCatalog.instancesOfType("volumeWidget")
@@ -1761,8 +1750,6 @@ Scope {
                                 }
                             }
                     }
-
-
 
                     Repeater {
                         model: ScriptModel {
@@ -1818,7 +1805,6 @@ Scope {
                                 }
                             }
                     }
-
 
                     Repeater {
                         model: ScriptModel {
@@ -1887,7 +1873,6 @@ Scope {
                                 }
                             }
                     }
-
 
                     Repeater {
                         model: ScriptModel {

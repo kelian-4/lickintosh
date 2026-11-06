@@ -5,14 +5,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-/*
-    Équivalent des services natifs C++ de caelestia (plugin/src/Caelestia/
-    Services/{cpu,memory,storage,network}.hpp) — mêmes définitions
-    (cpu = usage instantané en %, memory = used/total en %, storage =
-    usage du disque racine en %, network = débit instantané + totaux),
-    réimplémenté en QML/bash via /proc, df, faute de plugin natif
-    équivalent dans ce projet.
-*/
 Singleton {
     id: root
 
@@ -69,10 +61,9 @@ Singleton {
         root.topMemory = list.slice(0, 6)
     }
 
-    property var _prevCpu: null // { total, idle }
-    property var _prevNet: null // { rx, tx, t }
+    property var _prevCpu: null
+    property var _prevNet: null
 
-    // ---- CPU ----
     Process {
         id: _cpuProc
         command: ["sh", "-c", "head -n1 /proc/stat"]
@@ -123,7 +114,6 @@ Singleton {
         }
     }
 
-    // ---- Mémoire ----
     Process {
         id: _memProc
         command: ["sh", "-c", "awk '/^MemTotal:/{t=$2} /^MemAvailable:/{a=$2} END{print t, a}' /proc/meminfo"]
@@ -141,7 +131,6 @@ Singleton {
         root.memoryHistory = root._pushHistory(root.memoryHistory, root.memoryPercent)
     }
 
-    // ---- Stockage ----
     Process {
         id: _storageProc
         command: ["sh", "-c", "df -B1 --output=pcent,used,size,source / | tail -1"]
@@ -165,7 +154,6 @@ Singleton {
         if (m) root.storageDevice = m[1].replace(/[0-9]+$/, "")
     }
 
-    // ---- Réseau ----
     Process {
         id: _netProc
         command: ["sh", "-c",

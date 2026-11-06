@@ -3,11 +3,6 @@ import QtQuick.Layouts
 import QtQuick.VectorImage
 import qs.services
 
-/*
-    Contenu compact : icône réelle du projet (assets/icons/...), pas
-    un glyphe inventé — chemins relatifs depuis ui/topbar/notch/ (3
-    niveaux jusqu'à la racine).
-*/
 Item {
     id: root
     property bool peek: false
@@ -53,9 +48,6 @@ Item {
         spacing: 8
         visible: root.hasKind
 
-        // Le média n'a pas d'icône SVG dédiée dans assets/ : on montre
-        // la pochette (Mpris) si disponible, sinon un simple carré vide
-        // plutôt que d'inventer un glyphe.
         Rectangle {
             visible: root.kind === "media"
             Layout.preferredWidth: 14

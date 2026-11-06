@@ -5,18 +5,6 @@ import qs.components
 import qs.components.glass
 import qs.services
 
-/*
-    LockMediaPlayer — mini lecteur média du lockscreen, façon macOS
-    (pochette + titre/artiste + contrôles play/pause/suivant/précédent).
-
-    Contrairement à LockStatusIndicators (volontairement passif), ce
-    composant EST interactif : contrôler la lecture depuis l'écran de
-    verrouillage est le comportement macOS standard, et ne présente pas
-    le même risque qu'exposer des réglages système (wifi/bluetooth).
-
-    S'appuie sur qs.services.MprisState (déjà l'API du reste du projet),
-    pas de logique MPRIS dupliquée ici.
-*/
 Item {
     id: root
 
@@ -52,7 +40,6 @@ Item {
             anchors.margins: 10
             spacing: 10
 
-            // --- Pochette --------------------------------------------
             Item {
                 width: 44
                 height: 44
@@ -91,7 +78,6 @@ Item {
                 }
             }
 
-            // --- Titre / artiste + contrôles --------------------------
             Column {
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width - 44 - 10 - 10 - controlsRow.width

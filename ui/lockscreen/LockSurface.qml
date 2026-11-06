@@ -35,16 +35,6 @@ WlSessionLockSurface {
 
     color: "transparent"
 
-    // Construction d'URL file:// encodées correctement : centralisée
-    // dans LockContext.toFileUrl() (singleton partagé entre LockScreen,
-    // LockSurface), pas dupliquée ici.
-
-    // -----------------------------------------------------------------
-    // Horloge / date — recalculées à la seconde près, une seule fois
-    // pour toutes les surfaces n'est pas possible ici (chaque écran a
-    // son propre WlSessionLockSurface / QML tree), mais le coût d'un
-    // SystemClock par écran est négligeable.
-    // -----------------------------------------------------------------
     SystemClock {
         id: clock
         precision: SystemClock.Seconds
@@ -53,16 +43,6 @@ WlSessionLockSurface {
     readonly property string timeText: Qt.formatTime(clock.date, "h:mm")
     readonly property string dateText: Qt.formatDate(clock.date, "ddd d MMM")
 
-    // Avatar/wallpaper détectés et calculés dans LockContext (singleton
-    // partagé, chargé dès le démarrage du shell) — pas ici, pour éviter
-    // un délai visible d'apparition au moment du lock. Voir
-    // LockContext.avatarSource / avatarUrl / wallpaperSource.
-
-    // -----------------------------------------------------------------
-    // Déverrouillage : joue l'anim de sortie puis notifie le contexte.
-    // Appelé depuis LockScreen quand context.unlocking() se déclenche
-    // (le PAM a déjà validé le mot de passe à ce stade).
-    // -----------------------------------------------------------------
     function playUnlock() {
         if (unlockAnim.running) return
         unlockAnim.start()
@@ -83,32 +63,11 @@ WlSessionLockSurface {
         }
     }
 
-    // -----------------------------------------------------------------
-    // Fond : wallpaper courant, net (aucun flou), avec un léger zoom
-    // d'entrée qui accompagne l'apparition du contenu.
-    //
-    // Source calculée dans LockContext (context.wallpaperSource), pas
-    // recalculée ici : LockScreen précharge une Image avec cette même
-    // URL avant même que la surface existe (voir LockScreen.qml), donc
-    // réutiliser l'URL identique ici permet à Qt de servir depuis son
-    // cache interne au lieu de relire/redécoder le fichier depuis le
-    // disque au moment où l'écran de verrouillage apparaît.
-    // -----------------------------------------------------------------
     Item {
         id: background
         anchors.fill: parent
         opacity: 0
 
-        // Filet de sécurité seulement : en temps normal, cette Image sert
-        // déjà le résultat du préchargement (LockScreen attend que
-        // wallpaperPreloader/avatarPreloader terminent avant de poser
-        // lock.locked = true — voir LockScreen.readyForLock), donc status
-        // est déjà Ready dès la première frame et ce fondu ne se voit
-        // presque jamais. Il ne s'active réellement que si le timeout de
-        // sécurité de 800ms (LockScreen.lockTimeoutTimer) a forcé le
-        // verrouillage avant la fin du décodage — coupe court à une
-        // opacity: 1 déclarée nue, dont l'à-coup serait visible dans ce
-        // cas limite.
         Behavior on opacity {
             NumberAnimation { duration: root.reduceMotion ? 1 : 200; easing.type: Easing.OutCubic }
         }
@@ -121,26 +80,14 @@ WlSessionLockSurface {
             asynchronous: true
             cache: true
             smooth: true
-            // Décoder l'image à la taille d'affichage réelle plutôt qu'à
-            // sa résolution native complète (souvent 4K/5K pour un
-            // wallpaper) : c'est ce qui coûte le plus cher en temps de
-            // décodage, largement plus que la simple lecture disque.
-            // Le fond n'est plus flouté : c'est LockContext qui
-            // pré-redimensionne déjà le wallpaper à la taille exacte de
-            // l'écran (cache), donc décoder à la taille d'affichage ne
-            // coûte pas de netteté dans le cas normal.
+
             sourceSize: Qt.size(root.width * (root.screen?.devicePixelRatio ?? 1),
                                  root.height * (root.screen?.devicePixelRatio ?? 1))
 
-            // Ne révèle le fond qu'une fois le décodage terminé (Ready),
-            // jamais avant : c'est ce binding qui déclenche le fondu
-            // ci-dessus au bon moment, plutôt qu'un opacity fixe à 1 qui
-            // laisse voir le "pop" au moment exact où Qt finit de décoder.
             onStatusChanged: {
                 if (status === Image.Ready) background.opacity = 1
             }
-            // Léger zoom d'entrée, style eqsh : part de 1.04 et redescend
-            // à 1 (porté ici depuis l'ancien MultiEffect de flou).
+
             scale: root.reduceMotion ? 1 : 1.04
             Behavior on scale {
                 NumberAnimation { duration: root.reduceMotion ? 1 : 900; easing.type: Easing.OutCubic }
@@ -150,8 +97,6 @@ WlSessionLockSurface {
             }
         }
 
-        // Léger voile sombre pour garantir la lisibilité du texte quel
-        // que soit le fond choisi par l'utilisateur.
         Rectangle {
             anchors.fill: parent
             color: "#000000"
@@ -159,17 +104,10 @@ WlSessionLockSurface {
         }
     }
 
-    // -----------------------------------------------------------------
-    // Contenu interactif (horloge, avatar, champ mot de passe)
-    // -----------------------------------------------------------------
     Item {
         id: content
         anchors.fill: parent
-        // Style eqsh : dézoom en entrant (scale part de 1.06, plus grand
-        // que 1) plutôt qu'un zoom depuis plus petit — combiné à une
-        // translation verticale légère (translateY de -24 à 0), donne
-        // une impression de contenu qui "se pose" plutôt que de
-        // simplement apparaître en fondu.
+
         opacity: reduceMotion ? 1 : 0
         scale: reduceMotion ? 1 : 1.06
 
@@ -193,9 +131,6 @@ WlSessionLockSurface {
             NumberAnimation { duration: root.reduceMotion ? 1 : 380; easing.type: Easing.OutCubic }
         }
 
-        // --- Statut système (batterie/wifi/bluetooth), haut droite ----
-        // Mini Control Center en lecture seule, façon macOS — voir
-        // LockStatusIndicators.qml pour le détail des sources d'état.
         LockStatusIndicators {
             anchors.top: parent.top
             anchors.right: parent.right
@@ -203,7 +138,6 @@ WlSessionLockSurface {
             anchors.rightMargin: 24
         }
 
-        // --- Date -------------------------------------------------
         Text {
             id: dateLabel
             anchors.horizontalCenter: parent.horizontalCenter
@@ -224,66 +158,30 @@ WlSessionLockSurface {
             }
         }
 
-        // --- Heure ----------------------------------------------------
-        // Effet "verre dépoli" façon eqsh : le fond (wallpaper net)
-        // est capturé seulement dans le rectangle exact occupé par
-        // l'horloge, puis flouté et
-        // masqué par la forme du texte (maskSource: clockRow) — ça donne
-        // un texte translucide qui laisse deviner le mouvement du fond
-        // en dessous, plutôt qu'un simple texte blanc avec ombre portée.
-        // clockRow.textColor reste blanc semi-transparent en-dessous :
-        // sans lui, les zones où le fond est très sombre rendraient le
-        // texte presque invisible.
-        //
-        // clockRow est déclaré en premier (pas les effets qui en
-        // dépendent) : sourceRect ci-dessous a besoin de sa géométrie
-        // déjà calculée (mapToItem, width, height) pour capturer la
-        // bonne zone dès le premier rendu, plutôt que de dépendre d'un
-        // item pas encore positionné.
         Row {
             id: clockRow
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: dateLabel.bottom
             anchors.topMargin: 4
             spacing: 0
-            // Nécessaire pour que MultiEffect.maskSource (ci-dessous)
-            // puisse utiliser clockRow comme texture de masque — sans
-            // layer.enabled, ni un ShaderEffectSource ni un item
-            // directement utilisable comme texture, le masque échoue
-            // silencieusement (warning "ShaderEffect: 'source' does not
-            // have a matching property", déjà rencontré ailleurs dans ce
-            // projet pour la même raison).
+
             layer.enabled: true
-            // layer.smooth: true est nécessaire pour un antialiasing
-            // correct des bords du masque (confirmé par retour
-            // d'expérience Qt Forum sur ce shader précis) — sans lui,
-            // même avec les bons maskThresholdMin/maskSpreadAtMin, les
-            // bords du masque restent visiblement crénelés.
+
             layer.smooth: true
 
-            // Style choisi dans Réglages > Écran de verrouillage
-            // (services/LockClockStyle.qml). Style 0 + poids 1.0 (les
-            // valeurs par défaut) reproduisent exactement l'ancien rendu
-            // fixe : SF Pro Display, Font.Black, pas d'italique.
             readonly property var clockCfg: ShellConfig.options.lockscreen
             readonly property var clockStyle: LockClockStyle.styleAt(clockCfg.clockStyle)
             readonly property int clockWeightQt: LockClockStyle.weightFor(clockCfg.clockWeight)
 
             readonly property int baseDigitSize: Math.round(Math.min(root.width * 0.09, 92))
             readonly property int targetDigitSize: clockCfg.clockLarge ? baseDigitSize : Math.round(baseDigitSize * 0.58)
-            // Propriété normale (animable) suivant targetDigitSize (lui,
-            // en lecture seule car dérivé de root.width) : un Behavior sur
-            // une readonly property n'est pas permis en QML.
+
             property int digitSize: targetDigitSize
             onTargetDigitSizeChanged: digitSize = targetDigitSize
             Behavior on digitSize { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
 
             readonly property var timeParts: root.timeText.split(":")
-            // Blanc quasi-opaque (pas #ccffffff comme avant, trop
-            // transparent) : le texte doit rester clairement lisible en
-            // toutes circonstances, l'effet "verre" vient surtout du
-            // léger flou du fond visible au travers, pas d'une forte
-            // transparence du texte lui-même.
+
             readonly property color textColor: "#f2ffffff"
 
             Text {
@@ -302,9 +200,7 @@ WlSessionLockSurface {
                 color: clockRow.textColor
                 font.family: clockRow.clockStyle.family
                 font.italic: clockRow.clockStyle.italic
-                // Plus large et plus gras que les chiffres pour que le
-                // séparateur soit massif, comme sur l'écran de
-                // verrouillage macOS (référence visuelle du projet).
+
                 font.pixelSize: Math.round(clockRow.digitSize * 1.12)
                 font.weight: clockRow.clockWeightQt
                 renderType: Text.NativeRendering
@@ -350,10 +246,7 @@ WlSessionLockSurface {
             autoPaddingEnabled: false
             maskEnabled: true
             maskSource: clockRow
-            // Valeurs éprouvées pour un bord de masque net et lisse
-            // (source : retour d'expérience Qt Forum sur ce shader précis)
-            // — mes valeurs initiales (0.1/0.1) laissaient des bords en
-            // dents de scie / "résidus" visibles autour des lettres.
+
             maskThresholdMin: 0.5
             maskSpreadAtMin: 1.0
             visible: !clockGlass.glassOn
@@ -402,11 +295,6 @@ WlSessionLockSurface {
             fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/assets/shaders/liquidglass/GlyphGlass.frag.qsb")
         }
 
-        // --- Notifications, au-dessus du mini lecteur ----------------
-        // Ancrée indépendamment (comme LockMediaPlayer ci-dessous) pour
-        // ne jamais perturber le positionnement du reste : quand elle
-        // est masquée (implicitHeight 0), le mini lecteur remonte tout
-        // seul grâce à son propre anchors.bottom: notifStack.top.
         LockNotifications {
             id: notifStack
             glassBackdrop: lockBackdrop
@@ -415,11 +303,6 @@ WlSessionLockSurface {
             anchors.bottomMargin: visible ? 16 : 0
         }
 
-        // --- Mini lecteur média, au-dessus du bloc de connexion ------
-        // N'occupe de la place que si un lecteur MPRIS est actif
-        // (LockMediaPlayer.implicitHeight vaut 0 sinon) — ancré
-        // indépendamment de loginArea pour ne jamais perturber le
-        // positionnement de l'avatar/mot de passe selon sa présence.
         LockMediaPlayer {
             id: mediaPlayer
             glassBackdrop: lockBackdrop
@@ -429,7 +312,6 @@ WlSessionLockSurface {
             anchors.bottomMargin: (MprisState.hasPlayer && mediaPlayer.visible) ? 20 : 0
         }
 
-        // --- Bloc bas : avatar / nom / mot de passe ------------------
         Column {
             id: loginArea
             anchors.horizontalCenter: parent.horizontalCenter
@@ -456,28 +338,14 @@ WlSessionLockSurface {
                         smooth: true
                         cache: true
                         opacity: status === Image.Ready ? 1 : 0
-                        // Avatar affiché à 56px seulement : inutile de
-                        // décoder un fichier source potentiellement bien
-                        // plus grand (ex: photo de profil haute
-                        // résolution). Même stratégie que le wallpaper.
+
                         sourceSize: Qt.size(56 * (root.screen?.devicePixelRatio ?? 1), 56 * (root.screen?.devicePixelRatio ?? 1))
 
-                        // Fondu croisé avec le repli (initiale) ci-dessous
-                        // plutôt qu'un basculement instantané au moment
-                        // exact où le décodage se termine — même principe
-                        // que le fond d'écran : masquer le temps de
-                        // chargement par un mouvement plutôt que de
-                        // chercher à l'annuler complètement.
                         Behavior on opacity {
                             NumberAnimation { duration: root.reduceMotion ? 1 : 150; easing.type: Easing.OutCubic }
                         }
                     }
 
-                    // Repli si aucun avatar détecté (ou en attendant la
-                    // détection) : initiale sur fond glass. Reste monté
-                    // (visible piloté par opacity, pas par une bascule
-                    // dure) pour que le fondu croisé avec avatarImg soit
-                    // fluide plutôt qu'un pop.
                     Rectangle {
                         anchors.fill: parent
                         opacity: avatarImg.status === Image.Ready ? 0 : 1
@@ -508,16 +376,6 @@ WlSessionLockSurface {
                 }
             }
 
-            // --- Nom (par défaut) <-> pilule mot de passe (au clic/frappe) ---
-            // Comportement voulu : au repos, le nom d'utilisateur est
-            // affiché ; dès que l'utilisateur clique ou appuie sur une
-            // touche, il s'efface en fondu et la pilule glass apparaît à
-            // sa place (les deux sont superposés au même endroit). Le
-            // focus clavier est pris dès le chargement (pour pouvoir
-            // taper sans cliquer, comme macOS), mais ça ne suffit pas à
-            // révéler la pilule à soi seul — voir passHasInteracted. Le
-            // sous-titre "Touch ID or Enter Password" reste un troisième
-            // bloc distinct en dessous, toujours visible.
             Item {
                 id: passField
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -526,12 +384,6 @@ WlSessionLockSurface {
 
                 readonly property bool active: passHasInteracted || passInput.text.length > 0
 
-                // Distingue le focus clavier technique (toujours actif,
-                // pour pouvoir taper sans cliquer) de l'interaction
-                // utilisateur réelle : sans ce flag, passInput.focus:
-                // true ferait passer active à true dès le chargement de
-                // la surface, affichant la pilule immédiatement au lieu
-                // du nom.
                 property bool passHasInteracted: false
 
                 Text {
@@ -577,14 +429,7 @@ WlSessionLockSurface {
                         verticalAlignment: Text.AlignVCenter
                         color: "#ffffff"
                         font.family: "SF Pro Display"
-                        // Taille dédiée aux points du mot de passe : plus
-                        // grands que le texte normal (13px) pour qu'ils
-                        // soient bien visibles et espacés, comme sur
-                        // macOS/caelestia — un simple "•" à 13px paraît
-                        // petit et serré. Le placeholder ("Enter Password"
-                        // dans le champ, avant toute frappe) utilise sa
-                        // propre taille séparée, plus petite, via le Text
-                        // ci-dessous.
+
                         font.pixelSize: 22
                         font.weight: Font.Bold
                         font.letterSpacing: 4
@@ -597,32 +442,16 @@ WlSessionLockSurface {
                         inputMethodHints: Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
                         enabled: !root.context.unlockInProgress
 
-                        // Le champ garde le focus clavier en permanence
-                        // tant que la surface est visible : on peut taper
-                        // directement sans cliquer (comme macOS), et si
-                        // le focus est perdu pour une raison quelconque
-                        // (ex: un autre Item l'a volé), on le reprend
-                        // immédiatement — un lockscreen ne doit jamais
-                        // rester sans capture clavier utilisable.
                         focus: true
                         onActiveFocusChanged: {
                             if (!activeFocus && !root.unlocking)
                                 passInput.forceActiveFocus()
                         }
 
-                        // Toute frappe (même une touche qui ne modifie
-                        // pas text, ex: flèches) compte comme une
-                        // interaction réelle et révèle la pilule.
                         Keys.onPressed: event => {
                             passField.passHasInteracted = true
                         }
 
-                        // Ne synchronise depuis passInput vers le contexte
-                        // que lors d'une frappe utilisateur réelle. Un
-                        // flag interne évite de rappeler updateText() (et
-                        // donc de réinitialiser showFailure) quand c'est
-                        // la synchro inverse ci-dessous qui modifie text
-                        // programmatiquement après un échec PAM.
                         property bool _syncingFromContext: false
 
                         onTextChanged: {
@@ -643,9 +472,6 @@ WlSessionLockSurface {
                             function onFailed() { wiggleAnim.restart() }
                         }
 
-                        // Placeholder affiché à l'intérieur du champ
-                        // lui-même quand il est vide — pas un Text séparé
-                        // superposé qui se cache/affiche.
                         Text {
                             anchors.fill: parent
                             visible: passInput.text.length === 0
@@ -659,9 +485,6 @@ WlSessionLockSurface {
                         }
                     }
 
-                    // Flèche de validation à droite, façon macOS —
-                    // n'apparaît que si du texte a été saisi. Cliquer
-                    // dessus tente le déverrouillage, comme Entrée.
                     Rectangle {
                         id: submitRing
                         anchors.right: parent.right
@@ -693,8 +516,6 @@ WlSessionLockSurface {
                         }
                     }
 
-                    // Petit indicateur d'activité pendant la vérif PAM,
-                    // à la place de la flèche.
                     Text {
                         anchors.right: parent.right
                         anchors.rightMargin: 12
@@ -707,11 +528,6 @@ WlSessionLockSurface {
                     }
                 }
 
-                // Zone cliquable invisible : révèle la pilule et donne
-                // le focus au champ quand on clique n'importe où sur la
-                // zone (utile surtout avant toute interaction, quand la
-                // pilule n'est pas encore visible et donc pas cliquable
-                // directement).
                 MouseArea {
                     anchors.fill: parent
                     anchors.margins: -10
@@ -722,9 +538,6 @@ WlSessionLockSurface {
                     }
                 }
 
-                // Wiggle façon macOS quand le mot de passe est refusé.
-                // Désactivé si reduceMotion est actif (le changement de
-                // couleur/texte du sous-titre reste le seul retour visuel).
                 SequentialAnimation {
                     id: wiggleAnim
                     loops: 1
@@ -739,12 +552,6 @@ WlSessionLockSurface {
                 }
             }
 
-            // --- Sous-titre permanent, sous la pilule --------------------
-            // Toujours visible (contrairement à l'ancienne version où ce
-            // texte remplaçait le placeholder du champ) : c'est un
-            // troisième bloc distinct dans la Column, comme sur la
-            // référence macOS. Reflète aussi le fingerprint / les échecs /
-            // les messages PAM (pam_faillock, etc.).
             Text {
                 id: subtitleLabel
                 anchors.horizontalCenter: parent.horizontalCenter

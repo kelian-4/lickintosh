@@ -24,7 +24,6 @@ import qs.ui.lockscreen
 import qs.ui.desktop
 import qs.ui.widgets
 
-
 ShellRoot {
     id: appRoot
     property bool ccOpened:          false

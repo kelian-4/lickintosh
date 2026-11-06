@@ -6,17 +6,6 @@ import qs.components.glass
 import qs.services
 import qs.ui.settings.widgets
 
-/*
-    Réglages > Écran de verrouillage. Calquée sur la page macOS
-    « Fond d'écran » : aperçu de l'écran de verrouillage, puis le
-    panneau « Apparence de l'horloge » (grande horloge, 6 styles,
-    épaisseur), auxquels s'ajoutent les réglages des notifications et du
-    mini lecteur affichés sur le lockscreen.
-
-    Tout est persisté dans ShellConfig.options.lockscreen ; LockSurface,
-    LockNotifications et LockMediaPlayer lisent les mêmes propriétés, donc
-    les changements se voient immédiatement.
-*/
 ContentPage {
     id: root
 
@@ -29,7 +18,6 @@ ContentPage {
             : Quickshell.shellDir + "/assets/wallpapers/macOS Tahoe 26 Dark Wallpaper.png"
     }
 
-    // --- Aperçu -----------------------------------------------------
     ContentSection {
         title: I18n.tr("Aperçu")
 
@@ -128,7 +116,6 @@ ContentPage {
         }
     }
 
-    // --- Apparence de l'horloge ---------------------------------------
     ContentSection {
         title: I18n.tr("Apparence de l'horloge")
 
@@ -219,7 +206,6 @@ ContentPage {
         }
     }
 
-    // --- Notifications -------------------------------------------------
     ContentSection {
         title: I18n.tr("Notifications")
 
@@ -237,7 +223,6 @@ ContentPage {
         }
     }
 
-    // --- Mini lecteur ---------------------------------------------------
     ContentSection {
         title: I18n.tr("Mini lecteur")
 
