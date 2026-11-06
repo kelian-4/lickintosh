@@ -101,7 +101,7 @@ Scope {
         var de = entry.cmd ? DesktopEntries.heuristicLookup(entry.cmd) : null
         var live = IconResolver.forApp(de)
         if (live !== "") return live
-        if (entry.iconPath) return entry.iconPath
+        if (entry.iconPath) return IconResolver.retheme(entry.iconPath)
         return IconResolver.generic()
     }
 
