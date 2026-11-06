@@ -447,9 +447,13 @@ Singleton {
         if (!root.applyToCompositor)
             return
         var scheme = root.isLight ? "prefer-light" : "prefer-dark"
-        var script = "gsettings set org.gnome.desktop.interface color-scheme \"$1\"; "
+        var script = "setkey() { if command -v dconf >/dev/null 2>&1; then dconf write \"/org/gnome/desktop/interface/$1\" \"'$2'\"; "
+            + "elif command -v gsettings >/dev/null 2>&1; then gsettings set org.gnome.desktop.interface \"$1\" \"$2\"; fi; }; "
+            + "setkey color-scheme \"$1\"; "
             + "for d in \"$HOME/.local/share/icons\" \"$HOME/.icons\" /usr/share/icons; do "
-            + "if [ -d \"$d/$2\" ]; then gsettings set org.gnome.desktop.interface icon-theme \"$2\"; "
+            + "if [ -d \"$d/$2\" ]; then setkey icon-theme \"$2\"; "
+            + "for g in \"$HOME/.config/gtk-3.0/settings.ini\" \"$HOME/.config/gtk-4.0/settings.ini\"; do "
+            + "[ -f \"$g\" ] && sed -i \"s/^gtk-icon-theme-name=.*/gtk-icon-theme-name=$2/\" \"$g\"; done; "
             + "for q in \"$HOME/.config/qt6ct/qt6ct.conf\" \"$HOME/.config/qt5ct/qt5ct.conf\"; do "
             + "[ -f \"$q\" ] && sed -i \"s/^icon_theme=.*/icon_theme=$2/\" \"$q\"; done; "
             + "[ -f \"$HOME/.config/kdeglobals\" ] && sed -i \"/^\\[Icons\\]/,/^\\[/ s/^Theme=.*/Theme=$2/\" \"$HOME/.config/kdeglobals\"; "
