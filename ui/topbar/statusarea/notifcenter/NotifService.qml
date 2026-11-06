@@ -94,6 +94,13 @@ Singleton {
     readonly property alias popupModel: _popupModel
     property int  dismissGen:   0
     property bool centerOpened: false
+
+    onCenterOpenedChanged: {
+        if (root.centerOpened) {
+            _groupTimer.stop()
+            root.dismissGen = root.dismissGen + 1
+        }
+    }
     property bool dndEnabled:   false
 
     function pushPopup(notification) {
