@@ -136,13 +136,6 @@ function pkg_for --argument-names family item
                 case '*'
                     echo qt6-wayland
             end
-        case nmapplet
-            switch $family
-                case debian
-                    echo network-manager-gnome
-                case '*'
-                    echo network-manager-applet
-            end
         case imagemagick
             switch $family
                 case fedora
