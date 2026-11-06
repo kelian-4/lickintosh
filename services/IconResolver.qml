@@ -31,8 +31,14 @@ Singleton {
         return "text-x-generic"
     }
 
+    function retheme(path) {
+        if (!path)
+            return path
+        return path.replace(/\/MacTahoe(-dark|-light)?\//, "/" + Theme.iconTheme + "/")
+    }
+
     function byName(name) {
-        return name ? Quickshell.iconPath(name, true) : ""
+        return name ? root.retheme(Quickshell.iconPath(name, true)) : ""
     }
 
     function forApp(entry) {
@@ -58,13 +64,13 @@ Singleton {
             var path = root.byName(names[i])
             if (path !== "") return path
         }
-        return Quickshell.iconPath("image-missing")
+        return root.retheme(Quickshell.iconPath("image-missing"))
     }
 
     function resolve(source) {
         if (!source) return ""
-        if (source.indexOf("file://") === 0 || source.indexOf("image://") === 0) return source
-        if (source.charAt(0) === "/") return "file://" + source
+        if (source.indexOf("file://") === 0 || source.indexOf("image://") === 0) return root.retheme(source)
+        if (source.charAt(0) === "/") return root.retheme("file://" + source)
         return root.byName(source)
     }
 }

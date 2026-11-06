@@ -383,7 +383,7 @@ Item {
                         height: 16
                         sourceSize: Qt.size(64, 64)
                         mipmap: true
-                        source: Quickshell.iconPath(IconResolver.fileIconName(RecentFiles.nameOf(recentItem.modelData)), true)
+                        source: IconResolver.byName(IconResolver.fileIconName(RecentFiles.nameOf(recentItem.modelData)))
                     }
 
                     Text {
