@@ -5,10 +5,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
 
-// API vérifiée contre le vrai code source Quickshell
-// (src/services/mpris/player.hpp, watcher.hpp) : Mpris.players est un
-// UntypedObjectModel exposant .values ; MprisPlayer expose bien
-// isPlaying, canTogglePlaying, canGoNext/Previous directement.
 Singleton {
     id: root
 

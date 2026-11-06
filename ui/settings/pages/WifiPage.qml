@@ -58,7 +58,6 @@ ContentPage {
         }
     }
 
-    // ---------------- Wi-Fi : toggle + réseau actif ----------------
     ContentSection {
         title: ""
 
@@ -167,7 +166,6 @@ ContentPage {
         }
     }
 
-    // ---------------- Réseaux connus ----------------
     ContentSection {
         title: I18n.tr("Réseau connu")
         visible: NetworkManager.wifiEnabled && root._knownNetworks.length > 0
@@ -183,7 +181,6 @@ ContentPage {
         }
     }
 
-    // ---------------- Autres réseaux ----------------
     ContentSection {
         title: I18n.tr("Autres réseaux")
         visible: NetworkManager.wifiEnabled && _otherNets.count > 0
@@ -232,7 +229,6 @@ ContentPage {
         }
     }
 
-    // ---------------- Options de jointure automatique ----------------
     ContentSection {
         title: ""
 

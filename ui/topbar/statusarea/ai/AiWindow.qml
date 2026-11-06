@@ -367,7 +367,6 @@ Scope {
                             width:   320
                             spacing: 6
 
-
                     ListView {
                         id: chatView
                         width:   parent.width
@@ -1019,7 +1018,6 @@ Scope {
                 ListModel { id: conversationModel }
 
                 function sendMessage(txt) {
-
                     if (AiCommands.isSlashCommand(txt)) {
                         win.handleSlashCommand(txt)
                         return

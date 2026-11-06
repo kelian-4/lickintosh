@@ -4,15 +4,6 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 
-/*
-    Nouveau module, demande explicite : sur l'app macOS "Nook" (capture
-    de reference), l'extremite droite du dashboard est une simple photo
-    de profil circulaire, sans badge ni texte autour (contrairement a
-    l'ancien UserModule retire, qui ajoutait logo/WM/uptime en plus de
-    la photo). Detection de l'avatar reprise telle quelle de l'ancien
-    UserModule.qml (~/.face, ~/.face.icon, AccountsService — identique
-    a ui/lockscreen/LockContext.qml), pas de raison de la re-ecrire.
-*/
 Item {
     id: root
     Layout.preferredWidth: 100

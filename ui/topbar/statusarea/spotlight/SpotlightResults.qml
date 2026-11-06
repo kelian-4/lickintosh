@@ -166,7 +166,7 @@ ListView {
                 anchors.centerIn: parent
                 width: 22; height: 22
                 visible: !!(row.modelData.icon && row.modelData.icon.endsWith(".svg"))
-                source: row.modelData.icon && row.modelData.icon.endsWith(".svg") 
+                source: row.modelData.icon && row.modelData.icon.endsWith(".svg")
                         ? (row.modelData.icon.startsWith("/") ? "file://" + row.modelData.icon : Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + row.modelData.icon))
                         : ""
                 preferredRendererType: VectorImage.CurveRenderer

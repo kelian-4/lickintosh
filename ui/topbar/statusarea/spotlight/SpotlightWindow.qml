@@ -34,14 +34,9 @@ Scope {
     readonly property color glassColor: Theme.pick("#c0f2f2f2", "#c01e1e1e")
     readonly property color textColor:  Theme.pick(Theme.textPrimary, "#dfdfdf")
 
-
     property var fileIndex:  []
     property bool indexReady: false
 
-    // Le quoting simple protege des espaces et de l'injection, mais empeche
-    // aussi l'expansion du ~ par le shell ('~/Pictures' est un chemin
-    // litteral). On resout donc le ~ initial cote QML avant de quoter,
-    // via Quickshell.env("HOME") (meme pattern que LockContext.qml).
     function _safeShellPath(p) {
         var s = String(p)
         var home = Quickshell.env("HOME") || ""
@@ -146,11 +141,6 @@ Scope {
             }
             root.wallpaperList = out
 
-            // Aucun wallpaper n'a jamais ete applique (ShellConfig.options
-            // .wallpaper.path vaut "" par defaut) : le PanelWindow de fond
-            // existe mais reste noir. Des qu'une liste exploitable arrive,
-            // on applique la premiere image et on la persiste, pour que le
-            // shell ait un fond sense des la premiere utilisation.
             if (root.currentWallpaper === "" && out.length > 0) {
                 root.setWallpaper(out[0].path, true)
             }
@@ -590,26 +580,15 @@ Scope {
 
     Process { id: usageSaveProc; command: ["sh", "-c", "true"] }
 
-    // Wallpaper du bureau : source de vérité unique = ShellConfig.options
-    // .wallpaper.path (services/shell-config.json). Deux endroits le
-    // modifient : ce Spotlight (setWallpaper(..., true)) et la page
-    // Réglages > Fond d'écran (WallpaperPage.apply). Les deux doivent
-    // se refléter mutuellement sur le bureau.
-    //
-    // Bug corrigé : currentWallpaper était une propriété avec binding
-    // (ShellConfig.options.wallpaper.path) mais setWallpaper() et la
-    // restauration après aperçu lui ASSIGNAIENT une valeur, ce qui casse
-    // définitivement le binding en QML. Dès que Spotlight avait touché au
-    // fond une fois (y compris le fond par défaut appliqué au premier
-    // lancement), un changement fait depuis les Réglages n'atteignait
-    // plus le bureau.
-    //
-    // Maintenant : currentWallpaper est en lecture seule et garde son
-    // binding. L'aperçu en direct du picker (persist: false, sans écrire
-    // sur le disque à chaque image survolée) passe par previewWallpaper,
-    // "" = pas d'aperçu en cours. Seul persist: true écrit dans
-    // ShellConfig.
     property string previewWallpaper: ""
+    property string nextRandom: ""
+
+    function pickNextRandom() {
+        var pool = root.wallpaperList.filter(function(w) { return w.path !== root.currentWallpaper })
+        root.nextRandom = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)].path : ""
+    }
+
+    onWallpaperListChanged: if (root.nextRandom === "") root.pickNextRandom()
 
     Binding {
         target: GlassWallpaper
@@ -623,10 +602,9 @@ Scope {
 
     function setWallpaper(path, persist) {
         if (persist) {
-            // Écrire la config AVANT d'effacer l'aperçu : sinon
-            // currentWallpaper repasserait un instant par l'ancien chemin.
             ShellConfig.options.wallpaper.path = path
             root.previewWallpaper = ""
+            root.pickNextRandom()
         } else {
             root.previewWallpaper = path
         }
@@ -661,6 +639,17 @@ Scope {
                 anchors.fill: parent
             }
 
+            Image {
+                visible: false
+                width: 1
+                height: 1
+                source: root.nextRandom !== "" ? "file://" + root.nextRandom : ""
+                asynchronous: true
+                cache: true
+                sourceSize: Qt.size(bgWin.width * (bgWin.screen?.devicePixelRatio ?? 1),
+                                     bgWin.height * (bgWin.screen?.devicePixelRatio ?? 1))
+            }
+
             Component {
                 id: imgComp
                 Image {
@@ -670,16 +659,7 @@ Scope {
                     source: path !== "" ? "file://" + path : ""
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
-                    // cache: true (plutôt que false comme avant) : cette
-                    // fenêtre reste vivante en permanence, donc rebasculer
-                    // vers un wallpaper déjà vu (ex: annuler un aperçu
-                    // dans le picker) sert depuis le cache Qt au lieu de
-                    // redécoder le fichier. sourceSize borne le décodage
-                    // à la taille d'affichage réelle de cet écran plutôt
-                    // que la résolution native du fichier — c'est ce qui
-                    // coûte le plus cher en temps de décodage, largement
-                    // plus que la lecture disque elle-même (même
-                    // stratégie que CachingImage de caelestia).
+
                     cache: true
                     sourceSize: Qt.size(bgWin.width * (bgWin.screen?.devicePixelRatio ?? 1),
                                          bgWin.height * (bgWin.screen?.devicePixelRatio ?? 1))
@@ -1410,10 +1390,10 @@ Scope {
                                         if (done) root.removeTodo(id); else root.toggleTodo(id)
                                     }
                                     onRandomWallpaperRequested: {
-                                        if (root.wallpaperList.length > 0) {
-                                            var pick = root.wallpaperList[Math.floor(Math.random() * root.wallpaperList.length)]
-                                            root.setWallpaper(pick.path, true)
-                                        }
+                                        if (root.nextRandom === "")
+                                            root.pickNextRandom()
+                                        if (root.nextRandom !== "")
+                                            root.setWallpaper(root.nextRandom, true)
                                     }
                                 }
 

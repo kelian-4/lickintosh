@@ -5,32 +5,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-/*
-    Configuration et état persistant unifiés pour tout le shell.
-
-    Contient :
-      - Etat runtime persistant (dock, profil batterie) : anciennement ShellState.
-      - Réglages visuels utilisateur pilotés par l'app Settings (topbar, dock, etc.)
-
-    Ne contient PAS de logique système : NetworkManager, BluetoothState, etc.
-    restent des singletons séparés en lecture/écriture directe sur le système
-    (nmcli, bluez...), jamais gérés depuis ce fichier.
-
-    Persistance : un seul fichier JSON, via FileView + JsonAdapter (mécanisme
-    natif Quickshell). watchChanges: true assure la synchronisation
-    bidirectionnelle automatique :
-      - Un changement fait depuis l'app Settings (ou par un composant du
-        shell) écrit le fichier -> tous les autres composants qui lisent
-        ShellConfig.options.xxx se mettent à jour immédiatement (binding).
-      - Un changement fait manuellement dans le fichier JSON est détecté
-        (watchChanges) et rechargé -> les composants du shell reflètent le
-        changement sans redémarrage.
-
-    Usage:
-        import qs.services
-        ShellConfig.options.dock.pinnedApps
-        ShellConfig.options.topbar.clockVisible = false
-*/
 Singleton {
     id: root
 
@@ -64,9 +38,6 @@ Singleton {
         JsonAdapter {
             id: configAdapter
 
-            // ---------------------------------------------------------
-            // Etat runtime persistant (anciennement ShellState)
-            // ---------------------------------------------------------
             property JsonObject dock: JsonObject {
                 property list<var> pinnedApps: [
                     { "name": "Finder",   "cmd": "dolphin", "icon": "system-file-manager", "iconPath": "", "autostart": false },
@@ -78,15 +49,9 @@ Singleton {
             }
 
             property JsonObject battery: JsonObject {
-                // "" tant que non chargé/connu, sinon "balanced" | "power-saver" | "performance"
                 property string powerProfile: ""
             }
 
-            // ---------------------------------------------------------
-            // Réglages visuels utilisateur (pilotés par l'app Settings)
-            // Purement visuel : aucune de ces valeurs ne pilote de logique
-            // système, seulement l'apparence des composants du shell.
-            // ---------------------------------------------------------
             property JsonObject topbar: JsonObject {
                 property bool notchVisible:      true
                 property bool clockVisible:      true
@@ -194,15 +159,8 @@ Singleton {
             }
 
             property JsonObject wallpaper: JsonObject {
-                // Wallpaper du bureau normal. Historiquement stocké à
-                // part par SpotlightWindow.qml dans un cache base64
-                // (~/.cache/quickshell/spotlight_wallpaper) : migré ici
-                // pour que ce soit ShellConfig la seule source de vérité
-                // persistée, cohérent avec le reste du shell.
                 property string path: ""
-                // Wallpaper spécifique au lockscreen — volontairement
-                // une image distincte de celle du bureau, pas un simple
-                // alias vers "path" ci-dessus.
+
                 property string lockscreenPath: ""
             }
 
@@ -213,17 +171,9 @@ Singleton {
                 property var windowOpacityByClass: ({ "kitty": 0.3 })
             }
 
-            // Réglages > Écran de verrouillage : apparence de l'horloge,
-            // notifications et mini lecteur affichés sur le lockscreen.
-            // Lus par LockSurface, LockNotifications, LockMediaPlayer et
-            // par la page de réglages elle-même (LockScreenPage), qui
-            // sont donc toujours synchronisés entre eux.
             property JsonObject lockscreen: JsonObject {
-                // Index dans LockClockStyle.styles (services/LockClockStyle.qml).
                 property int    clockStyle:  0
-                // 0..1, voir LockClockStyle.weightFor(). 1.0 = Font.Black,
-                // identique à l'ancienne horloge fixe (comportement par
-                // défaut inchangé).
+
                 property real   clockWeight: 1.0
                 property bool   clockLarge:  true
 
@@ -253,9 +203,6 @@ Singleton {
         }
     }
 
-    // ---------------------------------------------------------------
-    // Dock : fonctions de compatibilité avec l'ancien ShellState
-    // ---------------------------------------------------------------
     readonly property var pinnedApps:  options.dock.pinnedApps
     readonly property var pinnedFiles: options.dock.pinnedFiles
 
@@ -284,9 +231,6 @@ Singleton {
         root.options.controlCenter.items = list
     }
 
-    // ---------------------------------------------------------------
-    // Batterie / profil d'alimentation
-    // ---------------------------------------------------------------
     readonly property string powerProfile: options.battery.powerProfile
 
     function setPowerProfile(profileId) {
@@ -299,8 +243,6 @@ Singleton {
         id: _setProfileProc
     }
 
-    // Resynchronise une fois au démarrage avec l'état système réel
-    // (le profil peut avoir été changé ailleurs que par le shell).
     Process {
         id: _getProfileProc
         command: ["powerprofilesctl", "get"]
@@ -314,12 +256,6 @@ Singleton {
         }
     }
 
-    // -----------------------------------------------------------------
-    // Energy usage monitoring (top consommateurs CPU/RAM/Swap)
-    // Etat volatil, recalculé en continu, jamais persisté dans le JSON.
-    // Tourne dès le démarrage du shell, indépendamment de l'ouverture du
-    // panneau batterie.
-    // -----------------------------------------------------------------
     property var previousSample: ({})
     property double previousTimestamp: 0
     property double memTotalKb: 1

@@ -4,15 +4,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 
-/*
-    Météo — approche reprise de caelestia-dots/shell (services/Weather.qml,
-    GPLv3) : géolocalisation IP via ip-api.com, données météo via
-    Open-Meteo (api.open-meteo.com), aucune clé API. Réimplémenté ici
-    avec XMLHttpRequest (JS natif Qt Quick) au lieu de leur wrapper
-    interne "Requests" (dépend de leur plugin C++ Caelestia.Config).
-    Étendu avec les prévisions 7 jours + lever/coucher du soleil pour
-    la page Weather complète (cf. WeatherTab.qml de caelestia).
-*/
 Singleton {
     id: root
 
@@ -20,7 +11,7 @@ Singleton {
 
     property bool available: false
     property string city: ""
-    property string loc: ""       // "lat,lon"
+    property string loc: ""
 
     property real tempC: 0
     property real feelsLikeC: 0
@@ -31,11 +22,8 @@ Singleton {
     property string sunrise: ""
     property string sunset: ""
 
-    property var forecast: []     // [{ date, weekday, code, tempMax, tempMin }]
+    property var forecast: []
 
-    // Fichier SVG (sous assets/icons/weather/ ou notch/, faute de mieux
-    // pour orage/bruine qui n'existent pas dans weather/) correspondant
-    // au code WMO courant — consommé par WeatherPage.
     readonly property string iconFile: root._iconFor(root.weatherCode)
 
     function _iconFor(code) {
@@ -114,8 +102,6 @@ Singleton {
         })
     }
 
-    // Table de correspondance WMO weather_code -> description, reprise
-    // de caelestia (services/Weather.qml, getWeatherCondition()).
     function _conditionFor(code) {
         const conditions = {
             0: "Ciel dégagé", 1: "Ciel dégagé", 2: "Partiellement nuageux", 3: "Couvert",
@@ -133,7 +119,7 @@ Singleton {
     }
 
     Timer {
-        interval: 3600000 // 1h, comme caelestia
+        interval: 3600000
         running: true
         repeat: true
         triggeredOnStart: true

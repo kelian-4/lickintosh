@@ -16,7 +16,6 @@ ContentPage {
     Component.onCompleted: BluetoothState.setDiscovering(true)
     Component.onDestruction: BluetoothState.setDiscovering(false)
 
-    // ---------------- Bluetooth : toggle + description ----------------
     ContentSection {
         title: ""
 
@@ -30,7 +29,6 @@ ContentPage {
         }
     }
 
-    // ---------------- Mes appareils ----------------
     ContentSection {
         title: I18n.tr("Mes appareils")
         visible: BluetoothState.enabled && BluetoothState.pairedDevices.length > 0
@@ -45,7 +43,6 @@ ContentPage {
         }
     }
 
-    // ---------------- Appareils à proximité ----------------
     ContentSection {
         title: I18n.tr("Appareils à proximité")
         visible: BluetoothState.enabled

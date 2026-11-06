@@ -5,12 +5,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-/*
-    Détecte si une application capture la caméra et/ou le micro.
-    Pas d'API caméra native dans Quickshell : sondage direct de
-    PipeWire via `pw-dump` (dépendance de fait sous Hyprland). Best-
-    effort par polling, pas un flux d'évènements.
-*/
 Singleton {
     id: root
 
