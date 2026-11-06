@@ -203,7 +203,8 @@ Singleton {
             }
 
             property JsonObject glass: JsonObject {
-                property bool captureWindows: true
+                property bool captureWindows: false
+                property int captureIntervalMs: 400
                 property real windowOpacity: 1.0
                 property var windowOpacityByClass: ({ "kitty": 0.3 })
             }

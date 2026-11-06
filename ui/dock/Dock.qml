@@ -630,6 +630,7 @@ Scope {
                     screenSize: Qt.size(dockWin.screen.width, dockWin.screen.height)
                     windowPosition: Qt.point(0, dockWin.screen.height - dockWin.height)
                     captureWindows: ShellConfig.options.glass.captureWindows
+                    captureInterval: ShellConfig.options.glass.captureIntervalMs
                     windowOpacity: ShellConfig.options.glass.windowOpacity
                     windowOpacityByClass: ShellConfig.options.glass.windowOpacityByClass
                     monitorName: dockWin.screen.name

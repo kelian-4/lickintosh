@@ -21,6 +21,7 @@ Item {
     property bool ready: true
     property bool warm: false
     property bool instantReveal: false
+    property int captureInterval: 400
 
     property real blurRadius: Theme.glassValue(root.element, "blurRadius")
     property real blurDownscale: 0.5
@@ -112,6 +113,7 @@ Item {
                 region: root.captureRegion
                 windowOpacity: root.windowOpacity
                 opacityByClass: root.windowOpacityByClass
+                captureInterval: root.captureInterval
             }
         }
 
