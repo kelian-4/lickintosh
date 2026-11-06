@@ -17,7 +17,7 @@ Item {
             Layout.fillWidth: true
 
             Text {
-                text: "Tasks"
+                text: I18n.tr("Tasks")
                 color: "#ff9f0a"
                 font.pixelSize: 13
                 font.weight: Font.Bold
@@ -40,7 +40,7 @@ Item {
         Text {
             Layout.fillWidth: true
             visible: root.size === "s"
-            text: TasksState.pending.length === 1 ? "task left" : "tasks left"
+            text: TasksState.pending.length === 1 ? I18n.tr("task left") : I18n.tr("tasks left")
             color: root.look.secondary
             font.pixelSize: 12
             font.family: "SF Pro Text"
@@ -50,7 +50,7 @@ Item {
         Text {
             Layout.fillWidth: true
             visible: root.size !== "s" && TasksState.pending.length === 0
-            text: "Nothing to do"
+            text: I18n.tr("Nothing to do")
             color: root.look.secondary
             font.pixelSize: 13
             font.family: "SF Pro Text"

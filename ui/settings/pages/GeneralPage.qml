@@ -13,12 +13,12 @@ Item {
     property string currentSubpage: ""
 
     readonly property var _rows: [
-        { id: "about",     name: "Informations",         icon: "settings/general.svg" },
-        { id: "updates",   name: "Mises à jour logicielles", icon: "settings/general.svg" },
-        { id: "storage",   name: "Stockage",              icon: "settings/general.svg" },
-        { id: "datetime",  name: "Date et heure",         icon: "settings/general.svg" },
-        { id: "language",  name: "Langue et région",      icon: "settings/general.svg" },
-        { id: "login",     name: "Éléments de connexion", icon: "settings/general.svg" }
+        { id: "about",     name: I18n.tr("Informations"),         icon: "settings/general.svg" },
+        { id: "updates",   name: I18n.tr("Mises à jour logicielles"), icon: "settings/general.svg" },
+        { id: "storage",   name: I18n.tr("Stockage"),              icon: "settings/general.svg" },
+        { id: "datetime",  name: I18n.tr("Date et heure"),         icon: "settings/general.svg" },
+        { id: "language",  name: I18n.tr("Langue et région"),      icon: "settings/general.svg" },
+        { id: "login",     name: I18n.tr("Éléments de connexion"), icon: "settings/general.svg" }
     ]
 
     readonly property string _currentSubpageLabel: {
@@ -180,7 +180,7 @@ Item {
                         spacing: 2
 
                         CFText {
-                            text: GeneralState.hostname.length > 0 ? GeneralState.hostname : "Inconnu"
+                            text: GeneralState.hostname.length > 0 ? GeneralState.hostname : I18n.tr("Inconnu")
                             font.pixelSize: 17
                             font.weight: Font.Bold
                             color: Theme.textPrimary
@@ -189,7 +189,7 @@ Item {
                         }
 
                         CFText {
-                            text: GeneralState.osName.length > 0 ? GeneralState.osName : "Système inconnu"
+                            text: GeneralState.osName.length > 0 ? GeneralState.osName : I18n.tr("Système inconnu")
                             font.pixelSize: 13
                             gray: true
                             elide: Text.ElideRight
@@ -200,7 +200,7 @@ Item {
             }
 
             ContentSection {
-                title: "Système"
+                title: I18n.tr("Système")
                 visible: root.currentSubpage === "about"
 
                 RowLayout {
@@ -208,7 +208,7 @@ Item {
                     spacing: 10
 
                     CFText {
-                        text: "OS"
+                        text: I18n.tr("OS")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -216,7 +216,7 @@ Item {
                     }
 
                     CFText {
-                        text: GeneralState.osName.length > 0 ? GeneralState.osName : "Inconnu"
+                        text: GeneralState.osName.length > 0 ? GeneralState.osName : I18n.tr("Inconnu")
                         gray: true
                         font.pixelSize: 13
                         elide: Text.ElideRight
@@ -230,7 +230,7 @@ Item {
                     visible: GeneralState.machineModel.length > 0
 
                     CFText {
-                        text: "Host"
+                        text: I18n.tr("Host")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -251,7 +251,7 @@ Item {
                     spacing: 10
 
                     CFText {
-                        text: "Noyau"
+                        text: I18n.tr("Noyau")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -259,7 +259,7 @@ Item {
                     }
 
                     CFText {
-                        text: GeneralState.kernelVersion.length > 0 ? GeneralState.kernelVersion : "Inconnu"
+                        text: GeneralState.kernelVersion.length > 0 ? GeneralState.kernelVersion : I18n.tr("Inconnu")
                         gray: true
                         font.pixelSize: 13
                     }
@@ -271,7 +271,7 @@ Item {
                     visible: GeneralState.uptimePretty.length > 0
 
                     CFText {
-                        text: "Uptime"
+                        text: I18n.tr("Uptime")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -293,7 +293,7 @@ Item {
                     visible: GeneralState.packageCounts.length > 0
 
                     CFText {
-                        text: "Paquets"
+                        text: I18n.tr("Paquets")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -322,7 +322,7 @@ Item {
                     visible: GeneralState.shellName.length > 0
 
                     CFText {
-                        text: "Shell"
+                        text: I18n.tr("Shell")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -344,7 +344,7 @@ Item {
                     visible: GeneralState.wmName.length > 0
 
                     CFText {
-                        text: "WM"
+                        text: I18n.tr("WM")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -362,7 +362,7 @@ Item {
             }
 
             ContentSection {
-                title: "Matériel"
+                title: I18n.tr("Matériel")
                 visible: root.currentSubpage === "about"
 
                 RowLayout {
@@ -371,7 +371,7 @@ Item {
                     visible: GeneralState.cpuModel.length > 0
 
                     CFText {
-                        text: "CPU"
+                        text: I18n.tr("CPU")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -393,7 +393,7 @@ Item {
                     visible: GeneralState.gpuModel.length > 0
 
                     CFText {
-                        text: "GPU"
+                        text: I18n.tr("GPU")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -419,7 +419,7 @@ Item {
                         spacing: 10
 
                         CFText {
-                            text: "Mémoire"
+                            text: I18n.tr("Mémoire")
                             font.pixelSize: 14
                             color: Theme.textPrimary
                             elide: Text.ElideRight
@@ -454,7 +454,7 @@ Item {
                     visible: GeneralState.swapTotal.length > 0
 
                     CFText {
-                        text: "Swap"
+                        text: I18n.tr("Swap")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -474,7 +474,7 @@ Item {
                     visible: GeneralState.localIp.length > 0
 
                     CFText {
-                        text: "IP locale"
+                        text: I18n.tr("IP locale")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -494,7 +494,7 @@ Item {
                     visible: GeneralState.batteryPercent.length > 0
 
                     CFText {
-                        text: "Batterie"
+                        text: I18n.tr("Batterie")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -516,7 +516,7 @@ Item {
                     visible: GeneralState.localeName.length > 0
 
                     CFText {
-                        text: "Locale"
+                        text: I18n.tr("Locale")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -532,7 +532,7 @@ Item {
             }
 
             ContentSection {
-                title: "Mises à jour logicielles"
+                title: I18n.tr("Mises à jour logicielles")
                 visible: root.currentSubpage === "updates"
 
                 RowLayout {
@@ -540,7 +540,7 @@ Item {
                     spacing: 10
 
                     CFText {
-                        text: "État"
+                        text: I18n.tr("État")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -576,7 +576,7 @@ Item {
                             anchors.centerIn: parent
                             width: _checkButton.width - 12
                             horizontalAlignment: Text.AlignHCenter
-                            text: "Vérifier"
+                            text: I18n.tr("Vérifier")
                             font.pixelSize: 12
                             color: Theme.textPrimary
                             elide: Text.ElideRight
@@ -594,7 +594,7 @@ Item {
 
                 CFText {
                     visible: GeneralState.packageManager === "" || GeneralState.packageManager === "unknown"
-                    text: "Aucun gestionnaire de paquets pris en charge n'a été détecté."
+                    text: I18n.tr("Aucun gestionnaire de paquets pris en charge n'a été détecté.")
                     font.pixelSize: 11
                     gray: true
                     Layout.fillWidth: true
@@ -603,7 +603,7 @@ Item {
             }
 
             ContentSection {
-                title: "Stockage"
+                title: I18n.tr("Stockage")
                 visible: root.currentSubpage === "storage"
 
                 Repeater {
@@ -651,14 +651,14 @@ Item {
 
                 CFText {
                     visible: GeneralState.storageVolumes.length === 0
-                    text: "Aucun volume détecté."
+                    text: I18n.tr("Aucun volume détecté.")
                     font.pixelSize: 12
                     gray: true
                 }
             }
 
             ContentSection {
-                title: "Date et heure"
+                title: I18n.tr("Date et heure")
                 visible: root.currentSubpage === "datetime"
 
                 RowLayout {
@@ -666,7 +666,7 @@ Item {
                     spacing: 10
 
                     CFText {
-                        text: "Fuseau horaire"
+                        text: I18n.tr("Fuseau horaire")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -674,22 +674,22 @@ Item {
                     }
 
                     CFText {
-                        text: GeneralState.timezone.length > 0 ? GeneralState.timezone : "Inconnu"
+                        text: GeneralState.timezone.length > 0 ? GeneralState.timezone : I18n.tr("Inconnu")
                         gray: true
                         font.pixelSize: 13
                     }
                 }
 
                 ConfigSwitch {
-                    text: "Régler automatiquement (NTP)"
-                    description: GeneralState.clockSynchronized ? "Horloge synchronisée" : "Horloge non synchronisée"
+                    text: I18n.tr("Régler automatiquement (NTP)")
+                    description: GeneralState.clockSynchronized ? I18n.tr("Horloge synchronisée") : I18n.tr("Horloge non synchronisée")
                     checked: GeneralState.ntpEnabled
                     onToggled: function(v) { GeneralState.setNtpEnabled(v) }
                 }
             }
 
             ContentSection {
-                title: "Langue et région"
+                title: I18n.tr("Langue et région")
                 visible: root.currentSubpage === "language"
 
                 RowLayout {
@@ -697,7 +697,55 @@ Item {
                     spacing: 10
 
                     CFText {
-                        text: "Langue système"
+                        text: I18n.tr("Langue de l'interface")
+                        font.pixelSize: 14
+                        color: Theme.textPrimary
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+
+                    Repeater {
+                        model: [
+                            { id: "auto", label: I18n.tr("Auto") },
+                            { id: "fr",   label: "Français" },
+                            { id: "en",   label: "English" },
+                            { id: "es",   label: "Español" }
+                        ]
+
+                        Rectangle {
+                            id: langChip
+                            required property var modelData
+                            readonly property bool active: ShellConfig.options.general.language === modelData.id
+                            implicitWidth: chipLabel.implicitWidth + 24
+                            implicitHeight: 28
+                            radius: 8
+                            color: active ? Theme.accent : (chipArea.containsMouse ? Theme.fillHover : Theme.fillControl)
+
+                            CFText {
+                                id: chipLabel
+                                anchors.centerIn: parent
+                                text: langChip.modelData.id === "auto" ? I18n.tr("Auto") : langChip.modelData.label
+                                font.pixelSize: 13
+                                color: langChip.active ? Theme.onAccent : Theme.textPrimary
+                            }
+
+                            MouseArea {
+                                id: chipArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: ShellConfig.options.general.language = langChip.modelData.id
+                            }
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    CFText {
+                        text: I18n.tr("Langue système")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -705,7 +753,7 @@ Item {
                     }
 
                     CFText {
-                        text: GeneralState.languageCode.length > 0 ? GeneralState.languageCode.toUpperCase() : "Inconnu"
+                        text: GeneralState.languageCode.length > 0 ? GeneralState.languageCode.toUpperCase() : I18n.tr("Inconnu")
                         gray: true
                         font.pixelSize: 13
                     }
@@ -716,7 +764,7 @@ Item {
                     spacing: 10
 
                     CFText {
-                        text: "Locale"
+                        text: I18n.tr("Locale")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -724,7 +772,7 @@ Item {
                     }
 
                     CFText {
-                        text: GeneralState.localeName.length > 0 ? GeneralState.localeName : "Inconnu"
+                        text: GeneralState.localeName.length > 0 ? GeneralState.localeName : I18n.tr("Inconnu")
                         gray: true
                         font.pixelSize: 13
                     }
@@ -732,7 +780,7 @@ Item {
             }
 
             ContentSection {
-                title: "Éléments de connexion"
+                title: I18n.tr("Éléments de connexion")
                 visible: root.currentSubpage === "login"
 
                 Repeater {
@@ -748,7 +796,7 @@ Item {
 
                 CFText {
                     visible: GeneralState.autostartEntries.length === 0
-                    text: "Aucune application configurée pour démarrer automatiquement."
+                    text: I18n.tr("Aucune application configurée pour démarrer automatiquement.")
                     font.pixelSize: 12
                     gray: true
                     wrapMode: Text.WordWrap

@@ -49,7 +49,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: "Notes"
+                text: I18n.tr("Notes")
                 color: "#ffd60a"
                 font.pixelSize: 13
                 font.weight: Font.Bold
@@ -133,7 +133,7 @@ Item {
 
                     Text {
                         visible: editor.text === "" && !editor.preeditText
-                        text: "New note…"
+                        text: I18n.tr("New note…")
                         color: root.look.tertiary
                         font: editor.font
                         renderType: Text.NativeRendering
@@ -145,7 +145,7 @@ Item {
         Text {
             Layout.fillWidth: true
             visible: NotesState.notes.length === 0 && !root.adding
-            text: "No Notes"
+            text: I18n.tr("No Notes")
             color: root.look.secondary
             font.pixelSize: 13
             font.family: "SF Pro Text"

@@ -9,26 +9,26 @@ ContentPage {
     id: root
 
     readonly property var _transformOptions: [
-        { id: 0, label: "Normal" },
+        { id: 0, label: I18n.tr("Normal") },
         { id: 1, label: "90°" },
         { id: 2, label: "180°" },
         { id: 3, label: "270°" },
-        { id: 4, label: "Miroir horizontal" },
-        { id: 5, label: "Miroir + 90°" },
-        { id: 6, label: "Miroir + 180°" },
-        { id: 7, label: "Miroir + 270°" }
+        { id: 4, label: I18n.tr("Miroir horizontal") },
+        { id: 5, label: I18n.tr("Miroir + 90°") },
+        { id: 6, label: I18n.tr("Miroir + 180°") },
+        { id: 7, label: I18n.tr("Miroir + 270°") }
     ]
 
     readonly property var _cmOptions: [
-        { id: "auto",    label: "Auto" },
-        { id: "srgb",    label: "sRGB" },
-        { id: "dcip3",   label: "DCI-P3" },
-        { id: "dp3",     label: "Apple P3" },
-        { id: "adobe",   label: "Adobe RGB" },
-        { id: "wide",    label: "Large gamut (BT2020)" },
-        { id: "edid",    label: "Primaires EDID" },
-        { id: "hdr",     label: "HDR (expérimental)" },
-        { id: "hdredid", label: "HDR + EDID (expérimental)" }
+        { id: "auto",    label: I18n.tr("Auto") },
+        { id: "srgb",    label: I18n.tr("sRGB") },
+        { id: "dcip3",   label: I18n.tr("DCI-P3") },
+        { id: "dp3",     label: I18n.tr("Apple P3") },
+        { id: "adobe",   label: I18n.tr("Adobe RGB") },
+        { id: "wide",    label: I18n.tr("Large gamut (BT2020)") },
+        { id: "edid",    label: I18n.tr("Primaires EDID") },
+        { id: "hdr",     label: I18n.tr("HDR (expérimental)") },
+        { id: "hdredid", label: I18n.tr("HDR + EDID (expérimental)") }
     ]
 
     ContentSection {
@@ -37,7 +37,7 @@ ContentPage {
             spacing: 10
 
             CFText {
-                text: "Écrans détectés"
+                text: I18n.tr("Écrans détectés")
                 font.pixelSize: 14
                 color: Theme.textPrimary
                 elide: Text.ElideRight
@@ -59,7 +59,7 @@ ContentPage {
                     anchors.centerIn: parent
                     width: _refreshButton.width - 12
                     horizontalAlignment: Text.AlignHCenter
-                    text: MonitorState.loading ? "…" : "Actualiser"
+                    text: MonitorState.loading ? "…" : I18n.tr("Actualiser")
                     font.pixelSize: 11
                     color: Theme.textPrimary
                     elide: Text.ElideRight
@@ -89,7 +89,7 @@ ContentPage {
 
             ConfigSwitch {
                 Layout.fillWidth: true
-                text: "Activé"
+                text: I18n.tr("Activé")
                 checked: !_monSection.modelData.disabled
                 enabled: _monSection.modelData.disabled || MonitorState.activeCount > 1
                 onToggled: function(v) {
@@ -99,7 +99,7 @@ ContentPage {
 
             CFText {
                 visible: !_monSection.modelData.disabled && MonitorState.activeCount <= 1
-                text: "Impossible de désactiver le seul écran actif."
+                text: I18n.tr("Impossible de désactiver le seul écran actif.")
                 font.pixelSize: 11
                 gray: true
                 Layout.fillWidth: true
@@ -116,7 +116,7 @@ ContentPage {
                     spacing: 10
 
                     CFText {
-                        text: "Résolution"
+                        text: I18n.tr("Résolution")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -177,7 +177,7 @@ ContentPage {
 
                 ConfigSlider {
                     Layout.fillWidth: true
-                    text: "Échelle"
+                    text: I18n.tr("Échelle")
                     value: _monSection.modelData.scale || 1
                     from: 0.5
                     to: 3.0
@@ -197,7 +197,7 @@ ContentPage {
                     spacing: 10
 
                     CFText {
-                        text: "Position"
+                        text: I18n.tr("Position")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         Layout.fillWidth: true
@@ -215,7 +215,7 @@ ContentPage {
                     spacing: 10
 
                     CFText {
-                        text: "Orientation"
+                        text: I18n.tr("Orientation")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -315,7 +315,7 @@ ContentPage {
 
                 ConfigSwitch {
                     Layout.fillWidth: true
-                    text: "Taux de rafraîchissement variable (VRR)"
+                    text: I18n.tr("Taux de rafraîchissement variable (VRR)")
                     checked: _monSection.modelData.vrr || false
                     onToggled: function(v) {
                         MonitorState.applyAndPersist({
@@ -330,7 +330,7 @@ ContentPage {
 
                 ConfigSwitch {
                     Layout.fillWidth: true
-                    text: "Profondeur de couleur 10 bits"
+                    text: I18n.tr("Profondeur de couleur 10 bits")
                     checked: (_monSection.modelData.currentFormat || "").indexOf("2101010") !== -1 || (_monSection.modelData.currentFormat || "").indexOf("A2R10G10B10") !== -1
                     onToggled: function(v) {
                         MonitorState.applyAndPersist({
@@ -348,7 +348,7 @@ ContentPage {
                     spacing: 10
 
                     CFText {
-                        text: "Gestion des couleurs"
+                        text: I18n.tr("Gestion des couleurs")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -454,7 +454,7 @@ ContentPage {
 
                     ConfigSlider {
                         Layout.fillWidth: true
-                        text: "Luminosité SDR"
+                        text: I18n.tr("Luminosité SDR")
                         value: _monSection.modelData.sdrBrightness || 1.0
                         from: 0.5
                         to: 2.0
@@ -472,7 +472,7 @@ ContentPage {
 
                     ConfigSlider {
                         Layout.fillWidth: true
-                        text: "Saturation SDR"
+                        text: I18n.tr("Saturation SDR")
                         value: _monSection.modelData.sdrSaturation || 1.0
                         from: 0.5
                         to: 1.5
@@ -496,7 +496,7 @@ ContentPage {
                     spacing: 10
 
                     CFText {
-                        text: "Miroir de"
+                        text: I18n.tr("Miroir de")
                         font.pixelSize: 14
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -529,7 +529,7 @@ ContentPage {
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
                             width: _mirrorButton.width - 10 - 8 - _mirrorChevron.width - 4
-                            text: (_monSection.modelData.mirrorOf && _monSection.modelData.mirrorOf !== "none" && _monSection.modelData.mirrorOf.length > 0) ? _monSection.modelData.mirrorOf : "Aucun"
+                            text: (_monSection.modelData.mirrorOf && _monSection.modelData.mirrorOf !== "none" && _monSection.modelData.mirrorOf.length > 0) ? _monSection.modelData.mirrorOf : I18n.tr("Aucun")
                             font.pixelSize: 12
                             color: Theme.textPrimary
                             elide: Text.ElideRight
@@ -560,7 +560,7 @@ ContentPage {
                             anchors.left: parent.left
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
-                            text: "Aucun"
+                            text: I18n.tr("Aucun")
                             font.pixelSize: 13
                             color: Theme.textPrimary
                         }
@@ -628,7 +628,7 @@ ContentPage {
                     spacing: 10
 
                     CFText {
-                        text: "Sur certains pilotes graphiques, la rotation ou le HDR peuvent nécessiter un redémarrage du compositeur pour s'appliquer pleinement."
+                        text: I18n.tr("Sur certains pilotes graphiques, la rotation ou le HDR peuvent nécessiter un redémarrage du compositeur pour s'appliquer pleinement.")
                         font.pixelSize: 11
                         gray: true
                         Layout.fillWidth: true
@@ -650,7 +650,7 @@ ContentPage {
                             anchors.centerIn: parent
                             width: _resetButton.width - 12
                             horizontalAlignment: Text.AlignHCenter
-                            text: "Réinitialiser"
+                            text: I18n.tr("Réinitialiser")
                             font.pixelSize: 11
                             color: Theme.textPrimary
                             elide: Text.ElideRight
@@ -683,7 +683,7 @@ ContentPage {
 
     CFText {
         visible: MonitorState.monitors.length === 0 && !MonitorState.loading
-        text: "Aucun écran détecté."
+        text: I18n.tr("Aucun écran détecté.")
         font.pixelSize: 13
         gray: true
         Layout.fillWidth: true

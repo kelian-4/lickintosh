@@ -14,7 +14,7 @@ Item {
         spacing: 8
 
         Text {
-            text: "Quote of the Day"
+            text: I18n.tr("Quote of the Day")
             color: "#bf5af2"
             font.pixelSize: 13
             font.weight: Font.Bold

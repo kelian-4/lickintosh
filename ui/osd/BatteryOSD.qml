@@ -269,7 +269,7 @@ Scope {
                             }
 
                             CFText {
-                                text:                "Batterie système"
+                                text:                I18n.tr("Batterie système")
                                 font.pixelSize:      11
                                 color:               Qt.rgba(1, 1, 1, 0.55)
                                 Layout.fillWidth:    true

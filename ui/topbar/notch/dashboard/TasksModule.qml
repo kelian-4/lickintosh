@@ -25,7 +25,7 @@ Item {
 
         Text {
             Layout.fillWidth: true
-            text: "Tâches"
+            text: I18n.tr("Tâches")
             color: "#8A8A8A"
             font.pixelSize: 12
             font.bold: true
@@ -35,7 +35,7 @@ Item {
         Text {
             Layout.fillWidth: true
             visible: root.visibleTasks.length === 0
-            text: "Rien à faire"
+            text: I18n.tr("Rien à faire")
             color: "#C0C0C0"
             font.pixelSize: 13
             font.family: "SF Pro Text"

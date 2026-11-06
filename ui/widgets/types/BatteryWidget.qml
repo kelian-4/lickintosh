@@ -111,7 +111,7 @@ Item {
     ResourceTitle {
         look: root.look
         id: title
-        title: root.size === "s" ? "Battery" : (root.size === "m" ? "System Status" : "System Monitor")
+        title: root.size === "s" ? I18n.tr("Battery") : (root.size === "m" ? I18n.tr("System Status") : I18n.tr("System Monitor"))
         tint: root.level
     }
 
@@ -166,7 +166,7 @@ Item {
 
                 Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "State"
+                    text: I18n.tr("State")
                     color: root.look.secondary
                     font.pixelSize: 10
                     font.family: "SF Pro Text"
@@ -191,7 +191,7 @@ Item {
 
                 Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: root.charging ? "To full" : "Left"
+                    text: root.charging ? I18n.tr("To full") : I18n.tr("Left")
                     color: root.look.secondary
                     font.pixelSize: 10
                     font.family: "SF Pro Text"
@@ -265,7 +265,7 @@ Item {
                 Layout.preferredWidth: 66
                 percent: root.fraction * 100
                 tint: root.level
-                caption: "BAT"
+                caption: I18n.tr("BAT")
                 thickness: 6
                 valueSize: 14
             }
@@ -277,7 +277,7 @@ Item {
                 Layout.preferredWidth: 66
                 percent: ResourcesState.cpuPercent
                 tint: "#64d2ff"
-                caption: "CPU"
+                caption: I18n.tr("CPU")
                 thickness: 6
                 valueSize: 14
             }
@@ -289,7 +289,7 @@ Item {
                 Layout.preferredWidth: 66
                 percent: ResourcesState.memoryPercent
                 tint: "#30d158"
-                caption: "RAM"
+                caption: I18n.tr("RAM")
                 thickness: 6
                 valueSize: 14
             }
@@ -301,14 +301,14 @@ Item {
                 Layout.preferredWidth: 66
                 percent: ResourcesState.storagePercent
                 tint: "#ff9f0a"
-                caption: "DISK"
+                caption: I18n.tr("DISK")
                 thickness: 6
                 valueSize: 14
             }
         }
 
         Text {
-            text: "Top Memory Users"
+            text: I18n.tr("Top Memory Users")
             color: root.look.primary
             font.pixelSize: 12
             font.weight: Font.Bold

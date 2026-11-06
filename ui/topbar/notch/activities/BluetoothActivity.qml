@@ -29,7 +29,7 @@ Item {
             spacing: 3
             Text {
                 Layout.fillWidth: true
-                text: root._entry ? root._entry.title : "Bluetooth"
+                text: root._entry ? root._entry.title : I18n.tr("Bluetooth")
                 color: "#FFFFFF"
                 font.pixelSize: 13
                 font.bold: true

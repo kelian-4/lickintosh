@@ -656,7 +656,7 @@ Scope {
                                     Behavior on color { ColorAnimation { duration: 100 } }
                                     Text {
                                         anchors.centerIn: parent
-                                        text: win.toolsBusy ? "…" : "Approuver"
+                                        text: win.toolsBusy ? "…" : I18n.tr("Approuver")
                                         color: "#FFFFFF"; font.pixelSize: 12; font.weight: Font.Medium; renderType: Text.NativeRendering
                                     }
                                     MouseArea {
@@ -722,7 +722,7 @@ Scope {
                                 TextArea {
                                     id: inputArea
                                     width:               inputScroll.width
-                                    placeholderText:     win.loading ? "Thinking…" : (speech.recording ? "Écoute…" : "Ask AI… (/ pour les commandes)")
+                                    placeholderText:     win.loading ? I18n.tr("Thinking…") : (speech.recording ? I18n.tr("Écoute…") : I18n.tr("Ask AI… (/ pour les commandes)"))
                                     placeholderTextColor: "#555"
                                     color: Theme.ink(parent, false)
                                     background:          null
@@ -919,7 +919,7 @@ Scope {
 
                                 Text {
                                     visible: AiChats.chats.length === 0
-                                    text: "Aucune conversation sauvegardée pour l'instant."
+                                    text: I18n.tr("Aucune conversation sauvegardée pour l'instant.")
                                     color: Theme.ink(parent, false)
                                     font.pixelSize: 12
                                     wrapMode: Text.Wrap

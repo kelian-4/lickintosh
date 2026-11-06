@@ -21,7 +21,7 @@ Item {
             Layout.fillWidth: true
 
             Text {
-                text: "Bluetooth"
+                text: I18n.tr("Bluetooth")
                 color: Theme.accent
                 font.pixelSize: 13
                 font.weight: Font.Bold

@@ -125,7 +125,7 @@ Item {
                 Text {
                     id: newLabel
                     anchors.centerIn: parent
-                    text: "+ Nouvelle"
+                    text: I18n.tr("+ Nouvelle")
                     color: "#FFFFFF"
                     font.pixelSize: 11
                     font.bold: true
@@ -236,7 +236,7 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "Annuler"
+                    text: I18n.tr("Annuler")
                     color: "#E6E6E6"
                     font.pixelSize: 11
                     font.family: "SF Pro Text"
@@ -259,7 +259,7 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "Valider"
+                    text: I18n.tr("Valider")
                     color: root.canValidate ? "#FFFFFF" : "#6A6A6A"
                     font.pixelSize: 11
                     font.bold: true

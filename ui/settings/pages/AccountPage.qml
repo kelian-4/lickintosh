@@ -15,19 +15,19 @@ ContentPage {
     readonly property string avatarPath: root.info.avatar || ""
 
     readonly property var personalRows: [
-        { label: "Nom complet",          value: root.info.fullname || "—" },
-        { label: "Identifiant",          value: root.info.user || "—" },
-        { label: "Identifiant numérique", value: root.info.uid || "—" },
-        { label: "Groupes",              value: root.info.groups || "—" },
-        { label: "Dossier personnel",    value: root.info.home || "—" },
-        { label: "Interpréteur",         value: root.info.shell || "—" }
+        { label: I18n.tr("Nom complet"),          value: root.info.fullname || "—" },
+        { label: I18n.tr("Identifiant"),          value: root.info.user || "—" },
+        { label: I18n.tr("Identifiant numérique"), value: root.info.uid || "—" },
+        { label: I18n.tr("Groupes"),              value: root.info.groups || "—" },
+        { label: I18n.tr("Dossier personnel"),    value: root.info.home || "—" },
+        { label: I18n.tr("Interpréteur"),         value: root.info.shell || "—" }
     ]
 
     readonly property var systemRows: [
-        { label: "Nom de la machine", value: root.info.host || "—" },
-        { label: "Système",           value: root.info.os || "—" },
-        { label: "Noyau",             value: root.info.kernel || "—" },
-        { label: "Session",           value: root.info.session || "—" }
+        { label: I18n.tr("Nom de la machine"), value: root.info.host || "—" },
+        { label: I18n.tr("Système"),           value: root.info.os || "—" },
+        { label: I18n.tr("Noyau"),             value: root.info.kernel || "—" },
+        { label: I18n.tr("Session"),           value: root.info.session || "—" }
     ]
 
     Process {
@@ -137,7 +137,7 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Informations personnelles"
+        title: I18n.tr("Informations personnelles")
 
         Repeater {
             model: root.personalRows
@@ -151,7 +151,7 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Cet ordinateur"
+        title: I18n.tr("Cet ordinateur")
 
         Repeater {
             model: root.systemRows

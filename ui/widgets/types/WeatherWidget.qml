@@ -12,7 +12,7 @@ Item {
     readonly property bool fullBleed: true
 
     function dayLabel(dateString) {
-        return Qt.locale().dayName(new Date(dateString + "T12:00:00").getDay(), Locale.ShortFormat)
+        return Qt.locale(I18n.lang).dayName(new Date(dateString + "T12:00:00").getDay(), Locale.ShortFormat)
     }
 
     Rectangle {
@@ -36,7 +36,7 @@ Item {
             spacing: 0
 
             Text {
-                text: WeatherState.city !== "" ? WeatherState.city : "Weather"
+                text: WeatherState.city !== "" ? WeatherState.city : I18n.tr("Weather")
                 color: "#ffffff"
                 font.pixelSize: 14
                 font.weight: Font.Medium
@@ -138,7 +138,7 @@ Item {
                 spacing: 0
 
                 Text {
-                    text: WeatherState.city !== "" ? WeatherState.city : "Weather"
+                    text: WeatherState.city !== "" ? WeatherState.city : I18n.tr("Weather")
                     color: "#ffffff"
                     font.pixelSize: 15
                     font.weight: Font.Medium

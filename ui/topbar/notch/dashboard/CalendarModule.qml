@@ -31,7 +31,7 @@ Item {
             spacing: 12
 
             Text {
-                text: Qt.locale("fr_FR").standaloneMonthName(root.today.getMonth(), Locale.ShortFormat)
+                text: Qt.locale(I18n.lang).standaloneMonthName(root.today.getMonth(), Locale.ShortFormat)
                 color: "#FFFFFF"
                 font.pixelSize: 24
                 font.bold: true
@@ -51,7 +51,7 @@ Item {
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
-                        text: Qt.locale("fr_FR").standaloneDayName(parent.cellDate.getDay(), Locale.ShortFormat).toUpperCase().replace(".", "")
+                        text: Qt.locale(I18n.lang).standaloneDayName(parent.cellDate.getDay(), Locale.ShortFormat).toUpperCase().replace(".", "")
                         color: parent.isToday ? Theme.accent : (parent.isWeekend ? "#EC4899" : "#8A8A8A")
                         font.pixelSize: 10
                         font.bold: parent.isToday
@@ -78,7 +78,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 visible: root.upcoming.length === 0
-                text: "Rien de prévu aujourd'hui"
+                text: I18n.tr("Rien de prévu aujourd'hui")
                 color: "#8A8A8A"
                 font.pixelSize: 12
                 font.family: "SF Pro Text"

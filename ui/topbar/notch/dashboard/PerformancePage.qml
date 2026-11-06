@@ -84,7 +84,7 @@ Item {
         spacing: 12
 
         Metric {
-            title: "CPU"
+            title: I18n.tr("CPU")
             history: ResourcesState.cpuHistory
             accent: Theme.accent
             percent: ResourcesState.cpuPercent
@@ -94,7 +94,7 @@ Item {
         Divider {}
 
         Metric {
-            title: "Mémoire"
+            title: I18n.tr("Mémoire")
             history: ResourcesState.memoryHistory
             accent: "#EC4899"
             percent: ResourcesState.memoryPercent
@@ -104,7 +104,7 @@ Item {
         Divider {}
 
         Metric {
-            title: "Stockage"
+            title: I18n.tr("Stockage")
             history: ResourcesState.storageHistory
             accent: "#4ADE80"
             percent: ResourcesState.storagePercent
@@ -118,7 +118,7 @@ Item {
                 anchors.centerIn: parent
                 spacing: 6
 
-                Caption { text: "Réseau" }
+                Caption { text: I18n.tr("Réseau") }
 
                 Text {
                     Layout.alignment: Qt.AlignHCenter
@@ -146,11 +146,11 @@ Item {
         Divider {}
 
         Metric {
-            title: "Batterie"
+            title: I18n.tr("Batterie")
             history: ResourcesState.batteryHistory
             accent: NotchState.batteryPercent > 20 ? "#4ADE80" : "#FF6B6B"
             percent: NotchState.batteryPercent
-            detail: NotchState.batteryCharging ? "En charge" : "Sur batterie"
+            detail: NotchState.batteryCharging ? I18n.tr("En charge") : I18n.tr("Sur batterie")
         }
 
         Divider {}
@@ -164,7 +164,7 @@ Item {
                 width: parent.width - 8
                 spacing: 4
 
-                Caption { text: "Processus (mémoire)" }
+                Caption { text: I18n.tr("Processus (mémoire)") }
 
                 Repeater {
                     model: ResourcesState.topMemory.slice(0, 4)

@@ -77,7 +77,7 @@ Item {
         spacing: 12
 
         CFText {
-            text: "Sound"
+            text: I18n.tr("Sound")
             font.pixelSize: 15
             font.weight: Font.Bold
         }
@@ -139,7 +139,7 @@ Item {
             spacing: 6
 
             CFText {
-                text: "Output"
+                text: I18n.tr("Output")
                 gray: true
                 font.pixelSize: 11
                 font.weight: Font.Bold
@@ -229,7 +229,7 @@ Item {
 
             CFText {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Sound Settings..."
+                text: I18n.tr("Sound Settings...")
                 font.pixelSize: 13
             }
         }

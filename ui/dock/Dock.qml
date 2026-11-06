@@ -1088,7 +1088,7 @@ Scope {
                         DockMenuItem {
                             id: _optionsItem
                             visible:    dockRoot.menuMode === "app"
-                            label:      "Options"
+                            label:      I18n.tr("Options")
                             hasSubmenu: true
                             onHoveredIn: {
                                 var pt = _optionsItem.mapToItem(null, 0, 0)
@@ -1102,7 +1102,7 @@ Scope {
 
                         DockMenuItem {
                             visible: dockRoot.menuMode === "app"
-                            label:   "Afficher toutes les fenêtres"
+                            label:   I18n.tr("Afficher toutes les fenêtres")
                             enabled: dockRoot.menuInstances.length > 0
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
@@ -1116,7 +1116,7 @@ Scope {
                             visible: dockRoot.menuMode === "app"
                             property bool _isHidden: dockRoot.menuInstances.length > 0 &&
                                                       dockRoot.menuInstances[0].wsName === "special:" + dockRoot.hiddenWorkspaceName(dockRoot.menuGroupKey)
-                            label:   _hideItem._isHidden ? "Afficher" : "Masquer"
+                            label:   _hideItem._isHidden ? I18n.tr("Afficher") : I18n.tr("Masquer")
                             enabled: dockRoot.menuInstances.length > 0
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
@@ -1130,7 +1130,7 @@ Scope {
 
                         DockMenuItem {
                             visible:     dockRoot.menuMode === "app"
-                            label:       "Quitter"
+                            label:       I18n.tr("Quitter")
                             enabled:     dockRoot.menuInstances.length > 0
                             destructive: true
                             onHoveredIn: dockRoot.submenuVisible = false
@@ -1145,7 +1145,7 @@ Scope {
                         DockMenuItem {
                             id: _assignItem
                             visible:    dockRoot.menuMode === "app"
-                            label:      "Assigner à"
+                            label:      I18n.tr("Assigner à")
                             hasSubmenu: true
                             enabled:    dockRoot.menuInstances.length > 0
                             onHoveredIn: {
@@ -1158,7 +1158,7 @@ Scope {
 
                         DockMenuItem {
                             visible: dockRoot.menuMode === "file"
-                            label:   "Ouvrir"
+                            label:   I18n.tr("Ouvrir")
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
                                 Quickshell.execDetached(["xdg-open", dockRoot.menuGroupKey])
@@ -1168,7 +1168,7 @@ Scope {
 
                         DockMenuItem {
                             visible: dockRoot.menuMode === "file"
-                            label:   "Copier le chemin"
+                            label:   I18n.tr("Copier le chemin")
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
                                 dockRoot.copyCommand()
@@ -1180,7 +1180,7 @@ Scope {
 
                         DockMenuItem {
                             visible:     dockRoot.menuMode === "file"
-                            label:       "Retirer du Dock"
+                            label:       I18n.tr("Retirer du Dock")
                             destructive: true
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
@@ -1191,7 +1191,7 @@ Scope {
 
                         DockMenuItem {
                             visible: dockRoot.menuMode === "trash"
-                            label:   "Ouvrir la corbeille"
+                            label:   I18n.tr("Ouvrir la corbeille")
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
                                 Quickshell.execDetached(["dolphin", "trash:/"])
@@ -1203,7 +1203,7 @@ Scope {
 
                         DockMenuItem {
                             visible:     dockRoot.menuMode === "trash"
-                            label:       "Vider la corbeille"
+                            label:       I18n.tr("Vider la corbeille")
                             destructive: true
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
@@ -1247,7 +1247,7 @@ Scope {
                         DockMenuItem {
                             visible: dockRoot.submenuKind === "options"
                             height:  visible ? 26 : 0
-                            label:   dockRoot.menuIsPinned ? "Retirer du Dock" : "Garder dans le Dock"
+                            label:   dockRoot.menuIsPinned ? I18n.tr("Retirer du Dock") : I18n.tr("Garder dans le Dock")
                             checked: dockRoot.menuIsPinned
                             onActivated: {
                                 dockRoot.toggleKeepInDock()
@@ -1266,7 +1266,7 @@ Scope {
                                 }
                                 return false
                             }
-                            label:   "Ouvrir à la connexion"
+                            label:   I18n.tr("Ouvrir à la connexion")
                             checked: _autostartItem._isAutostart
                             enabled: dockRoot.menuIsPinned && dockRoot.menuGroupKey !== ""
                             onActivated: {
@@ -1278,7 +1278,7 @@ Scope {
                         DockMenuItem {
                             visible: dockRoot.submenuKind === "assign"
                             height:  visible ? 26 : 0
-                            label:   "Tous les bureaux"
+                            label:   I18n.tr("Tous les bureaux")
                             checked: dockRoot.menuInstances.length > 0 && dockRoot.menuInstances[0].pinned === true
                             onActivated: {
                                 dockRoot.assignAllDesktops()
@@ -1289,7 +1289,7 @@ Scope {
                         DockMenuItem {
                             visible: dockRoot.submenuKind === "assign"
                             height:  visible ? 26 : 0
-                            label:   "Ce bureau"
+                            label:   I18n.tr("Ce bureau")
                             checked: !(dockRoot.menuInstances.length > 0 && dockRoot.menuInstances[0].pinned === true)
                             onActivated: {
                                 dockRoot.assignThisDesktop()

@@ -264,7 +264,7 @@ BoxGlass {
 
                     Text {
                         anchors.centerIn: parent
-                        text: root.isStack ? "Effacer" : "Rappeler plus tard"
+                        text: root.isStack ? I18n.tr("Effacer") : I18n.tr("Rappeler plus tard")
                         font.pixelSize: 13
                         font.weight: Font.DemiBold
                         font.family: "SF Pro Text"
@@ -296,7 +296,7 @@ BoxGlass {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Options"
+                        text: I18n.tr("Options")
                         font.pixelSize: 13
                         font.weight: Font.DemiBold
                         font.family: "SF Pro Text"
@@ -361,7 +361,7 @@ BoxGlass {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Confirmer"
+                        text: I18n.tr("Confirmer")
                         font.pixelSize: 12
                         font.weight: Font.DemiBold
                         font.family: "SF Pro Text"

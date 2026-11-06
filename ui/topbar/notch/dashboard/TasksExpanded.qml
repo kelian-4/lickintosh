@@ -87,7 +87,7 @@ Item {
             Item { Layout.fillHeight: true }
 
             Text {
-                text: "Tâches"
+                text: I18n.tr("Tâches")
                 color: "#FFFFFF"
                 font.pixelSize: 28
                 font.bold: true
@@ -102,7 +102,7 @@ Item {
             Text {
                 Layout.topMargin: 8
                 Layout.fillWidth: true
-                text: "Ajout : >+ dans Spotlight"
+                text: I18n.tr("Ajout : >+ dans Spotlight")
                 color: "#6A6A6A"
                 font.pixelSize: 11
                 font.family: "SF Pro Text"
@@ -121,7 +121,7 @@ Item {
             spacing: 2
 
             Text {
-                text: "À faire"
+                text: I18n.tr("À faire")
                 color: "#8A8A8A"
                 font.pixelSize: 12
                 font.bold: true
@@ -130,7 +130,7 @@ Item {
 
             Text {
                 visible: root.pending.length === 0
-                text: "Rien à faire"
+                text: I18n.tr("Rien à faire")
                 color: "#C0C0C0"
                 font.pixelSize: 13
                 font.family: "SF Pro Text"
@@ -167,7 +167,7 @@ Item {
                 Layout.fillWidth: true
 
                 Text {
-                    text: "Terminées"
+                    text: I18n.tr("Terminées")
                     color: "#8A8A8A"
                     font.pixelSize: 12
                     font.bold: true
@@ -183,7 +183,7 @@ Item {
 
             Text {
                 visible: root.finished.length === 0
-                text: "Aucune tâche terminée"
+                text: I18n.tr("Aucune tâche terminée")
                 color: "#6A6A6A"
                 font.pixelSize: 13
                 font.family: "SF Pro Text"

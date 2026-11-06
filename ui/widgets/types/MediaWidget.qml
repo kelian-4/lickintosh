@@ -52,7 +52,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: MprisState.hasPlayer ? (MprisState.trackTitle !== "" ? MprisState.trackTitle : "Unknown") : "Not Playing"
+                text: MprisState.hasPlayer ? (MprisState.trackTitle !== "" ? MprisState.trackTitle : I18n.tr("Unknown")) : I18n.tr("Not Playing")
                 elide: Text.ElideRight
                 color: root.look.primary
                 font.pixelSize: 14

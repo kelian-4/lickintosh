@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.components
+import qs.services
 
 Item {
     id: root
@@ -30,7 +31,7 @@ Item {
 
         CFText {
             Layout.alignment: Qt.AlignHCenter
-            text: "Bientôt disponible"
+            text: I18n.tr("Bientôt disponible")
             font.pixelSize: 13
             gray: true
         }

@@ -129,7 +129,7 @@ Scope {
                         anchors.top: parent.top
                         anchors.topMargin: 13
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "About This PC"
+                        text: I18n.tr("About This PC")
                         color: Qt.rgba(1, 1, 1, 0.80)
                         font.pixelSize: 13
                         font.weight: Font.Medium
@@ -154,7 +154,7 @@ Scope {
                         anchors.top: _deviceImg.bottom
                         anchors.topMargin: 14
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: _procOS.result !== "" ? _procOS.result : "NixOS"
+                        text: _procOS.result !== "" ? _procOS.result : I18n.tr("NixOS")
                         color: Theme.ink(parent, false)
                         font.pixelSize: 22
                         font.weight: Font.Bold
@@ -235,7 +235,7 @@ Scope {
 
                         Text {
                             anchors.centerIn: parent
-                            text: "More Info…"
+                            text: I18n.tr("More Info…")
                             color: Theme.ink(parent, false)
                             font.pixelSize: 12
                             font.family: "SF Pro Display"

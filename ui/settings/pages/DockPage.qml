@@ -9,16 +9,16 @@ ContentPage {
     id: root
 
     ContentSection {
-        title: "Dock"
+        title: I18n.tr("Dock")
 
         ConfigSwitch {
-            text: "Masquer et afficher automatiquement le Dock"
+            text: I18n.tr("Masquer et afficher automatiquement le Dock")
             checked: ShellConfig.options.dockAppearance.hoverToReveal
             onToggled: function(v) { ShellConfig.options.dockAppearance.hoverToReveal = v }
         }
 
         ConfigSlider {
-            text: "Taille"
+            text: I18n.tr("Taille")
             value: ShellConfig.options.dockAppearance.iconSize
             from: 32
             to: 84
@@ -28,7 +28,7 @@ ContentPage {
         }
 
         ConfigSlider {
-            text: "Échelle du Dock"
+            text: I18n.tr("Échelle du Dock")
             value: ShellConfig.options.dockAppearance.iconScale
             from: 0.8
             to: 1.6
@@ -37,7 +37,7 @@ ContentPage {
         }
 
         ConfigSlider {
-            text: "Débordement des icônes"
+            text: I18n.tr("Débordement des icônes")
             value: ShellConfig.options.dockAppearance.iconOverflow
             from: -4
             to: 14
@@ -47,13 +47,13 @@ ContentPage {
         }
 
         ConfigSwitch {
-            text: "Grossissement à l'approche du curseur"
+            text: I18n.tr("Grossissement à l'approche du curseur")
             checked: ShellConfig.options.dockAppearance.magnificationEnabled
             onToggled: function(v) { ShellConfig.options.dockAppearance.magnificationEnabled = v }
         }
 
         ConfigSlider {
-            text: "Niveau de grossissement"
+            text: I18n.tr("Niveau de grossissement")
             visible: ShellConfig.options.dockAppearance.magnificationEnabled
             value: ShellConfig.options.dockAppearance.magnification
             from: 1.0
@@ -63,7 +63,7 @@ ContentPage {
         }
 
         ConfigSwitch {
-            text: "Icônes monochromes"
+            text: I18n.tr("Icônes monochromes")
             checked: ShellConfig.options.dockAppearance.monochromeIcons
             onToggled: function(v) { ShellConfig.options.dockAppearance.monochromeIcons = v }
         }

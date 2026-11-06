@@ -17,7 +17,7 @@ Item {
     readonly property var weekdays: ["L", "M", "M", "J", "V", "S", "D"]
     readonly property var events: CalendarState.available ? CalendarState.events.slice(0, 4) : []
     readonly property string monthTitle: {
-        var n = Qt.locale("fr_FR").monthName(root.shown.getMonth(), Locale.LongFormat)
+        var n = Qt.locale(I18n.lang).monthName(root.shown.getMonth(), Locale.LongFormat)
         return n.charAt(0).toUpperCase() + n.slice(1)
     }
 
@@ -194,7 +194,7 @@ Item {
                 Layout.fillWidth: true
 
                 Text {
-                    text: "Agenda"
+                    text: I18n.tr("Agenda")
                     color: "#8A8A8A"
                     font.pixelSize: 12
                     font.bold: true
@@ -211,7 +211,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 visible: root.events.length === 0
-                text: "Rien de prévu aujourd'hui"
+                text: I18n.tr("Rien de prévu aujourd'hui")
                 color: "#C0C0C0"
                 font.pixelSize: 12
                 font.family: "SF Pro Text"

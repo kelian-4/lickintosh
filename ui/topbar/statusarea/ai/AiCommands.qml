@@ -1,18 +1,19 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import qs.services
 
 Singleton {
     id: root
 
     readonly property var commands: [
-        { name: "model",    args: "set <nom>",                 desc: "Changer de modèle" },
-        { name: "provider", args: "set <id> [key <clé>]",       desc: "Changer de provider, avec clé optionnelle" },
-        { name: "key",      args: "set <provider> <clé> | remove <provider>", desc: "Définir ou supprimer une clé API" },
-        { name: "add",      args: "<id> <endpoint> <format> <modèle>", desc: "Ajouter un provider personnalisé" },
-        { name: "chat",     args: "list | load <id> | new | delete <id> | clear", desc: "Gérer les conversations sauvegardées" },
-        { name: "clear",    args: "",                           desc: "Effacer la conversation" },
-        { name: "help",     args: "",                           desc: "Liste des commandes" }
+        { name: "model",    args: "set <nom>",                 desc: I18n.tr("Changer de modèle") },
+        { name: "provider", args: "set <id> [key <clé>]",       desc: I18n.tr("Changer de provider, avec clé optionnelle") },
+        { name: "key",      args: "set <provider> <clé> | remove <provider>", desc: I18n.tr("Définir ou supprimer une clé API") },
+        { name: "add",      args: "<id> <endpoint> <format> <modèle>", desc: I18n.tr("Ajouter un provider personnalisé") },
+        { name: "chat",     args: "list | load <id> | new | delete <id> | clear", desc: I18n.tr("Gérer les conversations sauvegardées") },
+        { name: "clear",    args: "",                           desc: I18n.tr("Effacer la conversation") },
+        { name: "help",     args: "",                           desc: I18n.tr("Liste des commandes") }
     ]
 
     readonly property var modelsByProvider: ({
@@ -112,7 +113,7 @@ Singleton {
     function _suggestModel(rest, typing) {
         if (rest.length === 0) {
             return root._filterList(["set"], typing, function(v) {
-                return { value: v, label: "set", sub: "<nom du modèle>", desc: "Changer de modèle", insertSuffix: " ", freeform: false }
+                return { value: v, label: "set", sub: "<nom du modèle>", desc: I18n.tr("Changer de modèle"), insertSuffix: " ", freeform: false }
             })
         }
         if (rest[0] === "set" && rest.length === 1) {
@@ -121,14 +122,14 @@ Singleton {
                 return { value: m, label: m, sub: "", desc: m === AiConfig.cloudModel ? "modèle actif" : "connu", insertSuffix: "", freeform: false }
             })
             if (root.allowsFreeformModel(AiConfig.provider)) {
-                known.push({ value: typing, label: typing !== "" ? typing : "<nom du modèle>", sub: "", desc: "autre modèle (texte libre)", insertSuffix: "", freeform: true })
+                known.push({ value: typing, label: typing !== "" ? typing : "<nom du modèle>", sub: "", desc: I18n.tr("autre modèle (texte libre)"), insertSuffix: "", freeform: true })
             } else if (known.length === 0) {
                 known.push({ value: "", label: list.length === 0 ? "Aucun modèle Ollama installé" : "Aucune correspondance", sub: "", desc: list.length === 0 ? "essaie : ollama pull <modèle>" : "", insertSuffix: "", freeform: true, nonInsertable: true })
             }
             return known
         }
         if (rest[0] === "set" && rest.length === 2) {
-            return [{ value: "", label: "Entrée", sub: "", desc: "valider — modèle : " + rest[1], insertSuffix: "", freeform: true, submitNow: true }]
+            return [{ value: "", label: I18n.tr("Entrée"), sub: "", desc: "valider — modèle : " + rest[1], insertSuffix: "", freeform: true, submitNow: true }]
         }
         return []
     }
@@ -136,7 +137,7 @@ Singleton {
     function _suggestProvider(rest, typing) {
         if (rest.length === 0) {
             return root._filterList(["set"], typing, function(v) {
-                return { value: v, label: "set", sub: "<id> [key <clé>]", desc: "Changer de provider", insertSuffix: " ", freeform: false }
+                return { value: v, label: "set", sub: "<id> [key <clé>]", desc: I18n.tr("Changer de provider"), insertSuffix: " ", freeform: false }
             })
         }
         if (rest[0] === "set" && rest.length === 1) {
@@ -151,13 +152,13 @@ Singleton {
                     return { value: v, label: "key", sub: "<clé>", desc: "Ajouter la clé API de " + pid + " maintenant", insertSuffix: " ", freeform: false }
                 })
             }
-            return [{ value: "", label: "Entrée", sub: "", desc: "valider — " + pid + " a déjà une clé", insertSuffix: "", freeform: true, submitNow: true }]
+            return [{ value: "", label: I18n.tr("Entrée"), sub: "", desc: "valider — " + pid + " a déjà une clé", insertSuffix: "", freeform: true, submitNow: true }]
         }
         if (rest[0] === "set" && rest[2] === "key" && rest.length === 3) {
-            return [{ value: typing, label: typing !== "" ? typing : "<colle ta clé ici>", sub: "", desc: "puis Entrée", insertSuffix: "", freeform: true }]
+            return [{ value: typing, label: typing !== "" ? typing : "<colle ta clé ici>", sub: "", desc: I18n.tr("puis Entrée"), insertSuffix: "", freeform: true }]
         }
         if (rest[0] === "set" && rest[2] === "key" && rest.length === 4) {
-            return [{ value: "", label: "Entrée", sub: "", desc: "valider — provider et clé prêts", insertSuffix: "", freeform: true, submitNow: true }]
+            return [{ value: "", label: I18n.tr("Entrée"), sub: "", desc: I18n.tr("valider — provider et clé prêts"), insertSuffix: "", freeform: true, submitNow: true }]
         }
         return []
     }
@@ -166,8 +167,8 @@ Singleton {
         if (rest.length === 0) {
             return root._filterList(["set", "remove"], typing, function(v) {
                 return v === "set"
-                    ? { value: v, label: "set", sub: "<provider> <clé>", desc: "Définir une clé API", insertSuffix: " ", freeform: false }
-                    : { value: v, label: "remove", sub: "<provider>", desc: "Supprimer une clé API", insertSuffix: " ", freeform: false }
+                    ? { value: v, label: "set", sub: "<provider> <clé>", desc: I18n.tr("Définir une clé API"), insertSuffix: " ", freeform: false }
+                    : { value: v, label: "remove", sub: "<provider>", desc: I18n.tr("Supprimer une clé API"), insertSuffix: " ", freeform: false }
             })
         }
         if (rest[0] === "set" && rest.length === 1) {
@@ -176,18 +177,18 @@ Singleton {
             })
         }
         if (rest[0] === "set" && rest.length === 2) {
-            return [{ value: typing, label: typing !== "" ? typing : "<colle ta clé ici>", sub: "", desc: "puis Entrée", insertSuffix: "", freeform: true }]
+            return [{ value: typing, label: typing !== "" ? typing : "<colle ta clé ici>", sub: "", desc: I18n.tr("puis Entrée"), insertSuffix: "", freeform: true }]
         }
         if (rest[0] === "set" && rest.length === 3) {
-            return [{ value: "", label: "Entrée", sub: "", desc: "valider — clé enregistrée pour " + rest[1], insertSuffix: "", freeform: true, submitNow: true }]
+            return [{ value: "", label: I18n.tr("Entrée"), sub: "", desc: "valider — clé enregistrée pour " + rest[1], insertSuffix: "", freeform: true, submitNow: true }]
         }
         if (rest[0] === "remove" && rest.length === 1) {
             var withKey = root.allProviders().filter(function(p) { return p !== "ollama" && AiConfig.getKey(p) !== "" })
             if (withKey.length === 0) {
-                return [{ value: "", label: "Aucune clé enregistrée", sub: "", desc: "", insertSuffix: "", freeform: true, nonInsertable: true }]
+                return [{ value: "", label: I18n.tr("Aucune clé enregistrée"), sub: "", desc: "", insertSuffix: "", freeform: true, nonInsertable: true }]
             }
             return root._filterList(withKey, typing, function(p) {
-                return { value: p, label: p, sub: "", desc: "supprimer sa clé", insertSuffix: "", freeform: false, terminal: true }
+                return { value: p, label: p, sub: "", desc: I18n.tr("supprimer sa clé"), insertSuffix: "", freeform: false, terminal: true }
             })
         }
         return []
@@ -195,10 +196,10 @@ Singleton {
 
     function _suggestAdd(rest, typing) {
         if (rest.length === 0) {
-            return [{ value: typing, label: typing !== "" ? typing : "<identifiant>", sub: "", desc: "ex : monprovider", insertSuffix: " ", freeform: true }]
+            return [{ value: typing, label: typing !== "" ? typing : "<identifiant>", sub: "", desc: I18n.tr("ex : monprovider"), insertSuffix: " ", freeform: true }]
         }
         if (rest.length === 1) {
-            return [{ value: typing, label: typing !== "" ? typing : "<endpoint>", sub: "", desc: "URL complète de l'API", insertSuffix: " ", freeform: true }]
+            return [{ value: typing, label: typing !== "" ? typing : "<endpoint>", sub: "", desc: I18n.tr("URL complète de l'API"), insertSuffix: " ", freeform: true }]
         }
         if (rest.length === 2) {
             return root._filterList(root.formats, typing, function(f) {
@@ -206,10 +207,10 @@ Singleton {
             })
         }
         if (rest.length === 3) {
-            return [{ value: typing, label: typing !== "" ? typing : "<nom du modèle>", sub: "", desc: "puis Entrée", insertSuffix: "", freeform: true }]
+            return [{ value: typing, label: typing !== "" ? typing : "<nom du modèle>", sub: "", desc: I18n.tr("puis Entrée"), insertSuffix: "", freeform: true }]
         }
         if (rest.length === 4) {
-            return [{ value: "", label: "Entrée", sub: "", desc: "valider — ajoute " + rest[0], insertSuffix: "", freeform: true, submitNow: true }]
+            return [{ value: "", label: I18n.tr("Entrée"), sub: "", desc: "valider — ajoute " + rest[0], insertSuffix: "", freeform: true, submitNow: true }]
         }
         return []
     }
@@ -225,7 +226,7 @@ Singleton {
         if ((rest[0] === "load" || rest[0] === "delete") && rest.length === 1) {
             var chats = AiChats.chats
             if (chats.length === 0) {
-                return [{ value: "", label: "Aucune conversation sauvegardée", sub: "", desc: "", insertSuffix: "", freeform: true, nonInsertable: true }]
+                return [{ value: "", label: I18n.tr("Aucune conversation sauvegardée"), sub: "", desc: "", insertSuffix: "", freeform: true, nonInsertable: true }]
             }
             return root._filterList(chats.map(function(c) { return c.id }), typing, function(id) {
                 var c = chats.find(function(x) { return x.id === id })

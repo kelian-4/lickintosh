@@ -31,7 +31,7 @@ ContentPage {
 
     // --- Aperçu -----------------------------------------------------
     ContentSection {
-        title: "Aperçu"
+        title: I18n.tr("Aperçu")
 
         Item {
             Layout.fillWidth: true
@@ -64,7 +64,7 @@ ContentPage {
 
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "lundi 21 septembre"
+                        text: I18n.tr("lundi 21 septembre")
                         color: "#ccffffff"
                         font.family: "SF Pro Display"
                         font.pixelSize: 11
@@ -99,7 +99,7 @@ ContentPage {
 
                         Text {
                             anchors.centerIn: parent
-                            text: "Notification"
+                            text: I18n.tr("Notification")
                             color: "#f2ffffff"
                             font.family: "SF Pro Display"
                             font.pixelSize: 9
@@ -116,7 +116,7 @@ ContentPage {
 
                         Text {
                             anchors.centerIn: parent
-                            text: "♪  Mini lecteur"
+                            text: I18n.tr("♪  Mini lecteur")
                             color: "#f2ffffff"
                             font.family: "SF Pro Display"
                             font.pixelSize: 9
@@ -130,10 +130,10 @@ ContentPage {
 
     // --- Apparence de l'horloge ---------------------------------------
     ContentSection {
-        title: "Apparence de l'horloge"
+        title: I18n.tr("Apparence de l'horloge")
 
         ConfigSwitch {
-            text: "Afficher l'horloge en grand"
+            text: I18n.tr("Afficher l'horloge en grand")
             checked: root.cfg.clockLarge
             onToggled: function(v) { root.cfg.clockLarge = v }
         }
@@ -143,7 +143,7 @@ ContentPage {
             spacing: 8
 
             CFText {
-                text: "Style"
+                text: I18n.tr("Style")
                 font.pixelSize: 14
                 color: Theme.textPrimary
             }
@@ -198,7 +198,7 @@ ContentPage {
         }
 
         ConfigSlider {
-            text: "Épaisseur"
+            text: I18n.tr("Épaisseur")
             from: 0
             to: 100
             decimals: 0
@@ -209,11 +209,11 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Démarrage"
+        title: I18n.tr("Démarrage")
 
         ConfigSwitch {
-            text: "Verrouiller l'écran au démarrage de la session"
-            description: "Le verrouillage n'est lancé qu'une fois par session, pas à chaque rechargement du shell."
+            text: I18n.tr("Verrouiller l'écran au démarrage de la session")
+            description: I18n.tr("Le verrouillage n'est lancé qu'une fois par session, pas à chaque rechargement du shell.")
             checked: root.cfg.lockAtStartup
             onToggled: function(v) { root.cfg.lockAtStartup = v }
         }
@@ -221,16 +221,16 @@ ContentPage {
 
     // --- Notifications -------------------------------------------------
     ContentSection {
-        title: "Notifications"
+        title: I18n.tr("Notifications")
 
         ConfigSwitch {
-            text: "Afficher les notifications sur l'écran de verrouillage"
+            text: I18n.tr("Afficher les notifications sur l'écran de verrouillage")
             checked: root.cfg.showNotifications
             onToggled: function(v) { root.cfg.showNotifications = v }
         }
 
         ConfigSwitch {
-            text: "Afficher l'aperçu du contenu"
+            text: I18n.tr("Afficher l'aperçu du contenu")
             enabled: root.cfg.showNotifications
             checked: root.cfg.showNotificationPreviews
             onToggled: function(v) { root.cfg.showNotificationPreviews = v }
@@ -239,10 +239,10 @@ ContentPage {
 
     // --- Mini lecteur ---------------------------------------------------
     ContentSection {
-        title: "Mini lecteur"
+        title: I18n.tr("Mini lecteur")
 
         ConfigSwitch {
-            text: "Afficher le mini lecteur multimédia"
+            text: I18n.tr("Afficher le mini lecteur multimédia")
             checked: root.cfg.showMediaPlayer
             onToggled: function(v) { root.cfg.showMediaPlayer = v }
         }

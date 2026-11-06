@@ -99,7 +99,7 @@ Item {
 
                 CFText {
                     width: parent.width
-                    text: MprisState.trackTitle.length > 0 ? MprisState.trackTitle : qsTr("Non lu")
+                    text: MprisState.trackTitle.length > 0 ? MprisState.trackTitle : qsTr(I18n.tr("Non lu"))
                     font.pixelSize: 13
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight

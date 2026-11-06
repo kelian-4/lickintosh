@@ -11,14 +11,14 @@ Item {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "Game Mode actif"
+            text: I18n.tr("Game Mode actif")
             color: "#FFFFFF"
             font.pixelSize: 13
             font.family: "SF Pro Text"
         }
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "Animations, flou et ombres désactivés"
+            text: I18n.tr("Animations, flou et ombres désactivés")
             color: "#8A8A8A"
             font.pixelSize: 11
             font.family: "SF Pro Text"

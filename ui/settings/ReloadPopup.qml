@@ -107,7 +107,7 @@ Scope {
                         spacing: 2
 
                         CFText {
-                            text: root.failed ? "Erreur de rechargement" : "Shell rechargé"
+                            text: root.failed ? I18n.tr("Erreur de rechargement") : I18n.tr("Shell rechargé")
                             font.pixelSize: 13
                             font.weight: Font.Bold
                             color: "#fff"
