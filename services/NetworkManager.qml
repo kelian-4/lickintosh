@@ -18,15 +18,47 @@ Singleton {
     readonly property bool busy:                       _connect.running
                                                          || _connectFresh.running
                                                          || _disconnect.running
-                                                         || _deleteProfile.running
-                                                         || _deleteProfileSilent.running
+                                                         || _cleanup.running
+                                                         || _forgetProfile.running
 
     readonly property bool   ethernetConnected: _ethernetInterface !== ""
     property string _ethernetInterface: ""
     property string _ethernetConnectionName: ""
 
-    property string _pendingSSID:     ""
-    property string _pendingPassword: ""
+    property string _pendingSSID: ""
+    property bool   _hadProfile:  false
+    property bool   _timedOut:    false
+    property var    failures:     ({})
+
+    readonly property string _findScript:
+        "nmcli -t -f UUID,TYPE connection show | while IFS=: read -r u t; do " +
+        "[ \"$t\" = 802-11-wireless ] || continue; " +
+        "s=$(nmcli -g 802-11-wireless.ssid connection show uuid \"$u\" 2>/dev/null); " +
+        "[ \"$s\" = \"$LK_SSID\" ] && echo \"$u\"; done"
+
+    readonly property string _deleteScript:
+        _findScript + " | while read -r u; do nmcli connection delete uuid \"$u\" >/dev/null 2>&1; done; " +
+        "[ -z \"$(" + _findScript + ")\" ]"
+
+    readonly property string _upScript:
+        "u=$(" + _findScript + " | head -n1); " +
+        "if [ -n \"$u\" ]; then exec nmcli --wait 25 connection up uuid \"$u\"; fi; " +
+        "exec nmcli --wait 25 device wifi connect \"$LK_SSID\""
+
+    readonly property string _freshScript:
+        _deleteScript + "; exec nmcli --wait 25 device wifi connect \"$LK_SSID\" password \"$LK_PW\""
+
+    function failureMessage(ssid) {
+        return ssid ? (root.failures[ssid] || "") : ""
+    }
+
+    function _setFailure(ssid, message) {
+        if (!ssid) return
+        var next = Object.assign({}, root.failures)
+        if (message) next[ssid] = message
+        else delete next[ssid]
+        root.failures = next
+    }
 
     property string detailsSSID:       ""
     property string detailsIPv4Method: ""
@@ -108,16 +140,62 @@ Singleton {
         return mask.join(".")
     }
 
-    signal connectionFailed(string ssid)
+    signal connectionFailed(string ssid, string reason, string message)
     signal passwordRequired(string ssid)
 
-    function _detectPasswordRequired(stderrText) {
-        if (!stderrText || stderrText.length === 0) return false
-        var t = stderrText
-        return t.indexOf("Secrets were required") !== -1
-            || t.indexOf("No secrets provided") !== -1
-            || t.indexOf("802-11-wireless-security.psk") !== -1
-            || (t.indexOf("password") !== -1 && t.indexOf("successfully") === -1)
+    function _classify(raw, timedOut) {
+        if (timedOut)
+            return { reason: "timeout", message: I18n.tr("La connexion a expiré : le routeur ne répond pas") }
+        var t = (raw || "").toLowerCase()
+        if (t.indexOf("802-11-wireless-security.psk") !== -1)
+            return { reason: "password", message: I18n.tr("Mot de passe invalide (8 à 63 caractères)") }
+        if (t.indexOf("wi-fi is disabled") !== -1 || t.indexOf("wireless is disabled") !== -1 || t.indexOf("rfkill") !== -1)
+            return { reason: "radio", message: I18n.tr("Le Wi-Fi est désactivé") }
+        if (t.indexOf("no wi-fi device") !== -1 || t.indexOf("no suitable device") !== -1 || t.indexOf("not ready") !== -1)
+            return { reason: "device", message: I18n.tr("Aucune carte Wi-Fi disponible") }
+        if (t.indexOf("not authorized") !== -1 || t.indexOf("insufficient privileges") !== -1 || t.indexOf("permission") !== -1)
+            return { reason: "denied", message: I18n.tr("Permission refusée par NetworkManager") }
+        if (t.indexOf("no network with ssid") !== -1 || t.indexOf("could not be found") !== -1)
+            return { reason: "notfound", message: I18n.tr("Réseau introuvable ou hors de portée") }
+        if (t.indexOf("ip configuration") !== -1 || t.indexOf("dhcp") !== -1)
+            return { reason: "dhcp", message: I18n.tr("Connecté au routeur mais aucune adresse IP attribuée (DHCP)") }
+        if (t.indexOf("secrets were required") !== -1 || t.indexOf("no secrets") !== -1
+            || t.indexOf("supplicant took too long") !== -1 || t.indexOf("authenticat") !== -1)
+            return { reason: "password", message: I18n.tr("Mot de passe incorrect, réessayez") }
+        if (t.indexOf("timeout expired") !== -1 || t.indexOf("timed out") !== -1 || t.indexOf("took too long") !== -1)
+            return { reason: "timeout", message: I18n.tr("La connexion a expiré : le routeur ne répond pas") }
+        var lines = (raw || "").split("\n")
+        var line = ""
+        for (var i = 0; i < lines.length; i++) {
+            var l = lines[i].replace(/^\s*(Error|Erreur)\s*:\s*/i, "").trim()
+            if (l) { line = l; break }
+        }
+        if (line.length > 120) line = line.substring(0, 117) + "…"
+        return { reason: "unknown",
+                 message: line ? I18n.tr("Échec de la connexion : ") + line : I18n.tr("Échec de la connexion (cause inconnue)") }
+    }
+
+    function _finishAttempt(exitCode, errText) {
+        var ssid = root._pendingSSID
+        _connectTimeoutTimer.stop()
+        root._pendingSSID = ""
+        if (exitCode === 0) {
+            root._timedOut = false
+            root._setFailure(ssid, "")
+        } else {
+            var f = root._classify(errText, root._timedOut)
+            root._timedOut = false
+            var passwordCause = f.reason === "password"
+            if (ssid && (passwordCause || !root._hadProfile)) {
+                _cleanup.environment = ({ LANG: "C", LC_ALL: "C", LK_SSID: ssid })
+                _cleanup.running = true
+            }
+            root._setFailure(ssid, f.message)
+            if (passwordCause) root.passwordRequired(ssid)
+            else root.connectionFailed(ssid, f.reason, f.message)
+        }
+        _getNetworks.running = true
+        _getKnown.running    = true
     }
 
     function enableWifi(enabled) {
@@ -126,16 +204,22 @@ Singleton {
     }
 
     function connectToNetwork(ssid, password) {
+        if (!ssid || _connect.running || _connectFresh.running) return
         root._pendingSSID = ssid
+        root._timedOut    = false
+        root._setFailure(ssid, "")
         _connectTimeoutTimer.restart()
 
         if (password === "") {
-            _connect.command = ["nmcli", "conn", "up", ssid]
+            root._hadProfile = root.networksKnown.some(function(n) { return n.ssid === ssid })
+            _connect.environment = ({ LANG: "C", LC_ALL: "C", LK_SSID: ssid })
+            _connect.command = ["sh", "-c", root._upScript]
             _connect.running = true
         } else {
-            root._pendingPassword = password
-            _deleteProfile.command = ["nmcli", "conn", "delete", ssid]
-            _deleteProfile.running = true
+            root._hadProfile = false
+            _connectFresh.environment = ({ LANG: "C", LC_ALL: "C", LK_SSID: ssid, LK_PW: password })
+            _connectFresh.command = ["sh", "-c", root._freshScript]
+            _connectFresh.running = true
         }
     }
 
@@ -148,7 +232,8 @@ Singleton {
 
     function forgetNetwork(ssid) {
         if (!ssid) return
-        _forgetProfile.command = ["nmcli", "conn", "delete", ssid]
+        root._setFailure(ssid, "")
+        _forgetProfile.environment = ({ LANG: "C", LC_ALL: "C", LK_SSID: ssid })
         _forgetProfile.running = true
     }
 
@@ -165,14 +250,13 @@ Singleton {
 
     Timer {
         id: _connectTimeoutTimer
-        interval: 6000
+        interval: 40000
         repeat: false
         onTriggered: {
-            if (root._pendingSSID !== "" && (!root.active || root.active.ssid !== root._pendingSSID)) {
-                var failedSSID = root._pendingSSID
-                root._pendingSSID     = ""
-                root._pendingPassword = ""
-                root.connectionFailed(failedSSID)
+            if (_connect.running || _connectFresh.running) {
+                root._timedOut = true
+                _connect.running = false
+                _connectFresh.running = false
             }
         }
     }
@@ -258,47 +342,25 @@ Singleton {
 
     Process {
         id: _connect
-        stderr: StdioCollector {
-            id: _connectErr
-        }
-        stdout: SplitParser {
-            onRead: {
-                _getNetworks.running = true
-                _getKnown.running    = true
-            }
-        }
-        onExited: (exitCode, exitStatus) => {
-            if (exitCode !== 0) {
-                var failedSSID = _connect.command[_connect.command.length - 1]
-                _deleteProfileSilent.command = ["nmcli", "conn", "delete", failedSSID]
-                _deleteProfileSilent.running = true
-                if (root._detectPasswordRequired(_connectErr.text)) {
-                    _connectTimeoutTimer.stop()
-                    root._pendingSSID = ""
-                    root.passwordRequired(failedSSID)
-                } else {
-                    _connectTimeoutTimer.stop()
-                    root._pendingSSID = ""
-                    root.connectionFailed(failedSSID)
-                }
-            } else {
-                _connectTimeoutTimer.stop()
-                root._pendingSSID = ""
-            }
-            _getNetworks.running = true
-            _getKnown.running    = true
-        }
+        stderr: StdioCollector { id: _connectErr }
+        onExited: (exitCode, exitStatus) => root._finishAttempt(exitCode, _connectErr.text)
     }
 
     Process {
-        id: _deleteProfileSilent
-        onExited: {
-            _getKnown.running = true
-        }
+        id: _connectFresh
+        stderr: StdioCollector { id: _connectFreshErr }
+        onExited: (exitCode, exitStatus) => root._finishAttempt(exitCode, _connectFreshErr.text)
+    }
+
+    Process {
+        id: _cleanup
+        command: ["sh", "-c", root._deleteScript]
+        onExited: _getKnown.running = true
     }
 
     Process {
         id: _forgetProfile
+        command: ["sh", "-c", root._deleteScript]
         onExited: {
             _getKnown.running    = true
             _getNetworks.running = true
@@ -312,46 +374,6 @@ Singleton {
                 _getNetworks.running = true
                 _getKnown.running    = true
             }
-        }
-    }
-
-    Process {
-        id: _deleteProfile
-        onExited: {
-            _getKnown.running             = true
-            _connectFresh.command         = ["nmcli", "device", "wifi", "connect",
-                                             root._pendingSSID,
-                                             "password", root._pendingPassword]
-            _connectFresh.running         = true
-        }
-    }
-
-    Process {
-        id: _connectFresh
-        stderr: StdioCollector {
-            id: _connectFreshErr
-        }
-        onExited: (exitCode, exitStatus) => {
-            var failedSSID = root._pendingSSID
-            root._pendingPassword = ""
-            if (exitCode !== 0) {
-                _deleteProfileSilent.command = ["nmcli", "conn", "delete", failedSSID]
-                _deleteProfileSilent.running = true
-                if (root._detectPasswordRequired(_connectFreshErr.text)) {
-                    _connectTimeoutTimer.stop()
-                    root._pendingSSID = ""
-                    root.passwordRequired(failedSSID)
-                } else {
-                    _connectTimeoutTimer.stop()
-                    root._pendingSSID = ""
-                    root.connectionFailed(failedSSID)
-                }
-            } else {
-                _connectTimeoutTimer.stop()
-                root._pendingSSID = ""
-            }
-            _getNetworks.running  = true
-            _getKnown.running     = true
         }
     }
 
