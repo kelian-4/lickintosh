@@ -45,12 +45,12 @@ ContentPage {
                 root._passwordForSSID = ""
             }
         }
-        function onConnectionFailed(ssid) {
-            root._failedSSIDs[ssid] = true
-            root._failedSSIDsChanged()
-            root._passwordForSSID = ssid
+        function onConnectionFailed(ssid, reason, message) {
+            root._passwordForSSID = ""
         }
         function onPasswordRequired(ssid) {
+            root._failedSSIDs[ssid] = true
+            root._failedSSIDsChanged()
             root._passwordForSSID = ssid
         }
         function onBusyChanged() {
@@ -320,11 +320,15 @@ ContentPage {
                                               && net.isSecure
                                               && root._passwordForSSID === net.ssid
 
+        readonly property string _failMsg: _nr.net ? NetworkManager.failureMessage(_nr.net.ssid) : ""
+        readonly property bool _showFailure: !isActive && !_showPassword && _failMsg !== ""
+
         readonly property bool _showError: _nr.net
                                            && root._failedSSIDs[_nr.net.ssid] === true
                                            && _nr._showPassword
 
-        Layout.preferredHeight: _showPassword ? root.rowHeight + _pwArea.height : root.rowHeight
+        Layout.preferredHeight: _showPassword ? root.rowHeight + _pwArea.height
+                                              : _showFailure ? root.rowHeight + _failText.implicitHeight + 10 : root.rowHeight
 
         Rectangle {
             anchors.fill:    parent
@@ -384,6 +388,20 @@ ContentPage {
             }
         }
 
+        CFText {
+            id: _failText
+            visible: _nr._showFailure
+            anchors.top: _row.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 44
+            anchors.rightMargin: 12
+            text: _nr._failMsg
+            color: "#FF6B6B"
+            font.pixelSize: 11
+            wrapMode: Text.WordWrap
+        }
+
         Item {
             id: _pwArea
             anchors.top:   _row.bottom
@@ -397,7 +415,7 @@ ContentPage {
             CFText {
                 id: _errorText
                 visible: _nr._showError
-                text: I18n.tr("Mot de passe incorrect, réessayez")
+                text: NetworkManager.failureMessage(_nr.net ? _nr.net.ssid : "") || I18n.tr("Mot de passe incorrect, réessayez")
                 color: "#FF6B6B"
                 font.pixelSize: 11
                 anchors.top:  parent.top

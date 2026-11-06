@@ -58,12 +58,12 @@ Item {
                 root._passwordForSSID = ""
             }
         }
-        function onConnectionFailed(ssid) {
-            root._failedSSIDs[ssid] = true
-            root._failedSSIDsChanged()
-            root._passwordForSSID = ssid
+        function onConnectionFailed(ssid, reason, message) {
+            root._passwordForSSID = ""
         }
         function onPasswordRequired(ssid) {
+            root._failedSSIDs[ssid] = true
+            root._failedSSIDsChanged()
             root._passwordForSSID = ssid
         }
         function onBusyChanged() {
@@ -297,11 +297,15 @@ Item {
                                               && net.isSecure
                                               && root._passwordForSSID === net.ssid
 
+        readonly property string _failMsg: _nr.net ? NetworkManager.failureMessage(_nr.net.ssid) : ""
+        readonly property bool _showFailure: !isActive && !_showPassword && _failMsg !== ""
+
         readonly property bool _showError: _nr.net
                                            && root._failedSSIDs[_nr.net.ssid] === true
                                            && _nr._showPassword
 
-        height: _showPassword ? rowHeight + (_showError ? 68 : 48) : rowHeight
+        height: _showPassword ? rowHeight + (_showError ? 68 : 48)
+                                : _showFailure ? rowHeight + _failText.implicitHeight + 8 : rowHeight
         Behavior on height {
             NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
         }
@@ -363,6 +367,20 @@ Item {
                 visible: _nr.net && _nr.net.isSecure
                 gray:    true
             }
+        }
+
+        CFText {
+            id:                  _failText
+            visible:             _nr._showFailure
+            anchors.top:         _row.bottom
+            anchors.left:        parent.left
+            anchors.right:       parent.right
+            anchors.leftMargin:  64
+            anchors.rightMargin: 20
+            text:                _nr._failMsg
+            color:               "#FF6B6B"
+            font.pixelSize:      11
+            wrapMode:            Text.WordWrap
         }
 
         Item {
