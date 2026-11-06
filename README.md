@@ -171,9 +171,3 @@ lickintosh est un projet indépendant, sans lien avec Apple. macOS et Tahoe sont
 ## • licence •
 
 PolyForm Noncommercial 1.0.0.
-
-<div align="center">
-
-[![Historique des étoiles](https://api.star-history.com/svg?repos=kelian-4/lickintosh&type=Date)](https://star-history.com/#kelian-4/lickintosh&Date)
-
-</div>
