@@ -1,4 +1,3 @@
----@module 'hl'
 
 require("hyprlua/animations")
 require("hyprlua/autostart")
