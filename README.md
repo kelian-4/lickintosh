@@ -9,7 +9,8 @@
 [Fonctionnalités](#-fonctionnalités-) · [Installation](#-installation-) · [Raccourcis](#-raccourcis-clavier-) · [Configuration](#-configuration-) · [FAQ](#-faq-) · [Crédits](#-crédits-et-licences-)
 
 </div>
-<img width="1366" height="768" alt="2026-11-06_12:53:14" src="https://github.com/user-attachments/assets/41c4936f-7a6f-4c17-8ff3-1e5297acc000" />
+<img width="1366" height="768" alt="2026-11-06_15:18:10" src="https://github.com/user-attachments/assets/3ce6cb3d-c93d-4551-a539-3788f14aea09" />
+
 
 > [!WARNING]
 > **Version : bêta 1.** Le projet fonctionne au quotidien sur ma machine (lol), mais je n'ai pas pu le tester sur beaucoup de configurations. Attends-toi à des bugs par endroit, et ouvre une issue quand tu en trouves un.
