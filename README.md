@@ -9,7 +9,8 @@
 [Fonctionnalités](#-fonctionnalités-) · [Installation](#-installation-) · [Raccourcis](#-raccourcis-clavier-) · [Configuration](#-configuration-) · [FAQ](#-faq-) · [Crédits](#-crédits-et-licences-)
 
 </div>
-<img width="1366" height="768" alt="2026-11-06_15:18:10" src="https://github.com/user-attachments/assets/3ce6cb3d-c93d-4551-a539-3788f14aea09" />
+<img width="1366" height="768" alt="2026-11-06_12:53:14" src="https://github.com/user-attachments/assets/4973a757-5baf-4a7e-9ff1-4ed01412cb63" />
+
 
 
 > [!WARNING]
@@ -124,7 +125,12 @@ Le modificateur principal est `SUPER`.
 
 ## • configuration •
 
-Presque tout se règle dans l'application **Réglages**, ouverte depuis le menu Apple (« Réglages Système… »). Les valeurs sont enregistrées par le shell dans son fichier de configuration.
+Presque tout se règle dans l'application **Réglages**, ouverte depuis le menu Apple (« Réglages Système… ») ou le dock. Les valeurs sont enregistrées par le shell dans son fichier de configuration.
+
+<img width="1366" height="768" alt="2026-11-06_13:01:23" src="https://github.com/user-attachments/assets/657b6060-fc4f-4797-9326-94cabac4d5cf" /> 
+
+<img width="924" height="621" alt="image" src="https://github.com/user-attachments/assets/ae88562b-6be1-4818-a47e-15a2a8c40081" />
+
 
 ## • structure du dépôt •
 
@@ -160,7 +166,7 @@ Il n'est pas présent dans toutes les versions de Arch, Debian et Fedora : le sc
 Les traductions anglaise et espagnole sont récentes et peuvent contenir des erreurs. Certains textes restent en français : messages de l'assistant IA et du script d'installation. Ouvre une issue pour les signaler.
 ou mieux contribuer a la traduction du projet 
 
-## • crédits et licences •
+## • Remerciment et licences •
 
 - **Liquid Glass** : l'effet est adapté de [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
 - **MacTahoe Liquid KDE** : voir `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
