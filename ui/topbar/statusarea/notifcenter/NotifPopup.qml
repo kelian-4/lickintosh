@@ -204,6 +204,35 @@ Scope {
                                             renderType:       Text.NativeRendering
                                         }
                                     }
+
+                                    MouseArea {
+                                        width:       18
+                                        height:      18
+                                        Layout.alignment: Qt.AlignTop
+                                        acceptedButtons: Qt.LeftButton
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onEntered: NotifService.stopGroupTimer()
+                                        onExited:  NotifService.restartGroupTimer()
+                                        onClicked: wrap.dismiss()
+
+                                        Rectangle {
+                                            anchors.centerIn: parent
+                                            width:  15
+                                            height: 15
+                                            radius: 8
+                                            color:  Qt.rgba(1, 1, 1, 0.12)
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text:           "×"
+                                                font.pixelSize: 12
+                                                font.family:    "SF Pro Text"
+                                                color:          Qt.rgba(1, 1, 1, 0.70)
+                                                renderType:     Text.NativeRendering
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
