@@ -53,14 +53,14 @@ SUBSTITUTIONS = [
 DEAD_BLOCKS = [r"if\(darkGradientOverlay\)\{.*?\}"]
 
 DEFAULTS = {
-    "DockCornerRadius": "cornerRadius",
-    "RefractionWidth": "refractionWidth",
-    "MagnifyGlassStrength": "magnifyGlassStrength",
-    "RgbDriftStrength": "rgbDriftStrength",
-    "HighlightWidth": "highlightWidth",
-    "HighlightStrength": "highlightStrength",
-    "Saturation": "saturation",
-    "MaterialOpacity": "materialOpacity",
+    "DockCornerRadius": ("qml", "cornerRadius"),
+    "RefractionWidth": ("theme", "refractionWidth"),
+    "MagnifyGlassStrength": ("theme", "magnifyGlassStrength"),
+    "RgbDriftStrength": ("theme", "rgbDriftStrength"),
+    "HighlightWidth": ("theme", "highlightWidth"),
+    "HighlightStrength": ("theme", "highlightStrength"),
+    "Saturation": ("theme", "saturation"),
+    "MaterialOpacity": ("theme", "materialOpacity"),
 }
 
 
@@ -108,35 +108,50 @@ def check_shader(source_dir, port_path):
     return ok
 
 
-def check_defaults(source_dir, qml_path):
+def theme_defaults(theme_path):
+    text = open(theme_path).read()
+    start = text.index("elementSpecs")
+    block = text[start:text.index("]", start)]
+    found = {}
+    for key, value in re.findall(r'key:\s*"(\w+)"[^}]*?def:\s*(-?[0-9.]+)', block):
+        found[key] = float(value)
+    return found
+
+
+def check_defaults(source_dir, qml_path, theme_path):
     kcfg = open(source_dir + "/glass.kcfg").read()
     effect = open(source_dir + "/effect.cpp").read()
     qml = open(qml_path).read()
+    theme = theme_defaults(theme_path)
     ok = True
-    for entry, prop in DEFAULTS.items():
+    for entry, (where, prop) in DEFAULTS.items():
         sent = re.search(r'name="' + entry + r'"[^>]*>\s*<default>\s*(-?[0-9.]+)\s*</default>', kcfg)
-        declared = re.search(r"property\s+real\s+" + prop + r":\s*(-?[0-9.]+)", qml)
-        if not sent or not declared:
+        if where == "qml":
+            declared = re.search(r"property\s+real\s+" + prop + r":\s*(-?[0-9.]+)", qml)
+            value = float(declared.group(1)) if declared else None
+        else:
+            value = theme.get(prop)
+        if not sent or value is None:
             print(entry, "INTROUVABLE")
             ok = False
             continue
-        same = float(sent.group(1)) == float(declared.group(1))
+        same = float(sent.group(1)) == value
         ok = ok and same
-        print(entry, sent.group(1), declared.group(1), "OK" if same else "DIFFERENT")
+        print(entry, sent.group(1), value, "OK" if same else "DIFFERENT")
     center = re.search(r"centerOpacity\s*=\s*dockSurface\s*\?\s*([0-9.]+)f", effect)
-    declared = re.search(r"property\s+real\s+centerOpacity:\s*([0-9.]+)", qml)
-    same = bool(center and declared and float(center.group(1)) == float(declared.group(1)))
+    value = theme.get("centerOpacity")
+    same = bool(center and value is not None and float(center.group(1)) == value)
     ok = ok and same
-    print("centerOpacity", center.group(1) if center else "?", declared.group(1) if declared else "?", "OK" if same else "DIFFERENT")
+    print("centerOpacity", center.group(1) if center else "?", value, "OK" if same else "DIFFERENT")
     return ok
 
 
 def main():
-    if len(sys.argv) != 4:
-        print("usage: fidelity_tahoe.py ACRYLIC_GLASS_SRC_DIR TahoeGlass.frag TahoeGlass.qml")
+    if len(sys.argv) != 5:
+        print("usage: fidelity_tahoe.py ACRYLIC_GLASS_SRC_DIR TahoeGlass.frag TahoeGlass.qml Theme.qml")
         return 2
     shader_ok = check_shader(sys.argv[1], sys.argv[2])
-    defaults_ok = check_defaults(sys.argv[1], sys.argv[3])
+    defaults_ok = check_defaults(sys.argv[1], sys.argv[3], sys.argv[4])
     return 0 if shader_ok and defaults_ok else 1
 
 

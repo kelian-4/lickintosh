@@ -26,6 +26,7 @@ LiquidGlassBackdrop {
     readonly property bool glassReady: ready && captureSettled
 
     ready: !Theme.compositorBlur
+    captureInterval: ShellConfig.options.glass.captureIntervalMs
     instantReveal: gateEnabled
 
     onGlassReadyChanged: {

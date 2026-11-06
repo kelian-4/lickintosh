@@ -10,6 +10,7 @@ Item {
     property rect region: Qt.rect(0, 0, 0, 0)
     property real attachMargin: GlassTracker.captureMargin
     property real windowOpacity: 1.0
+    property int captureInterval: 400
     property var opacityByClass: ({})
 
     function opacityFor(windowClass) {
@@ -132,7 +133,7 @@ Item {
 
             readonly property real captureOpacity: root.opacityFor(ipc ? ipc["class"] : "")
             readonly property bool translucent: captureOpacity > 0 && captureOpacity < 1
-            readonly property bool pending: inRegion && captureOpacity > 0 && !hasContent
+            readonly property bool pending: inRegion && captureOpacity > 0 && !hasContent && gate.calm
             onPendingChanged: root.recount()
 
             property bool restarting: false
@@ -148,15 +149,18 @@ Item {
                 onTriggered: view.restarting = false
             }
 
-            Timer {
-                interval: 8000
-                running: view.shown && !view.hasContent
-                repeat: true
-                onTriggered: view.restart()
+            CaptureGate {
+                id: gate
+                wanted: view.shown && view.captureOpacity > 0
+                calm: !GlassTracker.fast && !GlassTracker.captureBlocked
+                hasContent: view.hasContent
+                interval: root.captureInterval
+                onRequestFrame: view.captureFrame()
+                onRestartRequested: view.restart()
             }
 
-            captureSource: shown && !restarting && captureOpacity > 0 ? modelData.wayland : null
-            live: true
+            captureSource: gate.armed && !restarting ? modelData.wayland : null
+            live: false
             visible: shown
             opacity: hasContent ? (translucent ? 1 : Math.min(1, captureOpacity)) : 0
             layer.enabled: translucent
