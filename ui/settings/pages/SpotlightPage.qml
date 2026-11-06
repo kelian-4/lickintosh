@@ -28,57 +28,57 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Sources de résultats"
+        title: I18n.tr("Sources de résultats")
 
         ConfigSwitch {
             Layout.fillWidth: true
-            text: "Applications"
+            text: I18n.tr("Applications")
             checked: ShellConfig.options.spotlight.sources.applications
             onToggled: function(v) { ShellConfig.options.spotlight.sources.applications = v }
         }
 
         ConfigSwitch {
             Layout.fillWidth: true
-            text: "Fichiers"
+            text: I18n.tr("Fichiers")
             checked: ShellConfig.options.spotlight.sources.files
             onToggled: function(v) { ShellConfig.options.spotlight.sources.files = v }
         }
 
         ConfigSwitch {
             Layout.fillWidth: true
-            text: "Actions système"
+            text: I18n.tr("Actions système")
             checked: ShellConfig.options.spotlight.sources.actions
             onToggled: function(v) { ShellConfig.options.spotlight.sources.actions = v }
         }
 
         ConfigSwitch {
             Layout.fillWidth: true
-            text: "Calculatrice"
+            text: I18n.tr("Calculatrice")
             checked: ShellConfig.options.spotlight.sources.calculator
             onToggled: function(v) { ShellConfig.options.spotlight.sources.calculator = v }
         }
     }
 
     ContentSection {
-        title: "Presse-papier"
+        title: I18n.tr("Presse-papier")
 
         ConfigSwitch {
             Layout.fillWidth: true
-            text: "Historique du texte copié"
+            text: I18n.tr("Historique du texte copié")
             checked: ShellConfig.options.spotlight.clipboard.enableText
             onToggled: function(v) { ShellConfig.options.spotlight.clipboard.enableText = v }
         }
 
         ConfigSwitch {
             Layout.fillWidth: true
-            text: "Historique des images copiées"
+            text: I18n.tr("Historique des images copiées")
             checked: ShellConfig.options.spotlight.clipboard.enableImage
             onToggled: function(v) { ShellConfig.options.spotlight.clipboard.enableImage = v }
         }
 
         ConfigSlider {
             Layout.fillWidth: true
-            text: "Nombre d'entrées conservées"
+            text: I18n.tr("Nombre d'entrées conservées")
             value: ShellConfig.options.spotlight.clipboard.maxEntries
             from: 10
             to: 300
@@ -88,10 +88,10 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Raccourcis rapides"
+        title: I18n.tr("Raccourcis rapides")
 
         CFText {
-            text: "Préfixe suivi d'un espace ou tapé directement selon l'alias, pour accéder à chaque mode."
+            text: I18n.tr("Préfixe suivi d'un espace ou tapé directement selon l'alias, pour accéder à chaque mode.")
             font.pixelSize: 11
             gray: true
             Layout.fillWidth: true
@@ -100,12 +100,12 @@ ContentPage {
 
         Repeater {
             model: [
-                { key: "calc",   label: "Calculatrice" },
-                { key: "search", label: "Recherche web" },
-                { key: "wall",   label: "Fonds d'écran" },
-                { key: "emoji",  label: "Emoji" },
-                { key: "sh",     label: "Commande shell" },
-                { key: "todo",   label: "Tâches" }
+                { key: "calc",   label: I18n.tr("Calculatrice") },
+                { key: "search", label: I18n.tr("Recherche web") },
+                { key: "wall",   label: I18n.tr("Fonds d'écran") },
+                { key: "emoji",  label: I18n.tr("Emoji") },
+                { key: "sh",     label: I18n.tr("Commande shell") },
+                { key: "todo",   label: I18n.tr("Tâches") }
             ]
 
             RowLayout {
@@ -154,14 +154,14 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Indexation des fichiers"
+        title: I18n.tr("Indexation des fichiers")
 
         RowLayout {
             Layout.fillWidth: true
             spacing: 10
 
             CFText {
-                text: "Dossier des fonds d'écran"
+                text: I18n.tr("Dossier des fonds d'écran")
                 font.pixelSize: 14
                 color: Theme.textPrimary
                 elide: Text.ElideRight
@@ -196,7 +196,7 @@ ContentPage {
             spacing: 6
 
             CFText {
-                text: "Dossiers exclus de la recherche"
+                text: I18n.tr("Dossiers exclus de la recherche")
                 font.pixelSize: 14
                 color: Theme.textPrimary
                 Layout.fillWidth: true
@@ -335,7 +335,7 @@ ContentPage {
             spacing: 10
 
             CFText {
-                text: "Réindexation incrémentale"
+                text: I18n.tr("Réindexation incrémentale")
                 font.pixelSize: 14
                 color: Theme.textPrimary
                 elide: Text.ElideRight
@@ -363,7 +363,7 @@ ContentPage {
             spacing: 10
 
             CFText {
-                text: "Réindexation complète"
+                text: I18n.tr("Réindexation complète")
                 font.pixelSize: 14
                 color: Theme.textPrimary
                 elide: Text.ElideRight
@@ -388,10 +388,10 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Actions système"
+        title: I18n.tr("Actions système")
 
         CFText {
-            text: "Désactive les actions que tu ne veux pas voir apparaître (accessibles avec le préfixe >)."
+            text: I18n.tr("Désactive les actions que tu ne veux pas voir apparaître (accessibles avec le préfixe >).")
             font.pixelSize: 11
             gray: true
             Layout.fillWidth: true

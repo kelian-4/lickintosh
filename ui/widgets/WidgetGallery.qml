@@ -18,7 +18,7 @@ Scope {
                 id: win
 
                 visible: true
-                title: "Edit Widgets"
+                title: I18n.tr("Edit Widgets")
                 implicitWidth: 820
                 implicitHeight: 620
                 minimumSize: Qt.size(820, 620)
@@ -38,7 +38,7 @@ Scope {
                         return inCategory && inQuery
                     })
 
-                    categories: [{ key: "all", title: "All Widgets", icon: "notch/columns.svg", tint: "#8e8e93" }].concat(
+                    categories: [{ key: "all", title: I18n.tr("All Widgets"), icon: "notch/columns.svg", tint: "#8e8e93" }].concat(
                         WidgetRegistry.types.map(function(t) {
                             return { key: t.type, title: t.title, icon: t.icon, tint: t.tint, raw: t.type === "weather" }
                         }))

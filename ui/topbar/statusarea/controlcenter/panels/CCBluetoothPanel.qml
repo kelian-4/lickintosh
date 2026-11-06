@@ -53,7 +53,7 @@ Item {
             height: 54
 
             CFText {
-                text:           "Bluetooth"
+                text:           I18n.tr("Bluetooth")
                 font.weight:    Font.Bold
                 font.pixelSize: 18
                 anchors.left:        parent.left
@@ -113,7 +113,7 @@ Item {
                 spacing: 0
 
                 CFText {
-                    text:           "Mes appareils"
+                    text:           I18n.tr("Mes appareils")
                     font.pixelSize: 13
                     font.weight:    Font.Bold
                     color: Theme.ink(parent, false)
@@ -133,7 +133,7 @@ Item {
                 Item { width: parent.width; height: 8 }
 
                 CFText {
-                    text:          "Autres appareils"
+                    text:          I18n.tr("Autres appareils")
                     font.pixelSize: 13
                     font.weight:    Font.Bold
                     color: Theme.ink(parent, false)
@@ -168,7 +168,7 @@ Item {
             visible: root._btOn
 
             CFText {
-                text:           "Paramètres Bluetooth…"
+                text:           I18n.tr("Paramètres Bluetooth…")
                 font.pixelSize: 14
                 font.weight:    Font.Bold
                 color: Theme.ink(parent, false)
@@ -362,7 +362,7 @@ Item {
                 spacing: 2
 
                 CtxItem {
-                    label: root._ctxDevice && root._ctxDevice.connected ? "Déconnecter" : "Connecter"
+                    label: root._ctxDevice && root._ctxDevice.connected ? I18n.tr("Déconnecter") : I18n.tr("Connecter")
                     onActivated: {
                         if (!root._ctxDevice) return
                         BluetoothState.toggleConnection(root._ctxDevice)
@@ -372,7 +372,7 @@ Item {
                 CtxItem {
                     visible: root._ctxDevice && root._ctxDevice.paired
                     height: visible ? 32 : 0
-                    label: "Supprimer"
+                    label: I18n.tr("Supprimer")
                     destructive: true
                     onActivated: {
                         if (root._ctxDevice) {

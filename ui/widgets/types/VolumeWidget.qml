@@ -34,7 +34,7 @@ Item {
             Layout.fillWidth: true
 
             Text {
-                text: "Volume"
+                text: I18n.tr("Volume")
                 color: Theme.accent
                 font.pixelSize: 13
                 font.weight: Font.Bold

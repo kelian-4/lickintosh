@@ -31,7 +31,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: MprisState.hasPlayer ? MprisState.trackTitle : "Aucune lecture en cours"
+                text: MprisState.hasPlayer ? MprisState.trackTitle : I18n.tr("Aucune lecture en cours")
                 color: "#FFFFFF"
                 font.pixelSize: 14
                 font.bold: true

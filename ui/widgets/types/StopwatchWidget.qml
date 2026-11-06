@@ -15,7 +15,7 @@ Item {
         spacing: 6
 
         Text {
-            text: "Stopwatch"
+            text: I18n.tr("Stopwatch")
             color: "#ff9f0a"
             font.pixelSize: 13
             font.weight: Font.Bold
@@ -40,7 +40,7 @@ Item {
 
             WidgetButton {
                 look: root.look
-                text: StopwatchState.running ? "Stop" : "Start"
+                text: StopwatchState.running ? I18n.tr("Stop") : I18n.tr("Start")
                 tint: StopwatchState.running ? "#ff453a" : "#30d158"
                 onClicked: StopwatchState.toggle()
             }
@@ -48,7 +48,7 @@ Item {
             WidgetButton {
                 look: root.look
                 visible: !StopwatchState.running && StopwatchState.elapsedMs > 0
-                text: "Reset"
+                text: I18n.tr("Reset")
                 onClicked: StopwatchState.reset()
             }
         }

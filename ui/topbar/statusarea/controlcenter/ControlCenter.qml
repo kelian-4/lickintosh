@@ -648,7 +648,7 @@ Scope {
                         Text {
                             id: _editControlsLabel
                             anchors.centerIn: parent
-                            text: "Edit Controls…"
+                            text: I18n.tr("Edit Controls…")
                             color: Theme.ink(parent, false)
                             font.pixelSize: 12
                             font.weight: Font.Medium
@@ -795,7 +795,7 @@ Scope {
                                 if (mouse.button !== Qt.RightButton) return
                                 ccMenu.target = boxbutton.widgetId
                                 var p = mapToItem(ccMenu, mouse.x, mouse.y)
-                                ccMenu.openAt(p.x, p.y, [{ label: "Remove", action: "remove", danger: true }])
+                                ccMenu.openAt(p.x, p.y, [{ label: I18n.tr("Remove"), action: "remove", danger: true }])
                             }
 
                             DragHandler {
@@ -979,7 +979,7 @@ Scope {
                                             anchors.leftMargin: 9
                                             anchors.verticalCenter: parent.verticalCenter
                                             CFText {
-                                                text: "Wi-Fi"
+                                                text: I18n.tr("Wi-Fi")
                                                 font.weight: Font.Bold
                                                 font.pixelSize: 12
                                                 color: Theme.ink(parent, false)
@@ -1518,7 +1518,7 @@ Scope {
                                                     }
                                                     CFText {
                                                         anchors.verticalCenter: parent.verticalCenter
-                                                        text: (Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.description) ? Pipewire.defaultAudioSink.description : "Sortie audio"
+                                                        text: (Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.description) ? Pipewire.defaultAudioSink.description : I18n.tr("Sortie audio")
                                                         font.pixelSize: 11
                                                         font.weight: Font.Bold
                                                         elide: Text.ElideRight
@@ -1576,7 +1576,7 @@ Scope {
                                     anchors.left: focusCircle.right
                                     anchors.leftMargin: 9
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: "Focus"
+                                    text: I18n.tr("Focus")
                                     font.pixelSize: 12
                                     font.weight: Font.Bold
                                     color: root.focusOn ? "#000" : "#fff"
@@ -1801,7 +1801,7 @@ Scope {
                                     anchors.left: darkCircle.right
                                     anchors.leftMargin: 9
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: "Dark Mode"
+                                    text: I18n.tr("Dark Mode")
                                     font.pixelSize: 12
                                     font.weight: Font.Bold
                                     color: root.darkOn ? "#000" : "#fff"
@@ -2058,7 +2058,7 @@ Scope {
                                         spacing: 10
 
                                         CFText {
-                                            text: "Minuteur"
+                                            text: I18n.tr("Minuteur")
                                             font.pixelSize: 15
                                             font.weight: Font.Bold
                                             color: Theme.ink(parent, false)
@@ -2066,7 +2066,7 @@ Scope {
 
                                         CFText {
                                             visible: TimerState.firing
-                                            text: "Terminé"
+                                            text: I18n.tr("Terminé")
                                             font.pixelSize: 30
                                             font.weight: Font.Bold
                                             color: "#ff453a"
@@ -2127,7 +2127,7 @@ Scope {
                                                 color: _pauseMouse.containsMouse ? "#28ffffff" : "#18ffffff"
                                                 CFText {
                                                     anchors.centerIn: parent
-                                                    text: TimerState.running ? "Pause" : "Reprendre"
+                                                    text: TimerState.running ? I18n.tr("Pause") : I18n.tr("Reprendre")
                                                     font.pixelSize: 12
                                                     color: Theme.ink(parent, false)
                                                 }
@@ -2147,7 +2147,7 @@ Scope {
                                                 color: _cancelMouse.containsMouse ? "#40ff453a" : "#20ff453a"
                                                 CFText {
                                                     anchors.centerIn: parent
-                                                    text: TimerState.firing ? "OK" : "Annuler"
+                                                    text: TimerState.firing ? I18n.tr("OK") : I18n.tr("Annuler")
                                                     font.pixelSize: 12
                                                     color: "#ff453a"
                                                 }
@@ -2247,7 +2247,7 @@ Scope {
                                             Layout.fillWidth: true
 
                                             CFText {
-                                                text: "Alarmes"
+                                                text: I18n.tr("Alarmes")
                                                 font.pixelSize: 15
                                                 font.weight: Font.Bold
                                                 color: Theme.ink(parent, false)
@@ -2350,7 +2350,7 @@ Scope {
 
                                                 CFText {
                                                     visible: AlarmState.alarms.length === 0
-                                                    text: "Aucune alarme"
+                                                    text: I18n.tr("Aucune alarme")
                                                     font.pixelSize: 12
                                                     gray: true
                                                 }
@@ -2440,7 +2440,7 @@ Scope {
                                         spacing: 10
 
                                         CFText {
-                                            text: "Chronomètre"
+                                            text: I18n.tr("Chronomètre")
                                             font.pixelSize: 15
                                             font.weight: Font.Bold
                                             color: Theme.ink(parent, false)
@@ -2465,7 +2465,7 @@ Scope {
                                                 color: _swToggleMouse.containsMouse ? "#28ffffff" : "#18ffffff"
                                                 CFText {
                                                     anchors.centerIn: parent
-                                                    text: StopwatchState.running ? "Arrêter" : "Démarrer"
+                                                    text: StopwatchState.running ? I18n.tr("Arrêter") : I18n.tr("Démarrer")
                                                     font.pixelSize: 12
                                                     color: Theme.ink(parent, false)
                                                 }
@@ -2485,7 +2485,7 @@ Scope {
                                                 color: _swResetMouse.containsMouse ? "#40ff453a" : "#20ff453a"
                                                 CFText {
                                                     anchors.centerIn: parent
-                                                    text: "Réinitialiser"
+                                                    text: I18n.tr("Réinitialiser")
                                                     font.pixelSize: 12
                                                     color: "#ff453a"
                                                 }

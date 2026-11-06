@@ -17,27 +17,27 @@ Scope {
 
     readonly property var texts: ({
         poweroff: {
-            title: "Voulez-vous vraiment éteindre l'ordinateur maintenant ?",
-            detail: "Si vous ne faites rien, l'ordinateur s'éteindra automatiquement dans",
-            button: "Éteindre",
+            title: I18n.tr("Voulez-vous vraiment éteindre l'ordinateur maintenant ?"),
+            detail: I18n.tr("Si vous ne faites rien, l'ordinateur s'éteindra automatiquement dans"),
+            button: I18n.tr("Éteindre"),
             icon: "dropdown/power.svg"
         },
         reboot: {
-            title: "Voulez-vous vraiment redémarrer l'ordinateur maintenant ?",
-            detail: "Si vous ne faites rien, l'ordinateur redémarrera automatiquement dans",
-            button: "Redémarrer",
+            title: I18n.tr("Voulez-vous vraiment redémarrer l'ordinateur maintenant ?"),
+            detail: I18n.tr("Si vous ne faites rien, l'ordinateur redémarrera automatiquement dans"),
+            button: I18n.tr("Redémarrer"),
             icon: "dropdown/reload.svg"
         },
         bios: {
-            title: "Voulez-vous vraiment redémarrer vers le BIOS maintenant ?",
-            detail: "Si vous ne faites rien, l'ordinateur redémarrera vers le BIOS dans",
-            button: "Redémarrer",
+            title: I18n.tr("Voulez-vous vraiment redémarrer vers le BIOS maintenant ?"),
+            detail: I18n.tr("Si vous ne faites rien, l'ordinateur redémarrera vers le BIOS dans"),
+            button: I18n.tr("Redémarrer"),
             icon: "dropdown/reload.svg"
         },
         logout: {
-            title: "Voulez-vous vraiment fermer la session maintenant ?",
-            detail: "Si vous ne faites rien, la session se fermera automatiquement dans",
-            button: "Fermer la session",
+            title: I18n.tr("Voulez-vous vraiment fermer la session maintenant ?"),
+            detail: I18n.tr("Si vous ne faites rien, la session se fermera automatiquement dans"),
+            button: I18n.tr("Fermer la session"),
             icon: "notch/log-out.svg"
         }
     })
@@ -158,7 +158,7 @@ Scope {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
                             wrapMode: Text.WordWrap
-                            text: root.current ? root.current.detail + " " + root.remaining + " secondes." : ""
+                            text: root.current ? root.current.detail + " " + root.remaining + " " + I18n.tr("secondes.") : ""
                             color: Qt.rgba(1, 1, 1, 0.65)
                             font.family: "SF Pro Text"
                             font.pixelSize: 12
@@ -181,7 +181,7 @@ Scope {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: "Annuler"
+                                    text: I18n.tr("Annuler")
                                     color: "#FFFFFF"
                                     font.family: "SF Pro Text"
                                     font.pixelSize: 13

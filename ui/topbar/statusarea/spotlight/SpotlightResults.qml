@@ -9,7 +9,7 @@ ListView {
     id: root
 
     required property string      searchText
-    required property list<var>   answers
+    required property var   answers
     required property string      fontFamily
     required property string      fontFamilyMedium
     required property int         currentIdx
@@ -195,7 +195,7 @@ ListView {
             anchors.leftMargin:  10
             anchors.right:       parent.right
             anchors.rightMargin: 12
-            text:           row.modelData.name || row.modelData.title || ""
+            text:           I18n.tr(row.modelData.name || row.modelData.title || "")
             color:          row.modelData.isTodoItem && row.modelData.todoDone ? "#80ffffff" : "#ffffff"
             font.family:    root.fontFamilyMedium
             font.pixelSize: 15
@@ -217,7 +217,7 @@ ListView {
                 if (row.modelData.isWallpaper) return "Fond d'écran"
                 if (row.modelData.isCalc) return "Calculatrice"
                 if (row.modelData.isWeb) return "Recherche"
-                return row.modelData.description || ""
+                return I18n.tr(row.modelData.description || "")
             }
             color:          "#80ffffff"
             font.family:    root.fontFamily

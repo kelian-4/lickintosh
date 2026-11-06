@@ -185,7 +185,7 @@ Item {
         spacing: 2
 
         MenuRow {
-            label: "About this Mac"
+            label: I18n.tr("About this Mac")
             icon: "dropdown/mac.svg"
             onActivated: {
                 root.openAbout()
@@ -196,7 +196,7 @@ Item {
         MenuSep {}
 
         MenuRow {
-            label: "System Settings…"
+            label: I18n.tr("System Settings…")
             icon: "dropdown/settings.svg"
             onActivated: {
                 root.openSettingsApp()
@@ -204,7 +204,7 @@ Item {
             }
         }
         MenuRow {
-            label: "App Store"
+            label: I18n.tr("App Store")
             icon: "dropdown/store.svg"
             dimmed: root.packagesUrl === ""
             onActivated: {
@@ -218,7 +218,7 @@ Item {
 
         MenuRow {
             id: recentRow
-            label: "Recent Items"
+            label: I18n.tr("Recent Items")
             icon: "dropdown/clock.svg"
             hasSub: true
         }
@@ -226,7 +226,7 @@ Item {
         MenuSep {}
 
         MenuRow {
-            label: "Force Quit…"
+            label: I18n.tr("Force Quit…")
             icon: "notch/x-circle.svg"
             shortcut: "⇧⌘⌫"
             onActivated: _kill.running = true
@@ -235,12 +235,12 @@ Item {
         MenuSep {}
 
         MenuRow {
-            label: "Sleep"
+            label: I18n.tr("Sleep")
             icon: "dropdown/sleep.svg"
             onActivated: _suspend.running = true
         }
         MenuRow {
-            label: "Restart…"
+            label: I18n.tr("Restart…")
             icon: "dropdown/reload.svg"
             onActivated: {
                 root.powerRequested("reboot")
@@ -248,7 +248,7 @@ Item {
             }
         }
         MenuRow {
-            label: "Shut Down…"
+            label: I18n.tr("Shut Down…")
             icon: "dropdown/power.svg"
             onActivated: {
                 root.powerRequested("poweroff")
@@ -259,7 +259,7 @@ Item {
         MenuSep {}
 
         MenuRow {
-            label: "Log Out…"
+            label: I18n.tr("Log Out…")
             icon: "notch/log-out.svg"
             onActivated: {
                 root.powerRequested("logout")
@@ -270,7 +270,7 @@ Item {
         MenuSep {}
 
         MenuRow {
-            label: "Lock Screen"
+            label: I18n.tr("Lock Screen")
             icon: "dropdown/lock.svg"
             shortcut: "⌃⌘L"
             onActivated: {
@@ -348,7 +348,7 @@ Item {
                     anchors.left: parent.left
                     anchors.leftMargin: 14
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "No Recent Items"
+                    text: I18n.tr("No Recent Items")
                     color: root.dimColor
                     font.pixelSize: 13
                     renderType: Text.NativeRendering

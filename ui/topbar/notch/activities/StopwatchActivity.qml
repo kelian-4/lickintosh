@@ -28,7 +28,7 @@ Item {
                 color: "#2A2A2A"
                 Text {
                     anchors.centerIn: parent
-                    text: StopwatchState.running ? "Pause" : "Démarrer"
+                    text: StopwatchState.running ? I18n.tr("Pause") : I18n.tr("Démarrer")
                     color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Text"
                 }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: StopwatchState.toggle() }

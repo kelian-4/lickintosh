@@ -22,9 +22,9 @@ Item {
     readonly property string currentProfile: ShellConfig.powerProfile
 
     readonly property var profiles: [
-        { id: "balanced", label: "Automatic", icon: "battery/battery-100.svg" },
-        { id: "power-saver", label: "Low Power", icon: "battery/battery-010.svg" },
-        { id: "performance", label: "High Power", icon: "battery/battery-100-charging.svg" }
+        { id: "balanced", label: I18n.tr("Automatic"), icon: "battery/battery-100.svg" },
+        { id: "power-saver", label: I18n.tr("Low Power"), icon: "battery/battery-010.svg" },
+        { id: "performance", label: I18n.tr("High Power"), icon: "battery/battery-100-charging.svg" }
     ]
 
     function setProfile(profileId) {
@@ -49,7 +49,7 @@ Item {
             Layout.fillWidth: true
 
             CFText {
-                text: "Battery"
+                text: I18n.tr("Battery")
                 font.pixelSize: 15
                 font.weight: Font.Bold
             }
@@ -83,7 +83,7 @@ Item {
             spacing: 6
 
             CFText {
-                text: "Energy Mode"
+                text: I18n.tr("Energy Mode")
                 gray: true
                 font.pixelSize: 11
                 font.weight: Font.Bold
@@ -163,7 +163,7 @@ Item {
             spacing: 6
 
             CFText {
-                text: "Energy Usage"
+                text: I18n.tr("Energy Usage")
                 gray: true
                 font.pixelSize: 11
                 font.weight: Font.Bold
@@ -171,7 +171,7 @@ Item {
 
 	    CFText {
                 visible: root.topConsumers.length === 0
-                text: root.hasCollectedOnce ? "No Apps Using Significant Energy" : "Calculating..."
+                text: root.hasCollectedOnce ? I18n.tr("No Apps Using Significant Energy") : I18n.tr("Calculating...")
                 gray: true
                 font.pixelSize: 12
             }
@@ -278,7 +278,7 @@ Item {
 
             CFText {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Battery Settings..."
+                text: I18n.tr("Battery Settings...")
                 font.pixelSize: 13
             }
         }

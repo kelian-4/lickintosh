@@ -21,7 +21,7 @@ Item {
             Layout.fillWidth: true
 
             Text {
-                text: root.working ? "Focus" : "Break"
+                text: root.working ? I18n.tr("Focus") : I18n.tr("Break")
                 color: root.phaseColor
                 font.pixelSize: 13
                 font.weight: Font.Bold
@@ -58,7 +58,7 @@ Item {
 
             WidgetButton {
                 look: root.look
-                text: PomodoroState.running ? "Pause" : "Start"
+                text: PomodoroState.running ? I18n.tr("Pause") : I18n.tr("Start")
                 tint: root.phaseColor
                 onClicked: PomodoroState.running ? PomodoroState.pause() : PomodoroState.start()
             }
@@ -66,13 +66,13 @@ Item {
             WidgetButton {
                 look: root.look
                 visible: root.size === "m"
-                text: "Skip"
+                text: I18n.tr("Skip")
                 onClicked: PomodoroState.skip()
             }
 
             WidgetButton {
                 look: root.look
-                text: "Reset"
+                text: I18n.tr("Reset")
                 onClicked: PomodoroState.reset()
             }
         }

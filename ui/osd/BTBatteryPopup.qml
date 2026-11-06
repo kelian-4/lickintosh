@@ -161,7 +161,7 @@ Scope {
                             }
 
                             CFText {
-                                text:                "Connecté"
+                                text:                I18n.tr("Connecté")
                                 font.pixelSize:      11
                                 color:               Qt.rgba(1, 1, 1, 0.55)
                                 Layout.fillWidth:    true

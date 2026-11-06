@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import qs.services
 
 Singleton {
     id: root
@@ -21,34 +22,34 @@ Singleton {
     property var leaving: []
 
     readonly property var categories: [
-        { key: "connectivity", title: "Connectivity", icon: "notch/bluetooth.svg",  tint: Theme.accent },
-        { key: "media",        title: "Media",        icon: "music/play.svg",        tint: "#ff375f" },
-        { key: "display",      title: "Display",      icon: "sun-small.svg",         tint: "#ff9f0a" },
-        { key: "focus",        title: "Focus",        icon: "dnd.svg",               tint: "#5e5ce6" },
-        { key: "screen",       title: "Screen",       icon: "screenshot/region.svg", tint: "#30d158" },
-        { key: "utilities",    title: "Utilities",    icon: "notch/clock.svg",       tint: "#64d2ff" },
-        { key: "gaming",       title: "Gaming",       icon: "notch/zap.svg",         tint: "#bf5af2" }
+        { key: "connectivity", title: I18n.tr("Connectivity"), icon: "notch/bluetooth.svg",  tint: Theme.accent },
+        { key: "media",        title: I18n.tr("Media"),        icon: "music/play.svg",        tint: "#ff375f" },
+        { key: "display",      title: I18n.tr("Display"),      icon: "sun-small.svg",         tint: "#ff9f0a" },
+        { key: "focus",        title: I18n.tr("Focus"),        icon: "dnd.svg",               tint: "#5e5ce6" },
+        { key: "screen",       title: I18n.tr("Screen"),       icon: "screenshot/region.svg", tint: "#30d158" },
+        { key: "utilities",    title: I18n.tr("Utilities"),    icon: "notch/clock.svg",       tint: "#64d2ff" },
+        { key: "gaming",       title: I18n.tr("Gaming"),       icon: "notch/zap.svg",         tint: "#bf5af2" }
     ]
 
     readonly property var items: ShellConfig.options.controlCenter.items
 
     readonly property var controls: [
-        { id: "wifiWidget",      title: "Wi-Fi",         icon: "wifi/nm-signal-100-symbolic.svg", category: "connectivity", w: 2, h: 1, subtitle: "Network" },
-        { id: "musicWidget",     title: "Now Playing",   icon: "music/play.svg",                  category: "media",        w: 2, h: 2, subtitle: "Not Playing" },
-        { id: "btWidget",        title: "Bluetooth",     icon: "bluetooth/bluetooth.svg",         category: "connectivity", w: 1, h: 1, subtitle: "" },
-        { id: "adWidget",        title: "KDE Connect",   icon: "devices/smartphone.svg",          category: "connectivity", w: 1, h: 1, subtitle: "" },
-        { id: "focusWidget",     title: "Focus",         icon: "dnd.svg",                         category: "focus",        w: 2, h: 1, subtitle: "Off" },
-        { id: "stageWidget",     title: "Screenshot",    icon: "screenshot/region.svg",           category: "screen",       w: 1, h: 1, subtitle: "" },
-        { id: "shareWidget",     title: "Screen Share",  icon: "screenshare.svg",                 category: "screen",       w: 1, h: 1, subtitle: "" },
-        { id: "displayWidget",   title: "Display",       icon: "sun-small.svg",                   category: "display",      w: 4, h: 1, subtitle: "" },
-        { id: "volumeWidget",    title: "Sound",         icon: "volume/audio-volume-3.svg",       category: "media",        w: 4, h: 1, subtitle: "" },
-        { id: "darkWidget",      title: "Dark Mode",     icon: "notch/moon.svg",                  category: "display",      w: 2, h: 1, subtitle: "On" },
-        { id: "calcWidget",      title: "Calculator",    icon: "calculator.svg",                  category: "utilities",    w: 1, h: 1, subtitle: "" },
-        { id: "gameModeWidget",  title: "Game Mode",     icon: "notch/zap.svg",                   category: "gaming",       w: 1, h: 1, subtitle: "" },
-        { id: "timerWidget",     title: "Timer",         icon: "notch/clock.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" },
-        { id: "alarmWidget",     title: "Alarm",         icon: "notch/bell.svg",                  category: "utilities",    w: 1, h: 1, subtitle: "" },
-        { id: "stopwatchWidget", title: "Stopwatch",     icon: "notch/watch.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" },
-        { id: "keepAwakeWidget", title: "Keep Awake",    icon: "notch/coffee.svg",                category: "utilities",    w: 1, h: 1, subtitle: "" }
+        { id: "wifiWidget",      title: I18n.tr("Wi-Fi"),         icon: "wifi/nm-signal-100-symbolic.svg", category: "connectivity", w: 2, h: 1, subtitle: I18n.tr("Network") },
+        { id: "musicWidget",     title: I18n.tr("Now Playing"),   icon: "music/play.svg",                  category: "media",        w: 2, h: 2, subtitle: I18n.tr("Not Playing") },
+        { id: "btWidget",        title: I18n.tr("Bluetooth"),     icon: "bluetooth/bluetooth.svg",         category: "connectivity", w: 1, h: 1, subtitle: "" },
+        { id: "adWidget",        title: I18n.tr("KDE Connect"),   icon: "devices/smartphone.svg",          category: "connectivity", w: 1, h: 1, subtitle: "" },
+        { id: "focusWidget",     title: I18n.tr("Focus"),         icon: "dnd.svg",                         category: "focus",        w: 2, h: 1, subtitle: I18n.tr("Off") },
+        { id: "stageWidget",     title: I18n.tr("Screenshot"),    icon: "screenshot/region.svg",           category: "screen",       w: 1, h: 1, subtitle: "" },
+        { id: "shareWidget",     title: I18n.tr("Screen Share"),  icon: "screenshare.svg",                 category: "screen",       w: 1, h: 1, subtitle: "" },
+        { id: "displayWidget",   title: I18n.tr("Display"),       icon: "sun-small.svg",                   category: "display",      w: 4, h: 1, subtitle: "" },
+        { id: "volumeWidget",    title: I18n.tr("Sound"),         icon: "volume/audio-volume-3.svg",       category: "media",        w: 4, h: 1, subtitle: "" },
+        { id: "darkWidget",      title: I18n.tr("Dark Mode"),     icon: "notch/moon.svg",                  category: "display",      w: 2, h: 1, subtitle: I18n.tr("On") },
+        { id: "calcWidget",      title: I18n.tr("Calculator"),    icon: "calculator.svg",                  category: "utilities",    w: 1, h: 1, subtitle: "" },
+        { id: "gameModeWidget",  title: I18n.tr("Game Mode"),     icon: "notch/zap.svg",                   category: "gaming",       w: 1, h: 1, subtitle: "" },
+        { id: "timerWidget",     title: I18n.tr("Timer"),         icon: "notch/clock.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" },
+        { id: "alarmWidget",     title: I18n.tr("Alarm"),         icon: "notch/bell.svg",                  category: "utilities",    w: 1, h: 1, subtitle: "" },
+        { id: "stopwatchWidget", title: I18n.tr("Stopwatch"),     icon: "notch/watch.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" },
+        { id: "keepAwakeWidget", title: I18n.tr("Keep Awake"),    icon: "notch/coffee.svg",                category: "utilities",    w: 1, h: 1, subtitle: "" }
     ]
 
     readonly property var built: root.build(root.savedPositions(), "")

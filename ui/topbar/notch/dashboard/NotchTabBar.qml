@@ -12,8 +12,8 @@ Item {
     property bool settled: false
 
     readonly property var tabs: [
-        { label: "Dashboard",   icon: "grid.svg" },
-        { label: "Performance", icon: "bar-chart2.svg" }
+        { label: I18n.tr("Dashboard"),   icon: "grid.svg" },
+        { label: I18n.tr("Performance"), icon: "bar-chart2.svg" }
     ]
 
     Layout.fillWidth: true

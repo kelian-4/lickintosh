@@ -112,8 +112,8 @@ Item {
 
                 Repeater {
                     model: root.sectioned
-                        ? [ { title: "Suggestions", items: root.filteredItems.slice(0, root.suggestionsCount) },
-                            { title: "Récents",     items: root.filteredItems.slice(root.suggestionsCount) } ]
+                        ? [ { title: I18n.tr("Suggestions"), items: root.filteredItems.slice(0, root.suggestionsCount) },
+                            { title: I18n.tr("Récents"),     items: root.filteredItems.slice(root.suggestionsCount) } ]
                         : [ { title: "", items: root.filteredItems } ]
 
                     delegate: ColumnLayout {

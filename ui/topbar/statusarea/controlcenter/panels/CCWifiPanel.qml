@@ -88,7 +88,7 @@ Item {
             height: 54
 
             CFText {
-                text:           "Wi-Fi"
+                text:           I18n.tr("Wi-Fi")
                 font.weight:    Font.Bold
                 font.pixelSize: 18
                 anchors.left:           parent.left
@@ -145,7 +145,7 @@ Item {
                 Item { width: parent.width; height: 10 }
 
                 CFText {
-                    text:          "Connecté"
+                    text:          I18n.tr("Connecté")
                     font.pixelSize: 13
                     gray:           true
                     visible:        NetworkManager.active !== null
@@ -163,7 +163,7 @@ Item {
                 Item { width: parent.width; height: NetworkManager.networksKnown.length > 0 ? 8 : 0 }
 
                 CFText {
-                    text:           "Réseaux connus"
+                    text:           I18n.tr("Réseaux connus")
                     font.pixelSize: 13
                     gray:           true
                     visible:        NetworkManager.networksKnown.filter(function(n) { return !n.active }).length > 0
@@ -199,7 +199,7 @@ Item {
                     property bool _shown: false
 
                     CFText {
-                        text:           "Autres réseaux"
+                        text:           I18n.tr("Autres réseaux")
                         font.pixelSize: 13
                         gray:           true
                         anchors.left:           parent.left
@@ -259,7 +259,7 @@ Item {
             height: 44
 
             CFText {
-                text:           "Paramètres Wi-Fi…"
+                text:           I18n.tr("Paramètres Wi-Fi…")
                 font.pixelSize: 14
                 gray:           true
                 anchors.left:           parent.left
@@ -344,14 +344,14 @@ Item {
             }
 
             CFText {
-                text:           "Déconnexion…"
+                text:           I18n.tr("Déconnexion…")
                 font.pixelSize: 12
                 gray:           true
                 visible:        _nr.isActive && _nr.net && root._disconnectingSSID === _nr.net.ssid
             }
 
             CFText {
-                text:           "Connexion…"
+                text:           I18n.tr("Connexion…")
                 font.pixelSize: 12
                 gray:           true
                 visible:        !_nr.isActive && _nr.net && root._connectingSSID === _nr.net.ssid
@@ -380,7 +380,7 @@ Item {
             CFText {
                 id: _errorText
                 visible:        _nr._showError
-                text:           "Mot de passe incorrect, réessayez"
+                text:           I18n.tr("Mot de passe incorrect, réessayez")
                 color:          "#FF6B6B"
                 font.pixelSize: 11
                 anchors.top:        parent.top
@@ -396,7 +396,7 @@ Item {
                 anchors.rightMargin:     8
                 height:                  32
                 echoMode:                TextInput.Password
-                placeholderText:         "Mot de passe"
+                placeholderText:         I18n.tr("Mot de passe")
                 color: Theme.ink(parent, false)
                 font.pixelSize:          13
                 font.family:             "SF Pro Text"
@@ -434,7 +434,7 @@ Item {
 
                 CFText {
                     anchors.centerIn: parent
-                    text:           "Joindre"
+                    text:           I18n.tr("Joindre")
                     font.pixelSize: 13
                     font.weight:    Font.DemiBold
                     color: Theme.ink(parent, false)
@@ -555,7 +555,7 @@ Item {
                 spacing: 2
 
                 CtxItem {
-                    label: root._ctxNet && root._ctxNet.active ? "Déconnecter" : "Connecter"
+                    label: root._ctxNet && root._ctxNet.active ? I18n.tr("Déconnecter") : I18n.tr("Connecter")
                     onActivated: {
                         if (!root._ctxNet) return
                         if (root._ctxNet.active) {
@@ -571,7 +571,7 @@ Item {
                 CtxItem {
                     visible: root._ctxNet && NetworkManager.networksKnown.indexOf(root._ctxNet) !== -1
                     height: visible ? 32 : 0
-                    label: "Oublier ce réseau"
+                    label: I18n.tr("Oublier ce réseau")
                     destructive: true
                     onActivated: {
                         if (root._ctxNet) {

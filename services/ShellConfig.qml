@@ -119,6 +119,10 @@ Singleton {
                 property bool magnificationEnabled: true
             }
 
+            property JsonObject general: JsonObject {
+                property string language: "auto"
+            }
+
             property JsonObject menuBar: JsonObject {
                 property bool autoHide: false
             }

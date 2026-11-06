@@ -123,7 +123,7 @@ ColumnLayout {
                 Text {
                     id: _lessLabel
                     anchors.centerIn: parent
-                    text: "Show less"
+                    text: I18n.tr("Show less")
                     font.pixelSize: 11
                     font.family: "SF Pro Text"
                     color: Theme.ink(parent, false)

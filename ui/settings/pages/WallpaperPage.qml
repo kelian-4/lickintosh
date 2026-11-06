@@ -172,7 +172,7 @@ ContentPage {
     // Previsualisation : bureau et ecran de verrouillage
     // ---------------------------------------------------------------
     ContentSection {
-        title: "Aperçu"
+        title: I18n.tr("Aperçu")
 
         RowLayout {
             Layout.fillWidth: true
@@ -180,8 +180,8 @@ ContentPage {
 
             Repeater {
                 model: [
-                    { key: "desktop",    label: "Bureau" },
-                    { key: "lockscreen", label: "Écran de verrouillage" }
+                    { key: "desktop",    label: I18n.tr("Bureau") },
+                    { key: "lockscreen", label: I18n.tr("Écran de verrouillage") }
                 ]
 
                 delegate: ColumnLayout {
@@ -213,7 +213,7 @@ ContentPage {
 
                             CFText {
                                 anchors.centerIn: parent
-                                text: "Aucun fond d'écran"
+                                text: I18n.tr("Aucun fond d'écran")
                                 font.pixelSize: 12
                                 gray: true
                                 visible: _preview.shownPath === ""
@@ -279,7 +279,7 @@ ContentPage {
 
                 CFText {
                     anchors.centerIn: parent
-                    text: "Aléatoire"
+                    text: I18n.tr("Aléatoire")
                     font.pixelSize: 12
                     color: Theme.textPrimary
                 }
@@ -313,7 +313,7 @@ ContentPage {
 
                 CFText {
                     anchors.centerIn: parent
-                    text: "Revenir au fond par défaut"
+                    text: I18n.tr("Revenir au fond par défaut")
                     font.pixelSize: 12
                     color: Theme.textPrimary
                 }
@@ -336,7 +336,7 @@ ContentPage {
     // Grilles de selection
     // ---------------------------------------------------------------
     ContentSection {
-        title: "Fournis avec le shell"
+        title: I18n.tr("Fournis avec le shell")
 
         Flow {
             Layout.fillWidth: true
@@ -368,7 +368,7 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Vos photos"
+        title: I18n.tr("Vos photos")
 
         Flow {
             Layout.fillWidth: true

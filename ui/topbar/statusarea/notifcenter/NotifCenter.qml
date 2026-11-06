@@ -166,7 +166,7 @@ Scope {
 
                                     Text {
                                         Layout.fillWidth: true
-                                        text: "Notification Center"
+                                        text: I18n.tr("Notification Center")
                                         font.pixelSize: 13
                                         font.weight: Font.Bold
                                         font.family: "SF Pro Text"
@@ -207,7 +207,7 @@ Scope {
 
                                     Text {
                                         anchors.centerIn: parent
-                                        text: "No Notifications"
+                                        text: I18n.tr("No Notifications")
                                         font.pixelSize: 12
                                         font.family: "SF Pro Text"
                                         color: Qt.rgba(1, 1, 1, 0.40)
@@ -278,7 +278,7 @@ Scope {
                                     Text {
                                         id: _editLabel
                                         anchors.centerIn: parent
-                                        text: "Edit Widgets…"
+                                        text: I18n.tr("Edit Widgets…")
                                         color: Theme.ink(parent, false)
                                         font.pixelSize: 12
                                         font.weight: Font.Medium

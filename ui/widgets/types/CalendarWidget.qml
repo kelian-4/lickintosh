@@ -11,7 +11,7 @@ Item {
     property string size: "s"
 
     readonly property date today: clock.date
-    readonly property int firstDay: Qt.locale().firstDayOfWeek % 7
+    readonly property int firstDay: Qt.locale(I18n.lang).firstDayOfWeek % 7
     readonly property int monthOffset: (new Date(root.today.getFullYear(), root.today.getMonth(), 1).getDay() - root.firstDay + 7) % 7
     readonly property int monthDays: new Date(root.today.getFullYear(), root.today.getMonth() + 1, 0).getDate()
     readonly property var events: CalendarState.available ? CalendarState.events : []
@@ -37,7 +37,7 @@ Item {
                 spacing: 0
 
                 Text {
-                    text: Qt.locale().dayName(root.today.getDay(), Locale.LongFormat).toUpperCase()
+                    text: Qt.locale(I18n.lang).dayName(root.today.getDay(), Locale.LongFormat).toUpperCase()
                     color: "#ff453a"
                     font.pixelSize: 12
                     font.weight: Font.Bold
@@ -55,7 +55,7 @@ Item {
                 }
 
                 Text {
-                    text: Qt.locale().standaloneMonthName(root.today.getMonth(), Locale.LongFormat)
+                    text: Qt.locale(I18n.lang).standaloneMonthName(root.today.getMonth(), Locale.LongFormat)
                     color: root.look.secondary
                     font.pixelSize: 12
                     font.family: "SF Pro Text"
@@ -72,7 +72,7 @@ Item {
                 Text {
                     Layout.fillWidth: true
                     visible: root.events.length === 0
-                    text: "No Events"
+                    text: I18n.tr("No Events")
                     color: root.look.secondary
                     font.pixelSize: 13
                     font.family: "SF Pro Text"
@@ -128,7 +128,7 @@ Item {
         visible: root.size === "l"
 
         Text {
-            text: Qt.locale().standaloneMonthName(root.today.getMonth(), Locale.LongFormat).toUpperCase() + " " + root.today.getFullYear()
+            text: Qt.locale(I18n.lang).standaloneMonthName(root.today.getMonth(), Locale.LongFormat).toUpperCase() + " " + root.today.getFullYear()
             color: "#ff453a"
             font.pixelSize: 13
             font.weight: Font.Bold
@@ -150,7 +150,7 @@ Item {
                     required property int index
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    text: Qt.locale().dayName((root.firstDay + index) % 7, Locale.NarrowFormat)
+                    text: Qt.locale(I18n.lang).dayName((root.firstDay + index) % 7, Locale.NarrowFormat)
                     color: root.look.secondary
                     font.pixelSize: 11
                     font.weight: Font.Bold

@@ -68,21 +68,21 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: MprisState.trackTitle !== "" ? MprisState.trackTitle : "Unknown title"
+                text: MprisState.trackTitle !== "" ? MprisState.trackTitle : I18n.tr("Unknown title")
                 color: "#FFFFFF"
                 font.pixelSize: 14; font.bold: true; font.family: "SF Pro Text"
                 elide: Text.ElideRight
             }
             Text {
                 Layout.fillWidth: true
-                text: MprisState.trackAlbum !== "" ? MprisState.trackAlbum : "Unknown album"
+                text: MprisState.trackAlbum !== "" ? MprisState.trackAlbum : I18n.tr("Unknown album")
                 color: "#C0C0C0"
                 font.pixelSize: 11; font.family: "SF Pro Text"
                 elide: Text.ElideRight
             }
             Text {
                 Layout.fillWidth: true
-                text: MprisState.trackArtist !== "" ? MprisState.trackArtist : "Unknown artist"
+                text: MprisState.trackArtist !== "" ? MprisState.trackArtist : I18n.tr("Unknown artist")
                 color: "#8A8A8A"
                 font.pixelSize: 11; font.family: "SF Pro Text"
                 elide: Text.ElideRight

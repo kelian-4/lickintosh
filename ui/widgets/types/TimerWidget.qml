@@ -19,7 +19,7 @@ Item {
         spacing: 6
 
         Text {
-            text: "Timer"
+            text: I18n.tr("Timer")
             color: "#ff9f0a"
             font.pixelSize: 13
             font.weight: Font.Bold
@@ -28,7 +28,7 @@ Item {
         }
 
         Text {
-            text: TimerState.firing ? "Done" : (root.active ? TimerState.formatRemaining(TimerState.remainingMs) : "0:00")
+            text: TimerState.firing ? I18n.tr("Done") : (root.active ? TimerState.formatRemaining(TimerState.remainingMs) : "0:00")
             color: TimerState.firing ? "#ff9f0a" : root.look.primary
             font.pixelSize: root.size === "s" ? 34 : 44
             font.weight: Font.Light
@@ -45,7 +45,7 @@ Item {
             WidgetButton {
                 look: root.look
                 visible: TimerState.firing
-                text: "OK"
+                text: I18n.tr("OK")
                 tint: "#ff9f0a"
                 onClicked: TimerState.dismissFiring()
             }
@@ -64,7 +64,7 @@ Item {
             WidgetButton {
                 look: root.look
                 visible: root.active
-                text: TimerState.running ? "Pause" : "Resume"
+                text: TimerState.running ? I18n.tr("Pause") : I18n.tr("Resume")
                 tint: "#ff9f0a"
                 onClicked: TimerState.running ? TimerState.pause() : TimerState.resume()
             }
@@ -72,7 +72,7 @@ Item {
             WidgetButton {
                 look: root.look
                 visible: root.active
-                text: "Cancel"
+                text: I18n.tr("Cancel")
                 onClicked: TimerState.cancel()
             }
         }

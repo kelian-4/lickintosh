@@ -36,8 +36,8 @@ Item {
             case "timer":          return TimerState.formatRemaining(TimerState.remainingMs)
             case "stopwatch":      return StopwatchState.formatElapsed(StopwatchState.elapsedMs)
             case "alarm":          return "Alarme"
-            case "notification":   return NotchState.topUrgent ? NotchState.topUrgent.title : "Notification"
-            case "bluetooth":      return NotchState.topUrgent ? NotchState.topUrgent.title : "Bluetooth"
+            case "notification":   return NotchState.topUrgent ? NotchState.topUrgent.title : I18n.tr("Notification")
+            case "bluetooth":      return NotchState.topUrgent ? NotchState.topUrgent.title : I18n.tr("Bluetooth")
             case "battery":        return "Charge · " + NotchState.batteryPercent + "%"
             case "gamemode":       return "Game Mode"
             case "capture-camera": return "Caméra active"

@@ -88,7 +88,7 @@ Item {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Effacer"
+                    text: I18n.tr("Effacer")
                     font.pixelSize: 13
                     font.family: "SF Pro Text"
                     color: Theme.ink(parent, false)
@@ -126,7 +126,7 @@ Item {
                             anchors.left: parent.left
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
-                            text: "Rappeler plus tard"
+                            text: I18n.tr("Rappeler plus tard")
                             font.pixelSize: 13
                             font.family: "SF Pro Text"
                             color: Theme.ink(parent, false)
@@ -152,7 +152,7 @@ Item {
                             anchors.left: parent.left
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
-                            text: "Options"
+                            text: I18n.tr("Options")
                             font.pixelSize: 13
                             font.family: "SF Pro Text"
                             color: Theme.ink(parent, false)
@@ -226,7 +226,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Confirmer"
+                        text: I18n.tr("Confirmer")
                         font.pixelSize: 12
                         font.weight: Font.DemiBold
                         font.family: "SF Pro Text"

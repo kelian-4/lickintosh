@@ -15,7 +15,7 @@ Scope {
                 id: win
 
                 visible: true
-                title: "Edit Controls"
+                title: I18n.tr("Edit Controls")
                 implicitWidth: 820
                 implicitHeight: 600
                 minimumSize: Qt.size(820, 600)
@@ -41,12 +41,12 @@ Scope {
                         return s.items.length > 0 && (panel.category === "all" || panel.category === s.cat.key)
                     })
 
-                    categories: [{ key: "all", title: "All Controls", icon: "notch/columns.svg", tint: "#8e8e93" }].concat(
+                    categories: [{ key: "all", title: I18n.tr("All Controls"), icon: "notch/columns.svg", tint: "#8e8e93" }].concat(
                         ControlCatalog.categories.map(function(c) {
                             return { key: c.key, title: c.title, icon: c.icon, tint: c.tint }
                         }))
                     searchPlaceholder: "Search Controls"
-                    hint: "Drag a control into Control Center, or click it to add."
+                    hint: I18n.tr("Drag a control into Control Center, or click it to add.")
                     emptyText: "No Controls Found"
                     empty: panel.sections.length === 0
                     onDone: ControlCatalog.galleryOpen = false

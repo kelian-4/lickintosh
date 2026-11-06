@@ -1,31 +1,32 @@
 pragma Singleton
 import QtQuick
+import qs.services
 
 QtObject {
-    property list<var> menus: [
+    property var menus: [
         {
-            label: "Fichier",
+            label: I18n.tr("Fichier"),
             items: [
-                { label: "Nouvel onglet", mods: "CTRL SHIFT", key: "T", icon: "notch/plus-square.svg" },
-                { label: "Nouvelle fenêtre", mods: "CTRL SHIFT", key: "N", icon: "notch/layout.svg" },
-                { label: "Fermer l'onglet", mods: "CTRL SHIFT", key: "W", icon: "notch/x.svg" }
+                { label: I18n.tr("Nouvel onglet"), mods: "CTRL SHIFT", key: "T", icon: "notch/plus-square.svg" },
+                { label: I18n.tr("Nouvelle fenêtre"), mods: "CTRL SHIFT", key: "N", icon: "notch/layout.svg" },
+                { label: I18n.tr("Fermer l'onglet"), mods: "CTRL SHIFT", key: "W", icon: "notch/x.svg" }
             ]
         },
         {
-            label: "Édition",
+            label: I18n.tr("Édition"),
             items: [
-                { label: "Copier", mods: "CTRL SHIFT", key: "C", icon: "notch/copy.svg" },
-                { label: "Coller", mods: "CTRL SHIFT", key: "V", icon: "notch/clipboard.svg" },
-                { label: "Rechercher", mods: "CTRL SHIFT", key: "F", icon: "notch/search.svg" }
+                { label: I18n.tr("Copier"), mods: "CTRL SHIFT", key: "C", icon: "notch/copy.svg" },
+                { label: I18n.tr("Coller"), mods: "CTRL SHIFT", key: "V", icon: "notch/clipboard.svg" },
+                { label: I18n.tr("Rechercher"), mods: "CTRL SHIFT", key: "F", icon: "notch/search.svg" }
             ]
         },
         {
-            label: "Affichage",
+            label: I18n.tr("Affichage"),
             items: [
-                { label: "Zoom avant", mods: "CTRL SHIFT", key: "plus", icon: "notch/zoom-in.svg" },
-                { label: "Zoom arrière", mods: "CTRL", key: "minus", icon: "notch/zoom-out.svg" },
-                { label: "Réinitialiser zoom", mods: "CTRL", key: "0", icon: "notch/maximize-2.svg" },
-                { label: "Plein écran", mods: "", key: "F11", icon: "notch/maximize.svg" }
+                { label: I18n.tr("Zoom avant"), mods: "CTRL SHIFT", key: "plus", icon: "notch/zoom-in.svg" },
+                { label: I18n.tr("Zoom arrière"), mods: "CTRL", key: "minus", icon: "notch/zoom-out.svg" },
+                { label: I18n.tr("Réinitialiser zoom"), mods: "CTRL", key: "0", icon: "notch/maximize-2.svg" },
+                { label: I18n.tr("Plein écran"), mods: "", key: "F11", icon: "notch/maximize.svg" }
             ]
         }
     ]

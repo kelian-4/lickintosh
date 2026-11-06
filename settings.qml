@@ -19,7 +19,7 @@ FloatingWindow {
     id: root
 
     visible: true
-    title: "Réglages"
+    title: I18n.tr("Réglages")
     implicitWidth: 900
     implicitHeight: 620
     minimumSize: Qt.size(860, 560)
@@ -62,7 +62,7 @@ FloatingWindow {
             ]
         },
         {
-            title: "Système",
+            title: I18n.tr("Système"),
             items: [
                 { name: "Général",                  icon: "settings/general.svg",       component: "GeneralPage", implemented: true },
                 { name: "Apparence",                 icon: "settings/appearance.svg",    component: "AppearancePage", implemented: true },
@@ -303,7 +303,7 @@ FloatingWindow {
 
                                     CFText {
                                         anchors.verticalCenter: parent.verticalCenter
-                                        text: "Rechercher"
+                                        text: I18n.tr("Rechercher")
                                         font.pixelSize: 13
                                         gray: true
                                         visible: _searchField.text.length === 0

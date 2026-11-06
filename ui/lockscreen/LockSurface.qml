@@ -489,7 +489,7 @@ WlSessionLockSurface {
 
                         Text {
                             anchors.centerIn: parent
-                            text: (Quickshell.env("USER") || "?").charAt(0).toUpperCase()
+                            text: (Quickshell.env(I18n.tr("USER")) || "?").charAt(0).toUpperCase()
                             color: "#ffffff"
                             font.family: "SF Pro Display"
                             font.pixelSize: 22

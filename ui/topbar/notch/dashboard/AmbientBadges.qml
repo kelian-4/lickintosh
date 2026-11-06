@@ -84,21 +84,21 @@ RowLayout {
         shown: MediaCaptureState.cameraActive
         icon: "notch/camera.svg"
         tint: "#4ADE80"
-        label: "Caméra"
+        label: I18n.tr("Caméra")
     }
 
     Badge {
         shown: MediaCaptureState.micActive
         icon: "notch/mic.svg"
         tint: "#FBBF24"
-        label: "Micro"
+        label: I18n.tr("Micro")
     }
 
     Badge {
         shown: GameMode.enabled
         icon: "notch/award.svg"
         tint: "#FF6B6B"
-        label: "Game Mode"
+        label: I18n.tr("Game Mode")
         dismissible: true
         onDismissed: GameMode.disable()
     }

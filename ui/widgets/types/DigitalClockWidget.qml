@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import qs.services
 
 Item {
     id: root
@@ -30,7 +31,7 @@ Item {
         }
 
         Text {
-            text: Qt.formatDate(clock.date, root.size === "s" ? "ddd d MMM" : "dddd d MMMM")
+            text: Qt.formatDate(clock.date, root.size === "s" ? I18n.tr("ddd d MMM") : I18n.tr("dddd d MMMM"))
             color: "#5e5ce6"
             font.pixelSize: root.size === "s" ? 13 : 16
             font.weight: Font.Medium

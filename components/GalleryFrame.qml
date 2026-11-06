@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.components
+import qs.services
 
 Rectangle {
     id: root
@@ -250,7 +251,7 @@ Rectangle {
                         anchors.fill: parent
 
                         Repeater {
-                            model: [{ key: "glass", title: "Glass" }, { key: "light", title: "Light" }, { key: "dark", title: "Dark" }]
+                            model: [{ key: "glass", title: I18n.tr("Glass") }, { key: "light", title: I18n.tr("Light") }, { key: "dark", title: I18n.tr("Dark") }]
 
                             delegate: Rectangle {
                                 id: themeOption
@@ -293,7 +294,7 @@ Rectangle {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Done"
+                        text: I18n.tr("Done")
                         color: "#ffffff"
                         font.pixelSize: 13
                         font.weight: Font.Medium

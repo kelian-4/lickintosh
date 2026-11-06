@@ -18,7 +18,7 @@ Item {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: root._firing && root._firing.label ? root._firing.label : "Alarme"
+            text: root._firing && root._firing.label ? root._firing.label : I18n.tr("Alarme")
             color: "#FFFFFF"
             font.pixelSize: 18
             font.bold: true

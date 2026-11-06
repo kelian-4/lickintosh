@@ -6,6 +6,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.components.glass
+import qs.services
 
 /*
     LockScreen — point d'entrée du lockscreen, intégré au shell principal
@@ -272,7 +273,7 @@ Scope {
     GlobalShortcut {
         appid: "lickintosh"
         name: "lock"
-        description: "Verrouille la session"
+        description: I18n.tr("Verrouille la session")
         onPressed: root.lock()
     }
 }

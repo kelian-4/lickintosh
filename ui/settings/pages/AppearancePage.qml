@@ -12,14 +12,14 @@ ContentPage {
     property string glassTarget: "*"
 
     readonly property var accents: [
-        { name: "Bleu",     hex: "#0088ff" },
-        { name: "Violet",   hex: "#cb30e0" },
-        { name: "Rose",     hex: "#ff2d55" },
-        { name: "Rouge",    hex: "#ff383c" },
-        { name: "Orange",   hex: "#ff8d28" },
-        { name: "Jaune",    hex: "#ffcc00" },
-        { name: "Vert",     hex: "#34c759" },
-        { name: "Graphite", hex: "#8e8e93" }
+        { name: I18n.tr("Bleu"),     hex: "#0088ff" },
+        { name: I18n.tr("Violet"),   hex: "#cb30e0" },
+        { name: I18n.tr("Rose"),     hex: "#ff2d55" },
+        { name: I18n.tr("Rouge"),    hex: "#ff383c" },
+        { name: I18n.tr("Orange"),   hex: "#ff8d28" },
+        { name: I18n.tr("Jaune"),    hex: "#ffcc00" },
+        { name: I18n.tr("Vert"),     hex: "#34c759" },
+        { name: I18n.tr("Graphite"), hex: "#8e8e93" }
     ]
 
     component StyleTile: Item {
@@ -176,14 +176,14 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Style de l'interface"
+        title: I18n.tr("Style de l'interface")
 
         Flow {
             Layout.fillWidth: true
             spacing: 20
 
             StyleTile {
-                label: "Liquid Glass"
+                label: I18n.tr("Liquid Glass")
                 selected: Theme.mode === "glass"
                 palette: "glass"
                 windowTint: "#40ffffff"
@@ -192,7 +192,7 @@ ContentPage {
             }
 
             StyleTile {
-                label: "Clair"
+                label: I18n.tr("Clair")
                 selected: Theme.mode === "light"
                 palette: "light"
                 windowTint: "#99ffffff"
@@ -201,7 +201,7 @@ ContentPage {
             }
 
             StyleTile {
-                label: "Sombre"
+                label: I18n.tr("Sombre")
                 selected: Theme.mode === "dark"
                 palette: "dark"
                 windowTint: "#99000000"
@@ -212,10 +212,10 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Personnalisation du style"
+        title: I18n.tr("Personnalisation du style")
 
         ParamSlider {
-            text: "Intensité de la teinte du verre"
+            text: I18n.tr("Intensité de la teinte du verre")
             from: 0
             to: 0.9
             decimals: 2
@@ -233,7 +233,7 @@ ContentPage {
             spacing: 10
 
             CFText {
-                text: "Couleur d'accentuation"
+                text: I18n.tr("Couleur d'accentuation")
                 font.pixelSize: 14
             }
 
@@ -251,7 +251,7 @@ ContentPage {
 
                     CFText {
                         anchors.centerIn: parent
-                        text: "Défaut"
+                        text: I18n.tr("Défaut")
                         font.pixelSize: 12
                     }
 
@@ -289,11 +289,11 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Liquid Glass par élément"
+        title: I18n.tr("Liquid Glass par élément")
 
         CFText {
             Layout.fillWidth: true
-            text: "Chaque réglage s'applique à l'élément choisi. « Tous » sert de base : un élément sans réglage propre en hérite."
+            text: I18n.tr("Chaque réglage s'applique à l'élément choisi. « Tous » sert de base : un élément sans réglage propre en hérite.")
             font.pixelSize: 12
             gray: true
             wrapMode: Text.WordWrap
@@ -359,7 +359,7 @@ ContentPage {
 
             CFText {
                 anchors.centerIn: parent
-                text: "Réinitialiser cet élément"
+                text: I18n.tr("Réinitialiser cet élément")
                 font.pixelSize: 13
                 color: Theme.onAccent
             }
@@ -373,11 +373,11 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Thème de flou Hyprland"
+        title: I18n.tr("Thème de flou Hyprland")
 
         CFText {
             Layout.fillWidth: true
-            text: "Applique le flou choisi à toutes les fenêtres et aux couches Quickshell, quel que soit le style de l'interface."
+            text: I18n.tr("Applique le flou choisi à toutes les fenêtres et aux couches Quickshell, quel que soit le style de l'interface.")
             font.pixelSize: 12
             gray: true
             wrapMode: Text.WordWrap
@@ -388,7 +388,7 @@ ContentPage {
             spacing: 20
 
             StyleTile {
-                label: "Aucun"
+                label: I18n.tr("Aucun")
                 selected: !Theme.compositorBlur
                 palette: "glass"
                 windowTint: "#40ffffff"
@@ -434,10 +434,10 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Fenêtres et couches"
+        title: I18n.tr("Fenêtres et couches")
 
         ParamSlider {
-            text: "Opacité des fenêtres actives"
+            text: I18n.tr("Opacité des fenêtres actives")
             from: 0.3
             to: 1.0
             decimals: 2
@@ -446,7 +446,7 @@ ContentPage {
         }
 
         ParamSlider {
-            text: "Opacité des fenêtres inactives"
+            text: I18n.tr("Opacité des fenêtres inactives")
             from: 0.3
             to: 1.0
             decimals: 2
@@ -455,20 +455,20 @@ ContentPage {
         }
 
         ParamSwitch {
-            text: "Appliquer le flou aux couches Quickshell"
-            description: "Barre, dock, panneaux, Spotlight, notifications et OSD."
+            text: I18n.tr("Appliquer le flou aux couches Quickshell")
+            description: I18n.tr("Barre, dock, panneaux, Spotlight, notifications et OSD.")
             source: ShellConfig.options.appearance.blurLayers
             onCommitted: function(v) { ShellConfig.options.appearance.blurLayers = v }
         }
 
         ParamSwitch {
-            text: "Flou des menus des couches"
+            text: I18n.tr("Flou des menus des couches")
             source: ShellConfig.options.appearance.blurLayerPopups
             onCommitted: function(v) { ShellConfig.options.appearance.blurLayerPopups = v }
         }
 
         ParamSlider {
-            text: "Seuil de transparence des couches"
+            text: I18n.tr("Seuil de transparence des couches")
             from: 0
             to: 1
             decimals: 2
@@ -477,7 +477,7 @@ ContentPage {
         }
 
         ParamSlider {
-            text: "Opacité des surfaces du shell"
+            text: I18n.tr("Opacité des surfaces du shell")
             from: 0
             to: 1
             decimals: 2
@@ -487,7 +487,7 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Réglages du flou"
+        title: I18n.tr("Réglages du flou")
 
         Repeater {
             model: Theme.blurGeneral
@@ -521,7 +521,7 @@ ContentPage {
 
         CFText {
             anchors.centerIn: parent
-            text: "Réinitialiser le flou"
+            text: I18n.tr("Réinitialiser le flou")
             font.pixelSize: 13
             color: Theme.onAccent
         }

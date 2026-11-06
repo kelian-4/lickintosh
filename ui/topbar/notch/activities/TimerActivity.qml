@@ -11,7 +11,7 @@ Item {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: TimerState.firing ? "Temps écoulé" : TimerState.formatRemaining(TimerState.remainingMs)
+            text: TimerState.firing ? I18n.tr("Temps écoulé") : TimerState.formatRemaining(TimerState.remainingMs)
             color: "#FFFFFF"
             font.pixelSize: TimerState.firing ? 16 : 28
             font.family: "SF Mono"
@@ -39,7 +39,7 @@ Item {
                 color: "#2A2A2A"
                 Text {
                     anchors.centerIn: parent
-                    text: TimerState.running ? "Pause" : "Reprendre"
+                    text: TimerState.running ? I18n.tr("Pause") : I18n.tr("Reprendre")
                     color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Text"
                 }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: TimerState.running ? TimerState.pause() : TimerState.resume() }
