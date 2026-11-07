@@ -218,6 +218,7 @@ ShellRoot {
         onCloseRequested: appRoot.aboutOpened = false
     }
     ControlCenter {
+        id: mainControlCenter
         opened: appRoot.ccOpened
         onClosing: appRoot.ccOpened = false
     }
@@ -268,6 +269,7 @@ ShellRoot {
 
     LockScreen {
         id: lockScreen
+        controlCenter: mainControlCenter
     }
 
     Process {
