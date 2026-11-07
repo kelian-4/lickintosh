@@ -277,17 +277,81 @@ def fmt(value):
     return str(value)
 
 
-HELP = """\
-Operators   + - * / // % ** ^ !   (parentheses allowed)
-Constants   pi e tau phi inf      ans or _ = last result
-Functions   sin cos tan asin acos atan sinh cosh tanh
-            sqrt cbrt exp ln log log2 log10 abs round floor ceil
-            fact gcd lcm min max sum hypot pow mod deg rad
-Variables   x = 5 * 3             then use x in any expression
-Commands    deg / rad   angle mode      vars   list variables
-            clear       reset all       help   this text
-            q / quit    leave
-"""
+DOCS = [
+    ("Operators", [
+        ("+  -  *  /", "basic arithmetic: 2+3*4"),
+        ("//", "integer division: 7//2 = 3"),
+        ("%", "remainder: 7%3 = 1"),
+        ("^  **", "power: 2^10 = 1024"),
+        ("!", "factorial: 5! = 120"),
+        ("( )", "grouping: (1+2)*3"),
+    ]),
+    ("Constants", [
+        ("pi", "3.14159..."),
+        ("e", "Euler's number 2.71828..."),
+        ("tau", "2*pi"),
+        ("phi", "golden ratio 1.61803..."),
+        ("inf", "infinity"),
+        ("ans  _", "result of the previous line"),
+    ]),
+    ("Angles", [
+        ("sin cos tan", "trigonometry, uses the current angle mode"),
+        ("asin acos atan", "inverse trigonometry, answer in the current angle mode"),
+        ("sinh cosh tanh", "hyperbolic functions"),
+        ("deg", "switch to degrees (command), or deg(x) converts radians to degrees"),
+        ("rad", "switch to radians (command), or rad(x) converts degrees to radians"),
+    ]),
+    ("Powers and logs", [
+        ("sqrt(x)", "square root: sqrt(16) = 4"),
+        ("cbrt(x)", "cube root: cbrt(27) = 3"),
+        ("exp(x)", "e to the power x"),
+        ("ln(x)  log(x)", "natural logarithm; log(x, b) uses base b"),
+        ("log2(x)  log10(x)", "base 2 and base 10 logarithms"),
+        ("pow(a, b)", "same as a^b"),
+        ("hypot(a, b)", "length of the hypotenuse: hypot(3,4) = 5"),
+    ]),
+    ("Rounding and numbers", [
+        ("abs(x)", "absolute value"),
+        ("round(x, n)", "round to n decimals (n optional)"),
+        ("floor(x)  ceil(x)", "round down / up to an integer"),
+        ("fact(n)", "factorial, same as n!"),
+        ("gcd(a, b)  lcm(a, b)", "greatest common divisor / least common multiple"),
+        ("mod(a, b)", "same as a%b"),
+        ("min(a, b, ...)", "smallest value: min(4, 2, 9) = 2"),
+        ("max(a, b, ...)", "largest value: max(4, 2, 9) = 9"),
+        ("sum(a, b, ...)", "total of the values: sum(1, 2, 3) = 6"),
+    ]),
+    ("Variables", [
+        ("x = 5*3", "store a result under a name, then use x anywhere"),
+        ("vars", "list your variables"),
+        ("clear", "forget all variables and ans"),
+    ]),
+    ("Other", [
+        ("help", "this list; help sqrt explains one entry"),
+        ("Tab", "complete the word under the cursor"),
+        ("q  quit", "leave"),
+    ]),
+]
+
+
+def help_text(topic=None):
+    if topic:
+        t = topic.lower()
+        hits = []
+        for _, rows in DOCS:
+            for names, text in rows:
+                words = re.findall(r"[A-Za-z_]+|[^\sA-Za-z_,()]+", names.lower())
+                if t in words or t == names.lower():
+                    hits.append(names + "  -  " + text)
+        return "\n".join(hits) if hits else "no help for '" + topic + "'"
+    width = max(len(n) for _, rows in DOCS for n, _ in rows)
+    out = []
+    for title, rows in DOCS:
+        out.append(BOLD + title + RESET)
+        for names, text in rows:
+            out.append("  " + CYAN + names.ljust(width) + RESET + "  " + text)
+        out.append("")
+    return "\n".join(out).rstrip("\n")
 
 
 def handle(line):
@@ -298,7 +362,9 @@ def handle(line):
     if low in ("q", "quit", "exit"):
         raise EOFError
     if low in ("help", "?"):
-        return HELP.rstrip("\n")
+        return help_text()
+    if low.startswith("help "):
+        return help_text(line[5:].strip())
     if low == "deg":
         state.degrees = True
         return "angle mode: degrees"
@@ -583,7 +649,6 @@ def main():
             sys.exit(1)
         return
 
-    print(BOLD + "Calculator" + RESET + DIM + "  live results, Tab completes, help for functions, q to quit" + RESET)
     live = termios is not None and sys.stdin.isatty() and sys.stdout.isatty()
     entries = []
     if live:
