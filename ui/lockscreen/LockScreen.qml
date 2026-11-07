@@ -20,6 +20,17 @@ Scope {
 
     property real lockRequestedAt: 0
 
+    property string capturePath: ""
+
+    Timer {
+        id: captureTimer
+        interval: 2500
+        onTriggered: {
+            Quickshell.execDetached(["grim", root.capturePath])
+            root.capturePath = ""
+        }
+    }
+
     function imageIsSettled(img) {
         return img.status === Image.Ready || img.status === Image.Error
     }
@@ -130,6 +141,9 @@ Scope {
 
         onLockedChanged: {
             if (locked) {
+                if (root.capturePath !== "") {
+                    captureTimer.restart()
+                }
                 root.lockRequested()
             } else {
                 lockContext.reset()
@@ -148,6 +162,15 @@ Scope {
 
         function lock(): void {
             root.lock()
+        }
+
+        function capture(path: string): void {
+            root.capturePath = path
+            if (lock.locked) {
+                captureTimer.restart()
+            } else {
+                root.lock()
+            }
         }
 
         function isLocked(): bool {
