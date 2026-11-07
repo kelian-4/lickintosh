@@ -6,7 +6,7 @@
 ![Étoiles](https://img.shields.io/github/stars/kelian-4/lickintosh?style=for-the-badge&labelColor=1e1e2e)
 ![Taille du dépôt](https://img.shields.io/github/repo-size/kelian-4/lickintosh?style=for-the-badge&labelColor=1e1e2e)
 
-[Fonctionnalités](#-fonctionnalités-) · [Installation](#-installation-) · [Raccourcis](#-raccourcis-clavier-) · [Configuration](#-configuration-) · [FAQ](#-faq-) · [Crédits](#-crédits-et-licences-)
+[Fonctionnalités](#-fonctionnalités-) · [Installation](#-installation-) · [Raccourcis](#-raccourcis-clavier-) · [Configuration](#-configuration-) · [FAQ](#-faq-) · [Remerciements](#-remerciements-et-licences-)
 
 </div>
 <img width="1366" height="768" alt="2026-11-06_12:53:14" src="https://github.com/user-attachments/assets/4973a757-5baf-4a7e-9ff1-4ed01412cb63" />
@@ -94,7 +94,8 @@ Le script est écrit pour fish. Ne le lance pas en root : il demande `sudo` (ou 
 Si Quickshell tourne déjà, relance-le complètement pour charger la nouvelle copie.
 
 > [!TIP]
-> **Mise à jour** : git pull et relancer `./setup.fish`. Une methodes plus convivial arrivera plutart
+> **Mise à jour** : `git pull` puis relance `./setup.fish`. Une méthode plus conviviale arrivera plus tard.
+
 ## • raccourcis clavier •
 
 Le modificateur principal est `SUPER`.
@@ -152,21 +153,20 @@ Les shaders Liquid Glass se recompilent avec `tools/liquid-glass/build-shaders.s
 ### Comment changer la langue ?
 La langue du système est détectée au lancement (français, anglais ou espagnol, anglais par défaut). Pour la forcer : **Réglages › Général › Langue et région**.
 
-### Pourquoi les fenetres non pas le style macos taheo?
-je travail encore sur des themes pour les fenetres 
+### Pourquoi les fenêtres n'ont-elles pas le style macOS Tahoe ?
+Je travaille encore sur des thèmes pour les fenêtres.
 
 ### Ma distribution n'est pas Arch, Debian ou Fedora, que faire ?
 Seules ces familles bénéficient de l'installation automatique des dépendances. Sur les autres, installe les paquets de la section [prérequis](#-prérequis-) à la main, puis lance `./setup.fish --skip-deps`.
-vous pouvez aussi deplace manuellement ou mieux contribuer au script
+Tu peux aussi procéder manuellement ou, mieux, contribuer au script.
 
 ### Quickshell est introuvable dans mes dépôts
-Il n'est pas présent dans toutes les versions de Arch, Debian et Fedora : le script l'indique et propose le dépôt tiers adapté.
+Il n'est pas présent dans toutes les versions d'Arch, Debian et Fedora : le script l'indique et propose le dépôt tiers adapté.
 
 ### Certains textes ne sont pas traduits
-Les traductions anglaise et espagnole sont récentes et peuvent contenir des erreurs. Certains textes restent en français : messages de l'assistant IA et du script d'installation. Ouvre une issue pour les signaler.
-ou mieux contribuer a la traduction du projet 
+Les traductions anglaise et espagnole sont récentes et peuvent contenir des erreurs. Certains textes restent en français : messages de l'assistant IA et du script d'installation. Ouvre une issue pour les signaler, ou, mieux, contribue à la traduction du projet.
 
-## • Remerciment et licences •
+## • remerciements et licences •
 
 - **Liquid Glass** : l'effet est adapté de [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
 - **MacTahoe Liquid KDE** : voir `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
