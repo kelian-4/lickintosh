@@ -45,7 +45,7 @@ RowLayout {
             TintedIcon {
                 anchors.verticalCenter: parent.verticalCenter
                 size: 12
-                source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + badge.icon)
+                source: badge.icon.startsWith("/") ? "file://" + badge.icon : Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + badge.icon)
                 tint: badge.tint
             }
 
@@ -96,7 +96,7 @@ RowLayout {
 
     Badge {
         shown: GameMode.enabled
-        icon: "notch/award.svg"
+        icon: Quickshell.shellDir + "/assets/icons_desktop/MacTahoe/actions/symbolic/gamepad-symbolic.svg"
         tint: "#FF6B6B"
         label: I18n.tr("Game Mode")
         dismissible: true

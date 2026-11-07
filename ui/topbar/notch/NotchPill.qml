@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.VectorImage
+import Quickshell
+import qs.components
 import qs.services
 
 Item {
@@ -10,17 +11,22 @@ Item {
     readonly property string kind: NotchState.primaryKind
     readonly property bool hasKind: root.kind !== "none"
 
+    function _batteryIcon() {
+        var level = Math.max(0, Math.min(100, Math.round(NotchState.batteryPercent / 10) * 10))
+        return "battery/battery-" + String(level).padStart(3, "0") + "-charging.svg"
+    }
+
     function _icon(k) {
         switch (k) {
-            case "timer":          return "../../../assets/icons/notch/clock.svg"
-            case "stopwatch":      return "../../../assets/icons/notch/clock.svg"
-            case "alarm":          return "../../../assets/icons/dropdown/clock.svg"
-            case "notification":   return "../../../assets/icons/notch/bell.svg"
-            case "bluetooth":      return "../../../assets/icons/bluetooth/bluetooth.svg"
-            case "battery":        return "../../../assets/icons/battery/zap.svg"
-            case "gamemode":       return "../../../assets/icons/notch/award.svg"
-            case "capture-camera": return "../../../assets/icons/notch/camera.svg"
-            case "capture-mic":    return "../../../assets/icons/notch/mic.svg"
+            case "timer":          return "notch/clock.svg"
+            case "stopwatch":      return "notch/clock.svg"
+            case "alarm":          return "dropdown/clock.svg"
+            case "notification":   return "notch/bell.svg"
+            case "bluetooth":      return "bluetooth/bluetooth.svg"
+            case "battery":        return root._batteryIcon()
+            case "gamemode":       return Quickshell.shellDir + "/assets/icons_desktop/MacTahoe/actions/symbolic/gamepad-symbolic.svg"
+            case "capture-camera": return "notch/camera.svg"
+            case "capture-mic":    return "notch/mic.svg"
             default:               return ""
         }
     }
@@ -64,13 +70,15 @@ Item {
             }
         }
 
-        VectorImage {
+        CFVI {
             visible: root.kind !== "media" && root.kind !== "none"
+            Layout.alignment: Qt.AlignVCenter
             Layout.preferredWidth: 14
             Layout.preferredHeight: 14
-            Layout.alignment: Qt.AlignVCenter
-            source: root._icon(root.kind)
-            preferredRendererType: VectorImage.CurveRenderer
+            size: 14
+            icon: root._icon(root.kind)
+            colorized: root.kind === "gamemode"
+            color: "#ffffff"
         }
 
         Text {
