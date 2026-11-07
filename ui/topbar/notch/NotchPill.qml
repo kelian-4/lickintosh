@@ -15,12 +15,7 @@ Item {
 
     readonly property string themeDir: Quickshell.shellDir + "/assets/icons_desktop/MacTahoe/"
 
-    function _batteryIcon() {
-        var level = Math.max(0, Math.min(100, Math.round(NotchState.batteryPercent / 10) * 10))
-        return root.themeDir + "status/symbolic/battery-level-" + level + "-charging-symbolic.svg"
-    }
-
-    readonly property bool themedGlyph: root.kind === "battery" || root.kind === "gamemode"
+    readonly property bool themedGlyph: root.kind === "gamemode"
 
     function _icon(k) {
         switch (k) {
@@ -29,7 +24,6 @@ Item {
             case "alarm":          return "dropdown/clock.svg"
             case "notification":   return "notch/bell.svg"
             case "bluetooth":      return "bluetooth/bluetooth.svg"
-            case "battery":        return root._batteryIcon()
             case "gamemode":       return root.themeDir + "actions/symbolic/gamepad-symbolic.svg"
             case "focus":          return "dnd.svg"
             case "capture-camera": return "notch/camera.svg"
@@ -46,7 +40,6 @@ Item {
             case "alarm":          return "Alarme"
             case "notification":   return NotchState.topUrgent ? NotchState.topUrgent.title : I18n.tr("Notification")
             case "bluetooth":      return NotchState.topUrgent ? NotchState.topUrgent.title : I18n.tr("Bluetooth")
-            case "battery":        return "Charge · " + NotchState.batteryPercent + "%"
             case "gamemode":       return "Game Mode"
             case "focus":          return "Focus"
             case "capture-camera": return "Caméra active"

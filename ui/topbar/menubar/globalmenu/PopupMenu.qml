@@ -94,10 +94,12 @@ Scope {
                     width: 300
                     height: itemsColumn.implicitHeight + 12
                     z: 1
-                    radius: 10
-                    color: Qt.rgba(0.08, 0.08, 0.08, 0.88)
-                    rimStrength: 1.7
-                    light: "#20ffffff"
+                    backdrop: null
+                    radius: 8
+                    color: Qt.rgba(0.11, 0.11, 0.12, 0.97)
+                    rimStrength: 0
+                    highlightEnabled: false
+                    light: "transparent"
                     opacity:         (root.opened && panel.entered) ? 1 : 0
                     scale:           (root.opened && panel.entered) ? 1 : 0.95
                     transformOrigin: Item.Top
@@ -141,8 +143,8 @@ Scope {
                                     anchors.fill: parent
                                     anchors.leftMargin: 6
                                     anchors.rightMargin: 6
-                                    radius: 6
-                                    color: (rowMouse.containsMouse && !menuRow.isDisabled) ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                                    radius: 5
+                                    color: (rowMouse.containsMouse && !menuRow.isDisabled) ? Theme.accent : "transparent"
                                 }
 
                                 RowLayout {
@@ -169,6 +171,7 @@ Scope {
                                         text: menuRow.modelData.label ? menuRow.modelData.label : ""
                                         font.pixelSize: 13
                                         gray: menuRow.isDisabled
+                                        color: (rowMouse.containsMouse && !menuRow.isDisabled) ? "#ffffff" : Theme.ink(menuRow, menuRow.isDisabled)
                                     }
 
                                     CFText {
@@ -178,6 +181,7 @@ Scope {
                                               : (menuRow.modelData.chord ? ShortcutSymbols.formatChord(menuRow.modelData.chord) : ShortcutSymbols.format(menuRow.modelData.mods, menuRow.modelData.key))
                                         font.pixelSize: 12
                                         gray: true
+                                        color: (rowMouse.containsMouse && !menuRow.isDisabled) ? "#d0ffffff" : Theme.ink(menuRow, true)
                                     }
                                 }
 
@@ -228,7 +232,6 @@ Scope {
                     }
                 }
 
-                GlassBackdrop { element: "menus" }
             }
         }
     }
