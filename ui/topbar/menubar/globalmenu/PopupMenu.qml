@@ -19,10 +19,19 @@ Scope {
     signal closeRequested()
 
     property int subIndex: -1
+    property bool subKeep: false
+    property var subItems: []
     property int subX: 0
     property int subY: 0
 
     onOpenedChanged: if (!root.opened) root.subIndex = -1
+
+    onSubIndexChanged: {
+        if (root.subIndex !== -1 && root.items[root.subIndex]) {
+            root.subItems = root.items[root.subIndex].submenu
+            root.subKeep = true
+        }
+    }
 
     function luaMods(mods) {
         if (!mods || mods === "") return ""
@@ -60,6 +69,16 @@ Scope {
     }
 
     Presence { id: presence; wanted: root.opened }
+
+    Connections {
+        target: presence
+        function onPresentChanged() {
+            if (!presence.present) {
+                root.subKeep = false
+                root.subItems = []
+            }
+        }
+    }
 
     Loader {
         active: presence.present
@@ -122,8 +141,8 @@ Scope {
                                 Layout.preferredHeight: modelData.separator ? 9 : 28
 
                                 property bool isDisabled: menuRow.modelData.disabled === true
-                                property bool hasSubmenu: menuRow.modelData.submenu && menuRow.modelData.submenu.length > 0
-                                property bool hasAction: (menuRow.modelData.chord && menuRow.modelData.chord.length > 0) || (menuRow.modelData.key && menuRow.modelData.key !== "")
+                                property bool hasSubmenu: !!(menuRow.modelData.submenu && menuRow.modelData.submenu.length > 0)
+                                property bool hasAction: !!((menuRow.modelData.chord && menuRow.modelData.chord.length > 0) || (menuRow.modelData.key && menuRow.modelData.key !== ""))
 
                                 Rectangle {
                                     visible: menuRow.modelData.separator === true
@@ -216,13 +235,13 @@ Scope {
 
                 Loader {
                     id: subLoader
-                    active: root.subIndex !== -1
+                    active: root.subKeep && presence.present
                     source: "PopupMenu.qml"
                     onLoaded: {
                         item.opened = Qt.binding(function() { return root.subIndex !== -1 })
                         item.xPos = Qt.binding(function() { return root.subX })
                         item.yPos = Qt.binding(function() { return root.subY })
-                        item.items = Qt.binding(function() { return root.subIndex !== -1 ? root.items[root.subIndex].submenu : [] })
+                        item.items = Qt.binding(function() { return root.subItems })
                         item.closeRequested.connect(function() {
                             root.subIndex = -1
                             root.closeRequested()
