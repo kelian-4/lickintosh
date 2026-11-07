@@ -8,7 +8,7 @@ Scope {
     id: root
 
     readonly property bool opened: WidgetState.galleryZone !== ""
-    readonly property string zoneTitle: WidgetState.galleryZone === "desktop" ? "the Desktop" : "the Notification Center"
+    readonly property string zoneHint: WidgetState.galleryZone === "desktop" ? I18n.tr("Click or drag a widget to add it to the Desktop.") : I18n.tr("Click or drag a widget to add it to the Notification Center.")
 
     Loader {
         active: root.opened
@@ -42,9 +42,9 @@ Scope {
                         WidgetRegistry.types.map(function(t) {
                             return { key: t.type, title: t.title, icon: t.icon, tint: t.tint, raw: t.type === "weather" }
                         }))
-                    searchPlaceholder: "Search Widgets"
-                    hint: "Click or drag a widget to add it to " + root.zoneTitle + "."
-                    emptyText: "No Widgets Found"
+                    searchPlaceholder: I18n.tr("Search Widgets")
+                    hint: root.zoneHint
+                    emptyText: I18n.tr("No Widgets Found")
                     empty: panel.filtered.length === 0
                     showThemes: true
                     theme: WidgetState.galleryTheme

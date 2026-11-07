@@ -40,7 +40,7 @@ Item {
 
         Text {
             Layout.fillWidth: true
-            text: !BluetoothState.enabled ? "Off" : (root.connected.length === 0 ? "No Devices" : root.connected.length + " connected")
+            text: !BluetoothState.enabled ? I18n.tr("Off") : (root.connected.length === 0 ? I18n.tr("No Devices") : I18n.tr("%1 connected").replace("%1", root.connected.length))
             color: root.look.primary
             font.pixelSize: root.size === "s" ? 18 : 15
             font.weight: Font.Medium

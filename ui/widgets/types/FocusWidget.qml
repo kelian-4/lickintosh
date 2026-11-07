@@ -33,7 +33,7 @@ Item {
 
             Text {
                 visible: root.size === "m"
-                text: "Cycle " + ((PomodoroState.cyclesCompleted % PomodoroState.cyclesBeforeLongBreak) + 1) + " of " + PomodoroState.cyclesBeforeLongBreak
+                text: I18n.tr("Cycle %1 of %2").replace("%1", (PomodoroState.cyclesCompleted % PomodoroState.cyclesBeforeLongBreak) + 1).replace("%2", PomodoroState.cyclesBeforeLongBreak)
                 color: root.look.secondary
                 font.pixelSize: 12
                 font.family: "SF Pro Text"
