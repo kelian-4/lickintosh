@@ -125,6 +125,8 @@ Singleton {
         return 0
     }
 
+    readonly property var elementDefaults: ({ dock: { blurRadius: 0 } })
+
     function glassValue(element, key) {
         var all = ShellConfig.options.appearance.glassElements
         if (all) {
@@ -133,6 +135,9 @@ Singleton {
             if (all["*"] && all["*"][key] !== undefined)
                 return all["*"][key]
         }
+        var ed = element ? root.elementDefaults[element] : null
+        if (ed && ed[key] !== undefined)
+            return ed[key]
         return root.glassDefault(key)
     }
 
