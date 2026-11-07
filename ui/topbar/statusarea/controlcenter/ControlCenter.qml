@@ -416,13 +416,27 @@ Scope {
     property bool recording: false
 
     Process { id: _darkToggleCmd; command: ["sh", "-c", "~/.config/hypr/scripts/toggle-theme.sh"] }
+    function openCalculator() {
+        var list = Hyprland.toplevels.values
+        for (var i = 0; i < list.length; i++) {
+            var t = list[i]
+            var ipc = t.lastIpcObject
+            var title = (ipc && ipc.title) ? ipc.title : t.title
+            if (title !== "calculator") continue
+            var addr = String(t.address).toLowerCase()
+            if (addr.indexOf("0x") !== 0) addr = "0x" + addr
+            Hyprland.dispatch('hl.dsp.focus({ window = "address:' + addr + '" })')
+            return
+        }
+        _calcCmd.running = true
+    }
+
     Process {
         id: _calcCmd
         command: [
             "sh", "-c",
             "script=\"$1\"; lang=\"$2\"; " +
-            "if pgrep -f 'tools/calculator/calc.py' | grep -vx \"$$\" >/dev/null 2>&1; then " +
-            "hyprctl dispatch focuswindow 'title:^calculator$' >/dev/null 2>&1; exit 0; fi; " +
+            "if pgrep -f 'tools/calculator/calc.py' | grep -vx \"$$\" >/dev/null 2>&1; then exit 0; fi; " +
             "if command -v python3 >/dev/null 2>&1; then run=\"python3 '$script' --lang '$lang'\"; " +
             "elif command -v qalc >/dev/null 2>&1; then run=\"qalc -i\"; " +
             "else echo \"python3 introuvable\" >&2; exit 1; fi; " +
@@ -1890,7 +1904,7 @@ Scope {
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
-                                        _calcCmd.running = true
+                                        root.openCalculator()
                                     }
                                     onPressed: if (!root.subOpened) calcWidget.isPressed = true
                                     onReleased: calcWidget.isPressed = false
