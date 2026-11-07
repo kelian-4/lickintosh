@@ -45,7 +45,7 @@ Item {
             Item { Layout.fillWidth: true }
 
             Text {
-                text: root.muted ? "Muted" : Math.round(root.level * 100) + "%"
+                text: root.muted ? I18n.tr("Muted") : Math.round(root.level * 100) + "%"
                 color: root.look.primary
                 font.pixelSize: 13
                 font.family: "SF Pro Text"

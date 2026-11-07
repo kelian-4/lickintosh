@@ -15,7 +15,7 @@ Item {
     readonly property real fraction: root.present ? UPower.displayDevice.percentage : 1
     readonly property bool charging: UPower.onBattery ? UPower.displayDevice.state === 1 : true
     readonly property color level: root.fraction <= 0.15 ? "#ff453a" : (root.fraction <= 0.3 ? "#ff9f0a" : "#30d158")
-    readonly property string stateText: !root.present ? "Plugged in" : (root.charging ? "Charging" : "On battery")
+    readonly property string stateText: !root.present ? I18n.tr("Plugged in") : (root.charging ? I18n.tr("Charging") : I18n.tr("On battery"))
     readonly property real timeSeconds: root.charging ? UPower.displayDevice.timeToFull : UPower.displayDevice.timeToEmpty
     readonly property string timeText: root.present && root.timeSeconds > 0 ? root.duration(root.timeSeconds) : "—"
     readonly property real freeGb: Math.max(0, ResourcesState.memoryTotalGb - ResourcesState.memoryUsedGb)
@@ -216,7 +216,7 @@ Item {
 
         Block {
             look: root.look
-            name: "Battery"
+            name: I18n.tr("Battery")
             percent: root.fraction * 100
             tint: root.level
             detail: root.stateText
@@ -224,7 +224,7 @@ Item {
 
         Block {
             look: root.look
-            name: "Memory"
+            name: I18n.tr("Memory")
             percent: ResourcesState.memoryPercent
             tint: "#30d158"
             detail: root.freeGb.toFixed(2) + " GB free"
@@ -235,12 +235,12 @@ Item {
             name: "CPU"
             percent: ResourcesState.cpuPercent
             tint: "#64d2ff"
-            detail: ResourcesState.cpuTempAvailable ? Math.round(ResourcesState.cpuTempC) + "°C" : "Load"
+            detail: ResourcesState.cpuTempAvailable ? Math.round(ResourcesState.cpuTempC) + "°C" : I18n.tr("Load")
         }
 
         Block {
             look: root.look
-            name: "Storage"
+            name: I18n.tr("Storage")
             percent: ResourcesState.storagePercent
             tint: "#ff9f0a"
             detail: root.diskFreeGb.toFixed(0) + " GB free"

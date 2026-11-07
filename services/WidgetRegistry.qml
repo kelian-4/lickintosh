@@ -9,26 +9,26 @@ Singleton {
     reloadableId: "widgetRegistry"
 
     readonly property var types: [
-        { type: "clock",    title: "Clock",       file: "ClockWidget",    sizes: ["s", "m"],           icon: "notch/clock.svg",        tint: "#ff9f0a",
+        { type: "clock",    title: I18n.tr("Clock"),       file: "ClockWidget",    sizes: ["s", "m"],           icon: "notch/clock.svg",        tint: "#ff9f0a",
           variants: [
-              { key: "analog",  title: "Analog",  sizes: ["s"] },
-              { key: "digital", title: "Digital", sizes: ["s", "m"] }
+              { key: "analog",  title: I18n.tr("Analog"),  sizes: ["s"] },
+              { key: "digital", title: I18n.tr("Digital"), sizes: ["s", "m"] }
           ] },
-        { type: "calendar", title: "Calendar",    file: "CalendarWidget", sizes: ["s", "m", "l"], icon: "notch/calender.svg",     tint: "#ff453a" },
-        { type: "weather",  title: "Weather",     file: "WeatherWidget",  sizes: ["s", "m", "l"], icon: "weather/cloud-sun.svg",  tint: "#0a84ff" },
-        { type: "tasks",    title: "Tasks",       file: "TasksWidget",    sizes: ["s", "m", "l"], icon: "notch/check-circle.svg", tint: "#ff9f0a" },
-        { type: "notes",    title: "Notes",       file: "NotesWidget",    sizes: ["s", "m", "l"], icon: "notch/book.svg",         tint: "#ffd60a" },
-        { type: "battery",  title: "Battery",     file: "BatteryWidget",  sizes: ["s", "m", "l"],      icon: "notch/battery.svg",      tint: "#30d158" },
-        { type: "media",    title: "Now Playing", file: "MediaWidget",    sizes: ["s", "m", "l"], icon: "notch/disc.svg",         tint: "#ff375f" },
-        { type: "timer",    title: "Timer",       file: "TimerWidget",     sizes: ["s", "m"],           icon: "notch/clock.svg",      tint: "#ff9f0a" },
-        { type: "stopwatch", title: "Stopwatch",  file: "StopwatchWidget", sizes: ["s", "m"],           icon: "notch/crosshair.svg",  tint: "#ff9f0a" },
-        { type: "focus",    title: "Focus",       file: "FocusWidget",     sizes: ["s", "m"],           icon: "notch/target.svg",     tint: "#ff453a" },
-        { type: "quote",    title: "Quote of the Day", file: "QuoteWidget", sizes: ["m", "l"],           icon: "notch/message-square.svg", tint: "#bf5af2" },
-        { type: "volume",   title: "Volume",      file: "VolumeWidget",    sizes: ["s", "m"],           icon: "notch/volume-2.svg",   tint: "#0a84ff" },
-        { type: "bluetooth", title: "Bluetooth",  file: "BluetoothWidget", sizes: ["s", "m", "l"],      icon: "notch/bluetooth.svg",  tint: "#0a84ff" }
+        { type: "calendar", title: I18n.tr("Calendar"),    file: "CalendarWidget", sizes: ["s", "m", "l"], icon: "notch/calender.svg",     tint: "#ff453a" },
+        { type: "weather",  title: I18n.tr("Weather"),     file: "WeatherWidget",  sizes: ["s", "m", "l"], icon: "weather/cloud-sun.svg",  tint: "#0a84ff" },
+        { type: "tasks",    title: I18n.tr("Tasks"),       file: "TasksWidget",    sizes: ["s", "m", "l"], icon: "notch/check-circle.svg", tint: "#ff9f0a" },
+        { type: "notes",    title: I18n.tr("Notes"),       file: "NotesWidget",    sizes: ["s", "m", "l"], icon: "notch/book.svg",         tint: "#ffd60a" },
+        { type: "battery",  title: I18n.tr("Battery"),     file: "BatteryWidget",  sizes: ["s", "m", "l"],      icon: "notch/battery.svg",      tint: "#30d158" },
+        { type: "media",    title: I18n.tr("Now Playing"), file: "MediaWidget",    sizes: ["s", "m", "l"], icon: "notch/disc.svg",         tint: "#ff375f" },
+        { type: "timer",    title: I18n.tr("Timer"),       file: "TimerWidget",     sizes: ["s", "m"],           icon: "notch/clock.svg",      tint: "#ff9f0a" },
+        { type: "stopwatch", title: I18n.tr("Stopwatch"),  file: "StopwatchWidget", sizes: ["s", "m"],           icon: "notch/crosshair.svg",  tint: "#ff9f0a" },
+        { type: "focus",    title: I18n.tr("Focus"),       file: "FocusWidget",     sizes: ["s", "m"],           icon: "notch/target.svg",     tint: "#ff453a" },
+        { type: "quote",    title: I18n.tr("Quote of the Day"), file: "QuoteWidget", sizes: ["m", "l"],           icon: "notch/message-square.svg", tint: "#bf5af2" },
+        { type: "volume",   title: I18n.tr("Volume"),      file: "VolumeWidget",    sizes: ["s", "m"],           icon: "notch/volume-2.svg",   tint: "#0a84ff" },
+        { type: "bluetooth", title: I18n.tr("Bluetooth"),  file: "BluetoothWidget", sizes: ["s", "m", "l"],      icon: "notch/bluetooth.svg",  tint: "#0a84ff" }
     ]
 
-    readonly property var sizeLabels: ({ s: "Small", m: "Medium", l: "Large" })
+    readonly property var sizeLabels: ({ s: I18n.tr("Small"), m: I18n.tr("Medium"), l: I18n.tr("Large") })
 
     readonly property var legacy: ({
         digital:   { type: "clock",   variant: "digital" },

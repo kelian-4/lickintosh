@@ -243,12 +243,12 @@ Singleton {
     function menuEntries(zone, widget) {
         var entries = []
         if (widget) {
-            entries.push({ label: "Remove Widget", action: "remove" })
+            entries.push({ label: I18n.tr("Remove Widget"), action: "remove" })
             var current = widget.theme || "glass"
-            entries.push({ label: "Style", children: [
-                { label: "Glass", action: "theme:glass", checkable: true, checked: current === "glass" },
-                { label: "Light", action: "theme:light", checkable: true, checked: current === "light" },
-                { label: "Dark", action: "theme:dark", checkable: true, checked: current === "dark" }
+            entries.push({ label: I18n.tr("Style"), children: [
+                { label: I18n.tr("Glass"), action: "theme:glass", checkable: true, checked: current === "glass" },
+                { label: I18n.tr("Light"), action: "theme:light", checkable: true, checked: current === "light" },
+                { label: I18n.tr("Dark"), action: "theme:dark", checkable: true, checked: current === "dark" }
             ] })
             var resolved = WidgetRegistry.resolve(widget)
             var sizes = WidgetRegistry.sizesOf(resolved.type, resolved.variant)
@@ -261,11 +261,11 @@ Singleton {
                 }
             }
             if (zone === "notifCenter") {
-                entries.push({ label: "Move Up", action: "up" })
-                entries.push({ label: "Move Down", action: "down" })
+                entries.push({ label: I18n.tr("Move Up"), action: "up" })
+                entries.push({ label: I18n.tr("Move Down"), action: "down" })
             }
         }
-        entries.push({ label: "Edit Widgets…", action: "edit" })
+        entries.push({ label: I18n.tr("Edit Widgets…"), action: "edit" })
         return entries
     }
 
