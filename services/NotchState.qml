@@ -5,7 +5,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.UPower
 import qs.services
-import qs.ui.topbar.statusarea.notifcenter
 
 Singleton {
     id: root
@@ -101,6 +100,8 @@ Singleton {
 
     Timer { interval: 1500; running: !GameMode.enabled; repeat: true; onTriggered: root._checkBluetoothTransitions() }
 
+    property bool focusActive: false
+
     readonly property string ambientKind: {
         if (MediaCaptureState.cameraActive) return "capture-camera"
         if (MediaCaptureState.micActive)    return "capture-mic"
@@ -109,7 +110,7 @@ Singleton {
         if (StopwatchState.running) return "stopwatch"
         if (root.batteryCharging)   return "battery"
         if (GameMode.enabled)       return "gamemode"
-        if (NotifService.dndEnabled) return "focus"
+        if (root.focusActive)       return "focus"
         return "none"
     }
 

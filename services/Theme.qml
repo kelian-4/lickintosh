@@ -161,7 +161,7 @@ Singleton {
     }
 
     function surfaceFor(element) {
-        var a = root.gameMode ? 0.92 : root.glassValue(element, "surfaceAlpha")
+        var a = root.gameMode ? 0.55 : root.glassValue(element, "surfaceAlpha")
         return root.isLight ? Qt.rgba(1, 1, 1, a) : Qt.rgba(0, 0, 0, a)
     }
 
