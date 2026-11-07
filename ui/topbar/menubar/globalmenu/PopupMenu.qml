@@ -233,25 +233,24 @@ Scope {
                     }
                 }
 
-                Loader {
-                    id: subLoader
-                    active: root.subKeep && presence.present
-                    source: "PopupMenu.qml"
-                    onLoaded: {
-                        item.opened = Qt.binding(function() { return root.subIndex !== -1 })
-                        item.xPos = Qt.binding(function() { return root.subX })
-                        item.yPos = Qt.binding(function() { return root.subY })
-                        item.items = Qt.binding(function() { return root.subItems })
-                        item.closeRequested.connect(function() {
-                            root.subIndex = -1
-                            root.closeRequested()
-                        })
-                    }
-                }
-
                 GlassBackdrop { element: "menus" }
-
             }
+        }
+    }
+
+    Loader {
+        id: subLoader
+        active: root.subKeep && presence.present
+        source: "PopupMenu.qml"
+        onLoaded: {
+            item.opened = Qt.binding(function() { return root.subIndex !== -1 })
+            item.xPos = Qt.binding(function() { return root.subX })
+            item.yPos = Qt.binding(function() { return root.subY })
+            item.items = Qt.binding(function() { return root.subItems })
+            item.closeRequested.connect(function() {
+                root.subIndex = -1
+                root.closeRequested()
+            })
         }
     }
 }
