@@ -69,7 +69,7 @@ TRANSLATIONS = {
     'cleared': 'tout effacé',
     'no variables': 'aucune variable',
     "no help for '{}'": "pas d'aide pour '{}'",
-    'type a calculation, help lists everything, Tab completes, q quits': 'tape un calcul, help liste tout, Tab complète, q quitte',
+    'calculator, help lists the options, q quits': 'calculatrice, help pour avoir les options, q pour quitter',
     'Operators': 'Opérateurs',
     'Constants': 'Constantes',
     'Angles': 'Angles',
@@ -140,7 +140,7 @@ TRANSLATIONS = {
     'cleared': 'todo borrado',
     'no variables': 'sin variables',
     "no help for '{}'": "sin ayuda para '{}'",
-    'type a calculation, help lists everything, Tab completes, q quits': 'escribe un cálculo, help lista todo, Tab completa, q sale',
+    'calculator, help lists the options, q quits': 'calculadora, help muestra las opciones, q para salir',
     'Operators': 'Operadores',
     'Constants': 'Constantes',
     'Angles': 'Ángulos',
@@ -597,6 +597,28 @@ def preview(text):
     return (name + " = " + shown) if name else "= " + shown
 
 
+ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def clip(text, limit):
+    out = []
+    seen = 0
+    i = 0
+    while i < len(text):
+        m = ANSI.match(text, i)
+        if m:
+            out.append(m.group(0))
+            i = m.end()
+            continue
+        if seen >= limit:
+            out.append(RESET)
+            break
+        out.append(text[i])
+        seen += 1
+        i += 1
+    return "".join(out)
+
+
 class LiveInput:
     def __init__(self, history):
         self.history = history
@@ -617,9 +639,7 @@ class LiveInput:
         if ghost:
             out.append(DIM + ghost + RESET)
         if not final:
-            line = status or ""
-            if len(line) > self.width() - 4:
-                line = line[: self.width() - 5] + "…"
+            line = clip(status or "", self.width() - 2)
             out.append("\n" + line + "\033[A\r")
             col = self.prompt_width + len(buf[:pos])
             if col:
@@ -632,8 +652,6 @@ class LiveInput:
         word = WORD.search(buf[:pos]) if pos == len(buf) else None
         result = preview(buf)
         parts = []
-        if not buf:
-            return DIM + t("type a calculation, help lists everything, Tab completes, q quits") + RESET
         if result is not None:
             parts.append(GREEN + result + RESET)
         if word:
@@ -816,6 +834,7 @@ def main():
             sys.exit(1)
         return
 
+    print(DIM + t("calculator, help lists the options, q quits") + RESET)
     live = termios is not None and sys.stdin.isatty() and sys.stdout.isatty()
     entries = []
     if live:
