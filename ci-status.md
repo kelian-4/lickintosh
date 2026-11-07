@@ -1,9 +1,9 @@
 # CI Status
 
-Commit: ae54ad6118a698131c9c814d132dabb5e098da59
-Branche: dev
-Date: 2026-11-07 13:38:58 UTC
-Run: https://github.com/kelian-4/lickintosh/actions/runs/42377907292
+Commit: 9225f30436a60566060b9a375cb1097d154eb9f7
+Branche: main
+Date: 2026-11-07 13:50:26 UTC
+Run: https://github.com/kelian-4/lickintosh/actions/runs/42378770758
 
 | Etape | Resultat |
 |---|---|
