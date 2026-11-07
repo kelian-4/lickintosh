@@ -222,7 +222,7 @@ ShellRoot {
         onClosing: appRoot.ccOpened = false
     }
     ControlGallery {}
-    LazyLoader { active: appRoot.interfaceShown; DesktopLayer {} }
+    LazyLoader { active: appRoot.interfaceShown && !GameMode.enabled; DesktopLayer {} }
     WidgetGallery {}
     LazyLoader { active: appRoot.interfaceShown; Dock {} }
     SpotlightWindow {

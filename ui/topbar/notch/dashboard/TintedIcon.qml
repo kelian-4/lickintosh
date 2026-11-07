@@ -18,6 +18,7 @@ Item {
         preferredRendererType: VectorImage.CurveRenderer
         layer.enabled: true
         layer.effect: MultiEffect {
+            brightness: 1.0
             colorization: 1
             colorizationColor: root.tint
         }

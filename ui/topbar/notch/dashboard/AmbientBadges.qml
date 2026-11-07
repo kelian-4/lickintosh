@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.services
+import qs.ui.topbar.statusarea.notifcenter
 
 RowLayout {
     id: root
@@ -105,9 +106,16 @@ RowLayout {
 
     Badge {
         shown: NotchState.batteryCharging
-        icon: "battery/zap.svg"
+        icon: Quickshell.shellDir + "/assets/icons_desktop/MacTahoe/status/symbolic/battery-level-" + Math.max(0, Math.min(100, Math.round(NotchState.batteryPercent / 10) * 10)) + "-charging-symbolic.svg"
         tint: "#4ADE80"
         label: NotchState.batteryPercent + "%"
+    }
+
+    Badge {
+        shown: NotifService.dndEnabled
+        icon: "dnd.svg"
+        tint: "#BF8AFF"
+        label: I18n.tr("Focus")
     }
 
     Badge {

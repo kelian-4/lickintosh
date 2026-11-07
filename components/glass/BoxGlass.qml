@@ -40,19 +40,19 @@ Item {
         anchors.fill: parent
         radius: Math.min(box.radius, Math.min(width, height) / 2)
         color: Theme.surfaceFor(box.element)
-        visible: Theme.compositorBlur && Theme.themed(box)
+        visible: Theme.plainSurfaces && Theme.themed(box)
     }
 
     Rectangle {
         anchors.fill: parent
         radius: Math.min(box.radius, Math.min(width, height) / 2)
         color: box.transparent || box.plainBackground ? "transparent" : Theme.boxColor(box, box.color)
-        visible: Theme.compositorBlur && Theme.themed(box)
+        visible: Theme.plainSurfaces && Theme.themed(box)
     }
 
     Loader {
         anchors.fill: parent
-        active: !box.glassed && !(Theme.compositorBlur && Theme.themed(box))
+        active: !box.glassed && !(Theme.plainSurfaces && Theme.themed(box))
 
         sourceComponent: GlassRim {
             baseColor: box.transparent ? "transparent" : Theme.boxColor(box, box.color)

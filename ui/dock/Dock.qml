@@ -635,7 +635,7 @@ Scope {
                     windowOpacityByClass: ShellConfig.options.glass.windowOpacityByClass
                     monitorName: dockWin.screen.name
                     element: "dock"
-                    ready: !Theme.compositorBlur
+                    ready: !Theme.plainSurfaces
                 }
 
                 MouseArea {
@@ -726,7 +726,7 @@ Scope {
 
                         TahoeGlass {
                             anchors.fill: parent
-                            backdrop:     Theme.compositorBlur ? null : dockBackdrop
+                            backdrop:     Theme.plainSurfaces ? null : dockBackdrop
                             cornerRadius: dockRoot.dockRadius
                         }
 
@@ -734,7 +734,7 @@ Scope {
                             anchors.fill: parent
                             radius:       dockRoot.dockRadius
                             color:        Theme.surfaceFor("dock")
-                            visible:      Theme.compositorBlur
+                            visible:      Theme.plainSurfaces
                         }
 
                         Row {

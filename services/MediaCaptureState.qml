@@ -61,7 +61,7 @@ Singleton {
 
     Timer {
         interval: 2000
-        running: true
+        running: !GameMode.enabled
         repeat: true
         triggeredOnStart: true
         onTriggered: if (!_dump.running) _dump.running = true

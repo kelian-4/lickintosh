@@ -20,25 +20,26 @@ Singleton {
     property int pageDuration: 240
     property real pageSlide: 14
     property real speed: 1.0
+    readonly property real motionScale: GameMode.enabled ? 0 : root.speed
 
     function spatial(factor) {
-        return Math.round(root.spatialDuration * root.speed * (factor === undefined ? 1 : factor))
+        return Math.round(root.spatialDuration * root.motionScale * (factor === undefined ? 1 : factor))
     }
 
     function enter(factor) {
-        return Math.round(root.enterDuration * root.speed * (factor === undefined ? 1 : factor))
+        return Math.round(root.enterDuration * root.motionScale * (factor === undefined ? 1 : factor))
     }
 
     function exit(factor) {
-        return Math.round(root.exitDuration * root.speed * (factor === undefined ? 1 : factor))
+        return Math.round(root.exitDuration * root.motionScale * (factor === undefined ? 1 : factor))
     }
 
     function page(factor) {
-        return Math.round(root.pageDuration * root.speed * (factor === undefined ? 1 : factor))
+        return Math.round(root.pageDuration * root.motionScale * (factor === undefined ? 1 : factor))
     }
 
     function split(factor) {
-        return Math.round(root.splitDuration * root.speed * (factor === undefined ? 1 : factor))
+        return Math.round(root.splitDuration * root.motionScale * (factor === undefined ? 1 : factor))
     }
 
     function stagger(factor) {
@@ -46,10 +47,10 @@ Singleton {
     }
 
     function fade(factor) {
-        return Math.round(root.fadeDuration * root.speed * (factor === undefined ? 1 : factor))
+        return Math.round(root.fadeDuration * root.motionScale * (factor === undefined ? 1 : factor))
     }
 
     function effects(factor) {
-        return Math.round(root.effectsDuration * root.speed * (factor === undefined ? 1 : factor))
+        return Math.round(root.effectsDuration * root.motionScale * (factor === undefined ? 1 : factor))
     }
 }

@@ -79,6 +79,8 @@ Singleton {
 
     readonly property var blurPresetData: root.presetById(root.blurPreset)
     readonly property bool compositorBlur: root.blurPreset !== ""
+    readonly property bool gameMode: GameMode.enabled
+    readonly property bool plainSurfaces: root.compositorBlur || root.gameMode
     readonly property real blurWindowOpacity: Math.max(0.3, Math.min(1.0, ShellConfig.options.appearance.blurWindowOpacity))
     readonly property real blurWindowOpacityInactive: Math.max(0.3, Math.min(1.0, ShellConfig.options.appearance.blurWindowOpacityInactive))
     readonly property var blurParams: ShellConfig.options.appearance.blurParams
@@ -159,7 +161,7 @@ Singleton {
     }
 
     function surfaceFor(element) {
-        var a = root.glassValue(element, "surfaceAlpha")
+        var a = root.gameMode ? 0.92 : root.glassValue(element, "surfaceAlpha")
         return root.isLight ? Qt.rgba(1, 1, 1, a) : Qt.rgba(0, 0, 0, a)
     }
 
@@ -330,7 +332,7 @@ Singleton {
     }
 
     function useGlass(item) {
-        return !root.compositorBlur || !root.themed(item)
+        return !root.plainSurfaces || !root.themed(item)
     }
 
     function pick(lightValue, legacy) {
@@ -338,7 +340,7 @@ Singleton {
     }
 
     function popup(legacy) {
-        if (root.compositorBlur) {
+        if (root.plainSurfaces) {
             return root.surfaceFor("spotlight")
         }
         return root.isLight ? "#f2f6f6f8" : legacy
