@@ -94,12 +94,10 @@ Scope {
                     width: 300
                     height: itemsColumn.implicitHeight + 12
                     z: 1
-                    backdrop: null
                     radius: 8
-                    color: Qt.rgba(0.11, 0.11, 0.12, 0.97)
-                    rimStrength: 0
-                    highlightEnabled: false
-                    light: "transparent"
+                    color: Qt.rgba(0.10, 0.10, 0.11, 0.80)
+                    rimStrength: 0.7
+                    light: "#14ffffff"
                     opacity:         (root.opened && panel.entered) ? 1 : 0
                     scale:           (root.opened && panel.entered) ? 1 : 0.95
                     transformOrigin: Item.Top
@@ -231,6 +229,8 @@ Scope {
                         })
                     }
                 }
+
+                GlassBackdrop { element: "menus" }
 
             }
         }
