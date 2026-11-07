@@ -16,6 +16,7 @@ Scope {
     signal lockRequested
     signal unlockRequested
 
+    property var controlCenter: null
     property bool lockPending: false
 
     property real lockRequestedAt: 0
@@ -140,6 +141,7 @@ Scope {
         LockSurface {
             lock: lock
             context: lockContext
+            controlCenter: root.controlCenter
         }
     }
 

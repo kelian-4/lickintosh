@@ -56,6 +56,11 @@ Singleton {
     readonly property var packedLayout: root.built.layout
     readonly property var occupied: root.built.occupied
     readonly property int lastRow: root.built.lastRow
+    readonly property var lockTypes: ["wifiWidget", "btWidget", "focusWidget", "displayWidget", "volumeWidget"]
+    readonly property var lockBuilt: root.build({}, "", root.lockTypes)
+    readonly property var lockLayout: root.lockBuilt.layout
+    readonly property int lockLastRow: root.lockBuilt.lastRow
+    readonly property bool lockHasItems: Object.keys(root.lockBuilt.layout).length > 0
     readonly property int shownRows: root.lastRow + 1 + (root.galleryOpen ? root.editExtraRows : 0)
 
     Timer {
@@ -100,7 +105,7 @@ Singleton {
         }
     }
 
-    function build(saved, skipUid) {
+    function build(saved, skipUid, onlyTypes) {
         var layout = {}
         var occupied = {}
         var lastRow = 0
@@ -109,6 +114,7 @@ Singleton {
             var it = root.items[i]
             var info = root.infoOf(it.type)
             if (!info || it.uid === skipUid) continue
+            if (onlyTypes && onlyTypes.indexOf(it.type) < 0) continue
             var pos = saved[it.uid]
             if (pos && root.isFree(occupied, pos.x, pos.y, info.w, info.h)) {
                 root.mark(occupied, pos.x, pos.y, info.w, info.h)
