@@ -225,6 +225,8 @@ Scope {
 
                         Text {
                             anchors.centerIn: parent
+                            width: Math.min(implicitWidth, parent.width - 16)
+                            elide: Text.ElideRight
                             text: I18n.tr("More Info…")
                             color: Theme.ink(parent, false)
                             font.pixelSize: 12

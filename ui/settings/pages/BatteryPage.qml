@@ -30,6 +30,7 @@ ContentPage {
                 font.pixelSize: 14
                 color: Theme.textPrimary
                 Layout.fillWidth: true
+                elide: Text.ElideRight
             }
 
             CFText {

@@ -28,6 +28,8 @@ Item {
         }
 
         Text {
+            Layout.fillWidth: true
+            elide: Text.ElideRight
             text: TimerState.firing ? I18n.tr("Done") : (root.active ? TimerState.formatRemaining(TimerState.remainingMs) : "0:00")
             color: TimerState.firing ? "#ff9f0a" : root.look.primary
             font.pixelSize: root.size === "s" ? 34 : 44

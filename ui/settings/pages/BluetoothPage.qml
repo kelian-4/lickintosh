@@ -71,6 +71,7 @@ ContentPage {
                 font.pixelSize: 13
                 gray: true
                 Layout.fillWidth: true
+                elide: Text.ElideRight
             }
 
             Rectangle {

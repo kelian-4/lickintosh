@@ -1326,8 +1326,11 @@ Scope {
             anchors {
                 left:           parent.left
                 leftMargin:     10
+                right:          parent.right
+                rightMargin:    menuItem.hasSubmenu ? 24 : 10
                 verticalCenter: parent.verticalCenter
             }
+            elide:          Text.ElideRight
             text:           (menuItem.checked ? "✓  " : "") + menuItem.label
             color:          menuItem.enabled ? (menuItem.destructive ? "#ff6b6b" : "#f2f2f2") : "#66ffffff"
             font.pixelSize: 13

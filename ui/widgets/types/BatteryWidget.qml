@@ -190,7 +190,9 @@ Item {
                 }
 
                 Text {
-                    Layout.alignment: Qt.AlignHCenter
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideRight
                     text: root.charging ? I18n.tr("To full") : I18n.tr("Left")
                     color: root.look.secondary
                     font.pixelSize: 10
