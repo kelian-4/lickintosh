@@ -170,6 +170,7 @@ Les traductions anglaise et espagnole sont récentes et peuvent contenir des err
 ## • remerciements et licences •
 
 - **Liquid Glass** : l'effet est adapté de [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
+- **Lecteur multimédia** : le widget « Lecture en cours » et le lecteur de l'écran de verrouillage sont adaptés de [0-ss/MacShell](https://github.com/0-ss/MacShell) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
 - **MacTahoe Liquid KDE** : voir `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
 - **Icônes** : thème [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) de vinceliuice, variante « bold ».
 - **Polices SF, curseur et fonds d'écran** : fournis dans `assets/`. Leurs droits appartiennent à leurs auteurs respectifs (les polices San Francisco et les fonds d'écran macOS sont des ressources d'Apple).
