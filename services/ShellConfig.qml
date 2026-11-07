@@ -17,6 +17,14 @@ Singleton {
 
     readonly property string filePath: Quickshell.env("HOME") + "/.config/lickintosh/shell-config.json"
     property alias options: configAdapter
+
+    readonly property string defaultWallpaper: Quickshell.shellDir + "/assets/wallpapers/WWDC25 macOS Tahoe city orange.jpeg"
+
+    function seedWallpaper() {
+        if (configAdapter.wallpaper.path === "") {
+            configAdapter.wallpaper.path = root.defaultWallpaper
+        }
+    }
     property bool ready: false
 
     FileView {
@@ -27,10 +35,12 @@ Singleton {
         onAdapterUpdated: writeAdapter()
         onLoaded: {
             root.ready = true
+            root.seedWallpaper()
             root.seedKeepAwake()
         }
         onLoadFailed: function(error) {
             if (error === FileViewError.FileNotFound) {
+                root.seedWallpaper()
                 writeAdapter()
             }
         }
