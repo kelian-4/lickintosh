@@ -554,7 +554,7 @@ Scope {
                                 spacing: 4
 
                                 Text {
-                                    text: win.pendingItem ? win.pendingItem.path : ""
+                                    text: (win.pendingItem && win.pendingItem.path) ? win.pendingItem.path : ""
                                     color: "#FFDD88"
                                     font.pixelSize: 12
                                     font.family: "SF Mono"
@@ -574,7 +574,7 @@ Scope {
                                         Text {
                                             id: writeText
                                             width: parent.width
-                                            text: win.pendingItem ? win.pendingItem.newContent : ""
+                                            text: (win.pendingItem && win.pendingItem.newContent) ? win.pendingItem.newContent : ""
                                             color: "#88DD88"
                                             font.pixelSize: 11
                                             font.family: "SF Mono"
@@ -591,7 +591,7 @@ Scope {
                                 spacing: 6
 
                                 Text {
-                                    text: win.pendingItem ? win.pendingItem.path : ""
+                                    text: (win.pendingItem && win.pendingItem.path) ? win.pendingItem.path : ""
                                     color: "#FFDD88"
                                     font.pixelSize: 12
                                     font.family: "SF Mono"
