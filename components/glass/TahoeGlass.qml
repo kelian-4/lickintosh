@@ -111,7 +111,7 @@ Item {
     ShaderEffect {
         anchors.fill: parent
         blending: true
-        visible: root.level > 0 && root.width > 0 && root.height > 0
+        visible: root.backdrop !== null && root.level > 0 && root.width > 0 && root.height > 0
         opacity: root.level
 
         property variant texUnit: root.backdrop ? root.backdrop.blurSource : null

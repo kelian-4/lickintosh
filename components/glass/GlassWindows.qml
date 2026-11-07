@@ -161,7 +161,7 @@ Item {
 
             captureSource: gate.armed && !restarting && !GlassTracker.closing ? modelData.wayland : null
             live: false
-            visible: shown
+            visible: shown && !GlassTracker.closing
             opacity: hasContent ? (translucent ? 1 : Math.min(1, captureOpacity)) : 0
             layer.enabled: translucent
             layer.effect: ShaderEffect {
