@@ -421,6 +421,8 @@ Scope {
         command: [
             "sh", "-c",
             "script=\"$1\"; lang=\"$2\"; " +
+            "if pgrep -f 'tools/calculator/calc.py' | grep -vx \"$$\" >/dev/null 2>&1; then " +
+            "hyprctl dispatch focuswindow 'title:^calculator$' >/dev/null 2>&1; exit 0; fi; " +
             "if command -v python3 >/dev/null 2>&1; then run=\"python3 '$script' --lang '$lang'\"; " +
             "elif command -v qalc >/dev/null 2>&1; then run=\"qalc -i\"; " +
             "else echo \"python3 introuvable\" >&2; exit 1; fi; " +
