@@ -420,8 +420,8 @@ Scope {
         id: _calcCmd
         command: [
             "sh", "-c",
-            "script=\"$1\"; " +
-            "if command -v python3 >/dev/null 2>&1; then run=\"python3 $script\"; " +
+            "script=\"$1\"; lang=\"$2\"; " +
+            "if command -v python3 >/dev/null 2>&1; then run=\"python3 '$script' --lang '$lang'\"; " +
             "elif command -v qalc >/dev/null 2>&1; then run=\"qalc -i\"; " +
             "else echo \"python3 introuvable\" >&2; exit 1; fi; " +
             "if command -v foot >/dev/null 2>&1; then exec foot --title=calculator -e sh -c \"$run\"; " +
@@ -434,7 +434,8 @@ Scope {
             "elif command -v xterm >/dev/null 2>&1; then exec xterm -T calculator -e sh -c \"$run\"; " +
             "else echo \"aucun terminal trouve\" >&2; exit 1; fi",
             "sh",
-            Quickshell.shellDir + "/tools/calculator/calc.py"
+            Quickshell.shellDir + "/tools/calculator/calc.py",
+            I18n.lang
         ]
         stderr: SplitParser {
             onRead: line => console.warn("Calculator launch error: " + line)

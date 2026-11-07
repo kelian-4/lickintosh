@@ -30,6 +30,171 @@ RESET = "\033[0m"
 if not sys.stdout.isatty() or os.environ.get("NO_COLOR"):
     BOLD = DIM = RED = GREEN = CYAN = RESET = ""
 
+def _read_lang():
+    code = ""
+    if "--lang" in sys.argv[1:]:
+        i = sys.argv.index("--lang")
+        if i + 1 < len(sys.argv):
+            code = sys.argv[i + 1]
+            del sys.argv[i:i + 2]
+    code = code or os.environ.get("LK_LANG") or os.environ.get("LANG") or "en"
+    code = code.split(".")[0].split("_")[0].lower()
+    return code if code in ("fr", "es") else "en"
+
+
+LANG = _read_lang()
+
+
+TRANSLATIONS = {
+    "fr": {
+    'exponent too large': 'exposant trop grand',
+    'result too large': 'résultat trop grand',
+    'division by zero': 'division par zéro',
+    'factorial needs a non-negative integer': 'la factorielle demande un entier positif ou nul',
+    'factorial too large': 'factorielle trop grande',
+    'log of a non-positive number': "logarithme d'un nombre négatif ou nul",
+    'invalid log base': 'base de logarithme invalide',
+    'square root of a negative number': "racine carrée d'un nombre négatif",
+    'unsupported value': 'valeur non prise en charge',
+    'unsupported operator': 'opérateur non pris en charge',
+    "unknown name '{}'": "nom inconnu '{}'",
+    'unsupported call': 'appel non pris en charge',
+    "unknown function '{}'": "fonction inconnue '{}'",
+    'unsupported expression': 'expression non prise en charge',
+    'invalid variable name': 'nom de variable invalide',
+    'syntax error': 'erreur de syntaxe',
+    'error: ': 'erreur : ',
+    'angle mode: degrees': "mode d'angle : degrés",
+    'angle mode: radians': "mode d'angle : radians",
+    'cleared': 'tout effacé',
+    'no variables': 'aucune variable',
+    "no help for '{}'": "pas d'aide pour '{}'",
+    'type a calculation, help lists everything, Tab completes, q quits': 'tape un calcul, help liste tout, Tab complète, q quitte',
+    'Operators': 'Opérateurs',
+    'Constants': 'Constantes',
+    'Angles': 'Angles',
+    'Powers and logs': 'Puissances et logarithmes',
+    'Rounding and numbers': 'Arrondis et nombres',
+    'Variables': 'Variables',
+    'Other': 'Autres',
+    'basic arithmetic: 2+3*4': 'opérations de base : 2+3*4',
+    'integer division: 7//2 = 3': 'division entière : 7//2 = 3',
+    'remainder: 7%3 = 1': 'reste de la division : 7%3 = 1',
+    'power: 2^10 = 1024': 'puissance : 2^10 = 1024',
+    'factorial: 5! = 120': 'factorielle : 5! = 120',
+    'grouping: (1+2)*3': 'regroupement : (1+2)*3',
+    '3.14159...': '3,14159...',
+    "Euler's number 2.71828...": "nombre d'Euler 2,71828...",
+    '2*pi': '2*pi',
+    'golden ratio 1.61803...': "nombre d'or 1,61803...",
+    'infinity': 'infini',
+    'result of the previous line': 'résultat de la ligne précédente',
+    'trigonometry, uses the current angle mode': "trigonométrie, suit le mode d'angle actuel",
+    'inverse trigonometry, answer in the current angle mode': "trigonométrie inverse, réponse dans le mode d'angle actuel",
+    'hyperbolic functions': 'fonctions hyperboliques',
+    'switch to degrees (command), or deg(x) converts radians to degrees': 'passe en degrés (commande), ou deg(x) convertit des radians en degrés',
+    'switch to radians (command), or rad(x) converts degrees to radians': 'passe en radians (commande), ou rad(x) convertit des degrés en radians',
+    'square root: sqrt(16) = 4': 'racine carrée : sqrt(16) = 4',
+    'cube root: cbrt(27) = 3': 'racine cubique : cbrt(27) = 3',
+    'e to the power x': 'e puissance x',
+    'natural logarithm; log(x, b) uses base b': 'logarithme népérien ; log(x, b) utilise la base b',
+    'base 2 and base 10 logarithms': 'logarithmes en base 2 et en base 10',
+    'same as a^b': 'identique à a^b',
+    'length of the hypotenuse: hypot(3,4) = 5': "longueur de l'hypoténuse : hypot(3,4) = 5",
+    'absolute value': 'valeur absolue',
+    'round to n decimals (n optional)': 'arrondit à n décimales (n facultatif)',
+    'round down / up to an integer': "arrondit à l'entier inférieur / supérieur",
+    'factorial, same as n!': 'factorielle, identique à n!',
+    'greatest common divisor / least common multiple': 'plus grand diviseur commun / plus petit multiple commun',
+    'same as a%b': 'identique à a%b',
+    'smallest value: min(4, 2, 9) = 2': 'plus petite valeur : min(4, 2, 9) = 2',
+    'largest value: max(4, 2, 9) = 9': 'plus grande valeur : max(4, 2, 9) = 9',
+    'total of the values: sum(1, 2, 3) = 6': 'somme des valeurs : sum(1, 2, 3) = 6',
+    'store a result under a name, then use x anywhere': 'range un résultat sous un nom, puis utilise x partout',
+    'list your variables': 'liste tes variables',
+    'forget all variables and ans': 'oublie toutes les variables et ans',
+    'this list; help sqrt explains one entry': 'cette liste ; help sqrt explique une seule entrée',
+    'complete the word under the cursor': 'complète le mot sous le curseur',
+    'leave': 'quitter',
+},
+    "es": {
+    'exponent too large': 'exponente demasiado grande',
+    'result too large': 'resultado demasiado grande',
+    'division by zero': 'división por cero',
+    'factorial needs a non-negative integer': 'el factorial necesita un entero no negativo',
+    'factorial too large': 'factorial demasiado grande',
+    'log of a non-positive number': 'logaritmo de un número no positivo',
+    'invalid log base': 'base de logaritmo no válida',
+    'square root of a negative number': 'raíz cuadrada de un número negativo',
+    'unsupported value': 'valor no admitido',
+    'unsupported operator': 'operador no admitido',
+    "unknown name '{}'": "nombre desconocido '{}'",
+    'unsupported call': 'llamada no admitida',
+    "unknown function '{}'": "función desconocida '{}'",
+    'unsupported expression': 'expresión no admitida',
+    'invalid variable name': 'nombre de variable no válido',
+    'syntax error': 'error de sintaxis',
+    'error: ': 'error: ',
+    'angle mode: degrees': 'modo de ángulo: grados',
+    'angle mode: radians': 'modo de ángulo: radianes',
+    'cleared': 'todo borrado',
+    'no variables': 'sin variables',
+    "no help for '{}'": "sin ayuda para '{}'",
+    'type a calculation, help lists everything, Tab completes, q quits': 'escribe un cálculo, help lista todo, Tab completa, q sale',
+    'Operators': 'Operadores',
+    'Constants': 'Constantes',
+    'Angles': 'Ángulos',
+    'Powers and logs': 'Potencias y logaritmos',
+    'Rounding and numbers': 'Redondeo y números',
+    'Variables': 'Variables',
+    'Other': 'Otros',
+    'basic arithmetic: 2+3*4': 'operaciones básicas: 2+3*4',
+    'integer division: 7//2 = 3': 'división entera: 7//2 = 3',
+    'remainder: 7%3 = 1': 'resto de la división: 7%3 = 1',
+    'power: 2^10 = 1024': 'potencia: 2^10 = 1024',
+    'factorial: 5! = 120': 'factorial: 5! = 120',
+    'grouping: (1+2)*3': 'agrupación: (1+2)*3',
+    '3.14159...': '3,14159...',
+    "Euler's number 2.71828...": 'número de Euler 2,71828...',
+    '2*pi': '2*pi',
+    'golden ratio 1.61803...': 'proporción áurea 1,61803...',
+    'infinity': 'infinito',
+    'result of the previous line': 'resultado de la línea anterior',
+    'trigonometry, uses the current angle mode': 'trigonometría, usa el modo de ángulo actual',
+    'inverse trigonometry, answer in the current angle mode': 'trigonometría inversa, respuesta en el modo de ángulo actual',
+    'hyperbolic functions': 'funciones hiperbólicas',
+    'switch to degrees (command), or deg(x) converts radians to degrees': 'cambia a grados (comando), o deg(x) convierte radianes a grados',
+    'switch to radians (command), or rad(x) converts degrees to radians': 'cambia a radianes (comando), o rad(x) convierte grados a radianes',
+    'square root: sqrt(16) = 4': 'raíz cuadrada: sqrt(16) = 4',
+    'cube root: cbrt(27) = 3': 'raíz cúbica: cbrt(27) = 3',
+    'e to the power x': 'e elevado a x',
+    'natural logarithm; log(x, b) uses base b': 'logaritmo natural; log(x, b) usa la base b',
+    'base 2 and base 10 logarithms': 'logaritmos en base 2 y base 10',
+    'same as a^b': 'igual que a^b',
+    'length of the hypotenuse: hypot(3,4) = 5': 'longitud de la hipotenusa: hypot(3,4) = 5',
+    'absolute value': 'valor absoluto',
+    'round to n decimals (n optional)': 'redondea a n decimales (n opcional)',
+    'round down / up to an integer': 'redondea al entero inferior / superior',
+    'factorial, same as n!': 'factorial, igual que n!',
+    'greatest common divisor / least common multiple': 'máximo común divisor / mínimo común múltiplo',
+    'same as a%b': 'igual que a%b',
+    'smallest value: min(4, 2, 9) = 2': 'valor más pequeño: min(4, 2, 9) = 2',
+    'largest value: max(4, 2, 9) = 9': 'valor más grande: max(4, 2, 9) = 9',
+    'total of the values: sum(1, 2, 3) = 6': 'suma de los valores: sum(1, 2, 3) = 6',
+    'store a result under a name, then use x anywhere': 'guarda un resultado con un nombre y úsalo después en cualquier parte',
+    'list your variables': 'lista tus variables',
+    'forget all variables and ans': 'olvida todas las variables y ans',
+    'this list; help sqrt explains one entry': 'esta lista; help sqrt explica una sola entrada',
+    'complete the word under the cursor': 'completa la palabra bajo el cursor',
+    'leave': 'salir',
+},
+}
+
+
+def t(text):
+    return TRANSLATIONS.get(LANG, {}).get(text, text)
+
+
 MAX_EXPONENT = 10000
 MAX_FACTORIAL = 2000
 
@@ -56,21 +221,21 @@ state = State()
 
 def _pow(a, b):
     if isinstance(b, int) and abs(b) > MAX_EXPONENT:
-        raise CalcError("exponent too large")
+        raise CalcError(t("exponent too large"))
     if isinstance(a, int) and isinstance(b, int) and b >= 0 and a != 0:
         if b * math.log2(abs(a) + 1) > 100000:
-            raise CalcError("result too large")
+            raise CalcError(t("result too large"))
     try:
         return a ** b
     except ZeroDivisionError:
-        raise CalcError("division by zero")
+        raise CalcError(t("division by zero"))
     except OverflowError:
-        raise CalcError("result too large")
+        raise CalcError(t("result too large"))
 
 
 def _div(a, b):
     if b == 0:
-        raise CalcError("division by zero")
+        raise CalcError(t("division by zero"))
     r = a / b
     if isinstance(a, int) and isinstance(b, int) and a % b == 0:
         return a // b
@@ -79,13 +244,13 @@ def _div(a, b):
 
 def _floordiv(a, b):
     if b == 0:
-        raise CalcError("division by zero")
+        raise CalcError(t("division by zero"))
     return a // b
 
 
 def _mod(a, b):
     if b == 0:
-        raise CalcError("division by zero")
+        raise CalcError(t("division by zero"))
     return a % b
 
 
@@ -93,25 +258,25 @@ def _fact(n):
     if isinstance(n, float) and n.is_integer():
         n = int(n)
     if not isinstance(n, int) or n < 0:
-        raise CalcError("factorial needs a non-negative integer")
+        raise CalcError(t("factorial needs a non-negative integer"))
     if n > MAX_FACTORIAL:
-        raise CalcError("factorial too large")
+        raise CalcError(t("factorial too large"))
     return math.factorial(n)
 
 
 def _log(x, base=None):
     if x <= 0:
-        raise CalcError("log of a non-positive number")
+        raise CalcError(t("log of a non-positive number"))
     if base is None:
         return math.log(x)
     if base <= 0 or base == 1:
-        raise CalcError("invalid log base")
+        raise CalcError(t("invalid log base"))
     return math.log(x, base)
 
 
 def _sqrt(x):
     if x < 0:
-        raise CalcError("square root of a negative number")
+        raise CalcError(t("square root of a negative number"))
     return math.sqrt(x)
 
 
@@ -189,16 +354,16 @@ def evaluate(node):
     if isinstance(node, ast.Constant):
         if isinstance(node.value, (int, float)) and not isinstance(node.value, bool):
             return node.value
-        raise CalcError("unsupported value")
+        raise CalcError(t("unsupported value"))
     if isinstance(node, ast.BinOp):
         op = BINARY.get(type(node.op))
         if op is None:
-            raise CalcError("unsupported operator")
+            raise CalcError(t("unsupported operator"))
         return op(evaluate(node.left), evaluate(node.right))
     if isinstance(node, ast.UnaryOp):
         op = UNARY.get(type(node.op))
         if op is None:
-            raise CalcError("unsupported operator")
+            raise CalcError(t("unsupported operator"))
         return op(evaluate(node.operand))
     if isinstance(node, ast.Name):
         if node.id in ("ans", "_"):
@@ -207,20 +372,20 @@ def evaluate(node):
             return state.variables[node.id]
         if node.id in CONSTANTS:
             return CONSTANTS[node.id]
-        raise CalcError("unknown name '" + node.id + "'")
+        raise CalcError(t("unknown name '{}'").format(node.id))
     if isinstance(node, ast.Call):
         if not isinstance(node.func, ast.Name) or node.keywords:
-            raise CalcError("unsupported call")
+            raise CalcError(t("unsupported call"))
         fn = FUNCTIONS.get(node.func.id)
         if fn is None:
-            raise CalcError("unknown function '" + node.func.id + "'")
+            raise CalcError(t("unknown function '{}'").format(node.func.id))
         try:
             return fn(*[evaluate(a) for a in node.args])
         except CalcError:
             raise
         except (TypeError, ValueError, OverflowError, ZeroDivisionError) as exc:
             raise CalcError(str(exc))
-    raise CalcError("unsupported expression")
+    raise CalcError(t("unsupported expression"))
 
 
 def prepare(text):
@@ -336,20 +501,20 @@ DOCS = [
 
 def help_text(topic=None):
     if topic:
-        t = topic.lower()
+        needle = topic.lower()
         hits = []
         for _, rows in DOCS:
             for names, text in rows:
                 words = re.findall(r"[A-Za-z_]+|[^\sA-Za-z_,()]+", names.lower())
-                if t in words or t == names.lower():
-                    hits.append(names + "  -  " + text)
-        return "\n".join(hits) if hits else "no help for '" + topic + "'"
+                if needle in words or needle == names.lower():
+                    hits.append(names + "  -  " + t(text))
+        return "\n".join(hits) if hits else t("no help for '{}'").format(topic)
     width = max(len(n) for _, rows in DOCS for n, _ in rows)
     out = []
     for title, rows in DOCS:
-        out.append(BOLD + title + RESET)
+        out.append(BOLD + t(title) + RESET)
         for names, text in rows:
-            out.append("  " + CYAN + names.ljust(width) + RESET + "  " + text)
+            out.append("  " + CYAN + names.ljust(width) + RESET + "  " + t(text))
         out.append("")
     return "\n".join(out).rstrip("\n")
 
@@ -367,17 +532,17 @@ def handle(line):
         return help_text(line[5:].strip())
     if low == "deg":
         state.degrees = True
-        return "angle mode: degrees"
+        return t("angle mode: degrees")
     if low == "rad":
         state.degrees = False
-        return "angle mode: radians"
+        return t("angle mode: radians")
     if low == "clear":
         state.variables.clear()
         state.ans = 0
-        return "cleared"
+        return t("cleared")
     if low == "vars":
         if not state.variables:
-            return "no variables"
+            return t("no variables")
         return "\n".join(k + " = " + fmt(v) for k, v in sorted(state.variables.items()))
 
     name, value = compute(line)
@@ -394,13 +559,13 @@ def compute(line):
         left, right = line.split("=", 1)
         left = left.strip()
         if not left.isidentifier() or left in CONSTANTS or left in FUNCTIONS or left in ("ans", "_"):
-            raise CalcError("invalid variable name")
+            raise CalcError(t("invalid variable name"))
         name, line = left, right
 
     try:
         tree = ast.parse(prepare(line.strip()), mode="eval")
     except SyntaxError:
-        raise CalcError("syntax error")
+        raise CalcError(t("syntax error"))
     return name, evaluate(tree)
 
 
@@ -467,6 +632,8 @@ class LiveInput:
         word = WORD.search(buf[:pos]) if pos == len(buf) else None
         result = preview(buf)
         parts = []
+        if not buf:
+            return DIM + t("type a calculation, help lists everything, Tab completes, q quits") + RESET
         if result is not None:
             parts.append(GREEN + result + RESET)
         if word:
@@ -483,13 +650,13 @@ class LiveInput:
         draft = ""
         try:
             tty.setcbreak(self.fd)
-            self.render(buf, pos, "")
+            self.render(buf, pos, self.status_for(buf, pos))
             while True:
                 try:
                     data = os.read(self.fd, 64)
                 except KeyboardInterrupt:
                     buf, pos = "", 0
-                    self.render(buf, pos, "")
+                    self.render(buf, pos, self.status_for(buf, pos))
                     continue
                 if not data:
                     raise EOFError
@@ -645,7 +812,7 @@ def main():
             if result is not None:
                 print(result)
         except CalcError as exc:
-            print(RED + "error: " + str(exc) + RESET, file=sys.stderr)
+            print(RED + t("error: ") + str(exc) + RESET, file=sys.stderr)
             sys.exit(1)
         return
 
@@ -676,7 +843,7 @@ def main():
         except EOFError:
             break
         except CalcError as exc:
-            print(RED + "error: " + str(exc) + RESET)
+            print(RED + t("error: ") + str(exc) + RESET)
             continue
         if result is not None:
             print(result)
