@@ -625,26 +625,43 @@ class LiveInput:
         self.history = history
         self.fd = sys.stdin.fileno()
         self.prompt_width = 2
+        self.row = 0
 
     def width(self):
         return max(20, shutil.get_terminal_size((80, 24)).columns - 1)
 
     def render(self, buf, pos, status, final=False):
-        out = ["\r\033[J", CYAN + "> " + RESET, buf]
+        cols = max(10, shutil.get_terminal_size((80, 24)).columns)
+        out = []
+        if self.row > 0:
+            out.append("\033[" + str(self.row) + "A")
+        out.append("\r\033[J")
         word = WORD.search(buf[:pos]) if pos == len(buf) else None
         ghost = ""
         if word and not final:
             options = candidates(word.group(0))
             if options:
                 ghost = options[0][len(word.group(0)):]
+        out.append(CYAN + "> " + RESET + buf)
         if ghost:
             out.append(DIM + ghost + RESET)
-        if not final:
-            line = clip(status or "", self.width() - 2)
-            out.append("\n" + line + "\033[A\r")
-            col = self.prompt_width + len(buf[:pos])
-            if col:
-                out.append("\033[" + str(col) + "C")
+        total = self.prompt_width + len(buf) + len(ghost)
+        end_row = total // cols
+        if total > 0 and total % cols == 0:
+            out.append("\r\n")
+        if final:
+            self.row = 0
+        else:
+            line = clip(status or "", cols - 2)
+            out.append("\n" + line + "\r")
+            target = self.prompt_width + pos
+            target_row = target // cols
+            up = end_row + 1 - target_row
+            if up > 0:
+                out.append("\033[" + str(up) + "A")
+            if target % cols:
+                out.append("\033[" + str(target % cols) + "C")
+            self.row = target_row
         sys.stdout.write("".join(out))
         sys.stdout.flush()
         return ghost
@@ -748,6 +765,7 @@ class LiveInput:
                         pos = cut
                     elif c == "\x0c":
                         sys.stdout.write("\033[2J\033[H")
+                        self.row = 0
                     elif c == "\x04":
                         if not buf:
                             self.render("", 0, "", final=True)
