@@ -5,13 +5,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-/*
-    Traduction via translate-shell (`trans`), utilitaire CLI courant
-    sous Linux (paquet "translate-shell" sur NixOS). Pas de clé API.
-    `available` passe à false si l'outil n'est pas installé, pour
-    masquer le module dans le dashboard plutôt que d'afficher une
-    erreur à chaque frappe.
-*/
 Singleton {
     id: root
 

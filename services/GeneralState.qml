@@ -93,10 +93,33 @@ Singleton {
 
     Process {
         id: _uptimeProc
-        command: ["uptime", "-p"]
+
+        command: ["sh", "-c", "read s _ < /proc/uptime && echo \"$s\""]
         stdout: StdioCollector {
-            onStreamFinished: { root.uptimePretty = text.trim().replace(/^up /, "") }
+            onStreamFinished: {
+                const seconds = parseFloat(text.trim())
+                root.uptimePretty = isNaN(seconds) ? "" : root._formatUptime(seconds)
+            }
         }
+    }
+
+    function _formatUptime(totalSeconds) {
+        const days = Math.floor(totalSeconds / 86400)
+        const hours = Math.floor((totalSeconds % 86400) / 3600)
+        const minutes = Math.floor((totalSeconds % 3600) / 60)
+        const parts = []
+        if (days > 0) parts.push(days + (days > 1 ? " days" : " day"))
+        if (hours > 0) parts.push(hours + (hours > 1 ? " hours" : " hour"))
+        if (parts.length < 2 && minutes > 0) parts.push(minutes + (minutes > 1 ? " minutes" : " minute"))
+        if (parts.length === 0) return "less than a minute"
+        return parts.join(", ")
+    }
+
+    Timer {
+        interval: 60000
+        running: true
+        repeat: true
+        onTriggered: _uptimeProc.running = true
     }
 
     Process {

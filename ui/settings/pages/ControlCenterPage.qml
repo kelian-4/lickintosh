@@ -11,33 +11,33 @@ ContentPage {
     id: root
 
     readonly property var _widgets: [
-        { id: "wifiWidget",      name: "Wi-Fi",              icon: "wifi/nm-signal-100-symbolic.svg", locked: true },
-        { id: "btWidget",        name: "Bluetooth",          icon: "bluetooth/bluetooth.svg", locked: true },
-        { id: "adWidget",        name: "AirDrop / KDE Connect", icon: "devices/smartphone.svg", locked: true },
-        { id: "musicWidget",     name: "Lecteur multimédia", icon: "music/play.svg", locked: true },
-        { id: "focusWidget",     name: "Focus",               icon: "dnd.svg", locked: true },
-        { id: "stageWidget",     name: "Capture d'écran",    icon: "screenshot/region.svg", locked: true },
-        { id: "shareWidget",     name: "Partage d'écran",    icon: "screenshare.svg", locked: true },
-        { id: "displayWidget",   name: "Luminosité",          icon: "sun-small.svg", locked: true },
-        { id: "volumeWidget",    name: "Volume",               icon: "volume/audio-volume-3.svg", locked: true },
-        { id: "darkWidget",      name: "Mode sombre",         icon: "notch/moon.svg", locked: false },
-        { id: "calcWidget",      name: "Calculatrice",        icon: "", locked: false },
-        { id: "gameModeWidget",  name: "Mode jeu",             icon: "", locked: false },
-        { id: "timerWidget",     name: "Minuteur",             icon: "notch/clock.svg", locked: false },
-        { id: "alarmWidget",     name: "Alarme",                icon: "notch/bell.svg", locked: false },
-        { id: "stopwatchWidget", name: "Chronomètre",          icon: "notch/watch.svg", locked: false }
+        { id: "wifiWidget",      name: I18n.tr("Wi-Fi"),              icon: "wifi/nm-signal-100-symbolic.svg", locked: false },
+        { id: "btWidget",        name: I18n.tr("Bluetooth"),          icon: "bluetooth/bluetooth.svg", locked: false },
+        { id: "adWidget",        name: I18n.tr("AirDrop / KDE Connect"), icon: "devices/smartphone.svg", locked: false },
+        { id: "musicWidget",     name: I18n.tr("Lecteur multimédia"), icon: "music/play.svg", locked: false },
+        { id: "focusWidget",     name: I18n.tr("Focus"),               icon: "dnd.svg", locked: false },
+        { id: "stageWidget",     name: I18n.tr("Capture d'écran"),    icon: "screenshot/region.svg", locked: false },
+        { id: "shareWidget",     name: I18n.tr("Partage d'écran"),    icon: "screenshare.svg", locked: false },
+        { id: "displayWidget",   name: I18n.tr("Luminosité"),          icon: "sun-small.svg", locked: false },
+        { id: "volumeWidget",    name: I18n.tr("Volume"),               icon: "volume/audio-volume-3.svg", locked: false },
+        { id: "darkWidget",      name: I18n.tr("Mode sombre"),         icon: "notch/moon.svg", locked: false },
+        { id: "calcWidget",      name: I18n.tr("Calculatrice"),        icon: "", locked: false },
+        { id: "gameModeWidget",  name: I18n.tr("Mode jeu"),             icon: "", locked: false },
+        { id: "timerWidget",     name: I18n.tr("Minuteur"),             icon: "notch/clock.svg", locked: false },
+        { id: "alarmWidget",     name: I18n.tr("Alarme"),                icon: "notch/bell.svg", locked: false },
+        { id: "stopwatchWidget", name: I18n.tr("Chronomètre"),          icon: "notch/watch.svg", locked: false }
     ]
 
     ContentSection {
         CFText {
-            text: "Contrôles disponibles"
+            text: I18n.tr("Contrôles disponibles")
             font.pixelSize: 14
-            color: "#fff"
+            color: Theme.textPrimary
             Layout.fillWidth: true
         }
 
         CFText {
-            text: "Coche les contrôles que tu veux voir apparaître dans le Control Center."
+            text: I18n.tr("Coche les contrôles que tu veux voir apparaître dans le Control Center.")
             font.pixelSize: 11
             gray: true
             Layout.fillWidth: true
@@ -46,7 +46,7 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Widgets"
+        title: I18n.tr("Widgets")
 
         Repeater {
             model: root._widgets
@@ -87,7 +87,7 @@ ContentPage {
                             anchors.margins: 3
                             height: 4
                             radius: 1
-                            color: "#a0ffffff"
+                            color: Theme.textSecondary
                         }
                         Grid {
                             anchors.left: parent.left
@@ -105,7 +105,7 @@ ContentPage {
                                     width: 2
                                     height: 2
                                     radius: 1
-                                    color: "#a0ffffff"
+                                    color: Theme.textSecondary
                                 }
                             }
                         }
@@ -127,7 +127,7 @@ ContentPage {
                             width: 6
                             height: 1.5
                             radius: 0.75
-                            color: "#a0ffffff"
+                            color: Theme.textSecondary
                             anchors.left: parent.left
                             anchors.leftMargin: 4
                             anchors.verticalCenter: parent.verticalCenter
@@ -136,7 +136,7 @@ ContentPage {
                             width: 1.5
                             height: 6
                             radius: 0.75
-                            color: "#a0ffffff"
+                            color: Theme.textSecondary
                             anchors.left: parent.left
                             anchors.leftMargin: 6.5
                             anchors.verticalCenter: parent.verticalCenter
@@ -145,7 +145,7 @@ ContentPage {
                             width: 3
                             height: 3
                             radius: 1.5
-                            color: "#a0ffffff"
+                            color: Theme.textSecondary
                             anchors.right: parent.right
                             anchors.rightMargin: 3
                             anchors.top: parent.top
@@ -155,7 +155,7 @@ ContentPage {
                             width: 3
                             height: 3
                             radius: 1.5
-                            color: "#a0ffffff"
+                            color: Theme.textSecondary
                             anchors.right: parent.right
                             anchors.rightMargin: 6.5
                             anchors.bottom: parent.bottom
@@ -167,7 +167,7 @@ ContentPage {
                 CFText {
                     text: _widgetRow.modelData.name
                     font.pixelSize: 14
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
@@ -184,7 +184,7 @@ ContentPage {
                         width: 20
                         height: 20
                         radius: 10
-                        color: "#fff"
+                        color: Theme.textPrimary
                         anchors.verticalCenter: parent.verticalCenter
                         x: (_widgetRow.modelData.locked || ShellConfig.ccWidgetVisible(_widgetRow.modelData.id)) ? parent.width - width - 2 : 2
                         Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }

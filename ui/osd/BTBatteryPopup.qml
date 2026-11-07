@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.components.glass
 import qs.components
+import qs.services
 
 Scope {
     id: root
@@ -67,6 +68,7 @@ Scope {
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color:         "transparent"
                 exclusiveZone: -1
+                mask:          Region { item: pill }
 
                 anchors {
                     top:   true
@@ -76,6 +78,8 @@ Scope {
 
                 implicitWidth:  324
                 implicitHeight: 108
+
+                GlassBackdrop { id: glassBackdrop; element: "osd" }
 
                 Item {
                     id: pill
@@ -106,6 +110,7 @@ Scope {
 
                     BoxGlass {
                         anchors.fill: parent
+                        backdrop:     glassBackdrop
                         radius:       27
                         color:        "#30000000"
                         light:        "#55ffffff"
@@ -149,14 +154,14 @@ Scope {
                                 text:                root.deviceName
                                 font.pixelSize:      13
                                 font.weight:         Font.Bold
-                                color:               "#ffffff"
+                                color: Theme.ink(parent, false)
                                 elide:               Text.ElideRight
                                 Layout.fillWidth:    true
                                 horizontalAlignment: Text.AlignHCenter
                             }
 
                             CFText {
-                                text:                "Connecté"
+                                text:                I18n.tr("Connecté")
                                 font.pixelSize:      11
                                 color:               Qt.rgba(1, 1, 1, 0.55)
                                 Layout.fillWidth:    true
@@ -220,7 +225,7 @@ Scope {
                                 text:             root.pct >= 0 ? Math.round(root.pct).toString() : ""
                                 font.pixelSize:   12
                                 font.weight:      Font.Bold
-                                color:            "#ffffff"
+                                color: Theme.ink(parent, false)
                             }
                         }
 

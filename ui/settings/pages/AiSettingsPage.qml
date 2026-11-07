@@ -4,15 +4,16 @@ import QtQuick.Controls
 import qs.ui.topbar.statusarea.ai
 import qs.components
 import qs.ui.settings.widgets
+import qs.services
 
 ContentPage {
     id: root
 
     readonly property var _providers: [
-        { id: "anthropic", label: "Anthropic (Claude)" },
-        { id: "openai",    label: "OpenAI" },
-        { id: "google",    label: "Google (Gemini)" },
-        { id: "ollama",    label: "Ollama (local)" }
+        { id: "anthropic", label: I18n.tr("Anthropic (Claude)") },
+        { id: "openai",    label: I18n.tr("OpenAI") },
+        { id: "google",    label: I18n.tr("Google (Gemini)") },
+        { id: "ollama",    label: I18n.tr("Ollama (local)") }
     ]
 
     readonly property string _currentProviderLabel: {
@@ -36,16 +37,16 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Fournisseur"
+        title: I18n.tr("Fournisseur")
 
         RowLayout {
             Layout.fillWidth: true
             spacing: 10
 
             CFText {
-                text: "Fournisseur IA"
+                text: I18n.tr("Fournisseur IA")
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -78,7 +79,7 @@ ContentPage {
                     width: _providerButton.width - 10 - 8 - _providerChevron.width - 4
                     text: root._currentProviderLabel
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                 }
 
@@ -114,7 +115,7 @@ ContentPage {
                         anchors.verticalCenter: parent.verticalCenter
                         text: _providerRow.modelData.label
                         font.pixelSize: 13
-                        color: "#fff"
+                        color: Theme.textPrimary
                     }
 
                     MouseArea {
@@ -139,9 +140,9 @@ ContentPage {
             visible: AiConfig.provider === "anthropic" || AiConfig.provider === "openai" || AiConfig.provider === "google"
 
             CFText {
-                text: "Modèle"
+                text: I18n.tr("Modèle")
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -161,7 +162,7 @@ ContentPage {
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
                     verticalAlignment: TextInput.AlignVCenter
-                    color: "#fff"
+                    color: Theme.textPrimary
                     font.pixelSize: 12
                     clip: true
                     selectByMouse: true
@@ -175,7 +176,7 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Clé API"
+        title: I18n.tr("Clé API")
         visible: AiConfig.provider === "anthropic" || AiConfig.provider === "openai" || AiConfig.provider === "google"
 
         ColumnLayout {
@@ -200,7 +201,7 @@ ContentPage {
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
                         verticalAlignment: TextInput.AlignVCenter
-                        color: "#fff"
+                        color: Theme.textPrimary
                         font.pixelSize: 13
                         echoMode: root._apiKeyVisible ? TextInput.Normal : TextInput.Password
                         text: root._apiKeyDraft
@@ -276,7 +277,7 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Ollama"
+        title: I18n.tr("Ollama")
         visible: AiConfig.provider === "ollama"
 
         RowLayout {
@@ -284,9 +285,9 @@ ContentPage {
             spacing: 10
 
             CFText {
-                text: "Hôte"
+                text: I18n.tr("Hôte")
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -305,9 +306,9 @@ ContentPage {
             spacing: 10
 
             CFText {
-                text: "Modèle"
+                text: I18n.tr("Modèle")
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -339,9 +340,9 @@ ContentPage {
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
                     width: _ollamaModelButton.width - 10 - 8 - _ollamaModelChevron.width - 4
-                    text: AiConfig.ollamaModel.length > 0 ? AiConfig.ollamaModel : "Aucun modèle"
+                    text: AiConfig.ollamaModel.length > 0 ? AiConfig.ollamaModel : I18n.tr("Aucun modèle")
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                 }
 
@@ -368,9 +369,9 @@ ContentPage {
                     anchors.centerIn: parent
                     width: _refreshButton.width - 12
                     horizontalAlignment: Text.AlignHCenter
-                    text: "Actualiser"
+                    text: I18n.tr("Actualiser")
                     font.pixelSize: 11
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                 }
 
@@ -407,7 +408,7 @@ ContentPage {
                         anchors.verticalCenter: parent.verticalCenter
                         text: _ollamaModelRow.modelData
                         font.pixelSize: 13
-                        color: "#fff"
+                        color: Theme.textPrimary
                     }
 
                     MouseArea {
@@ -426,7 +427,7 @@ ContentPage {
 
         CFText {
             visible: AiConfig.ollamaModels.length === 0
-            text: "Aucun modèle Ollama détecté. Vérifie qu'Ollama tourne et qu'au moins un modèle est installé (ollama pull <modèle>)."
+            text: I18n.tr("Aucun modèle Ollama détecté. Vérifie qu'Ollama tourne et qu'au moins un modèle est installé (ollama pull <modèle>).")
             font.pixelSize: 11
             gray: true
             Layout.fillWidth: true
@@ -435,16 +436,16 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Reconnaissance vocale"
+        title: I18n.tr("Reconnaissance vocale")
 
         RowLayout {
             Layout.fillWidth: true
             spacing: 10
 
             CFText {
-                text: "Modèle Whisper"
+                text: I18n.tr("Modèle Whisper")
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -461,9 +462,9 @@ ContentPage {
             spacing: 10
 
             CFText {
-                text: "Langue"
+                text: I18n.tr("Langue")
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -476,7 +477,7 @@ ContentPage {
         }
 
         CFText {
-            text: "Nécessite whisper-cpp et un modèle ggml compatible installés sur le système."
+            text: I18n.tr("Nécessite whisper-cpp et un modèle ggml compatible installés sur le système.")
             font.pixelSize: 11
             gray: true
             Layout.fillWidth: true
@@ -485,16 +486,16 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Historique des conversations"
+        title: I18n.tr("Historique des conversations")
 
         RowLayout {
             Layout.fillWidth: true
             spacing: 10
 
             CFText {
-                text: "Conversations enregistrées"
+                text: I18n.tr("Conversations enregistrées")
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -522,7 +523,7 @@ ContentPage {
                 anchors.centerIn: parent
                 width: _clearButton.width - 16
                 horizontalAlignment: Text.AlignHCenter
-                text: "Effacer tout l'historique"
+                text: I18n.tr("Effacer tout l'historique")
                 font.pixelSize: 12
                 color: "#ff453a"
                 elide: Text.ElideRight
@@ -539,10 +540,10 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Instructions personnalisées"
+        title: I18n.tr("Instructions personnalisées")
 
         CFText {
-            text: "Ajoutées à la fin des instructions système de base à chaque conversation."
+            text: I18n.tr("Ajoutées à la fin des instructions système de base à chaque conversation.")
             font.pixelSize: 11
             gray: true
             Layout.fillWidth: true
@@ -563,7 +564,7 @@ ContentPage {
                 anchors.fill: parent
                 anchors.margins: 8
                 text: AiConfig.systemPrompt
-                color: "#fff"
+                color: Theme.textPrimary
                 font.pixelSize: 13
                 wrapMode: TextArea.Wrap
                 selectByMouse: true
@@ -574,22 +575,22 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Accès rapide"
+        title: I18n.tr("Accès rapide")
 
         CFText {
-            text: "Clique sur l'icône IA dans la barre du haut pour ouvrir l'assistant à tout moment, depuis n'importe quel espace de travail."
+            text: I18n.tr("Clique sur l'icône IA dans la barre du haut pour ouvrir l'assistant à tout moment, depuis n'importe quel espace de travail.")
             font.pixelSize: 12
-            color: "#fff"
+            color: Theme.textPrimary
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
         }
     }
 
     ContentSection {
-        title: "Commandes slash"
+        title: I18n.tr("Commandes slash")
 
         CFText {
-            text: "Dans le champ de saisie de l'assistant, tape / pour voir apparaître les commandes disponibles."
+            text: I18n.tr("Dans le champ de saisie de l'assistant, tape / pour voir apparaître les commandes disponibles.")
             font.pixelSize: 12
             gray: true
             Layout.fillWidth: true
@@ -598,14 +599,14 @@ ContentPage {
 
         Repeater {
             model: [
-                { cmd: "/model set <nom>", desc: "Changer de modèle" },
-                { cmd: "/provider set <id> [key <clé>]", desc: "Changer de fournisseur, avec clé optionnelle" },
-                { cmd: "/key set <provider> <clé>", desc: "Définir une clé API" },
-                { cmd: "/key remove <provider>", desc: "Supprimer une clé API" },
-                { cmd: "/add <id> <endpoint> <format> <modèle>", desc: "Ajouter un fournisseur personnalisé" },
-                { cmd: "/chat list | load <id> | new | delete <id> | clear", desc: "Gérer les conversations sauvegardées" },
-                { cmd: "/clear", desc: "Effacer la conversation en cours" },
-                { cmd: "/help", desc: "Afficher la liste des commandes" }
+                { cmd: "/model set <nom>", desc: I18n.tr("Changer de modèle") },
+                { cmd: "/provider set <id> [key <clé>]", desc: I18n.tr("Changer de fournisseur, avec clé optionnelle") },
+                { cmd: "/key set <provider> <clé>", desc: I18n.tr("Définir une clé API") },
+                { cmd: "/key remove <provider>", desc: I18n.tr("Supprimer une clé API") },
+                { cmd: "/add <id> <endpoint> <format> <modèle>", desc: I18n.tr("Ajouter un fournisseur personnalisé") },
+                { cmd: "/chat list | load <id> | new | delete <id> | clear", desc: I18n.tr("Gérer les conversations sauvegardées") },
+                { cmd: "/clear", desc: I18n.tr("Effacer la conversation en cours") },
+                { cmd: "/help", desc: I18n.tr("Afficher la liste des commandes") }
             ]
 
             ColumnLayout {
@@ -616,8 +617,8 @@ ContentPage {
                 CFText {
                     text: modelData.cmd
                     font.pixelSize: 13
-                    font.family: "monospace"
-                    color: "#fff"
+                    font.family: "SF Mono"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }

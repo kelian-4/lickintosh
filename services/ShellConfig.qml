@@ -5,39 +5,26 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-/*
-    Configuration et état persistant unifiés pour tout le shell.
-
-    Contient :
-      - Etat runtime persistant (dock, profil batterie) : anciennement ShellState.
-      - Réglages visuels utilisateur pilotés par l'app Settings (topbar, dock, etc.)
-
-    Ne contient PAS de logique système : NetworkManager, BluetoothState, etc.
-    restent des singletons séparés en lecture/écriture directe sur le système
-    (nmcli, bluez...), jamais gérés depuis ce fichier.
-
-    Persistance : un seul fichier JSON, via FileView + JsonAdapter (mécanisme
-    natif Quickshell). watchChanges: true assure la synchronisation
-    bidirectionnelle automatique :
-      - Un changement fait depuis l'app Settings (ou par un composant du
-        shell) écrit le fichier -> tous les autres composants qui lisent
-        ShellConfig.options.xxx se mettent à jour immédiatement (binding).
-      - Un changement fait manuellement dans le fichier JSON est détecté
-        (watchChanges) et rechargé -> les composants du shell reflètent le
-        changement sans redémarrage.
-
-    Usage:
-        import qs.services
-        ShellConfig.options.dock.pinnedApps
-        ShellConfig.options.topbar.clockVisible = false
-*/
 Singleton {
     id: root
 
     reloadableId: "shellConfig"
 
-    readonly property string filePath: "$HOME/.config/quickshell/core/shell-config.json"
+    Process {
+        running: true
+        command: ["mkdir", "-p", Quickshell.env("HOME") + "/.config/lickintosh/core"]
+    }
+
+    readonly property string filePath: Quickshell.env("HOME") + "/.config/lickintosh/shell-config.json"
     property alias options: configAdapter
+
+    readonly property string defaultWallpaper: Quickshell.shellDir + "/assets/wallpapers/WWDC25 macOS Tahoe city orange.jpeg"
+
+    function seedWallpaper() {
+        if (configAdapter.wallpaper.path === "") {
+            configAdapter.wallpaper.path = root.defaultWallpaper
+        }
+    }
     property bool ready: false
 
     FileView {
@@ -46,9 +33,14 @@ Singleton {
         watchChanges: true
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
-        onLoaded: root.ready = true
+        onLoaded: {
+            root.ready = true
+            root.seedWallpaper()
+            root.seedKeepAwake()
+        }
         onLoadFailed: function(error) {
             if (error === FileViewError.FileNotFound) {
+                root.seedWallpaper()
                 writeAdapter()
             }
         }
@@ -56,9 +48,6 @@ Singleton {
         JsonAdapter {
             id: configAdapter
 
-            // ---------------------------------------------------------
-            // Etat runtime persistant (anciennement ShellState)
-            // ---------------------------------------------------------
             property JsonObject dock: JsonObject {
                 property list<var> pinnedApps: [
                     { "name": "Finder",   "cmd": "dolphin", "icon": "system-file-manager", "iconPath": "", "autostart": false },
@@ -70,16 +59,11 @@ Singleton {
             }
 
             property JsonObject battery: JsonObject {
-                // "" tant que non chargé/connu, sinon "balanced" | "power-saver" | "performance"
                 property string powerProfile: ""
             }
 
-            // ---------------------------------------------------------
-            // Réglages visuels utilisateur (pilotés par l'app Settings)
-            // Purement visuel : aucune de ces valeurs ne pilote de logique
-            // système, seulement l'apparence des composants du shell.
-            // ---------------------------------------------------------
             property JsonObject topbar: JsonObject {
+                property bool notchVisible:      true
                 property bool clockVisible:      true
                 property bool clockTextVisible:  true
                 property bool clockBadgeVisible: true
@@ -104,8 +88,14 @@ Singleton {
                 property bool hoverToReveal:     true
                 property bool monochromeIcons:   true
                 property int  iconSize:          54
+                property real iconScale:         1.15
+                property int  iconOverflow:      4
                 property real magnification:     1.50
                 property bool magnificationEnabled: true
+            }
+
+            property JsonObject general: JsonObject {
+                property string language: "auto"
             }
 
             property JsonObject menuBar: JsonObject {
@@ -116,6 +106,21 @@ Singleton {
                 property string accentColor:  "#1C7AFF"
                 property real   panelOpacity: 0.85
                 property bool   reduceMotion: false
+                property string mode:         "glass"
+                property string blurPreset:   ""
+                property real   blurWindowOpacity: 0.80
+                property real   blurWindowOpacityInactive: 0.80
+                property var    blurParams:   ({})
+                property var    glassElements: ({})
+                property bool   blurLayers:   true
+                property bool   blurLayerPopups: true
+                property real   layerIgnoreAlpha: 0.05
+                property real   blurSurfaceAlpha: 0.30
+                property real   glassTintLight: 0.45
+                property real   glassTintDark: 0.40
+                property string accentOverride: ""
+                property bool   blurApplied:  false
+                property string blurStatus:   ""
             }
 
             property JsonObject spotlight: JsonObject {
@@ -164,70 +169,79 @@ Singleton {
             }
 
             property JsonObject wallpaper: JsonObject {
-                // Wallpaper du bureau normal. Historiquement stocké à
-                // part par SpotlightWindow.qml dans un cache base64
-                // (~/.cache/quickshell/spotlight_wallpaper) : migré ici
-                // pour que ce soit ShellConfig la seule source de vérité
-                // persistée, cohérent avec le reste du shell.
                 property string path: ""
-                // Wallpaper spécifique au lockscreen — volontairement
-                // une image distincte de celle du bureau, pas un simple
-                // alias vers "path" ci-dessus.
+
                 property string lockscreenPath: ""
             }
 
+            property JsonObject glass: JsonObject {
+                property bool captureWindows: false
+                property int captureIntervalMs: 400
+                property real windowOpacity: 1.0
+                property var windowOpacityByClass: ({ "kitty": 0.3 })
+            }
+
+            property JsonObject lockscreen: JsonObject {
+                property int    clockStyle:  0
+
+                property real   clockWeight: 1.0
+                property bool   clockLarge:  true
+
+                property bool   showNotifications:         true
+                property bool   showNotificationPreviews:  true
+                property bool   showMediaPlayer:            true
+                property bool   showControlCenter:          true
+                property bool   lockAtStartup:              false
+            }
+
             property JsonObject controlCenter: JsonObject {
-                property list<var> widgetVisibility: [
-                    { "id": "wifiWidget",     "visible": true },
-                    { "id": "btWidget",       "visible": true },
-                    { "id": "adWidget",       "visible": true },
-                    { "id": "musicWidget",    "visible": true },
-                    { "id": "focusWidget",    "visible": true },
-                    { "id": "stageWidget",    "visible": true },
-                    { "id": "shareWidget",    "visible": true },
-                    { "id": "darkWidget",     "visible": true },
-                    { "id": "calcWidget",     "visible": true },
-                    { "id": "gameModeWidget", "visible": true },
-                    { "id": "displayWidget",  "visible": true },
-                    { "id": "volumeWidget",   "visible": true },
-                    { "id": "timerWidget",    "visible": false },
-                    { "id": "alarmWidget",    "visible": false },
-                    { "id": "stopwatchWidget","visible": false }
+                property bool keepAwakeSeeded: false
+                property list<var> items: [
+                    { "uid": "wifiWidget", "type": "wifiWidget" },
+                    { "uid": "btWidget", "type": "btWidget" },
+                    { "uid": "adWidget", "type": "adWidget" },
+                    { "uid": "musicWidget", "type": "musicWidget" },
+                    { "uid": "focusWidget", "type": "focusWidget" },
+                    { "uid": "stageWidget", "type": "stageWidget" },
+                    { "uid": "shareWidget", "type": "shareWidget" },
+                    { "uid": "darkWidget", "type": "darkWidget" },
+                    { "uid": "calcWidget", "type": "calcWidget" },
+                    { "uid": "gameModeWidget", "type": "gameModeWidget" },
+                    { "uid": "displayWidget", "type": "displayWidget" },
+                    { "uid": "volumeWidget", "type": "volumeWidget" }
                 ]
             }
         }
     }
 
-    // ---------------------------------------------------------------
-    // Dock : fonctions de compatibilité avec l'ancien ShellState
-    // ---------------------------------------------------------------
     readonly property var pinnedApps:  options.dock.pinnedApps
     readonly property var pinnedFiles: options.dock.pinnedFiles
 
-    function ccWidgetVisible(id) {
-        var list = root.options.controlCenter.widgetVisibility
+    function ccWidgetVisible(type) {
+        var list = root.options.controlCenter.items
         for (var i = 0; i < list.length; i++) {
-            if (list[i].id === id) return list[i].visible
+            if (list[i].type === type) return true
         }
         return false
     }
 
-    function setCcWidgetVisible(id, visible) {
-        var list = root.options.controlCenter.widgetVisibility.slice()
-        for (var i = 0; i < list.length; i++) {
-            if (list[i].id === id) {
-                list[i] = { id: id, visible: visible }
-                root.options.controlCenter.widgetVisibility = list
-                return
-            }
-        }
-        list.push({ id: id, visible: visible })
-        root.options.controlCenter.widgetVisibility = list
+    function seedKeepAwake() {
+        if (root.options.controlCenter.keepAwakeSeeded) return
+        root.setCcWidgetVisible("keepAwakeWidget", true)
+        root.options.controlCenter.keepAwakeSeeded = true
     }
 
-    // ---------------------------------------------------------------
-    // Batterie / profil d'alimentation
-    // ---------------------------------------------------------------
+    function setCcWidgetVisible(type, visible) {
+        var list = root.options.controlCenter.items.slice()
+        if (visible) {
+            if (root.ccWidgetVisible(type)) return
+            list.push({ uid: type + "_" + Date.now(), type: type })
+        } else {
+            list = list.filter(function(item) { return item.type !== type })
+        }
+        root.options.controlCenter.items = list
+    }
+
     readonly property string powerProfile: options.battery.powerProfile
 
     function setPowerProfile(profileId) {
@@ -240,8 +254,6 @@ Singleton {
         id: _setProfileProc
     }
 
-    // Resynchronise une fois au démarrage avec l'état système réel
-    // (le profil peut avoir été changé ailleurs que par le shell).
     Process {
         id: _getProfileProc
         command: ["powerprofilesctl", "get"]
@@ -255,12 +267,6 @@ Singleton {
         }
     }
 
-    // -----------------------------------------------------------------
-    // Energy usage monitoring (top consommateurs CPU/RAM/Swap)
-    // Etat volatil, recalculé en continu, jamais persisté dans le JSON.
-    // Tourne dès le démarrage du shell, indépendamment de l'ouverture du
-    // panneau batterie.
-    // -----------------------------------------------------------------
     property var previousSample: ({})
     property double previousTimestamp: 0
     property double memTotalKb: 1
@@ -324,7 +330,7 @@ Singleton {
                                     cpu:   cpuPct,
                                     rssMb: rssMb,
                                     swap:  swapMb,
-                                    icon:  Quickshell.iconPath(key, true)
+                                    icon:  IconResolver.byName(key)
                                 })
                             }
                         }

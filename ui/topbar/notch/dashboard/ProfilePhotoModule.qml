@@ -1,0 +1,74 @@
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Effects
+import Quickshell
+import Quickshell.Io
+
+Item {
+    id: root
+    Layout.preferredWidth: 100
+    Layout.fillHeight: true
+
+    readonly property string _home: Quickshell.env("HOME") || ""
+    readonly property string _user: Quickshell.env("USER") || ""
+    property string avatarSource: ""
+
+    Process {
+        running: root._home.length > 0
+        command: ["sh", "-c",
+            "for f in " +
+            "\"" + root._home + "/.face\" " +
+            "\"" + root._home + "/.face.icon\" " +
+            "\"/var/lib/AccountsService/icons/" + root._user + "\"" +
+            "; do [ -r \"$f\" ] && echo \"$f\" && break; done"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const path = text.trim()
+                if (path.length > 0) root.avatarSource = path
+            }
+        }
+    }
+
+    Rectangle {
+        id: photoClip
+        anchors.centerIn: parent
+        width: 88
+        height: 88
+        radius: width / 2
+        color: "#2A2A3A"
+
+        Item {
+            id: maskShape
+            anchors.fill: parent
+            layer.enabled: true
+            visible: false
+
+            Rectangle {
+                anchors.fill: parent
+                radius: width / 2
+                color: "#FFFFFF"
+            }
+        }
+
+        Image {
+            anchors.fill: parent
+            source: root.avatarSource !== "" ? "file://" + root.avatarSource : ""
+            fillMode: Image.PreserveAspectCrop
+            visible: root.avatarSource !== ""
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: maskShape
+            }
+        }
+
+        Text {
+            anchors.centerIn: parent
+            visible: root.avatarSource === ""
+            text: root._user.charAt(0).toUpperCase()
+            color: "#8A8A8A"
+            font.pixelSize: 32
+            font.bold: true
+        }
+    }
+}

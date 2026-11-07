@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.components
+import qs.services
 
 Item {
     id: root
@@ -28,7 +29,7 @@ Item {
             CFText {
                 text: root.text
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 Layout.fillWidth: true
             }
 
@@ -41,6 +42,7 @@ Item {
 
         CFSlider {
             width: parent.width
+            fillColor: Theme.accent
             value: (root.value - root.from) / (root.to - root.from)
             onMoved: {
                 var real = root.from + value * (root.to - root.from)

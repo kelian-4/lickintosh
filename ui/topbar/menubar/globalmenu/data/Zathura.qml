@@ -1,18 +1,19 @@
 pragma Singleton
 import QtQuick
+import qs.services
 
 QtObject {
-    property list<var> menus: [
+    property var menus: [
         {
-            label: "Zathura",
+            label: I18n.tr("Zathura"),
             items: [
-                { label: "Rechercher", mods: "", key: "slash" },
-                { label: "Page suivante", mods: "", key: "J" },
-                { label: "Page précédente", mods: "", key: "K" },
-                { label: "Aller à la fin", mods: "SHIFT", key: "G" },
-                { label: "Zoom avant", mods: "", key: "I" },
-                { label: "Zoom arrière", mods: "", key: "O" },
-                { label: "Index", mods: "", key: "Tab" }
+                { label: I18n.tr("Rechercher"), mods: "", key: "slash", icon: "notch/search.svg" },
+                { label: I18n.tr("Page suivante"), mods: "", key: "J", icon: "notch/skip-forward.svg" },
+                { label: I18n.tr("Page précédente"), mods: "", key: "K", icon: "notch/skip-back.svg" },
+                { label: I18n.tr("Aller à la fin"), mods: "SHIFT", key: "G", icon: "notch/corner-down-right.svg" },
+                { label: I18n.tr("Zoom avant"), mods: "", key: "I", icon: "notch/zoom-in.svg" },
+                { label: I18n.tr("Zoom arrière"), mods: "", key: "O", icon: "notch/zoom-out.svg" },
+                { label: I18n.tr("Index"), mods: "", key: "Tab", icon: "notch/list.svg" }
             ]
         }
     ]

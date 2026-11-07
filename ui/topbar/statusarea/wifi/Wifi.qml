@@ -6,7 +6,7 @@ import Quickshell.Io
 Item {
     id: root
 
-    property int iconSize: 20
+    property int iconSize: 16
     property string color: "#fff"
 
     property int networkStrength: 0

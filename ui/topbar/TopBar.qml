@@ -8,9 +8,11 @@ import qs.services
 import qs.ui.topbar.menubar
 import qs.ui.topbar.notch
 import qs.ui.topbar.statusarea
+import qs.ui.topbar.statusarea.notifcenter
 
 Rectangle {
     id: root
+    readonly property bool themed: false
     signal toggleCC()
     signal toggleAppleMenu()
     signal toggleSpotlight()
@@ -40,18 +42,15 @@ Rectangle {
     anchors.left:  parent.left
     anchors.right: parent.right
 
-    readonly property var _spatialCurve: [0.38, 1.21, 0.22, 1, 1, 1]
-    readonly property int  _spatialDuration: 500
-    readonly property var  _effectsCurve: [0.34, 0.8, 0.34, 1, 1, 1]
-    readonly property int  _effectsDuration: 200
-
-    FontLoader {
-        id: macFont
-        source: "../../../assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf"
-    }
 
     readonly property real notchZoneLeft:  root.themeMargin + menuBarItem.width
     readonly property real notchZoneRight: root.width - root.themeMargin - statusAreaItem.width
+
+    readonly property bool notchEnabled: ShellConfig.options.topbar.notchVisible
+
+    onNotchEnabledChanged: {
+        if (!notchEnabled && NotchState.expanded) NotchState.toggleExpanded()
+    }
 
     Binding {
         target: NotchState
@@ -62,6 +61,7 @@ Rectangle {
     Connections {
         target: root.notifServer
         function onNotification(notification) {
+            if (NotifService.dndEnabled || !root.notchEnabled) return
             NotchState.notifyIncoming(notification.appName, notification.summary, notification.appIcon)
         }
     }
@@ -124,17 +124,29 @@ Rectangle {
     readonly property bool notchExpanded:  NotchState.expanded
     readonly property bool notchDashboard: root.notchExpanded && !NotchState.hasUrgentActivity
 
-    readonly property real notchTargetWidth: root.notchDashboard ? 620
+    readonly property real notchTargetWidth: root.notchDashboard ? Math.min(1200, root.width - 2 * root.themeMargin)
                                             : root.notchExpanded   ? 440
                                             : root.notchPeek       ? Math.min(260, root.notchZoneRight - root.notchZoneLeft - 24)
+                                            : NotchState.primaryKind === "media" ? 156
                                                                     : 130
-    readonly property real notchTargetHeight: root.notchDashboard ? 380
+    readonly property real notchTargetHeight: root.notchDashboard ? 270
                                              : root.notchExpanded   ? 300
                                              : root.notchPeek       ? 40
                                                                      : 26
 
+    property real expandedWidth: 1200
+    property real expandedHeight: 270
+
+    Binding { target: root; property: "expandedWidth";  value: root.notchTargetWidth;  when: root.notchExpanded }
+    Binding { target: root; property: "expandedHeight"; value: root.notchTargetHeight; when: root.notchExpanded }
+
+    readonly property real notchTargetRadius: root.notchExpanded ? 26
+                                             : root.notchPeek     ? 20
+                                                                   : 13
+
     Rectangle {
         id: notchPill
+        visible: root.notchEnabled
         readonly property real _safeHalfWidth: 65
         readonly property real notchCenterX: Math.max(root.notchZoneLeft + _safeHalfWidth,
                                                         Math.min(root.width / 2, root.notchZoneRight - _safeHalfWidth))
@@ -142,28 +154,34 @@ Rectangle {
         y: (root.themeHeight - 26) / 2
         width:  root.notchTargetWidth
         height: root.notchTargetHeight
-        radius: root.notchExpanded ? 26 : height / 2
+        radius: root.notchTargetRadius
         color:  "#0A0A0A"
+        clip:   true
 
-        Behavior on width  { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
-        Behavior on height { NumberAnimation { duration: root._spatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._spatialCurve } }
-        Behavior on radius { NumberAnimation { duration: root._effectsDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root._effectsCurve } }
+        Behavior on width  { NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
+        Behavior on height { NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
+        Behavior on radius { NumberAnimation { duration: ShellMotion.spatial(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
 
         FadeLoader {
             anchors.fill: parent
             anchors.margins: 4
             shouldBeActive: !root.notchExpanded
-            fadeDuration: root._effectsDuration
-            fadeCurve: root._effectsCurve
+            fadeDuration: ShellMotion.effects()
+            fadeCurve: ShellMotion.effectsCurve
+            enterDelay: ShellMotion.spatial(0.4)
             sourceComponent: NotchPill { peek: root.notchPeek }
         }
 
         FadeLoader {
-            anchors.fill: parent
-            anchors.margins: 16
+            width: root.expandedWidth - 32
+            height: root.expandedHeight - 32
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 16
             shouldBeActive: root.notchExpanded
-            fadeDuration: root._effectsDuration
-            fadeCurve: root._effectsCurve
+            fadeDuration: ShellMotion.effects()
+            fadeCurve: ShellMotion.effectsCurve
+            enterDelay: ShellMotion.spatial(0.3)
             sourceComponent: NotchExpandedContent {}
         }
 
@@ -182,6 +200,7 @@ Rectangle {
         id: fl
         property bool shouldBeActive: false
         property int fadeDuration: 200
+        property int enterDelay: 0
         property var fadeCurve: [0.34, 0.8, 0.34, 1, 1, 1]
 
         active: false
@@ -198,6 +217,7 @@ Rectangle {
                 from: ""; to: "active"
                 SequentialAnimation {
                     PropertyAction { property: "active" }
+                    NumberAnimation { property: "opacity"; from: 0; to: 0; duration: fl.enterDelay }
                     NumberAnimation { property: "opacity"; duration: fl.fadeDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: fl.fadeCurve }
                 }
             },

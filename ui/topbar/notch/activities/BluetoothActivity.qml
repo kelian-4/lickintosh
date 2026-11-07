@@ -29,18 +29,18 @@ Item {
             spacing: 3
             Text {
                 Layout.fillWidth: true
-                text: root._entry ? root._entry.title : "Bluetooth"
+                text: root._entry ? root._entry.title : I18n.tr("Bluetooth")
                 color: "#FFFFFF"
                 font.pixelSize: 13
                 font.bold: true
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 elide: Text.ElideRight
             }
             Text {
                 text: root._entry ? root._entry.subtitle : ""
                 color: "#4ADE80"
                 font.pixelSize: 12
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
             }
         }
     }

@@ -1,7 +1,10 @@
+//@ pragma IconTheme MacTahoe-dark
 //@ pragma UseQApplication
 //@ pragma ShellId main-shell
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
+import Quickshell.Wayland
 import QtQuick
 import Quickshell.Services.Notifications
 import qs.services
@@ -18,12 +21,11 @@ import qs.ui.dock
 import qs.ui.topbar.statusarea.spotlight
 import qs.ui.osd
 import qs.ui.lockscreen
-
+import qs.ui.desktop
+import qs.ui.widgets
 
 ShellRoot {
     id: appRoot
-    FontLoader { source: "assets/fonts/SFPD" }
-    FontLoader { source: "assets/fonts/SFPR" }
     property bool ccOpened:          false
     property bool appleMenuOpened:   false
     property bool aboutOpened:       false
@@ -38,36 +40,44 @@ ShellRoot {
     property int  batteryX:          0
     property bool volumeOpened:      false
     property int  volumeX:           0
+    property bool interfaceShown:    false
+    property bool startupDecided:    false
+
+    Connections {
+        target: WorkspaceWatcher
+
+        function onChanged() {
+            appRoot.ccOpened          = false
+            appRoot.appleMenuOpened   = false
+            appRoot.spotlightOpened   = false
+            appRoot.aiOpened          = false
+            appRoot.notifCenterOpened = false
+            appRoot.wifiOpened        = false
+            appRoot.bluetoothOpened   = false
+            appRoot.batteryOpened     = false
+            appRoot.volumeOpened      = false
+            NotchState.close()
+        }
+    }
 
     readonly property bool anySubmenuOpened: ccOpened || appleMenuOpened || aboutOpened ||
         spotlightOpened || aiOpened || notifCenterOpened || wifiOpened || bluetoothOpened ||
         batteryOpened || volumeOpened || NotchState.expanded
 
     Variants {
-        model: Quickshell.screens
-        PanelWindow {
-            id: topBarExclusionZone
-            required property var modelData
-            screen: modelData
-            anchors { top: true; left: true; right: true }
-            implicitHeight: 32
-            color: "transparent"
-            exclusiveZone: ShellConfig.options.menuBar.autoHide ? 0 : 32
-            mask: Region {}
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
+        model: appRoot.interfaceShown ? Quickshell.screens : []
         PanelWindow {
             id: topBarWindow
             required property var modelData
             property bool _revealed: true
             readonly property int barHeight: 32
             screen: modelData
-            anchors { top: true; bottom: true; left: true; right: true }
+            anchors { top: true; left: true; right: true }
+            implicitHeight: 420
             color: "transparent"
-            exclusiveZone: 0
+            exclusionMode: ExclusionMode.Normal
+            exclusiveZone: ShellConfig.options.menuBar.autoHide ? 0 : barHeight
+            WlrLayershell.keyboardFocus: NotchState.expanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             mask: NotchState.visualState === "idle" ? _barMask : _fullMask
 
@@ -183,6 +193,25 @@ ShellRoot {
         onCloseRequested: appRoot.appleMenuOpened = false
         onOpenAbout:      appRoot.aboutOpened     = true
         onLockRequested:  lockScreen.lock()
+        onPowerRequested: function(action) { PowerState.request(action) }
+    }
+    PowerConfirmWindow {
+        action: PowerState.action
+        onCancelled: PowerState.clear()
+        onConfirmed: function(action) {
+            PowerState.clear()
+            var cmd = ""
+            if (action === "poweroff")
+                cmd = "hyprshutdown -t 'Extinction...' --post-cmd 'systemctl poweroff' || systemctl poweroff"
+            else if (action === "reboot")
+                cmd = "hyprshutdown -t 'Redémarrage...' --post-cmd 'systemctl reboot' || systemctl reboot"
+            else if (action === "bios")
+                cmd = "hyprshutdown -t 'Redémarrage vers le BIOS...' --post-cmd 'systemctl reboot --firmware-setup' || systemctl reboot --firmware-setup"
+            else if (action === "logout")
+                cmd = "hyprshutdown -t 'Déconnexion...' || hyprctl dispatch 'hl.dsp.exit()'"
+            if (cmd.length > 0)
+                Quickshell.execDetached(["sh", "-c", cmd])
+        }
     }
     AboutWindow {
         opened: appRoot.aboutOpened
@@ -192,7 +221,10 @@ ShellRoot {
         opened: appRoot.ccOpened
         onClosing: appRoot.ccOpened = false
     }
-    Dock {}
+    ControlGallery {}
+    LazyLoader { active: appRoot.interfaceShown && !GameMode.enabled; DesktopLayer {} }
+    WidgetGallery {}
+    LazyLoader { active: appRoot.interfaceShown; Dock {} }
     SpotlightWindow {
         opened: appRoot.spotlightOpened
         onCloseRequested: appRoot.spotlightOpened = false
@@ -237,6 +269,46 @@ ShellRoot {
     LockScreen {
         id: lockScreen
     }
+
+    Process {
+        id: startupLockCheck
+        command: ["sh", "-c", "m=\"${XDG_RUNTIME_DIR:-/tmp}/lickintosh-startup-lock\"; if [ -e \"$m\" ]; then echo skip; else : > \"$m\"; echo lock; fi"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.trim() === "lock") lockScreen.lock()
+                else appRoot.interfaceShown = true
+            }
+        }
+    }
+
+    function decideStartup() {
+        if (startupDecided || !ShellConfig.ready) return
+        startupDecided = true
+        if (ShellConfig.options.lockscreen.lockAtStartup) startupLockCheck.running = true
+        else interfaceShown = true
+    }
+
+    Connections {
+        target: ShellConfig
+        function onReadyChanged() { appRoot.decideStartup() }
+    }
+
+    Connections {
+        target: lockScreen
+        function onLockedChanged() {
+            if (!lockScreen.locked && appRoot.startupDecided) appRoot.interfaceShown = true
+        }
+    }
+
+    Timer {
+        interval: 6000
+        running: true
+        onTriggered: {
+            if (!appRoot.interfaceShown && !lockScreen.locked) appRoot.interfaceShown = true
+        }
+    }
+
+    Component.onCompleted: appRoot.decideStartup()
 
     StatusSubMenuWindow {
         opened: appRoot.wifiOpened

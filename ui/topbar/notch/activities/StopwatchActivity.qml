@@ -14,7 +14,7 @@ Item {
             text: StopwatchState.formatElapsed(StopwatchState.elapsedMs)
             color: "#FFFFFF"
             font.pixelSize: 28
-            font.family: "SF Pro Mono"
+            font.family: "SF Mono"
         }
 
         RowLayout {
@@ -28,8 +28,8 @@ Item {
                 color: "#2A2A2A"
                 Text {
                     anchors.centerIn: parent
-                    text: StopwatchState.running ? "Pause" : "Démarrer"
-                    color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Rounded"
+                    text: StopwatchState.running ? I18n.tr("Pause") : I18n.tr("Démarrer")
+                    color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Text"
                 }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: StopwatchState.toggle() }
             }
@@ -39,7 +39,7 @@ Item {
                 Layout.preferredHeight: 30
                 radius: 15
                 color: "#4A1E1E"
-                Text { anchors.centerIn: parent; text: "Réinitialiser"; color: "#FF6B6B"; font.pixelSize: 12; font.family: "SF Pro Rounded" }
+                Text { anchors.centerIn: parent; text: "Réinitialiser"; color: "#FF6B6B"; font.pixelSize: 12; font.family: "SF Pro Text" }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: StopwatchState.reset() }
             }
         }

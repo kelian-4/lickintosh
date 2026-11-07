@@ -4,6 +4,8 @@ import Quickshell.Io
 import QtQuick
 import QtQuick.VectorImage
 import qs.components.glass
+import qs.components
+import qs.services
 
 Scope {
     id: root
@@ -13,10 +15,16 @@ Scope {
     readonly property int winWidth:  340
     readonly property int winHeight: 520
 
+    Presence { id: presence; wanted: root.opened }
+
     Loader {
-        active: root.opened
+        active: presence.present
         sourceComponent: Component {
             PanelWindow {
+                id: panel
+                property bool entered: false
+                Component.onCompleted: panel.entered = true
+
                 anchors {
                     top: true
                     left: true
@@ -26,9 +34,9 @@ Scope {
                 color: "transparent"
                 exclusiveZone: -1
                 WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.namespace: "quickshell:about"
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
-                
                 Rectangle {
                     anchors.fill: parent
                     color: "transparent"
@@ -39,19 +47,19 @@ Scope {
                     }
                 }
 
-                
                 Item {
                     id: win
                     width: root.winWidth
                     height: root.winHeight
                     anchors.centerIn: parent
+                    opacity: (root.opened && panel.entered) ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     MouseArea {
                         anchors.fill: parent
                         onClicked: function(e) { e.accepted = true }
                     }
 
-                    
                     BoxGlass {
                         anchors.fill: parent
                         radius: 14
@@ -62,7 +70,6 @@ Scope {
                         lightDir: Qt.vector2d(0.5, -1.0)
                     }
 
-                    
                     Row {
                         x: 14
                         y: 14
@@ -98,7 +105,7 @@ Scope {
                             width: 13
                             height: 13
                             radius: 7
-                            color: "#a0282828"
+                            color: Qt.rgba(1, 1, 1, 0.22)
                             border.color: Qt.rgba(0,0,0,0.2)
                             border.width: 0.5
                         }
@@ -107,25 +114,23 @@ Scope {
                             width: 13
                             height: 13
                             radius: 7
-                            color: "#a0282828"
+                            color: Qt.rgba(1, 1, 1, 0.22)
                             border.color: Qt.rgba(0,0,0,0.2)
                             border.width: 0.5
                         }
                     }
 
-                    
                     Text {
                         anchors.top: parent.top
                         anchors.topMargin: 13
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "About This PC"
+                        text: I18n.tr("About This PC")
                         color: Qt.rgba(1, 1, 1, 0.80)
                         font.pixelSize: 13
                         font.weight: Font.Medium
                         renderType: Text.NativeRendering
                     }
 
-                    
                     VectorImage {
                         id: _deviceImg
                         anchors.top: parent.top
@@ -137,21 +142,19 @@ Scope {
                         preferredRendererType: VectorImage.CurveRenderer
                     }
 
-                    
                     Text {
                         id: _osName
                         anchors.top: _deviceImg.bottom
                         anchors.topMargin: 14
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: _procOS.result !== "" ? _procOS.result : "NixOS"
-                        color: "#ffffff"
+                        text: _procOS.result !== "" ? _procOS.result : I18n.tr("NixOS")
+                        color: Theme.ink(parent, false)
                         font.pixelSize: 22
                         font.weight: Font.Bold
                         font.family: "SF Pro Display"
                         renderType: Text.NativeRendering
                     }
 
-                    
                     Rectangle {
                         id: _sep
                         anchors.top: _osName.bottom
@@ -162,7 +165,6 @@ Scope {
                         color: Qt.rgba(1, 1, 1, 0.10)
                     }
 
-                    
                     Column {
                         id: _infoCol
                         anchors.top: _sep.bottom
@@ -196,7 +198,7 @@ Scope {
                                 Text {
                                     width: root.winWidth - 40 - 80 - 12
                                     text: modelData.v !== "" ? modelData.v : "…"
-                                    color: "#ffffff"
+                                    color: Theme.ink(parent, false)
                                     font.pixelSize: 12
                                     font.family: "SF Pro Display"
                                     renderType: Text.NativeRendering
@@ -207,7 +209,6 @@ Scope {
                         }
                     }
 
-                    
                     Rectangle {
                         id: _moreBtn
                         anchors.top: _infoCol.bottom
@@ -224,8 +225,10 @@ Scope {
 
                         Text {
                             anchors.centerIn: parent
-                            text: "More Info…"
-                            color: "#ffffff"
+                            width: Math.min(implicitWidth, parent.width - 16)
+                            elide: Text.ElideRight
+                            text: I18n.tr("More Info…")
+                            color: Theme.ink(parent, false)
                             font.pixelSize: 12
                             font.family: "SF Pro Display"
                             renderType: Text.NativeRendering
@@ -239,7 +242,6 @@ Scope {
                     }
                 }
 
-                
                 Process {
                     id: _procOS
                     property string result: ""
@@ -275,6 +277,8 @@ Scope {
                     running: true
                     stdout: StdioCollector { onStreamFinished: _procRAM.result = text.trim() }
                 }
+
+                GlassBackdrop { element: "menus" }
             }
         }
     }

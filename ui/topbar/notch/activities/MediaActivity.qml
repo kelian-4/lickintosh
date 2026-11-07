@@ -31,11 +31,11 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: MprisState.hasPlayer ? MprisState.trackTitle : "Aucune lecture en cours"
+                text: MprisState.hasPlayer ? MprisState.trackTitle : I18n.tr("Aucune lecture en cours")
                 color: "#FFFFFF"
                 font.pixelSize: 14
                 font.bold: true
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 elide: Text.ElideRight
             }
             Text {
@@ -43,7 +43,7 @@ Item {
                 text: MprisState.trackArtist
                 color: "#B0B0B0"
                 font.pixelSize: 12
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 elide: Text.ElideRight
                 visible: text !== ""
             }

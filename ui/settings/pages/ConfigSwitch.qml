@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.components
+import qs.services
 
 Item {
     id: root
@@ -36,7 +37,7 @@ Item {
             CFText {
                 text: root.text
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }

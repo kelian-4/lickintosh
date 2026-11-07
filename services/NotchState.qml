@@ -98,7 +98,9 @@ Singleton {
         root._btKnownConnected = nowConnected
     }
 
-    Timer { interval: 1500; running: true; repeat: true; onTriggered: root._checkBluetoothTransitions() }
+    Timer { interval: 1500; running: !GameMode.enabled; repeat: true; onTriggered: root._checkBluetoothTransitions() }
+
+    property bool focusActive: false
 
     readonly property string ambientKind: {
         if (MediaCaptureState.cameraActive) return "capture-camera"
@@ -106,8 +108,8 @@ Singleton {
         if (MprisState.hasPlayer && MprisState.isPlaying) return "media"
         if (TimerState.running)     return "timer"
         if (StopwatchState.running) return "stopwatch"
-        if (root.batteryCharging)   return "battery"
         if (GameMode.enabled)       return "gamemode"
+        if (root.focusActive)       return "focus"
         return "none"
     }
 

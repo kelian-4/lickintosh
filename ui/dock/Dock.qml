@@ -6,15 +6,16 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Io
 import qs.services
+import qs.components.glass
 
 Scope {
     id: dockRoot
 
-    readonly property int  baseIconSize: ShellConfig.options.dockAppearance.iconSize
+    readonly property int  baseIconSize: Math.round(ShellConfig.options.dockAppearance.iconSize * ShellConfig.options.dockAppearance.iconScale)
     readonly property int  dockPadH:     14
     readonly property int  dockPadV:     10
     readonly property int  dockHeight:   baseIconSize + dockPadV * 2 + 12
-    readonly property int  dockRadius:   22
+    readonly property int  dockRadius:   20
     readonly property int  iconSpacing:  8
     readonly property real magScale1:    ShellConfig.options.dockAppearance.magnificationEnabled ? ShellConfig.options.dockAppearance.magnification : 1.0
     readonly property real magScale2:    ShellConfig.options.dockAppearance.magnificationEnabled ? (1.0 + (ShellConfig.options.dockAppearance.magnification - 1.0) * 0.5) : 1.0
@@ -23,6 +24,7 @@ Scope {
 
     property bool pinned:         !ShellConfig.options.dockAppearance.hoverToReveal
     property var  clientList:     []
+    property string _clientsSignature: ""
     property bool fullscreenActive: false
     property var  cycleIndex:     ({})
     property string tooltipText:    ""
@@ -58,7 +60,7 @@ Scope {
         { name: "Settings", cmd: "__settings-app__", icon: "preferences-system", iconPath: "", autostart: false }
     ]
 
-    readonly property string _stateDir:  "$HOME/.config/quickshell/dock"
+    readonly property string _stateDir:  "$HOME/.config/lickintosh/dock"
     readonly property string _statePath: dockRoot._stateDir + "/dock-state.json"
     property bool _stateLoaded: false
 
@@ -82,13 +84,25 @@ Scope {
     }
 
     function resolveIcon(appId) {
-        if (!appId || appId === "") return ""
-        var de = DesktopEntries.heuristicLookup(appId)
-        if (de && de.icon) {
-            var p = Quickshell.iconPath(de.icon, true)
-            if (p !== "") return p
+        return IconResolver.forAppId(appId)
+    }
+
+    function _isThemeName(s) {
+        return !!s && s.charAt(0) !== "/" && s.indexOf("image://") !== 0
+    }
+
+    function pinnedIconFor(entry) {
+        if (dockRoot.pinnedKey(entry) === "settings-app")
+            return Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons_desktop/" + Theme.iconTheme + "/apps/scalable/preferences-system.svg")
+        if (dockRoot._isThemeName(entry.icon)) {
+            var byName = IconResolver.byName(entry.icon)
+            if (byName !== "") return byName
         }
-        return ""
+        var de = entry.cmd ? DesktopEntries.heuristicLookup(entry.cmd) : null
+        var live = IconResolver.forApp(de)
+        if (live !== "") return live
+        if (entry.iconPath) return IconResolver.retheme(entry.iconPath)
+        return IconResolver.generic()
     }
 
     function _findDesktopEntry(name) {
@@ -139,10 +153,8 @@ Scope {
             var ititle = (c.initialTitle || "").trim()
             if (ititle !== "") {
                 var entry = dockRoot._findDesktopEntry(ititle)
-                if (entry && entry.icon) {
-                    var p = Quickshell.iconPath(entry.icon, true)
-                    if (p !== "") return p
-                }
+                var fromEntry = IconResolver.forApp(entry)
+                if (fromEntry !== "") return fromEntry
             }
         }
         return resolveIcon(resolveAppId(c))
@@ -301,6 +313,9 @@ Scope {
                     pinned:       c.pinned === true
                 })
             }
+            var signature = JSON.stringify(result)
+            if (signature === dockRoot._clientsSignature) return
+            dockRoot._clientsSignature = signature
             dockRoot.clientList = result
             dockRoot._rebuildGroupedClients()
         } catch (e) {}
@@ -354,13 +369,18 @@ Scope {
     }
 
     function launchSettingsApp() {
-        console.log("[Settings launch] execDetached, shellDir=", Quickshell.shellDir)
-        Quickshell.execDetached(["quickshell", "-p", Quickshell.shellDir + "/settings.qml"])
+        SettingsLauncher.open("")
+    }
+
+    function pinnedKey(entry) {
+        var cmd = entry.cmd ? entry.cmd.toLowerCase() : ""
+        if (cmd === "__settings-app__" || (cmd === "" && entry.name === "Settings")) return "settings-app"
+        return cmd
     }
 
     function pinnedGroupInstances(entry) {
         if (!entry) return []
-        var cmd    = entry.cmd ? entry.cmd.toLowerCase() : ""
+        var cmd    = dockRoot.pinnedKey(entry)
         var result = []
         for (var i = 0; i < clientList.length; i++) {
             var c     = clientList[i]
@@ -429,7 +449,9 @@ Scope {
         if (idx >= 0) {
             list.splice(idx, 1)
         } else {
-            list.push({ name: dockRoot.menuAppName, cmd: key, icon: "", iconPath: dockRoot.menuIconPath, autostart: false })
+            var de = DesktopEntries.heuristicLookup(key)
+            var themeName = (de && dockRoot._isThemeName(de.icon)) ? de.icon : ""
+            list.push({ name: dockRoot.menuAppName, cmd: key, icon: themeName, iconPath: dockRoot.menuIconPath, autostart: false })
         }
         dockRoot.pinnedApps = list
     }
@@ -447,8 +469,8 @@ Scope {
                       'end)\n'
         var escaped = content.replace(/'/g, "'\\''")
         _autostartWrite.command = ["sh", "-c",
-            "mkdir -p $HOME/.config/quickshell/dock-autostart && printf '%s' '" + escaped +
-            "' > $HOME/.config/quickshell/dock-autostart/dock-autostart.lua"]
+            "mkdir -p $HOME/.config/lickintosh/dock-autostart && printf '%s' '" + escaped +
+            "' > $HOME/.config/lickintosh/dock-autostart/dock-autostart.lua"]
         _autostartWrite.running = true
     }
 
@@ -509,15 +531,8 @@ Scope {
     }
 
     function fileIconPath(entry) {
-        if (entry.isDir) return Quickshell.iconPath("folder", true)
-        var name = entry.path.split("/").pop()
-        var ext  = name.indexOf(".") > 0 ? name.split(".").pop().toLowerCase() : ""
-        var iconName = "text-x-generic"
-        if (ext === "pdf") iconName = "application-pdf"
-        else if (ext === "png" || ext === "jpg" || ext === "jpeg" || ext === "webp") iconName = "image-x-generic"
-        else if (ext === "mp4" || ext === "mkv") iconName = "video-x-generic"
-        else if (ext === "mp3" || ext === "flac") iconName = "audio-x-generic"
-        return Quickshell.iconPath(iconName, true)
+        if (entry.isDir) return IconResolver.forFolder()
+        return IconResolver.forFile(entry.path.split("/").pop())
     }
 
     function emptyTrash() {
@@ -609,6 +624,20 @@ Scope {
 
                 mask: Region { item: dockMouseArea }
 
+                LiquidGlassBackdrop {
+                    id: dockBackdrop
+                    wallpaperPath: GlassWallpaper.path
+                    screenSize: Qt.size(dockWin.screen.width, dockWin.screen.height)
+                    windowPosition: Qt.point(0, dockWin.screen.height - dockWin.height)
+                    captureWindows: ShellConfig.options.glass.captureWindows
+                    captureInterval: ShellConfig.options.glass.captureIntervalMs
+                    windowOpacity: ShellConfig.options.glass.windowOpacity
+                    windowOpacityByClass: ShellConfig.options.glass.windowOpacityByClass
+                    monitorName: dockWin.screen.name
+                    element: "dock"
+                    ready: !Theme.plainSurfaces
+                }
+
                 MouseArea {
                     id: dockMouseArea
                     height: parent.height
@@ -695,19 +724,17 @@ Scope {
                             z:            500
                         }
 
+                        TahoeGlass {
+                            anchors.fill: parent
+                            backdrop:     Theme.plainSurfaces ? null : dockBackdrop
+                            cornerRadius: dockRoot.dockRadius
+                        }
+
                         Rectangle {
                             anchors.fill: parent
                             radius:       dockRoot.dockRadius
-                            color:        "#22ffffff"
-                            border.color: "#38ffffff"
-                            border.width: 1
-                            Rectangle {
-                                anchors {
-                                    top: parent.top; left: parent.left; right: parent.right
-                                    leftMargin: 28; rightMargin: 28; topMargin: 1
-                                }
-                                height: 1; radius: 1; color: "#55ffffff"
-                            }
+                            color:        Theme.surfaceFor("dock")
+                            visible:      Theme.plainSurfaces
                         }
 
                         Row {
@@ -729,12 +756,11 @@ Scope {
                                     required property int index
 
                                     property var    _inst:     dockRoot.pinnedGroupInstances(modelData)
-                                    property string _groupKey: modelData.cmd.toLowerCase()
+                                    property string _groupKey: dockRoot.pinnedKey(modelData)
 
                                     appName:       modelData.name
                                     appCmd:        modelData.cmd
-                                    appIconPath:   modelData.iconPath ? modelData.iconPath
-                                                                       : Quickshell.iconPath(modelData.icon, "application-x-executable")
+                                    appIconPath:   dockRoot.pinnedIconFor(modelData)
                                     instanceCount: _inst.length
                                     iconIndex:     index
                                     totalIcons:    _pinnedRepeater.count + 1 + _activeRepeater.count
@@ -762,7 +788,6 @@ Scope {
                                     }
 
                                     onClicked: {
-                                        console.log("[Dock click]", "name=" + modelData.name, "cmd=" + appCmd, "instLen=" + _inst.length)
                                         if (_inst.length > 0)
                                             dockRoot.cycleWindow(_groupKey, _inst)
                                         else if (appCmd === "__settings-app__" || (appCmd === "" && modelData.name === "Settings"))
@@ -777,7 +802,7 @@ Scope {
                                 id: _activeRepeater
                                 model: {
                                     var pinned = dockRoot.pinnedApps.map(function(a) {
-                                        return a.cmd.toLowerCase()
+                                        return dockRoot.pinnedKey(a)
                                     })
                                     return dockRoot.groupedClients.filter(function(g) {
                                         for (var j = 0; j < pinned.length; j++) {
@@ -861,7 +886,7 @@ Scope {
                                 id: _trashIcon
                                 appName:       "Corbeille"
                                 appCmd:        ""
-                                appIconPath:   Quickshell.iconPath("user-trash", true)
+                                appIconPath:   IconResolver.byName("user-trash")
                                 instanceCount: 0
                                 dockHovered:   _magArea.containsMouse
                                 mouseXInDock:  _magArea.mouseX
@@ -967,7 +992,7 @@ Scope {
                             width:        _globalTipText.implicitWidth + 20
                             height:       28
                             radius:       8
-                            color:        "#E8111111"
+                            color:        Theme.popup("#E8111111")
                             border.color: "#55ffffff"
                             border.width: 1
 
@@ -975,7 +1000,7 @@ Scope {
                                 id: _globalTipText
                                 anchors.centerIn: parent
                                 text:             dockRoot.tooltipText
-                                color:            "#f2f2f2"
+                                color:            Theme.pick(Theme.textPrimary, "#f2f2f2")
                                 font.pixelSize:   12
                                 font.weight:      Font.Medium
                                 renderType:       Text.NativeRendering
@@ -997,7 +1022,6 @@ Scope {
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -1041,7 +1065,7 @@ Scope {
                     width:        204
                     height:       _ctxCol.implicitHeight + 12
                     radius:       10
-                    color:        "#EE181818"
+                    color:        Theme.popup("#EE181818")
                     border.color: "#33ffffff"
                     border.width: 1
                     x: Math.max(4, Math.min(dockRoot.menuX - width / 2, parent.width - width - 4))
@@ -1063,7 +1087,7 @@ Scope {
                         DockMenuItem {
                             id: _optionsItem
                             visible:    dockRoot.menuMode === "app"
-                            label:      "Options"
+                            label:      I18n.tr("Options")
                             hasSubmenu: true
                             onHoveredIn: {
                                 var pt = _optionsItem.mapToItem(null, 0, 0)
@@ -1077,7 +1101,7 @@ Scope {
 
                         DockMenuItem {
                             visible: dockRoot.menuMode === "app"
-                            label:   "Afficher toutes les fenêtres"
+                            label:   I18n.tr("Afficher toutes les fenêtres")
                             enabled: dockRoot.menuInstances.length > 0
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
@@ -1091,7 +1115,7 @@ Scope {
                             visible: dockRoot.menuMode === "app"
                             property bool _isHidden: dockRoot.menuInstances.length > 0 &&
                                                       dockRoot.menuInstances[0].wsName === "special:" + dockRoot.hiddenWorkspaceName(dockRoot.menuGroupKey)
-                            label:   _hideItem._isHidden ? "Afficher" : "Masquer"
+                            label:   _hideItem._isHidden ? I18n.tr("Afficher") : I18n.tr("Masquer")
                             enabled: dockRoot.menuInstances.length > 0
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
@@ -1105,7 +1129,7 @@ Scope {
 
                         DockMenuItem {
                             visible:     dockRoot.menuMode === "app"
-                            label:       "Quitter"
+                            label:       I18n.tr("Quitter")
                             enabled:     dockRoot.menuInstances.length > 0
                             destructive: true
                             onHoveredIn: dockRoot.submenuVisible = false
@@ -1120,7 +1144,7 @@ Scope {
                         DockMenuItem {
                             id: _assignItem
                             visible:    dockRoot.menuMode === "app"
-                            label:      "Assigner à"
+                            label:      I18n.tr("Assigner à")
                             hasSubmenu: true
                             enabled:    dockRoot.menuInstances.length > 0
                             onHoveredIn: {
@@ -1133,7 +1157,7 @@ Scope {
 
                         DockMenuItem {
                             visible: dockRoot.menuMode === "file"
-                            label:   "Ouvrir"
+                            label:   I18n.tr("Ouvrir")
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
                                 Quickshell.execDetached(["xdg-open", dockRoot.menuGroupKey])
@@ -1143,7 +1167,7 @@ Scope {
 
                         DockMenuItem {
                             visible: dockRoot.menuMode === "file"
-                            label:   "Copier le chemin"
+                            label:   I18n.tr("Copier le chemin")
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
                                 dockRoot.copyCommand()
@@ -1155,7 +1179,7 @@ Scope {
 
                         DockMenuItem {
                             visible:     dockRoot.menuMode === "file"
-                            label:       "Retirer du Dock"
+                            label:       I18n.tr("Retirer du Dock")
                             destructive: true
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
@@ -1166,7 +1190,7 @@ Scope {
 
                         DockMenuItem {
                             visible: dockRoot.menuMode === "trash"
-                            label:   "Ouvrir la corbeille"
+                            label:   I18n.tr("Ouvrir la corbeille")
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
                                 Quickshell.execDetached(["dolphin", "trash:/"])
@@ -1178,7 +1202,7 @@ Scope {
 
                         DockMenuItem {
                             visible:     dockRoot.menuMode === "trash"
-                            label:       "Vider la corbeille"
+                            label:       I18n.tr("Vider la corbeille")
                             destructive: true
                             onHoveredIn: dockRoot.submenuVisible = false
                             onActivated: {
@@ -1196,7 +1220,7 @@ Scope {
                     width:        192
                     height:       _subCol.implicitHeight + 12
                     radius:       10
-                    color:        "#EE181818"
+                    color:        Theme.popup("#EE181818")
                     border.color: "#33ffffff"
                     border.width: 1
                     x: {
@@ -1222,7 +1246,7 @@ Scope {
                         DockMenuItem {
                             visible: dockRoot.submenuKind === "options"
                             height:  visible ? 26 : 0
-                            label:   dockRoot.menuIsPinned ? "Retirer du Dock" : "Garder dans le Dock"
+                            label:   dockRoot.menuIsPinned ? I18n.tr("Retirer du Dock") : I18n.tr("Garder dans le Dock")
                             checked: dockRoot.menuIsPinned
                             onActivated: {
                                 dockRoot.toggleKeepInDock()
@@ -1241,7 +1265,7 @@ Scope {
                                 }
                                 return false
                             }
-                            label:   "Ouvrir à la connexion"
+                            label:   I18n.tr("Ouvrir à la connexion")
                             checked: _autostartItem._isAutostart
                             enabled: dockRoot.menuIsPinned && dockRoot.menuGroupKey !== ""
                             onActivated: {
@@ -1253,7 +1277,7 @@ Scope {
                         DockMenuItem {
                             visible: dockRoot.submenuKind === "assign"
                             height:  visible ? 26 : 0
-                            label:   "Tous les bureaux"
+                            label:   I18n.tr("Tous les bureaux")
                             checked: dockRoot.menuInstances.length > 0 && dockRoot.menuInstances[0].pinned === true
                             onActivated: {
                                 dockRoot.assignAllDesktops()
@@ -1264,7 +1288,7 @@ Scope {
                         DockMenuItem {
                             visible: dockRoot.submenuKind === "assign"
                             height:  visible ? 26 : 0
-                            label:   "Ce bureau"
+                            label:   I18n.tr("Ce bureau")
                             checked: !(dockRoot.menuInstances.length > 0 && dockRoot.menuInstances[0].pinned === true)
                             onActivated: {
                                 dockRoot.assignThisDesktop()
@@ -1302,8 +1326,11 @@ Scope {
             anchors {
                 left:           parent.left
                 leftMargin:     10
+                right:          parent.right
+                rightMargin:    menuItem.hasSubmenu ? 24 : 10
                 verticalCenter: parent.verticalCenter
             }
+            elide:          Text.ElideRight
             text:           (menuItem.checked ? "✓  " : "") + menuItem.label
             color:          menuItem.enabled ? (menuItem.destructive ? "#ff6b6b" : "#f2f2f2") : "#66ffffff"
             font.pixelSize: 13
@@ -1318,7 +1345,7 @@ Scope {
                 verticalCenter: parent.verticalCenter
             }
             text:           "›"
-            color:          "#aaffffff"
+            color:          Theme.pick(Theme.textSecondary, "#aaffffff")
             font.pixelSize: 14
             renderType:     Text.NativeRendering
         }
@@ -1446,10 +1473,12 @@ Scope {
             Image {
                 id: _iconImg
                 anchors.fill:    parent
-                anchors.margins: 2
+                anchors.margins: -ShellConfig.options.dockAppearance.iconOverflow
                 source:          iconItem.appIconPath
                 fillMode:        Image.PreserveAspectFit
+                sourceSize:      Qt.size(256, 256)
                 smooth:          true
+                mipmap:          true
                 antialiasing:    true
                 visible:         status === Image.Ready && source !== ""
                 layer.enabled:   ShellConfig.options.dockAppearance.monochromeIcons
@@ -1475,7 +1504,7 @@ Scope {
                     anchors.centerIn: parent
                     text:             iconItem.appName.length > 0
                                       ? iconItem.appName[0].toUpperCase() : "?"
-                    color:            "white"
+                    color: Theme.ink(parent, false)
                     font.pixelSize:   22
                     font.weight:      Font.Bold
                     renderType:       Text.NativeRendering
@@ -1607,7 +1636,7 @@ Scope {
                 model: Math.min(iconItem.instanceCount, 4)
                 delegate: Rectangle {
                     width: 5; height: 5; radius: 2.5
-                    color: "#e8e8e8"; opacity: 0.88
+                    color: Theme.pick(Theme.textPrimary, "#e8e8e8"); opacity: 0.88
                 }
             }
         }

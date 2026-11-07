@@ -3,11 +3,20 @@ import QtQuick.Layouts
 import Quickshell
 import qs.components.glass
 import qs.components
+import qs.services
 
 Item {
     id: root
 
     property bool  visible_: false
+
+    Connections {
+        target: WorkspaceWatcher
+
+        function onChanged() {
+            root.close()
+        }
+    }
     property real  menuX: 0
     property real  menuY: 0
     property var   notification: null
@@ -79,10 +88,10 @@ Item {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Effacer"
+                    text: I18n.tr("Effacer")
                     font.pixelSize: 13
-                    font.family: "SF Pro Rounded"
-                    color: "#ffffff"
+                    font.family: "SF Pro Text"
+                    color: Theme.ink(parent, false)
                     renderType: Text.NativeRendering
                 }
 
@@ -117,10 +126,10 @@ Item {
                             anchors.left: parent.left
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
-                            text: "Rappeler plus tard"
+                            text: I18n.tr("Rappeler plus tard")
                             font.pixelSize: 13
-                            font.family: "SF Pro Rounded"
-                            color: "#ffffff"
+                            font.family: "SF Pro Text"
+                            color: Theme.ink(parent, false)
                             renderType: Text.NativeRendering
                         }
 
@@ -143,10 +152,10 @@ Item {
                             anchors.left: parent.left
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
-                            text: "Options"
+                            text: I18n.tr("Options")
                             font.pixelSize: 13
-                            font.family: "SF Pro Rounded"
-                            color: "#ffffff"
+                            font.family: "SF Pro Text"
+                            color: Theme.ink(parent, false)
                             renderType: Text.NativeRendering
                         }
 
@@ -175,8 +184,8 @@ Item {
                     text: "Rappeler dans " + Math.round(root._remindMinutes) + " min"
                     font.pixelSize: 12
                     font.weight: Font.DemiBold
-                    font.family: "SF Pro Rounded"
-                    color: "#ffffff"
+                    font.family: "SF Pro Text"
+                    color: Theme.ink(parent, false)
                     renderType: Text.NativeRendering
                 }
 
@@ -190,7 +199,7 @@ Item {
                     Rectangle {
                         height: parent.height
                         radius: 3
-                        color: "#ffffff"
+                        color: Theme.ink(parent, false)
                         width: parent.width * ((root._remindMinutes - 1) / 119)
                     }
 
@@ -217,11 +226,11 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Confirmer"
+                        text: I18n.tr("Confirmer")
                         font.pixelSize: 12
                         font.weight: Font.DemiBold
-                        font.family: "SF Pro Rounded"
-                        color: "#ffffff"
+                        font.family: "SF Pro Text"
+                        color: Theme.ink(parent, false)
                         renderType: Text.NativeRendering
                     }
 

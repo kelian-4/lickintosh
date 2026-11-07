@@ -1,107 +1,117 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
+import Quickshell
+import qs.services
 
-// Calqué sur modules/dashboard/dash/Calendar.qml de caelestia : une
-// vraie grille de mois via les contrôles Qt natifs (MonthGrid /
-// DayOfWeekRow), sans dépendance externe (pas de CalDAV/khal — plus
-// simple et plus robuste, cf. retour d'expérience avec la première
-// version basée sur khal qui a été abandonnée).
-Rectangle {
+Item {
     id: root
-    Layout.fillWidth: true
+    Layout.preferredWidth: 168
     Layout.fillHeight: true
-    radius: 12
-    color: "#1A1A1A"
 
-    property date displayDate: new Date()
+    signal activated()
+
     readonly property date today: new Date()
+    readonly property int daySpan: 1
+    readonly property var upcoming: CalendarState.available ? CalendarState.events.slice(0, 2) : []
+
+    function dayAt(offset) {
+        var d = new Date(root.today)
+        d.setDate(d.getDate() + offset)
+        return d
+    }
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 10
-        spacing: 4
+        spacing: 10
+
+        Item { Layout.fillHeight: true }
 
         RowLayout {
             Layout.fillWidth: true
+            spacing: 12
+
             Text {
-                text: "◀"
-                color: "#8A8A8A"; font.pixelSize: 11
-                MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: root.displayDate = new Date(root.displayDate.getFullYear(), root.displayDate.getMonth() - 1, 1) }
+                text: Qt.locale(I18n.lang).standaloneMonthName(root.today.getMonth(), Locale.ShortFormat)
+                color: "#FFFFFF"
+                font.pixelSize: 24
+                font.bold: true
+                font.family: "SF Pro Text"
             }
-            Text {
-                Layout.fillWidth: true
-                horizontalAlignment: Text.AlignHCenter
-                text: Qt.locale("fr_FR").monthName(root.displayDate.getMonth()) + " " + root.displayDate.getFullYear()
-                color: "#FFFFFF"; font.pixelSize: 11; font.bold: true; font.family: "SF Pro Rounded"
-            }
-            Text {
-                text: "▶"
-                color: "#8A8A8A"; font.pixelSize: 11
-                MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: root.displayDate = new Date(root.displayDate.getFullYear(), root.displayDate.getMonth() + 1, 1) }
-            }
-        }
 
-        DayOfWeekRow {
-            Layout.fillWidth: true
-            locale: Qt.locale("fr_FR")
-            delegate: Text {
-                text: model.shortName
-                color: "#5A5A5A"
-                font.pixelSize: 9
-                font.family: "SF Pro Rounded"
-                horizontalAlignment: Text.AlignHCenter
-            }
-        }
+            Repeater {
+                model: root.daySpan * 2 + 1
 
-        MonthGrid {
-            id: grid
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            month: root.displayDate.getMonth()
-            year: root.displayDate.getFullYear()
-            locale: Qt.locale("fr_FR")
+                delegate: ColumnLayout {
+                    required property int index
+                    readonly property date cellDate: root.dayAt(index - root.daySpan)
+                    readonly property bool isToday: index === root.daySpan
+                    readonly property bool isWeekend: cellDate.getDay() === 0 || cellDate.getDay() === 6
 
-            delegate: Item {
-                readonly property bool isToday: model.month === root.today.getMonth()
-                                                 && model.year === root.today.getFullYear()
-                                                 && model.day === root.today.getDate()
-                width: grid.width / 7
-                height: grid.height / 6
+                    spacing: 2
 
-                // Badge hexagonal pour aujourd'hui (au lieu d'un simple
-                // rectangle arrondi), approximation de la forme vue
-                // dans les captures de caelestia.
-                Canvas {
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width, parent.height) - 6
-                    height: width
-                    visible: parent.isToday
-                    onPaint: {
-                        var ctx = getContext("2d")
-                        ctx.reset()
-                        var cx = width / 2, cy = height / 2, r = width / 2
-                        ctx.beginPath()
-                        for (var i = 0; i < 6; i++) {
-                            var angle = Math.PI / 3 * i - Math.PI / 2
-                            var x = cx + r * Math.cos(angle)
-                            var y = cy + r * Math.sin(angle)
-                            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
-                        }
-                        ctx.closePath()
-                        ctx.fillStyle = "#1C7AFF"
-                        ctx.fill()
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: Qt.locale(I18n.lang).standaloneDayName(parent.cellDate.getDay(), Locale.ShortFormat).toUpperCase().replace(".", "")
+                        color: parent.isToday ? Theme.accent : (parent.isWeekend ? "#EC4899" : "#8A8A8A")
+                        font.pixelSize: 10
+                        font.bold: parent.isToday
+                        font.family: "SF Pro Text"
+                    }
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: parent.cellDate.getDate()
+                        color: parent.isToday ? Theme.accent : (parent.isWeekend ? "#EC4899" : "#FFFFFF")
+                        font.pixelSize: parent.isToday ? 20 : 15
+                        font.bold: parent.isToday
+                        font.family: "SF Pro Text"
                     }
                 }
+            }
 
-                Text {
-                    anchors.centerIn: parent
-                    text: model.day
-                    color: model.month === grid.month ? "#FFFFFF" : "#4A4A4A"
-                    font.pixelSize: 9
-                    font.family: "SF Pro Rounded"
+            Item { Layout.fillWidth: true }
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 4
+
+            Text {
+                Layout.fillWidth: true
+                visible: root.upcoming.length === 0
+                text: I18n.tr("Rien de prévu aujourd'hui")
+                color: "#8A8A8A"
+                font.pixelSize: 12
+                font.family: "SF Pro Text"
+                elide: Text.ElideRight
+            }
+
+            Repeater {
+                model: root.upcoming
+
+                delegate: Item {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    implicitHeight: 16
+
+                    Text {
+                        anchors.fill: parent
+                        text: parent.modelData.time + "  " + parent.modelData.title
+                        color: "#C0C0C0"
+                        font.pixelSize: 11
+                        font.family: "SF Pro Text"
+                        elide: Text.ElideRight
+                        verticalAlignment: Text.AlignVCenter
+                    }
                 }
             }
         }
+
+        Item { Layout.fillHeight: true }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.activated()
     }
 }

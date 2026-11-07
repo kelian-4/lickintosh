@@ -7,6 +7,7 @@ import Quickshell.Io
 import Quickshell.Services.Pipewire
 import qs.components.glass
 import qs.components
+import qs.services
 
 Scope {
     id: root
@@ -33,6 +34,18 @@ Scope {
     property string _currentIconL: ""
     property string _currentIconH: ""
     property int    _currentSteps: 10
+
+    readonly property real liveValue: {
+        if (_currentType === "volume") {
+            var sink = Pipewire.defaultAudioSink
+            if (!sink || !sink.audio) return 0
+            return sink.audio.muted ? 0 : sink.audio.volume
+        }
+        if (_currentType === "brightness") return brtValue
+        if (_currentType === "kbdbrt") return kbdBrtValue
+        return _currentValue
+    }
+    readonly property int livePercent: Math.round(Math.max(0, liveValue) * 100)
 
     property real _lastKbdValue: -1.0
     property real _lastBrtValue: -1.0
@@ -94,7 +107,7 @@ Scope {
         _currentType  = "brightness"
         _currentValue = root.brtValue
         _currentLabel = "Luminosité"
-        _currentFill  = "#1C7AFF"
+        _currentFill  = Theme.accent
         _currentIconL = "sun-small.svg"
         _currentIconH = "sun-huge.svg"
         _currentSteps = 10
@@ -133,17 +146,14 @@ Scope {
 
     Process {
         id: _brtRead
-        command: ["sh", "-c",
-            "cat " + root._brtPath + " 2>/dev/null && cat " + root._brtPath.replace("/brightness", "/max_brightness") + " 2>/dev/null"
-        ]
+        command: ["brightnessctl", "-e2", "-m"]
         stdout: StdioCollector {
             onStreamFinished: {
-                var parts = text.trim().split("\n")
-                if (parts.length === 2) {
-                    var cur = parseFloat(parts[0])
-                    var max = parseFloat(parts[1])
-                    if (max > 0) {
-                        var v = cur / max
+                var fields = text.trim().split(",")
+                if (fields.length >= 5) {
+                    var pct = parseFloat(fields[3])
+                    if (isFinite(pct)) {
+                        var v = pct / 100
                         if (Math.abs(v - root._lastBrtValue) > 0.005) {
                             root._lastBrtValue = v
                             root.brtValue = v
@@ -265,6 +275,7 @@ Scope {
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color:         "transparent"
                 exclusiveZone: -1
+                mask:          Region {}
 
                 anchors {
                     top:   true
@@ -273,6 +284,8 @@ Scope {
 
                 implicitWidth:  320
                 implicitHeight: 106
+
+                GlassBackdrop { id: glassBackdrop; element: "osd" }
 
                 Item {
                     id: pill
@@ -302,8 +315,16 @@ Scope {
 
                     transformOrigin: Item.TopRight
 
+                    property bool armed: false
+                    Timer {
+                        interval: 50
+                        running:  true
+                        onTriggered: pill.armed = true
+                    }
+
                     BoxGlass {
                         anchors.fill: parent
+                        backdrop:     glassBackdrop
                         radius:       16
                         color:        "#30000000"
                         light:        "#55ffffff"
@@ -328,7 +349,15 @@ Scope {
                             text:           root._currentLabel
                             font.pixelSize: 12
                             font.weight:    Font.Bold
-                            color:          "#ffffff"
+                            color: Theme.ink(parent, false)
+                        }
+
+                        CFText {
+                            anchors.top:   parent.top
+                            anchors.right: parent.right
+                            text:           root.livePercent + " %"
+                            font.pixelSize: 12
+                            color: Qt.rgba(1, 1, 1, 0.65)
                         }
 
                         Item {
@@ -372,23 +401,20 @@ Scope {
                                     color:        Qt.rgba(1, 1, 1, 0.20)
                                 }
 
+                                property real shown: Math.max(0.0, Math.min(1.0, root.liveValue))
+
+                                Behavior on shown {
+                                    enabled: pill.armed
+                                    SmoothedAnimation { velocity: 3.0 }
+                                }
+
                                 Rectangle {
                                     anchors.left:   parent.left
                                     anchors.top:    parent.top
                                     anchors.bottom: parent.bottom
                                     radius:         3
                                     color:          root._currentFill
-                                    width: {
-                                        var v = Math.max(0.0, Math.min(1.0, root._currentValue))
-                                        return Math.max(6, parent.width * v)
-                                    }
-
-                                    Behavior on width {
-                                        NumberAnimation {
-                                            duration:    90
-                                            easing.type: Easing.OutQuad
-                                        }
-                                    }
+                                    width:          parent.width * parent.shown
                                 }
                             }
                         }
@@ -415,11 +441,12 @@ Scope {
                                         width:   3
                                         height:  3
                                         radius:  1.5
-                                        color: (index + 1) <= Math.round(root._currentValue * root._currentSteps)
+                                        color: (index + 1) <= Math.round(root.liveValue * root._currentSteps)
                                                ? "#ffffffff"
                                                : Qt.rgba(1, 1, 1, 0.28)
 
                                         Behavior on color {
+                                            enabled: pill.armed
                                             ColorAnimation { duration: 80 }
                                         }
                                     }

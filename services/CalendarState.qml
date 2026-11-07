@@ -5,22 +5,13 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-/*
-    Évènements de calendrier via `khal` (CLI CalDAV très répandu sous
-    Linux, généralement couplé à vdirsyncer). Best-effort : si `khal`
-    n'est pas installé/configuré, `available` reste à false et le
-    module se masque dans le dashboard plutôt que d'afficher une
-    erreur. Le parsing de `khal list` est fragile par nature (pas de
-    format stable garanti selon les versions) — ADAPTER la regex dans
-    _parse() si ta version de khal formate différemment.
-*/
 Singleton {
     id: root
 
     reloadableId: "calendarState"
 
     property bool available: false
-    property var events: []   // [{ time, title }]
+    property var events: []
 
     Process {
         id: _detect
@@ -53,7 +44,7 @@ Singleton {
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i].trim()
             if (line.length === 0) continue
-            // Format typique khal : "HH:MM-HH:MM Titre de l'évènement"
+
             var m = line.match(/^(\d{1,2}:\d{2}(?:-\d{1,2}:\d{2})?)\s+(.+)$/)
             if (m) result.push({ time: m[1], title: m[2] })
         }

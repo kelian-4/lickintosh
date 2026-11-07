@@ -5,28 +5,11 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-/*
-    État de santé et de charge de la batterie.
-
-    Contient :
-      - Battery Health (via upower : energy-full / energy-full-design)
-      - Charge Limit (seuil matériel, si le kernel l'expose)
-      - Low Power Mode avec règle conditionnelle (Never/Always/
-        Only on Battery/Only on Power Adapter), simulée par-dessus
-        power-profiles-daemon puisque celui-ci n'a pas cette notion
-        nativement.
-
-    Ne gère PAS l'historique long terme (Battery Level / Screen On
-    Usage) : voir BatteryHistoryState.qml pour ça.
-*/
 Singleton {
     id: root
 
     reloadableId: "batteryHealthState"
 
-    // ---------------------------------------------------------------
-    // Battery Health
-    // ---------------------------------------------------------------
     property real energyFull:       0
     property real energyFullDesign: 0
     readonly property real healthPercent: energyFullDesign > 0
@@ -83,12 +66,6 @@ Singleton {
         }
     }
 
-    // ---------------------------------------------------------------
-    // Charge Limit (seuil matériel)
-    // Chemin standard exposé par certains pilotes (ThinkPad, ASUS,
-    // certains Dell) : /sys/class/power_supply/BAT0/charge_control_end_threshold
-    // Si absent, la fonctionnalité doit rester masquée côté UI.
-    // ---------------------------------------------------------------
     property bool   chargeLimitSupported: false
     property string chargeLimitPath: ""
     property int    chargeLimitValue: 100
@@ -135,13 +112,6 @@ Singleton {
         id: _writeChargeLimit
     }
 
-    // ---------------------------------------------------------------
-    // Low Power Mode avec règle conditionnelle
-    // power-profiles-daemon n'a pas de notion "only on battery" ni
-    // "only on AC" : on la simule nous-mêmes en surveillant l'état
-    // secteur/batterie via upower et en appliquant le profil voulu.
-    // ---------------------------------------------------------------
-    // "never" | "always" | "only-battery" | "only-ac"
     property string lowPowerRule: "never"
     property bool   onBattery: false
 
