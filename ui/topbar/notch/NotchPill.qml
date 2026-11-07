@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
+import QtQuick.VectorImage
 import Quickshell
 import qs.components
 import qs.services
@@ -11,10 +13,14 @@ Item {
     readonly property string kind: NotchState.primaryKind
     readonly property bool hasKind: root.kind !== "none"
 
+    readonly property string themeDir: Quickshell.shellDir + "/assets/icons_desktop/MacTahoe/"
+
     function _batteryIcon() {
         var level = Math.max(0, Math.min(100, Math.round(NotchState.batteryPercent / 10) * 10))
-        return "battery/battery-" + String(level).padStart(3, "0") + "-charging.svg"
+        return root.themeDir + "status/symbolic/battery-level-" + level + "-charging-symbolic.svg"
     }
+
+    readonly property bool themedGlyph: root.kind === "battery" || root.kind === "gamemode"
 
     function _icon(k) {
         switch (k) {
@@ -24,7 +30,8 @@ Item {
             case "notification":   return "notch/bell.svg"
             case "bluetooth":      return "bluetooth/bluetooth.svg"
             case "battery":        return root._batteryIcon()
-            case "gamemode":       return Quickshell.shellDir + "/assets/icons_desktop/MacTahoe/actions/symbolic/gamepad-symbolic.svg"
+            case "gamemode":       return root.themeDir + "actions/symbolic/gamepad-symbolic.svg"
+            case "focus":          return "dnd.svg"
             case "capture-camera": return "notch/camera.svg"
             case "capture-mic":    return "notch/mic.svg"
             default:               return ""
@@ -41,6 +48,7 @@ Item {
             case "bluetooth":      return NotchState.topUrgent ? NotchState.topUrgent.title : I18n.tr("Bluetooth")
             case "battery":        return "Charge · " + NotchState.batteryPercent + "%"
             case "gamemode":       return "Game Mode"
+            case "focus":          return "Focus"
             case "capture-camera": return "Caméra active"
             case "capture-mic":    return "Micro actif"
             default:               return ""
@@ -71,14 +79,29 @@ Item {
         }
 
         CFVI {
-            visible: root.kind !== "media" && root.kind !== "none"
+            visible: root.kind !== "media" && root.kind !== "none" && !root.themedGlyph
             Layout.alignment: Qt.AlignVCenter
             Layout.preferredWidth: 14
             Layout.preferredHeight: 14
             size: 14
             icon: root._icon(root.kind)
-            colorized: root.kind === "gamemode"
-            color: "#ffffff"
+            colorized: root.kind === "focus"
+            color: root.kind === "focus" ? "#BF8AFF" : "#ffffff"
+        }
+
+        VectorImage {
+            visible: root.themedGlyph
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredWidth: 14
+            Layout.preferredHeight: 14
+            source: root.themedGlyph ? "file://" + root._icon(root.kind) : ""
+            preferredRendererType: VectorImage.CurveRenderer
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                brightness: 1.0
+                colorization: 1.0
+                colorizationColor: "#ffffff"
+            }
         }
 
         Text {

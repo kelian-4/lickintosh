@@ -21,7 +21,7 @@ Item {
     readonly property Item registered: GlassRegistry.lookup(QsWindow.window)
     readonly property string element: registered ? registered.element : ""
     property Item backdrop: Theme.useGlass(root) ? registered : null
-    readonly property color effectiveBase: Theme.compositorBlur && Theme.themed(root) ? Theme.surfaceFor(root.element) : root.baseColor
+    readonly property color effectiveBase: Theme.plainSurfaces && Theme.themed(root) ? Theme.surfaceFor(root.element) : root.baseColor
     readonly property bool glassOn: backdrop !== null && backdrop.ready && backdrop.captureSettled
     property point screenOrigin: Qt.point(0, 0)
 

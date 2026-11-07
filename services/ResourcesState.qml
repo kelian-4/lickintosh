@@ -185,7 +185,7 @@ Singleton {
 
     Timer {
         interval: 2000
-        running: true
+        running: !GameMode.enabled
         repeat: true
         triggeredOnStart: true
         onTriggered: {
@@ -199,7 +199,7 @@ Singleton {
 
     Timer {
         interval: 60000
-        running: true
+        running: !GameMode.enabled
         repeat: true
         triggeredOnStart: true
         onTriggered: {
