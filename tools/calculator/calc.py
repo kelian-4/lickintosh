@@ -24,11 +24,12 @@ BOLD = "\033[1m"
 DIM = "\033[2m"
 RED = "\033[31m"
 GREEN = "\033[32m"
+WHITE = "\033[97m"
 CYAN = "\033[36m"
 RESET = "\033[0m"
 
 if not sys.stdout.isatty() or os.environ.get("NO_COLOR"):
-    BOLD = DIM = RED = GREEN = CYAN = RESET = ""
+    BOLD = DIM = RED = GREEN = WHITE = CYAN = RESET = ""
 
 def _read_lang():
     code = ""
@@ -834,7 +835,7 @@ def main():
             sys.exit(1)
         return
 
-    print(DIM + t("calculator, help lists the options, q quits") + RESET)
+    print(WHITE + t("calculator, help lists the options, q quits") + RESET)
     live = termios is not None and sys.stdin.isatty() and sys.stdout.isatty()
     entries = []
     if live:
