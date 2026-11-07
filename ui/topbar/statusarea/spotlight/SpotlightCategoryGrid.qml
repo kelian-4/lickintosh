@@ -1,17 +1,18 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import qs.services
 
 Item {
     id: root
 
-    required property var    items              // liste plate, chaque item a `_category`
-    required property var    categoryOrder       // ordre des catégories pour les pastilles
-    property bool             sectioned: false   // true => "Suggestions" / "Récents" (fichiers)
+    required property var    items
+    required property var    categoryOrder
+    property bool             sectioned: false
     property int              suggestionsCount: 6
     required property string  fontFamily
     required property string  fontFamilyMedium
-    required property string  mode               // "apps" | "files"
+    required property string  mode
 
     signal itemClicked(var data)
 
@@ -57,8 +58,9 @@ Item {
             id: pillLabel
             anchors.centerIn: parent
             text: pill.label
-            color: "#ffffff"
+            color: Theme.ink(parent, false)
             font.family: root.fontFamilyMedium
+            font.weight: Font.Medium
             font.pixelSize: 12
             renderType: Text.NativeRendering
         }
@@ -110,8 +112,8 @@ Item {
 
                 Repeater {
                     model: root.sectioned
-                        ? [ { title: "Suggestions", items: root.filteredItems.slice(0, root.suggestionsCount) },
-                            { title: "Récents",     items: root.filteredItems.slice(root.suggestionsCount) } ]
+                        ? [ { title: I18n.tr("Suggestions"), items: root.filteredItems.slice(0, root.suggestionsCount) },
+                            { title: I18n.tr("Récents"),     items: root.filteredItems.slice(root.suggestionsCount) } ]
                         : [ { title: "", items: root.filteredItems } ]
 
                     delegate: ColumnLayout {
@@ -124,7 +126,7 @@ Item {
                         Text {
                             visible: section.modelData.title !== ""
                             text:    section.modelData.title
-                            color:   "#ffffff"
+                            color: Theme.ink(parent, false)
                             opacity: 0.55
                             font.family:    root.fontFamilyMedium
                             font.pixelSize: 13
@@ -161,7 +163,7 @@ Item {
                                                 if (tile.modelData.isImage && !directLoadFailed) return "file://" + tile.modelData.path
                                                 if (tile.modelData.isWallpaper && !directLoadFailed) return "file://" + tile.modelData.path
                                                 if (tile.modelData.clipImage && !directLoadFailed) return "file://" + tile.modelData.clipImage
-                                                return Quickshell.iconPath(tile.modelData.icon || "image-x-generic", true)
+                                                return IconResolver.byName(tile.modelData.icon || "image-x-generic")
                                             }
                                             fillMode: (tile.modelData.isImage || tile.modelData.isWallpaper || tile.modelData.clipImage) ? Image.PreserveAspectCrop : Image.PreserveAspectFit
                                             sourceSize.width:  112
@@ -174,7 +176,7 @@ Item {
                                             anchors.centerIn: parent
                                             visible: ico.status !== Image.Ready
                                             text:    (tile.modelData.name || tile.modelData.title || "?")[0].toUpperCase()
-                                            color:          "#ffffff"
+                                            color: Theme.ink(parent, false)
                                             font.pixelSize: 20
                                             font.weight:    Font.Bold
                                             renderType:     Text.NativeRendering
@@ -188,7 +190,7 @@ Item {
                                         anchors.right:      parent.right
                                         horizontalAlignment: Text.AlignHCenter
                                         text:           tile.modelData.name || tile.modelData.title || ""
-                                        color:          "#ffffff"
+                                        color: Theme.ink(parent, false)
                                         font.family:    root.fontFamily
                                         font.pixelSize: 11
                                         wrapMode:       Text.WordWrap

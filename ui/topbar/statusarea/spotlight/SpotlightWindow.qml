@@ -31,17 +31,20 @@ Scope {
         }
     }
 
-    readonly property color glassColor: "#c01e1e1e"
-    readonly property color textColor:  "#dfdfdf"
-
-    FontLoader { id: sfRounded;       source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf") }
-    FontLoader { id: sfRoundedMedium; source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/fonts/SFPR/SF-Pro-Rounded-Medium.otf") }
+    readonly property color glassColor: Theme.pick("#c0f2f2f2", "#c01e1e1e")
+    readonly property color textColor:  Theme.pick(Theme.textPrimary, "#dfdfdf")
 
     property var fileIndex:  []
     property bool indexReady: false
 
     function _safeShellPath(p) {
-        return "'" + String(p).replace(/'/g, "'\\''") + "'"
+        var s = String(p)
+        var home = Quickshell.env("HOME") || ""
+        if (home !== "") {
+            if (s === "~") s = home
+            else if (s.indexOf("~/") === 0) s = home + s.slice(1)
+        }
+        return "'" + s.replace(/'/g, "'\\''") + "'"
     }
 
     readonly property string findExcludes: {
@@ -62,6 +65,20 @@ Scope {
         for (var i = 0; i < lines.length; i++) { if (lines[i]) out.push(lines[i]) }
         root.fileIndex  = out
         root.indexReady = true
+    }
+
+    function mergeIncrementalOutput(text) {
+        if (!root.indexReady) return
+        var lines = text.trim().split("\n")
+        var fresh = []
+        var seen = {}
+        for (var i = 0; i < lines.length; i++) {
+            var p = lines[i]
+            if (p && !seen[p]) { seen[p] = true; fresh.push(p) }
+        }
+        if (fresh.length === 0) return
+        var kept = root.fileIndex.filter(function(path) { return !seen[path] })
+        root.fileIndex = fresh.concat(kept)
     }
 
     Process {
@@ -98,11 +115,11 @@ Scope {
             "tmp=$(mktemp); printf '%s\\n' \"$new\" > \"$tmp\"; " +
             "grep -vFxf <(printf '%s\\n' \"$new\") \"$idx\" >> \"$tmp\"; " +
             "mv \"$tmp\" \"$idx\"; " +
-            "fi; " +
-            "cat \"$idx\""
+            "printf '%s\\n' \"$new\"; " +
+            "fi"
         ]
         stdout: StdioCollector { id: incrementalIndexOut }
-        onExited: root.applyIndexOutput(incrementalIndexOut.text)
+        onExited: root.mergeIncrementalOutput(incrementalIndexOut.text)
     }
 
     function startReindex() { indexProc.running = true }
@@ -111,7 +128,7 @@ Scope {
 
     Process {
         id: wallProc
-        running: true
+        running: false
         command: ["sh", "-c", "find " + root._safeShellPath(ShellConfig.options.spotlight.indexing.wallpaperDir) + " -maxdepth 2 -type f \\( -name '*.jpg' -o -name '*.png' -o -name '*.jpeg' -o -name '*.webp' \\) 2>/dev/null | head -40"]
         stdout: StdioCollector { id: wallOut }
         onExited: {
@@ -123,6 +140,17 @@ Scope {
                 out.push({ title: p.split("/").pop(), description: "Prefix: >~ ou >wall | Fond d'écran", path: p, isWallpaper: true })
             }
             root.wallpaperList = out
+
+            if (root.currentWallpaper === "" && out.length > 0) {
+                root.setWallpaper(out[0].path, true)
+            }
+        }
+    }
+
+    Connections {
+        target: ShellConfig
+        function onReadyChanged() {
+            if (ShellConfig.ready) root.refreshWallpaperList()
         }
     }
 
@@ -161,38 +189,29 @@ Scope {
         return out
     }
 
-    property var recentFiles: []
-
-    Process {
-        id: recentXbelProc
-        command: ["bash", "-c",
-            "f=~/.local/share/recently-used.xbel; " +
-            "[ -f \"$f\" ] || exit 0; " +
-            "awk '/<bookmark / { href=\"\"; visited=\"\"; if (match($0, /href=\"[^\"]*\"/)) { href=substr($0, RSTART+6, RLENGTH-7) } if (match($0, /visited=\"[^\"]*\"/)) { visited=substr($0, RSTART+9, RLENGTH-10) } if (href != \"\") print visited \"\\t\" href }' \"$f\" " +
-            "| sort -r | cut -f2- | sed 's#^file://##' " +
-            "| while IFS= read -r p; do printf '%b\\n' \"${p//%/\\\\x}\"; done"
-        ]
-        stdout: StdioCollector { id: recentXbelOut }
-        onExited: {
-            var lines = recentXbelOut.text.trim().split("\n")
-            var out = []
-            for (var i = 0; i < lines.length; i++) { if (lines[i]) out.push(lines[i]) }
-            root.recentFiles = out
-        }
-    }
+    property bool _spotlightLoaded: false
 
     onOpenedChanged: {
         if (root.opened) {
-            recentXbelProc.running = true
+            const wasLoaded = spotlightLoader.item !== null
+            root._spotlightLoaded = true
+            if (wasLoaded) spotlightLoader.item.reopen()
+            RecentFiles.refresh()
             root.refreshClipHistory()
             root.refreshUserActions()
             root.refreshWallpaperList()
+        } else if (spotlightLoader.item) {
+            spotlightLoader.item.closeGracefully()
+        } else {
+            root._spotlightLoaded = false
         }
     }
 
     readonly property string clipDir: "$HOME/.cache/quickshell/spotlight_clip"
 
     Component.onCompleted: {
+        if (ShellConfig.ready) root.refreshWallpaperList()
+
         var textScript =
             "#!/usr/bin/env bash\n" +
             "content=$(cat)\n" +
@@ -303,10 +322,10 @@ Scope {
         { title: "Lock",                 description: "Prefix: > | Verrouiller",              cmd: "hyprlock", icon: "lock.svg", keywords: ["lock", "verrouiller", "verrou"] },
         { title: "Sleep",                description: "Prefix: > | Veille",                   cmd: "systemctl suspend", icon: "indicator.svg", keywords: ["sleep", "veille", "suspend"] },
         { title: "Hibernate",            description: "Prefix: > | Veille prolongée",         cmd: "systemctl hibernate", icon: "system-suspend-hibernate", keywords: ["hibernate", "hiberner", "veille prolongee"] },
-        { title: "Reboot",               description: "Prefix: > | Redémarrer (fermeture propre des apps)", cmd: "hyprshutdown -t 'Redémarrage...' --post-cmd 'systemctl reboot'", icon: "arrow-counterclockwise.svg", keywords: ["reboot", "redemarrer", "restart"] },
-        { title: "Redémarrer vers le BIOS", description: "Prefix: > | Reboot vers le firmware/UEFI (fermeture propre des apps)", cmd: "hyprshutdown -t 'Redémarrage vers le BIOS...' --post-cmd 'systemctl reboot --firmware-setup'", icon: "system-reboot", keywords: ["bios", "uefi", "firmware", "reboot"] },
-        { title: "Shutdown",             description: "Prefix: > | Éteindre (fermeture propre des apps)",   cmd: "hyprshutdown -t 'Extinction...' --post-cmd 'systemctl poweroff'", icon: "system-shutdown", keywords: ["shutdown", "eteindre", "poweroff", "arret"] },
-        { title: "Déconnexion",          description: "Prefix: > | Quitter la session (fermeture propre des apps)", cmd: "hyprshutdown -t 'Déconnexion...'", icon: "system-log-out", keywords: ["logout", "deconnexion", "exit", "session"] },
+        { title: "Reboot",               description: "Prefix: > | Redémarrer (fermeture propre des apps)", cmd: "hyprshutdown -t 'Redémarrage...' --post-cmd 'systemctl reboot'", icon: "arrow-counterclockwise.svg", keywords: ["reboot", "redemarrer", "restart"], powerAction: "reboot" },
+        { title: "Redémarrer vers le BIOS", description: "Prefix: > | Reboot vers le firmware/UEFI (fermeture propre des apps)", cmd: "hyprshutdown -t 'Redémarrage vers le BIOS...' --post-cmd 'systemctl reboot --firmware-setup'", icon: "system-reboot", keywords: ["bios", "uefi", "firmware", "reboot"], powerAction: "bios" },
+        { title: "Shutdown",             description: "Prefix: > | Éteindre (fermeture propre des apps)",   cmd: "hyprshutdown -t 'Extinction...' --post-cmd 'systemctl poweroff'", icon: "system-shutdown", keywords: ["shutdown", "eteindre", "poweroff", "arret"], powerAction: "poweroff" },
+        { title: "Déconnexion",          description: "Prefix: > | Quitter la session (fermeture propre des apps)", cmd: "hyprshutdown -t 'Déconnexion...'", icon: "system-log-out", keywords: ["logout", "deconnexion", "exit", "session"], powerAction: "logout" },
         { title: "Vider le presse-papier", description: "Prefix: > | Efface tout l'historique", cmd: "rm -rf ~/.cache/quickshell/spotlight_clip/*", icon: "edit-clear-all", keywords: ["wipe", "vider", "clipboard", "presse-papier", "clear"] },
         { title: "Fond d'écran aléatoire", description: "Prefix: > | Change le fond d'écran au hasard", icon: "media-playlist-shuffle", randomWallpaper: true, keywords: ["random", "aleatoire", "wallpaper", "hasard", "wall"] },
         { title: "Réindexer les fichiers", description: "Prefix: > | Actualiser l'index de recherche", icon: "view-refresh", reindex: true, keywords: ["reindex", "index", "actualiser", "refresh"] }
@@ -317,7 +336,7 @@ Scope {
     Process {
         id: userActionsProc
         running: true
-        command: ["bash", "-c", "dir=~/.config/quickshell/spotlight/actions; mkdir -p \"$dir\"; find \"$dir\" -maxdepth 1 -type f -executable -printf '%f\\n' 2>/dev/null | sort"]
+        command: ["bash", "-c", "dir=~/.config/lickintosh/spotlight/actions; mkdir -p \"$dir\"; find \"$dir\" -maxdepth 1 -type f -executable -printf '%f\\n' 2>/dev/null | sort"]
         stdout: StdioCollector { id: userActionsOut }
         onExited: {
             var lines = userActionsOut.text.trim().split("\n")
@@ -504,51 +523,11 @@ Scope {
         return Qt.btoa(bytes)
     }
 
-    property var todos: []
+    readonly property var todos: TasksState.tasks
 
-    Process {
-        id: todoLoadProc
-        running: true
-        command: ["bash", "-c", "cat ~/.cache/quickshell/spotlight_todos.json 2>/dev/null || echo '[]'"]
-        stdout: StdioCollector { id: todoLoadOut }
-        onExited: {
-            try { root.todos = JSON.parse(todoLoadOut.text.trim() || "[]") } catch(e) { root.todos = [] }
-        }
-    }
-
-    Process { id: todoSaveProc; command: ["true"] }
-
-    function saveTodos() {
-        var b64 = root.toBase64(JSON.stringify(root.todos))
-        todoSaveProc.command = ["bash", "-c", "mkdir -p ~/.cache/quickshell && echo " + b64 + " | base64 -d > ~/.cache/quickshell/spotlight_todos.json"]
-        todoSaveProc.running = true
-    }
-
-    function addTodo(text) {
-        var list = root.todos.slice()
-        list.unshift({ id: Date.now(), text: text, done: false })
-        root.todos = list
-        root.saveTodos()
-    }
-
-    function toggleTodo(id) {
-        var list = []
-        for (var i = 0; i < root.todos.length; i++) {
-            var t = root.todos[i]
-            list.push(t.id === id ? { id: t.id, text: t.text, done: !t.done } : t)
-        }
-        root.todos = list
-        root.saveTodos()
-    }
-
-    function removeTodo(id) {
-        var list = []
-        for (var i = 0; i < root.todos.length; i++) {
-            if (root.todos[i].id !== id) list.push(root.todos[i])
-        }
-        root.todos = list
-        root.saveTodos()
-    }
+    function addTodo(text)  { TasksState.addTask(text) }
+    function toggleTodo(id) { TasksState.toggleTask(id) }
+    function removeTodo(id) { TasksState.removeTask(id) }
 
     Process { id: shellExecProc; command: ["true"] }
 
@@ -601,20 +580,33 @@ Scope {
 
     Process { id: usageSaveProc; command: ["sh", "-c", "true"] }
 
-    // Wallpaper du bureau : persisté via ShellConfig.options.wallpaper.path
-    // (source de vérité unique, cf. ShellConfig.qml), plus dans un cache
-    // base64 séparé (~/.cache/quickshell/spotlight_wallpaper — ancien
-    // mécanisme, supprimé). currentWallpaper reste une propriété locale
-    // distincte de ShellConfig.options.wallpaper.path pour permettre un
-    // aperçu en direct pendant la navigation dans le picker (persist:
-    // false) sans écrire sur le disque à chaque image survolée — seul
-    // persist: true (sélection confirmée) écrit dans ShellConfig.
-    property string currentWallpaper: ShellConfig.options.wallpaper.path
+    property string previewWallpaper: ""
+    property string nextRandom: ""
+
+    function pickNextRandom() {
+        var pool = root.wallpaperList.filter(function(w) { return w.path !== root.currentWallpaper })
+        root.nextRandom = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)].path : ""
+    }
+
+    onWallpaperListChanged: if (root.nextRandom === "") root.pickNextRandom()
+
+    Binding {
+        target: GlassWallpaper
+        property: "preview"
+        value: root.previewWallpaper
+    }
+
+    readonly property string currentWallpaper: root.previewWallpaper !== ""
+        ? root.previewWallpaper
+        : ShellConfig.options.wallpaper.path
 
     function setWallpaper(path, persist) {
-        root.currentWallpaper = path
         if (persist) {
             ShellConfig.options.wallpaper.path = path
+            root.previewWallpaper = ""
+            root.pickNextRandom()
+        } else {
+            root.previewWallpaper = path
         }
     }
 
@@ -647,6 +639,17 @@ Scope {
                 anchors.fill: parent
             }
 
+            Image {
+                visible: false
+                width: 1
+                height: 1
+                source: root.nextRandom !== "" ? "file://" + root.nextRandom : ""
+                asynchronous: true
+                cache: true
+                sourceSize: Qt.size(bgWin.width * (bgWin.screen?.devicePixelRatio ?? 1),
+                                     bgWin.height * (bgWin.screen?.devicePixelRatio ?? 1))
+            }
+
             Component {
                 id: imgComp
                 Image {
@@ -656,16 +659,7 @@ Scope {
                     source: path !== "" ? "file://" + path : ""
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
-                    // cache: true (plutôt que false comme avant) : cette
-                    // fenêtre reste vivante en permanence, donc rebasculer
-                    // vers un wallpaper déjà vu (ex: annuler un aperçu
-                    // dans le picker) sert depuis le cache Qt au lieu de
-                    // redécoder le fichier. sourceSize borne le décodage
-                    // à la taille d'affichage réelle de cet écran plutôt
-                    // que la résolution native du fichier — c'est ce qui
-                    // coûte le plus cher en temps de décodage, largement
-                    // plus que la lecture disque elle-même (même
-                    // stratégie que CachingImage de caelestia).
+
                     cache: true
                     sourceSize: Qt.size(bgWin.width * (bgWin.screen?.devicePixelRatio ?? 1),
                                          bgWin.height * (bgWin.screen?.devicePixelRatio ?? 1))
@@ -693,7 +687,7 @@ Scope {
 
     Loader {
         id: spotlightLoader
-        active: root.opened
+        active: root._spotlightLoaded
         sourceComponent: Component {
             PanelWindow {
                 id: win
@@ -715,6 +709,10 @@ Scope {
                 anchors { top: true; left: true; right: true; bottom: true }
 
                 property bool   actionsShown:   false
+                property bool   closing:        false
+                readonly property bool splitTarget: actionsShown && !closing
+                property real   splitProgress:  splitTarget ? 1 : 0
+                Behavior on splitProgress { NumberAnimation { duration: win.splitTarget ? splitGlass.totalDuration : splitGlass.totalDuration * 0.7; easing.type: Easing.Linear } }
                 property string selectedAction: ""
                 property string hoveredAction:  ""
                 property int    currentIdx:     0
@@ -733,7 +731,7 @@ Scope {
                         if (win.answers.length > 0) wallPreviewDebounce.trigger(win.answers[win.currentIdx].path)
                     } else {
                         wallPreviewDebounce.stop()
-                        root.currentWallpaper = ShellConfig.options.wallpaper.path
+                        root.previewWallpaper = ""
                     }
                 }
                 onCurrentIdxChanged: {
@@ -869,16 +867,16 @@ Scope {
                                             if (todoRest !== null) {
                                                 var task = todoRest.trim()
                                                 if (task !== "") {
-                                                    out.push({ title: "Ajouter : '" + task + "'", description: "Entrée pour enregistrer", icon: "task-due", isTodoAdd: true, value: task })
+                                                    out.push({ title: "Ajouter : '" + task + "'", description: "Entrée pour enregistrer", icon: "notch/plus-circle.svg", isTodoAdd: true, value: task })
                                                 } else if (root.todos.length === 0) {
-                                                    out.push({ title: "Aucune tâche", description: "Tape du texte après >todo pour en ajouter", icon: "task-due", dummy: true, targetPrefix: ">todo " })
+                                                    out.push({ title: "Aucune tâche", description: "Tape du texte après >todo pour en ajouter", icon: "notch/list.svg", dummy: true, targetPrefix: ">todo " })
                                                 } else {
                                                     for (var ti = 0; ti < root.todos.length; ti++) {
                                                         var td = root.todos[ti]
                                                         out.push({
                                                             title: td.text,
                                                             description: td.done ? "Terminé · Entrée pour supprimer" : "Entrée pour marquer comme terminé",
-                                                            icon: td.done ? "checkbox-checked" : "checkbox",
+                                                            icon: td.done ? "notch/check-circle.svg" : "notch/circle.svg",
                                                             isTodoItem: true,
                                                             todoId: td.id,
                                                             todoDone: td.done
@@ -894,7 +892,7 @@ Scope {
                                                     out.push({ title: "Fonds d'écran",   description: "Prefix: >~ ou >wall",    icon: "image-x-generic",        dummy: true, targetPrefix: ">wall " })
                                                     out.push({ title: "Emoji",           description: "Prefix: >: ou >emoji",   icon: "face-smile",             dummy: true, targetPrefix: ">emoji " })
                                                     out.push({ title: "Commande shell",  description: "Prefix: >$ ou >sh",      icon: "utilities-terminal",     dummy: true, targetPrefix: ">sh " })
-                                                    out.push({ title: "Todo",            description: "Prefix: >+ ou >todo — vide pour voir la liste",    icon: "task-due",               dummy: true, targetPrefix: ">todo " })
+                                                    out.push({ title: "Todo",            description: "Prefix: >+ ou >todo — vide pour voir la liste",    icon: "notch/check-circle.svg",               dummy: true, targetPrefix: ">todo " })
                                                 }
                                                 var sys2 = root.allActions.filter(function(a) {
                                                     if (filter === "") return true
@@ -988,15 +986,10 @@ Scope {
                 function makeFileEntry(p) {
                     var parts = p.split("/")
                     var name  = parts[parts.length - 1]
-                    var ext   = name.indexOf(".") > 0 ? name.split(".").pop().toLowerCase() : ""
                     var cat   = root.categoryForFile(p)
                     return {
                         name: name, title: name, description: p,
-                        icon: ext === "pdf" ? "application-pdf"
-                            : cat === "Images" ? "image-x-generic"
-                            : (ext === "mp4" || ext === "mkv") ? "video-x-generic"
-                            : (ext === "mp3" || ext === "flac") ? "audio-x-generic"
-                            : "text-x-generic",
+                        icon: IconResolver.fileIconName(name),
                         path: p,
                         isImage: cat === "Images",
                         _category: cat
@@ -1008,8 +1001,8 @@ Scope {
                     if (query === "") {
                         var seen = {}
                         var combined = []
-                        for (var ri = 0; ri < root.recentFiles.length; ri++) {
-                            var rp = root.recentFiles[ri]
+                        for (var ri = 0; ri < RecentFiles.files.length; ri++) {
+                            var rp = RecentFiles.files[ri]
                             if (!seen[rp]) { seen[rp] = true; combined.push(rp) }
                         }
                         for (var fi = 0; fi < root.fileIndex.length && combined.length < 150; fi++) {
@@ -1045,6 +1038,7 @@ Scope {
                 }
 
                 function doClose() {
+                    win.closing      = true
                     searchField.text = ""
                     actionsShown     = false
                     hoveredAction    = ""
@@ -1053,9 +1047,21 @@ Scope {
                     fileAnswers      = []
                     clipAnswers      = []
                     root.closeRequested()
+                    root._spotlightLoaded = false
                 }
 
-                function closeGracefully() { hideAnim.start() }
+                function closeGracefully() {
+                    if (win.closing) return
+                    win.closing = true
+                    showAnim.stop()
+                    hideAnim.start()
+                }
+
+                function reopen() {
+                    win.closing = false
+                    hideAnim.stop()
+                    showAnim.start()
+                }
 
                 function refreshClipboard(query) {
                     var q = query.toLowerCase()
@@ -1108,35 +1114,39 @@ Scope {
 
                 SequentialAnimation {
                     id: showAnim
-                    ParallelAnimation {
-                        PropertyAnimation { target: bgPanel; property: "opacity";  from: 0;   to: 1;   duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 }
-                        PropertyAnimation { target: bgPanel; property: "bgScaleX"; from: 1.3; to: 1.0; duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 }
-                    }
+                    PropertyAnimation { target: bgPanel; property: "opacity"; from: 0; to: 1; duration: ShellMotion.enter(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
                 }
                 SequentialAnimation {
                     id: hideAnim
-                    ParallelAnimation {
-                        PropertyAnimation { target: bgPanel; property: "opacity";  from: 1; to: 0;   duration: 200 }
-                        PropertyAnimation { target: bgPanel; property: "bgScaleX"; from: 1; to: 1.1; duration: 130 }
-                    }
+                    PauseAnimation { duration: win.splitProgress > 0.02 ? splitGlass.totalDuration * 0.4 : 0 }
+                    PropertyAnimation { target: bgPanel; property: "opacity"; to: 0; duration: ShellMotion.exit(1.5); easing.type: Easing.InOutCubic }
                     ScriptAction { script: win.doClose() }
                 }
 
-                MouseArea { anchors.fill: parent; onClicked: hideAnim.start() }
+                MouseArea { anchors.fill: parent; onClicked: win.closeGracefully() }
+
+                SplitGlass {
+                    id: splitGlass
+                    progress: win.splitProgress
+                    bar: Qt.rect(bgPanel.x, bgPanel.y, bgPanel.width, bgPanel.height)
+                    barRadius: bgPanel.radius
+                    bubbleCenterY: bgPanel.y + 32
+                    rightEdge: win.width / 2 + 442
+                    baseColor: root.glassColor
+                    rimColor: Qt.rgba(1, 1, 1, 0.3)
+                    opacity: bgPanel.opacity
+                }
 
                 BoxGlass {
                     id: bgPanel
-                    property real bgScaleX: 1.0
                     z: 1; opacity: 0
                     anchors.top:              parent.top
                     anchors.topMargin:        200
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: (win.gridMode || win.showingShellOutput) ? 680 : (win.actionsShown ? 340 : 540)
-                    Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutBack; easing.overshoot: 2 } }
+                    Behavior on width { NumberAnimation { duration: ShellMotion.split(1.5); easing.type: Easing.InOutCubic } }
                     implicitHeight: panelCol.implicitHeight + 8
-                    radius: 30; color: root.glassColor; rimStrength: 1.7
-                    light: "#20ffffff"; lightDir: Qt.vector2d(1, 1); layer.enabled: true
-                    transform: Scale { xScale: bgPanel.bgScaleX; origin.x: bgPanel.width / 2 }
+                    radius: 30; transparent: true; highlightEnabled: false; layer.enabled: true
 
                     MouseArea {
                         anchors.fill: parent
@@ -1186,7 +1196,7 @@ Scope {
                                     anchors.leftMargin:     48
                                     anchors.right:          parent.right
                                     anchors.rightMargin:    8
-                                    font.family:    sfRoundedMedium.name
+                                    font.family:    "SF Pro Text"
                                     font.pixelSize: 26
                                     font.weight:    Font.Medium
                                     color:          root.textColor
@@ -1217,7 +1227,7 @@ Scope {
                                     visible: text !== "" && searchField.activeFocus
                                     color:   root.textColor
                                     opacity: 0.35
-                                    font.family:    sfRoundedMedium.name
+                                    font.family:    "SF Pro Text"
                                     font.pixelSize: 26
                                     font.weight:    Font.Medium
                                     renderType:     Text.NativeRendering
@@ -1238,8 +1248,9 @@ Scope {
                                         text: "—  " + win.topHitLabel
                                         color: root.textColor
                                         opacity: 0.7
-                                        font.family:    sfRoundedMedium.name
+                                        font.family:    "SF Pro Text"
                                         font.pixelSize: 13
+                                        font.weight:    Font.Medium
                                         renderType:     Text.NativeRendering
                                     }
                                 }
@@ -1249,8 +1260,9 @@ Scope {
                                     anchors.fill:        parent
                                     anchors.leftMargin:  48
                                     anchors.rightMargin: 14
-                                    font.family:         sfRoundedMedium.name
+                                    font.family:         "SF Pro Text"
                                     font.pixelSize:      26
+                                    font.weight:         Font.Medium
                                     color:               root.textColor
                                     renderType:          Text.NativeRendering
                                     background:          Item {}
@@ -1288,7 +1300,7 @@ Scope {
                                     Keys.onPressed: function(event) {
                                         if (event.key === Qt.Key_Escape) {
                                             if (win.showingShellOutput) { win.showingShellOutput = false; event.accepted = true; return }
-                                            hideAnim.start(); event.accepted = true; return
+                                            win.closeGracefully(); event.accepted = true; return
                                         }
                                         if (event.key === Qt.Key_Tab) {
                                             var t = searchField.text
@@ -1337,7 +1349,7 @@ Scope {
                                     : win.gridMode
                                         ? 480
                                         : (win.answers.length > 0 ? Math.min(400, results.implicitHeight + 20) : 0)
-                                Behavior on Layout.preferredHeight { NumberAnimation { duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 } }
+                                Behavior on Layout.preferredHeight { NumberAnimation { duration: ShellMotion.spatial(0.8); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                                 clip: true
 
                                 SpotlightCategoryGrid {
@@ -1349,9 +1361,9 @@ Scope {
                                     categoryOrder: win.selectedAction === "applications" ? root.appCategoryOrder : root.fileCategoryOrder
                                     sectioned:     win.selectedAction === "files"
                                     mode:          win.selectedAction === "applications" ? "apps" : "files"
-                                    fontFamily:       sfRounded.name
-                                    fontFamilyMedium: sfRoundedMedium.name
-                                    onItemClicked: function(data) { root.recordAppUsage(data); hideAnim.start() }
+                                    fontFamily:       "SF Pro Text"
+                                    fontFamilyMedium: "SF Pro Text"
+                                    onItemClicked: function(data) { root.recordAppUsage(data); win.closeGracefully() }
                                 }
 
                                 SpotlightResults {
@@ -1360,34 +1372,34 @@ Scope {
                                     visible: !win.gridMode && !win.showingShellOutput
                                     searchText:       searchField.text
                                     answers:          win.answers
-                                    fontFamily:       sfRounded.name
-                                    fontFamilyMedium: sfRoundedMedium.name
+                                    fontFamily:       "SF Pro Text"
+                                    fontFamilyMedium: "SF Pro Text"
                                     currentIdx:       win.currentIdx
                                     showWhenEmpty:    win.selectedAction === "clipboard"
                                     sectioned:        win.selectedAction === "search"
                                     onHoveredIdx:     function(idx) { win.currentIdx = idx }
                                     onItemClicked:    function(data) {
                                         if (data.isWallpaper) { root.setWallpaper(data.path, true) } else { root.recordAppUsage(data) }
-                                        if (data.instantClose) { win.doClose() } else { hideAnim.start() }
+                                        if (data.instantClose) { win.doClose() } else { win.closeGracefully() }
                                     }
                                     onReindexRequested: root.startReindex()
                                     onShellCmdRequested: function(cmd) {
                                         if (/^\s*sudo\b/.test(cmd)) {
                                             root.runShellCommand(cmd)
-                                            hideAnim.start()
+                                            win.closeGracefully()
                                         } else {
                                             win.runInlineShell(cmd)
                                         }
                                     }
-                                    onTodoAddRequested: function(text) { root.addTodo(text); hideAnim.start() }
+                                    onTodoAddRequested: function(text) { root.addTodo(text); win.closeGracefully() }
                                     onTodoItemActivated: function(id, done) {
                                         if (done) root.removeTodo(id); else root.toggleTodo(id)
                                     }
                                     onRandomWallpaperRequested: {
-                                        if (root.wallpaperList.length > 0) {
-                                            var pick = root.wallpaperList[Math.floor(Math.random() * root.wallpaperList.length)]
-                                            root.setWallpaper(pick.path, true)
-                                        }
+                                        if (root.nextRandom === "")
+                                            root.pickNextRandom()
+                                        if (root.nextRandom !== "")
+                                            root.setWallpaper(root.nextRandom, true)
                                     }
                                 }
 
@@ -1404,8 +1416,8 @@ Scope {
                                         Text {
                                             Layout.fillWidth: true
                                             text: "$ " + win.shellOutputCmd
-                                            color: "#ffffff"
-                                            font.family: sfRoundedMedium.name
+                                            color: Theme.ink(parent, false)
+                                            font.family: "SF Pro Text"
                                             font.pixelSize: 13
                                             font.weight: Font.DemiBold
                                             elide: Text.ElideRight
@@ -1420,7 +1432,7 @@ Scope {
                                                 id: copyLabel
                                                 anchors.centerIn: parent
                                                 text: "Copier"
-                                                color: "#ffffff"
+                                                color: Theme.ink(parent, false)
                                                 opacity: 0.75
                                                 font.pixelSize: 11
                                             }
@@ -1440,7 +1452,7 @@ Scope {
                                                 id: closeLabel
                                                 anchors.centerIn: parent
                                                 text: "Fermer (Échap)"
-                                                color: "#ffffff"
+                                                color: Theme.ink(parent, false)
                                                 opacity: 0.75
                                                 font.pixelSize: 11
                                             }
@@ -1471,8 +1483,8 @@ Scope {
                                                 id: outputText
                                                 width: parent.width
                                                 text: win.shellOutput
-                                                color: "#ffffff"
-                                                font.family: "monospace"
+                                                color: Theme.ink(parent, false)
+                                                font.family: "SF Mono"
                                                 font.pixelSize: 12
                                                 wrapMode: Text.Wrap
                                                 textFormat: Text.PlainText
@@ -1487,39 +1499,32 @@ Scope {
 
                 Item {
                     anchors.fill: parent
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:0;action:"applications";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/applications.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:1;action:"files";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/files.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:2;action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
-                    SpotlightActionBtn { anchors.top:parent.top;anchors.topMargin:203;position:3;iconSize:36;action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");actionsShown:win.actionsShown;isOpen:root.opened;screenW:win.screen.width;glassColor:root.glassColor;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    opacity: bgPanel.opacity
+                    SpotlightActionBtn { bud:splitGlass.buds[0];action:"applications";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/applications.svg");textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { bud:splitGlass.buds[1];action:"files";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/files.svg");textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { bud:splitGlass.buds[2];action:"actions";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/actions.svg");textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
+                    SpotlightActionBtn { bud:splitGlass.buds[3];action:"clipboard";iconSrc:Qt.resolvedUrl(Quickshell.shellDir+"/assets/icons/spotlight/clipboard.svg");iconSize:36;textColor:root.textColor;onHovered:function(a){win.hoveredAction=a};onSelected:function(a){win.clickAction(a)} }
                 }
+
+                GlassBackdrop { element: "spotlight" }
             }
         }
     }
 
     component SpotlightActionBtn: Item {
         id: btn
-        required property int    position
         required property string action
         required property url    iconSrc
-        required property bool   actionsShown
-        required property bool   isOpen
-        required property color  glassColor
+        required property var    bud
         required property color  textColor
-        required property real   screenW
+        readonly property bool   active: btn.bud.t > 0.9
         property int iconSize: 30
         signal hovered(string action)
         signal selected(string action)
         width: 58; height: 58
-        x: btn.screenW / 2 + 170 + 10 + (68 * btn.position)
-        BoxGlass {
-            anchors.fill:parent;radius:30;color:btn.glassColor;rimStrength:0.2
-            light:"#20ffffff";lightDir:Qt.vector2d(1,1);layer.enabled:true
-            scale:   btn.actionsShown && btn.isOpen ? 1.0 : 0.0
-            opacity: btn.actionsShown && btn.isOpen ? 1.0 : 0.0
-            Behavior on scale   { NumberAnimation { duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1 } }
-            Behavior on opacity { NumberAnimation { duration: 200 } }
-            VectorImage { anchors.centerIn:parent;width:btn.iconSize;height:btn.iconSize;source:btn.iconSrc;preferredRendererType:VectorImage.CurveRenderer;layer.enabled:true;layer.effect:MultiEffect{colorization:1;colorizationColor:btn.textColor} }
-        }
-        MouseArea { anchors.fill:parent;enabled:btn.actionsShown&&btn.isOpen;hoverEnabled:true;cursorShape:Qt.PointingHandCursor;onEntered:btn.hovered(btn.actionsShown&&btn.isOpen?btn.action:"");onExited:btn.hovered("");onClicked:btn.selected(btn.action) }
+        x: btn.bud.x - btn.width / 2
+        y: btn.bud.y - btn.height / 2
+        VectorImage { anchors.centerIn:parent;width:btn.iconSize;height:btn.iconSize;opacity:Math.max(0, Math.min(1, (btn.bud.r / 29 - 0.7) / 0.3));source:btn.iconSrc;preferredRendererType:VectorImage.CurveRenderer;layer.enabled:true;layer.effect:MultiEffect{colorization:1;colorizationColor:btn.textColor} }
+        MouseArea { anchors.fill:parent;enabled:btn.active;hoverEnabled:true;cursorShape:Qt.PointingHandCursor;onEntered:btn.hovered(btn.active?btn.action:"");onExited:btn.hovered("");onClicked:btn.selected(btn.action) }
     }
 }

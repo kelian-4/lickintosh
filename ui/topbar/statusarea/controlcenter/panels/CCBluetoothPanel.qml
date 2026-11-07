@@ -53,7 +53,7 @@ Item {
             height: 54
 
             CFText {
-                text:           "Bluetooth"
+                text:           I18n.tr("Bluetooth")
                 font.weight:    Font.Bold
                 font.pixelSize: 18
                 anchors.left:        parent.left
@@ -102,7 +102,7 @@ Item {
                     radius: 2
                     color: "#50ffffff"
                     opacity: _btVbar.pressed ? 0.9 : (_btVbar.hovered ? 0.7 : 0.0)
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75) } }
                 }
                 background: Item {}
             }
@@ -113,10 +113,10 @@ Item {
                 spacing: 0
 
                 CFText {
-                    text:           "Mes appareils"
+                    text:           I18n.tr("Mes appareils")
                     font.pixelSize: 13
                     font.weight:    Font.Bold
-                    color:          "#fff"
+                    color: Theme.ink(parent, false)
                     visible:        root._devices.some(function(d) { return d.paired })
                     leftPadding:    20
                     bottomPadding:  4
@@ -133,10 +133,10 @@ Item {
                 Item { width: parent.width; height: 8 }
 
                 CFText {
-                    text:          "Autres appareils"
+                    text:          I18n.tr("Autres appareils")
                     font.pixelSize: 13
                     font.weight:    Font.Bold
-                    color:          "#fff"
+                    color: Theme.ink(parent, false)
                     visible:        root._devices.some(function(d) { return !d.paired })
                     leftPadding:    20
                     bottomPadding:  4
@@ -168,13 +168,22 @@ Item {
             visible: root._btOn
 
             CFText {
-                text:           "Paramètres Bluetooth…"
+                text:           I18n.tr("Paramètres Bluetooth…")
                 font.pixelSize: 14
                 font.weight:    Font.Bold
-                color:          "#fff"
+                color: Theme.ink(parent, false)
                 anchors.left:        parent.left
                 anchors.leftMargin:  20
                 anchors.verticalCenter: parent.verticalCenter
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape:  Qt.PointingHandCursor
+                onClicked: {
+                    SettingsLauncher.open("BluetoothPage")
+                    root.closeRequested()
+                }
             }
         }
     }
@@ -214,7 +223,7 @@ Item {
                     anchors.centerIn: parent
                     icon:  _dr.modelData !== null ? BluetoothState.deviceIcon(_dr.modelData) : "bluetooth/bluetooth.svg"
                     size:  root.iconSize
-                    color: _dr.modelData !== null && _dr.modelData.connected ? "#1C7AFF" : "#fff"
+                    color: _dr.modelData !== null && _dr.modelData.connected ? Theme.accent : "#fff"
                 }
             }
 
@@ -222,7 +231,7 @@ Item {
                 text:           _dr.modelData !== null ? _dr.modelData.name : ""
                 font.pixelSize: 14
                 font.weight:    Font.Bold
-                color:          "#fff"
+                color: Theme.ink(parent, false)
                 Layout.fillWidth: true
                 elide:            Text.ElideRight
             }
@@ -231,7 +240,7 @@ Item {
                 text:           _dr.modelData !== null ? BluetoothState.statusText(_dr.modelData) : ""
                 font.pixelSize: 12
                 font.weight:    Font.Bold
-                color:          "#fff"
+                color: Theme.ink(parent, false)
                 visible:        _dr._connecting || _dr._disconnecting || _dr._pairing
             }
 
@@ -245,7 +254,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     text:           parent._pct
                     font.weight:    Font.Bold
-                    color:          "#fff"
+                    color: Theme.ink(parent, false)
                     font.pixelSize: 16
                 }
 
@@ -253,7 +262,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     icon:  parent._battIcon
                     size:  26
-                    color: "#fff"
+                    color: Theme.ink(parent, false)
                 }
             }
         }
@@ -338,7 +347,7 @@ Item {
             y: root._ctxY
             width: 170
             radius: 10
-            color: "#e6202020"
+            color: Theme.popup("#e6202020")
             border.color: "#20ffffff"
             border.width: 1
             implicitHeight: _ctxCol.implicitHeight + 8
@@ -353,7 +362,7 @@ Item {
                 spacing: 2
 
                 CtxItem {
-                    label: root._ctxDevice && root._ctxDevice.connected ? "Déconnecter" : "Connecter"
+                    label: root._ctxDevice && root._ctxDevice.connected ? I18n.tr("Déconnecter") : I18n.tr("Connecter")
                     onActivated: {
                         if (!root._ctxDevice) return
                         BluetoothState.toggleConnection(root._ctxDevice)
@@ -363,7 +372,7 @@ Item {
                 CtxItem {
                     visible: root._ctxDevice && root._ctxDevice.paired
                     height: visible ? 32 : 0
-                    label: "Supprimer"
+                    label: I18n.tr("Supprimer")
                     destructive: true
                     onActivated: {
                         if (root._ctxDevice) {

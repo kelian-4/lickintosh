@@ -6,6 +6,7 @@ import Quickshell.Hyprland
 import qs.components.glass
 import qs.components
 import qs.ui.topbar.statusarea.notifcenter
+import qs.services
 
 Scope {
     id: root
@@ -36,6 +37,7 @@ Scope {
                 WlrLayershell.layer:         WlrLayer.Overlay
                 color:         "transparent"
                 exclusiveZone: -1
+                mask:          Region { item: _col }
                 anchors { top: true; right: true }
 
                 implicitWidth:  root.popupWidth + root.rightMargin
@@ -183,8 +185,8 @@ Scope {
                                             text:            wrap.myNotif.summary
                                             font.pixelSize:  14
                                             font.weight:     Font.Bold
-                                            font.family:     "SF Pro Rounded"
-                                            color:           "#ffffff"
+                                            font.family:     "SF Pro Text"
+                                            color: Theme.ink(parent, false)
                                             elide:           Text.ElideRight
                                             renderType:      Text.NativeRendering
                                         }
@@ -194,7 +196,7 @@ Scope {
                                             visible:          wrap.myNotif.body !== ""
                                             text:             wrap.myNotif.body
                                             font.pixelSize:   12
-                                            font.family:      "SF Pro Rounded"
+                                            font.family:      "SF Pro Text"
                                             color:            Qt.rgba(1, 1, 1, 0.72)
                                             wrapMode:         Text.Wrap
                                             maximumLineCount: 2
@@ -202,11 +204,42 @@ Scope {
                                             renderType:       Text.NativeRendering
                                         }
                                     }
+
+                                    MouseArea {
+                                        width:       18
+                                        height:      18
+                                        Layout.alignment: Qt.AlignTop
+                                        acceptedButtons: Qt.LeftButton
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onEntered: NotifService.stopGroupTimer()
+                                        onExited:  NotifService.restartGroupTimer()
+                                        onClicked: wrap.dismiss()
+
+                                        Rectangle {
+                                            anchors.centerIn: parent
+                                            width:  15
+                                            height: 15
+                                            radius: 8
+                                            color:  Qt.rgba(1, 1, 1, 0.12)
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text:           "×"
+                                                font.pixelSize: 12
+                                                font.family:    "SF Pro Text"
+                                                color:          Qt.rgba(1, 1, 1, 0.70)
+                                                renderType:     Text.NativeRendering
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
+                GlassBackdrop { element: "notifpopup" }
             }
         }
     }

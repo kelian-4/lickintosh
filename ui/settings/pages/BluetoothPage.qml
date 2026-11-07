@@ -16,13 +16,12 @@ ContentPage {
     Component.onCompleted: BluetoothState.setDiscovering(true)
     Component.onDestruction: BluetoothState.setDiscovering(false)
 
-    // ---------------- Bluetooth : toggle + description ----------------
     ContentSection {
         title: ""
 
         ConfigSwitch {
-            text: "Bluetooth"
-            description: "Se connecter à des accessoires pour diffuser de la musique, saisir du texte, jouer et bien plus encore."
+            text: I18n.tr("Bluetooth")
+            description: I18n.tr("Se connecter à des accessoires pour diffuser de la musique, saisir du texte, jouer et bien plus encore.")
             checked: BluetoothState.enabled
             onToggled: function(value) {
                 if (BluetoothState.adapter) BluetoothState.adapter.enabled = value
@@ -30,9 +29,8 @@ ContentPage {
         }
     }
 
-    // ---------------- Mes appareils ----------------
     ContentSection {
-        title: "Mes appareils"
+        title: I18n.tr("Mes appareils")
         visible: BluetoothState.enabled && BluetoothState.pairedDevices.length > 0
 
         Repeater {
@@ -45,9 +43,8 @@ ContentPage {
         }
     }
 
-    // ---------------- Appareils à proximité ----------------
     ContentSection {
-        title: "Appareils à proximité"
+        title: I18n.tr("Appareils à proximité")
         visible: BluetoothState.enabled
 
         Repeater {
@@ -70,10 +67,11 @@ ContentPage {
             }
 
             CFText {
-                text: BluetoothState.isScanning ? "Recherche…" : "Aucun appareil trouvé"
+                text: BluetoothState.isScanning ? I18n.tr("Recherche…") : I18n.tr("Aucun appareil trouvé")
                 font.pixelSize: 13
                 gray: true
                 Layout.fillWidth: true
+                elide: Text.ElideRight
             }
 
             Rectangle {
@@ -89,9 +87,9 @@ ContentPage {
 
                 CFText {
                     anchors.centerIn: parent
-                    text: "Rechercher"
+                    text: I18n.tr("Rechercher")
                     font.pixelSize: 11
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {
@@ -155,7 +153,7 @@ ContentPage {
                     anchors.centerIn: parent
                     icon: _dr.dev ? BluetoothState.deviceIcon(_dr.dev) : "bluetooth/bluetooth.svg"
                     size: root.iconSize
-                    color: _dr.dev && _dr.dev.connected ? "#1C7AFF" : "#fff"
+                    color: _dr.dev && _dr.dev.connected ? Theme.accent : "#fff"
                 }
             }
 
@@ -166,7 +164,7 @@ ContentPage {
                 CFText {
                     text: _dr.dev ? _dr.dev.name : ""
                     font.pixelSize: 14
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                     width: parent.width
                 }
@@ -210,9 +208,9 @@ ContentPage {
 
                 CFText {
                     anchors.centerIn: parent
-                    text: "Options…"
+                    text: I18n.tr("Options…")
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {
@@ -309,7 +307,7 @@ ContentPage {
             y: root._ctxY
             width: 170
             radius: 10
-            color: "#e6202020"
+            color: Theme.popup("#e6202020")
             border.color: "#20ffffff"
             border.width: 1
             implicitHeight: _ctxCol.implicitHeight + 8
@@ -324,7 +322,7 @@ ContentPage {
                 spacing: 2
 
                 CtxItem {
-                    label: root._ctxDevice && root._ctxDevice.connected ? "Déconnecter" : "Connecter"
+                    label: root._ctxDevice && root._ctxDevice.connected ? I18n.tr("Déconnecter") : I18n.tr("Connecter")
                     onActivated: {
                         if (!root._ctxDevice) return
                         BluetoothState.toggleConnection(root._ctxDevice)
@@ -334,7 +332,7 @@ ContentPage {
                 CtxItem {
                     visible: root._ctxDevice && root._ctxDevice.paired
                     height: visible ? 32 : 0
-                    label: "Supprimer"
+                    label: I18n.tr("Supprimer")
                     destructive: true
                     onActivated: {
                         if (root._ctxDevice) {

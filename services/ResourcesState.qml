@@ -5,14 +5,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-/*
-    Équivalent des services natifs C++ de caelestia (plugin/src/Caelestia/
-    Services/{cpu,memory,storage,network}.hpp) — mêmes définitions
-    (cpu = usage instantané en %, memory = used/total en %, storage =
-    usage du disque racine en %, network = débit instantané + totaux),
-    réimplémenté en QML/bash via /proc, df, faute de plugin natif
-    équivalent dans ce projet.
-*/
 Singleton {
     id: root
 
@@ -37,10 +29,41 @@ Singleton {
     property real netTotalDownGb: 0
     property real netTotalUpGb:   0
 
-    property var _prevCpu: null // { total, idle }
-    property var _prevNet: null // { rx, tx, t }
+    property var cpuHistory: []
+    property var memoryHistory: []
+    property var storageHistory: []
+    property var batteryHistory: []
+    property var topMemory: []
+    property int topMemoryWatchers: 0
 
-    // ---- CPU ----
+    function _pushHistory(list, value) {
+        var next = list.concat([value])
+        return next.length > 40 ? next.slice(next.length - 40) : next
+    }
+
+    Process {
+        id: _topProc
+        command: ["sh", "-c", "ps -eo comm=,rss= --sort=-rss | head -n 60"]
+        stdout: StdioCollector { onStreamFinished: root._parseTop(text) }
+    }
+
+    function _parseTop(raw) {
+        var sums = {}
+        var lines = raw.trim().split("\n")
+        for (var i = 0; i < lines.length; i++) {
+            var m = lines[i].trim().match(/^(.+?)\s+(\d+)$/)
+            if (!m) continue
+            sums[m[1]] = (sums[m[1]] || 0) + Number(m[2])
+        }
+        var list = []
+        for (var name in sums) list.push({ name: name, mb: sums[name] / 1024 })
+        list.sort(function(a, b) { return b.mb - a.mb })
+        root.topMemory = list.slice(0, 6)
+    }
+
+    property var _prevCpu: null
+    property var _prevNet: null
+
     Process {
         id: _cpuProc
         command: ["sh", "-c", "head -n1 /proc/stat"]
@@ -55,7 +78,10 @@ Singleton {
         if (root._prevCpu) {
             var deltaTotal = total - root._prevCpu.total
             var deltaIdle  = idle  - root._prevCpu.idle
-            if (deltaTotal > 0) root.cpuPercent = Math.max(0, Math.min(100, 100 * (1 - deltaIdle / deltaTotal)))
+            if (deltaTotal > 0) {
+                root.cpuPercent = Math.max(0, Math.min(100, 100 * (1 - deltaIdle / deltaTotal)))
+                root.cpuHistory = root._pushHistory(root.cpuHistory, root.cpuPercent)
+            }
         }
         root._prevCpu = { total: total, idle: idle }
     }
@@ -88,7 +114,6 @@ Singleton {
         }
     }
 
-    // ---- Mémoire ----
     Process {
         id: _memProc
         command: ["sh", "-c", "awk '/^MemTotal:/{t=$2} /^MemAvailable:/{a=$2} END{print t, a}' /proc/meminfo"]
@@ -103,9 +128,9 @@ Singleton {
         root.memoryTotalGb = totalKb / 1048576
         root.memoryUsedGb  = usedKb  / 1048576
         root.memoryPercent = Math.max(0, Math.min(100, 100 * usedKb / totalKb))
+        root.memoryHistory = root._pushHistory(root.memoryHistory, root.memoryPercent)
     }
 
-    // ---- Stockage ----
     Process {
         id: _storageProc
         command: ["sh", "-c", "df -B1 --output=pcent,used,size,source / | tail -1"]
@@ -118,7 +143,10 @@ Singleton {
         var pcent = parseFloat(parts[0].replace('%', ''))
         var used  = parseFloat(parts[1])
         var size  = parseFloat(parts[2])
-        if (!isNaN(pcent)) root.storagePercent = pcent
+        if (!isNaN(pcent)) {
+            root.storagePercent = pcent
+            root.storageHistory = root._pushHistory(root.storageHistory, pcent)
+        }
         if (!isNaN(used))  root.storageUsedGb  = used / 1073741824
         if (!isNaN(size))  root.storageTotalGb = size / 1073741824
         var dev = parts[3] || ""
@@ -126,7 +154,6 @@ Singleton {
         if (m) root.storageDevice = m[1].replace(/[0-9]+$/, "")
     }
 
-    // ---- Réseau ----
     Process {
         id: _netProc
         command: ["sh", "-c",
@@ -158,19 +185,21 @@ Singleton {
 
     Timer {
         interval: 2000
-        running: true
+        running: !GameMode.enabled
         repeat: true
         triggeredOnStart: true
         onTriggered: {
             if (!_cpuProc.running)  _cpuProc.running = true
             if (!_memProc.running)  _memProc.running = true
             if (!_netProc.running)  _netProc.running = true
+            root.batteryHistory = root._pushHistory(root.batteryHistory, NotchState.batteryPercent)
+            if (root.topMemoryWatchers > 0 && !_topProc.running) _topProc.running = true
         }
     }
 
     Timer {
         interval: 60000
-        running: true
+        running: !GameMode.enabled
         repeat: true
         triggeredOnStart: true
         onTriggered: {

@@ -1,0 +1,80 @@
+import QtQuick
+import QtQuick.Layouts
+import qs.services
+import qs.ui.widgets
+
+Item {
+    id: root
+
+    property var look: null
+
+    property string size: "s"
+
+    readonly property bool working: PomodoroState.phase === "work"
+    readonly property color phaseColor: root.working ? "#ff453a" : "#30d158"
+
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 6
+
+        RowLayout {
+            Layout.fillWidth: true
+
+            Text {
+                text: root.working ? I18n.tr("Focus") : I18n.tr("Break")
+                color: root.phaseColor
+                font.pixelSize: 13
+                font.weight: Font.Bold
+                font.family: "SF Pro Text"
+                renderType: Text.NativeRendering
+            }
+
+            Item { Layout.fillWidth: true }
+
+            Text {
+                visible: root.size === "m"
+                text: I18n.tr("Cycle %1 of %2").replace("%1", (PomodoroState.cyclesCompleted % PomodoroState.cyclesBeforeLongBreak) + 1).replace("%2", PomodoroState.cyclesBeforeLongBreak)
+                color: root.look.secondary
+                font.pixelSize: 12
+                font.family: "SF Pro Text"
+                renderType: Text.NativeRendering
+            }
+        }
+
+        Text {
+            text: TimerState.formatRemaining(PomodoroState.remainingMs)
+            color: root.look.primary
+            font.pixelSize: root.size === "s" ? 34 : 44
+            font.weight: Font.Light
+            font.family: "SF Pro Text"
+            renderType: Text.NativeRendering
+        }
+
+        Item { Layout.fillHeight: true }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+
+            WidgetButton {
+                look: root.look
+                text: PomodoroState.running ? I18n.tr("Pause") : I18n.tr("Start")
+                tint: root.phaseColor
+                onClicked: PomodoroState.running ? PomodoroState.pause() : PomodoroState.start()
+            }
+
+            WidgetButton {
+                look: root.look
+                visible: root.size === "m"
+                text: I18n.tr("Skip")
+                onClicked: PomodoroState.skip()
+            }
+
+            WidgetButton {
+                look: root.look
+                text: I18n.tr("Reset")
+                onClicked: PomodoroState.reset()
+            }
+        }
+    }
+}

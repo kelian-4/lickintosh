@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.components.glass
 import qs.components
+import qs.services
 
 ColumnLayout {
     id: root
@@ -78,8 +79,8 @@ ColumnLayout {
                 text:           root.items.length.toString()
                 font.pixelSize: 10
                 font.weight:    Font.Bold
-                font.family:    "SF Pro Rounded"
-                color:          "#ffffff"
+                font.family:    "SF Pro Text"
+                color: Theme.ink(parent, false)
                 renderType:     Text.NativeRendering
             }
         }
@@ -108,8 +109,8 @@ ColumnLayout {
                 text: root.appName
                 font.pixelSize: 13
                 font.weight: Font.Bold
-                font.family: "SF Pro Rounded"
-                color: "#ffffff"
+                font.family: "SF Pro Text"
+                color: Theme.ink(parent, false)
                 renderType: Text.NativeRendering
             }
 
@@ -122,10 +123,10 @@ ColumnLayout {
                 Text {
                     id: _lessLabel
                     anchors.centerIn: parent
-                    text: "Show less"
+                    text: I18n.tr("Show less")
                     font.pixelSize: 11
-                    font.family: "SF Pro Rounded"
-                    color: "#ffffff"
+                    font.family: "SF Pro Text"
+                    color: Theme.ink(parent, false)
                     renderType: Text.NativeRendering
                 }
 
@@ -148,8 +149,8 @@ ColumnLayout {
                     anchors.centerIn: parent
                     text: "×"
                     font.pixelSize: 13
-                    font.family: "SF Pro Rounded"
-                    color: "#ffffff"
+                    font.family: "SF Pro Text"
+                    color: Theme.ink(parent, false)
                     renderType: Text.NativeRendering
                 }
 
@@ -195,7 +196,7 @@ ColumnLayout {
                 anchors.centerIn: parent
                 text: (root.items.length - root.maxVisible) + " more notification" + (root.items.length - root.maxVisible > 1 ? "s" : "")
                 font.pixelSize: 11
-                font.family: "SF Pro Rounded"
+                font.family: "SF Pro Text"
                 color: Qt.rgba(1, 1, 1, 0.60)
                 renderType: Text.NativeRendering
             }

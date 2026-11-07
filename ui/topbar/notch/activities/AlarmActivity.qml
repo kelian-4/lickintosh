@@ -18,18 +18,18 @@ Item {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: root._firing && root._firing.label ? root._firing.label : "Alarme"
+            text: root._firing && root._firing.label ? root._firing.label : I18n.tr("Alarme")
             color: "#FFFFFF"
             font.pixelSize: 18
             font.bold: true
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
         }
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: root._firing ? (String(root._firing.hour).padStart(2, "0") + ":" + String(root._firing.minute).padStart(2, "0")) : ""
             color: "#B0B0B0"
             font.pixelSize: 22
-            font.family: "SF Pro Mono"
+            font.family: "SF Mono"
         }
 
         RowLayout {
@@ -42,15 +42,15 @@ Item {
                 Layout.preferredHeight: 30
                 radius: 15
                 color: "#2A2A2A"
-                Text { anchors.centerIn: parent; text: "Répéter (9 min)"; color: "#FFFFFF"; font.pixelSize: 11; font.family: "SF Pro Rounded" }
+                Text { anchors.centerIn: parent; text: "Répéter (9 min)"; color: "#FFFFFF"; font.pixelSize: 11; font.family: "SF Pro Text" }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: AlarmState.snoozeFiringAlarm(9) }
             }
             Rectangle {
                 Layout.preferredWidth: 100
                 Layout.preferredHeight: 30
                 radius: 15
-                color: "#1C7AFF"
-                Text { anchors.centerIn: parent; text: "Arrêter"; color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Rounded" }
+                color: Theme.accent
+                Text { anchors.centerIn: parent; text: "Arrêter"; color: "#FFFFFF"; font.pixelSize: 12; font.family: "SF Pro Text" }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: AlarmState.dismissFiringAlarm() }
             }
         }

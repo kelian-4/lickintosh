@@ -3,7 +3,6 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtGraphs
 import qs.services
-import qs.services
 import qs.components
 import qs.ui.settings.widgets
 
@@ -27,10 +26,11 @@ ContentPage {
             spacing: 10
 
             CFText {
-                text: "Santé de la batterie"
+                text: I18n.tr("Santé de la batterie")
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 Layout.fillWidth: true
+                elide: Text.ElideRight
             }
 
             CFText {
@@ -48,7 +48,7 @@ ContentPage {
             CFText {
                 text: root._chargingStateLabel
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 Layout.fillWidth: true
             }
 
@@ -62,10 +62,10 @@ ContentPage {
     }
 
     readonly property var _lowPowerRules: [
-        { id: "never",         label: "Jamais" },
-        { id: "always",        label: "Toujours" },
-        { id: "only-battery",  label: "Sur batterie uniquement" },
-        { id: "only-ac",       label: "Sur secteur uniquement" }
+        { id: "never",         label: I18n.tr("Jamais") },
+        { id: "always",        label: I18n.tr("Toujours") },
+        { id: "only-battery",  label: I18n.tr("Sur batterie uniquement") },
+        { id: "only-ac",       label: I18n.tr("Sur secteur uniquement") }
     ]
 
     readonly property string _lowPowerRuleLabel: {
@@ -78,16 +78,16 @@ ContentPage {
     property bool _lowPowerMenuOpen: false
 
     ContentSection {
-        title: "Mode basse consommation"
+        title: I18n.tr("Mode basse consommation")
 
         RowLayout {
             Layout.fillWidth: true
             spacing: 10
 
             CFText {
-                text: "Mode basse consommation"
+                text: I18n.tr("Mode basse consommation")
                 font.pixelSize: 14
-                color: "#fff"
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
@@ -121,7 +121,7 @@ ContentPage {
                     width: _lowPowerButton.width - 10 - 8 - _lowPowerChevron.width - 4
                     text: root._lowPowerRuleLabel
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                     elide: Text.ElideRight
                 }
 
@@ -157,7 +157,7 @@ ContentPage {
                         anchors.verticalCenter: parent.verticalCenter
                         text: _ruleRow.modelData.label
                         font.pixelSize: 13
-                        color: "#fff"
+                        color: Theme.textPrimary
                     }
 
                     MouseArea {
@@ -176,11 +176,11 @@ ContentPage {
     }
 
     ContentSection {
-        title: "Limite de charge"
+        title: I18n.tr("Limite de charge")
         visible: BatteryHealthState.chargeLimitSupported
 
         ConfigSlider {
-            text: "Charger jusqu'à"
+            text: I18n.tr("Charger jusqu'à")
             value: BatteryHealthState.chargeLimitValue
             from: 50
             to: 100
@@ -190,7 +190,7 @@ ContentPage {
         }
 
         CFText {
-            text: "Limite la charge pour ralentir le vieillissement de la batterie. Nécessite un mot de passe administrateur."
+            text: I18n.tr("Limite la charge pour ralentir le vieillissement de la batterie. Nécessite un mot de passe administrateur.")
             font.pixelSize: 11
             gray: true
             Layout.fillWidth: true
@@ -205,8 +205,8 @@ ContentPage {
 
             Repeater {
                 model: [
-                    { id: "24h",     label: "Dernières 24 heures" },
-                    { id: "10days",  label: "10 derniers jours" }
+                    { id: "24h",     label: I18n.tr("Dernières 24 heures") },
+                    { id: "10days",  label: I18n.tr("10 derniers jours") }
                 ]
 
                 Rectangle {
@@ -226,7 +226,7 @@ ContentPage {
                         text: _tabButton.modelData.label
                         font.pixelSize: 12
                         font.weight: _tabButton.active ? Font.DemiBold : Font.Normal
-                        color: "#fff"
+                        color: Theme.textPrimary
                     }
 
                     MouseArea {
@@ -247,7 +247,7 @@ ContentPage {
             visible: root._currentLevelHistory.length > 1
 
             CFText {
-                text: "Niveau de batterie"
+                text: I18n.tr("Niveau de batterie")
                 font.pixelSize: 12
                 gray: true
             }
@@ -309,7 +309,7 @@ ContentPage {
 
         CFText {
             visible: root._currentLevelHistory.length <= 1
-            text: "Pas encore assez de données collectées pour afficher l'historique."
+            text: I18n.tr("Pas encore assez de données collectées pour afficher l'historique.")
             font.pixelSize: 12
             gray: true
             Layout.fillWidth: true
@@ -323,7 +323,7 @@ ContentPage {
             visible: root._currentUsageHistory.length > 0
 
             CFText {
-                text: "Activité de l'écran"
+                text: I18n.tr("Activité de l'écran")
                 font.pixelSize: 12
                 gray: true
             }
@@ -365,7 +365,7 @@ ContentPage {
     Component.onCompleted: root._fillLevelSeries()
 
     ContentSection {
-        title: "Utilisation énergétique"
+        title: I18n.tr("Utilisation énergétique")
 
         Repeater {
             model: ShellConfig.topConsumers
@@ -378,7 +378,7 @@ ContentPage {
                 CFText {
                     text: modelData.name
                     font.pixelSize: 14
-                    color: "#fff"
+                    color: Theme.textPrimary
                     Layout.fillWidth: true
                 }
 
@@ -391,7 +391,7 @@ ContentPage {
         }
 
         CFText {
-            text: "Analyse en cours…"
+            text: I18n.tr("Analyse en cours…")
             font.pixelSize: 13
             gray: true
             visible: !ShellConfig.hasCollectedOnce

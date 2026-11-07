@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
+import qs.services
 
 Singleton {
     id: root
@@ -94,6 +95,15 @@ Singleton {
     readonly property alias popupModel: _popupModel
     property int  dismissGen:   0
     property bool centerOpened: false
+
+    onDndEnabledChanged: NotchState.focusActive = root.dndEnabled
+
+    onCenterOpenedChanged: {
+        if (root.centerOpened) {
+            _groupTimer.stop()
+            root.dismissGen = root.dismissGen + 1
+        }
+    }
     property bool dndEnabled:   false
 
     function pushPopup(notification) {

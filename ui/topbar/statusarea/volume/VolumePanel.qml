@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.VectorImage
 import Quickshell.Services.Pipewire
 import qs.components
+import qs.services
 
 Item {
     id: root
@@ -76,7 +77,7 @@ Item {
         spacing: 12
 
         CFText {
-            text: "Sound"
+            text: I18n.tr("Sound")
             font.pixelSize: 15
             font.weight: Font.Bold
         }
@@ -138,7 +139,7 @@ Item {
             spacing: 6
 
             CFText {
-                text: "Output"
+                text: I18n.tr("Output")
                 gray: true
                 font.pixelSize: 11
                 font.weight: Font.Bold
@@ -174,7 +175,7 @@ Item {
                                 width: 28
                                 height: 28
                                 radius: 14
-                                color: outputRow.isActive ? "#1C7AFF" : "transparent"
+                                color: outputRow.isActive ? Theme.accent : "transparent"
                                 Layout.alignment: Qt.AlignVCenter
 
                                 Behavior on color {
@@ -221,11 +222,14 @@ Item {
             Layout.fillWidth: true
             height: 24
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.closeRequested()
+            onClicked: {
+                SettingsLauncher.open("GeneralPage")
+                root.closeRequested()
+            }
 
             CFText {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Sound Settings..."
+                text: I18n.tr("Sound Settings...")
                 font.pixelSize: 13
             }
         }

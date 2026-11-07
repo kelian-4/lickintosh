@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.qmlc
+*.jsc
+.DS_Store
+$HOME/.config/quickshell/core/alarms.json
+services/shell-config.json
+dock/
+dock-autostart/

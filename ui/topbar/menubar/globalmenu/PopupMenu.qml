@@ -7,6 +7,7 @@ import QtQuick.Effects
 import qs.components.glass
 import qs.components
 import qs.ui.topbar.menubar.globalmenu
+import qs.services
 
 Scope {
     id: root
@@ -18,10 +19,19 @@ Scope {
     signal closeRequested()
 
     property int subIndex: -1
+    property bool subKeep: false
+    property var subItems: []
     property int subX: 0
     property int subY: 0
 
     onOpenedChanged: if (!root.opened) root.subIndex = -1
+
+    onSubIndexChanged: {
+        if (root.subIndex !== -1 && root.items[root.subIndex]) {
+            root.subItems = root.items[root.subIndex].submenu
+            root.subKeep = true
+        }
+    }
 
     function luaMods(mods) {
         if (!mods || mods === "") return ""
@@ -58,10 +68,26 @@ Scope {
         root.subY = y
     }
 
+    Presence { id: presence; wanted: root.opened }
+
+    Connections {
+        target: presence
+        function onPresentChanged() {
+            if (!presence.present) {
+                root.subKeep = false
+                root.subItems = []
+            }
+        }
+    }
+
     Loader {
-        active: root.opened
+        active: presence.present
         sourceComponent: Component {
             PanelWindow {
+                id: panel
+                property bool entered: false
+                Component.onCompleted: panel.entered = true
+
                 anchors {
                     top: true
                     left: true
@@ -87,10 +113,15 @@ Scope {
                     width: 300
                     height: itemsColumn.implicitHeight + 12
                     z: 1
-                    radius: 10
-                    color: Qt.rgba(0.08, 0.08, 0.08, 0.88)
-                    rimStrength: 1.7
-                    light: "#20ffffff"
+                    radius: 8
+                    color: Qt.rgba(0.10, 0.10, 0.11, 0.80)
+                    rimStrength: 0.7
+                    light: "#14ffffff"
+                    opacity:         (root.opened && panel.entered) ? 1 : 0
+                    scale:           (root.opened && panel.entered) ? 1 : 0.95
+                    transformOrigin: Item.Top
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                    Behavior on scale { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     ColumnLayout {
                         id: itemsColumn
@@ -110,8 +141,8 @@ Scope {
                                 Layout.preferredHeight: modelData.separator ? 9 : 28
 
                                 property bool isDisabled: menuRow.modelData.disabled === true
-                                property bool hasSubmenu: menuRow.modelData.submenu && menuRow.modelData.submenu.length > 0
-                                property bool hasAction: (menuRow.modelData.chord && menuRow.modelData.chord.length > 0) || (menuRow.modelData.key && menuRow.modelData.key !== "")
+                                property bool hasSubmenu: !!(menuRow.modelData.submenu && menuRow.modelData.submenu.length > 0)
+                                property bool hasAction: !!((menuRow.modelData.chord && menuRow.modelData.chord.length > 0) || (menuRow.modelData.key && menuRow.modelData.key !== ""))
 
                                 Rectangle {
                                     visible: menuRow.modelData.separator === true
@@ -129,8 +160,8 @@ Scope {
                                     anchors.fill: parent
                                     anchors.leftMargin: 6
                                     anchors.rightMargin: 6
-                                    radius: 6
-                                    color: (rowMouse.containsMouse && !menuRow.isDisabled) ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                                    radius: 5
+                                    color: (rowMouse.containsMouse && !menuRow.isDisabled) ? Theme.accent : "transparent"
                                 }
 
                                 RowLayout {
@@ -141,7 +172,6 @@ Scope {
                                     spacing: 8
 
                                     VectorImage {
-                                        visible: menuRow.modelData.icon ? true : false
                                         Layout.preferredWidth: 14
                                         Layout.preferredHeight: 14
                                         source: menuRow.modelData.icon ? Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + menuRow.modelData.icon) : ""
@@ -158,6 +188,7 @@ Scope {
                                         text: menuRow.modelData.label ? menuRow.modelData.label : ""
                                         font.pixelSize: 13
                                         gray: menuRow.isDisabled
+                                        color: (rowMouse.containsMouse && !menuRow.isDisabled) ? "#ffffff" : Theme.ink(menuRow, menuRow.isDisabled)
                                     }
 
                                     CFText {
@@ -167,6 +198,7 @@ Scope {
                                               : (menuRow.modelData.chord ? ShortcutSymbols.formatChord(menuRow.modelData.chord) : ShortcutSymbols.format(menuRow.modelData.mods, menuRow.modelData.key))
                                         font.pixelSize: 12
                                         gray: true
+                                        color: (rowMouse.containsMouse && !menuRow.isDisabled) ? "#d0ffffff" : Theme.ink(menuRow, true)
                                     }
                                 }
 
@@ -178,9 +210,13 @@ Scope {
                                     enabled: !menuRow.isDisabled
                                     cursorShape: Qt.PointingHandCursor
                                     onEntered: {
-                                        if (menuRow.hasSubmenu && root.subIndex !== -1 && root.subIndex !== menuRow.index) {
-                                            var p = menuRow.mapToItem(null, menuRow.width, 0)
-                                            root.openSub(menuRow.index, p.x, p.y)
+                                        if (menuRow.hasSubmenu) {
+                                            if (root.subIndex !== menuRow.index) {
+                                                var p = menuRow.mapToItem(null, menuRow.width, 0)
+                                                root.openSub(menuRow.index, p.x, p.y)
+                                            }
+                                        } else if (!menuRow.modelData.separator) {
+                                            root.subIndex = -1
                                         }
                                     }
                                     onClicked: {
@@ -197,22 +233,24 @@ Scope {
                     }
                 }
 
-                Loader {
-                    id: subLoader
-                    active: root.subIndex !== -1
-                    source: "PopupMenu.qml"
-                    onLoaded: {
-                        item.opened = Qt.binding(function() { return root.subIndex !== -1 })
-                        item.xPos = Qt.binding(function() { return root.subX })
-                        item.yPos = Qt.binding(function() { return root.subY })
-                        item.items = Qt.binding(function() { return root.subIndex !== -1 ? root.items[root.subIndex].submenu : [] })
-                        item.closeRequested.connect(function() {
-                            root.subIndex = -1
-                            root.closeRequested()
-                        })
-                    }
-                }
+                GlassBackdrop { element: "menus" }
             }
+        }
+    }
+
+    Loader {
+        id: subLoader
+        active: root.subKeep && presence.present
+        source: "PopupMenu.qml"
+        onLoaded: {
+            item.opened = Qt.binding(function() { return root.subIndex !== -1 })
+            item.xPos = Qt.binding(function() { return root.subX })
+            item.yPos = Qt.binding(function() { return root.subY })
+            item.items = Qt.binding(function() { return root.subItems })
+            item.closeRequested.connect(function() {
+                root.subIndex = -1
+                root.closeRequested()
+            })
         }
     }
 }

@@ -1,0 +1,331 @@
+pragma Singleton
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import Qt.labs.folderlistmodel
+import Quickshell
+import Quickshell.Io
+import qs.services
+
+Singleton {
+    id: root
+
+    reloadableId: "desktopFiles"
+
+    property string dir: Quickshell.env("HOME") + "/Desktop"
+    property alias model: folderModel
+    property var selection: []
+
+    function isSelected(path) {
+        return root.selection.indexOf(path) >= 0
+    }
+
+    function selectOnly(path) {
+        root.selection = [path]
+    }
+
+    function selectMany(paths) {
+        root.selection = paths
+    }
+
+    function toggleSelected(path) {
+        var index = root.selection.indexOf(path)
+        var next = root.selection.slice()
+        if (index >= 0) next.splice(index, 1)
+        else next.push(path)
+        root.selection = next
+    }
+
+    function clearSelection() {
+        root.selection = []
+    }
+
+    function targetsOf(target) {
+        return root.isSelected(target.path) ? root.selection.slice() : [target.path]
+    }
+
+    function nameOfPath(path) {
+        return path.slice(path.lastIndexOf("/") + 1)
+    }
+    property string renaming: ""
+    property var infoTarget: null
+
+    Process {
+        running: true
+        command: ["sh", "-c", "command -v xdg-user-dir >/dev/null 2>&1 && xdg-user-dir DESKTOP || true"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var path = text.trim()
+                if (path !== "" && path !== Quickshell.env("HOME")) root.dir = path
+            }
+        }
+    }
+
+    FolderListModel {
+        id: folderModel
+        folder: "file://" + root.dir
+        showDirs: true
+        showDirsFirst: true
+        showHidden: WidgetState.showHidden
+        showDotAndDotDot: false
+        sortField: root.sortFieldFor(WidgetState.desktopSort)
+        sortReversed: WidgetState.desktopSort === "date" || WidgetState.desktopSort === "size"
+    }
+
+    function sortFieldFor(key) {
+        if (key === "kind") return FolderListModel.Type
+        if (key === "date") return FolderListModel.Time
+        if (key === "size") return FolderListModel.Size
+        return FolderListModel.Name
+    }
+
+    function run(script, args) {
+        Quickshell.execDetached(["sh", "-c", script, "sh"].concat(args))
+    }
+
+    function isImage(name) {
+        return /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(name)
+    }
+
+    function extensionOf(name) {
+        return name.indexOf(".") > 0 ? name.split(".").pop().toLowerCase() : ""
+    }
+
+    function entryFor(name) {
+        if (!name.endsWith(".desktop")) return null
+        return DesktopEntries.byId(name.slice(0, -8))
+    }
+
+    property var launcherIcons: ({})
+
+    function scanLaunchers() {
+        launcherDebounce.restart()
+    }
+
+    Timer {
+        id: launcherDebounce
+        interval: 300
+        onTriggered: launcherScan.running = true
+    }
+
+    Process {
+        id: launcherScan
+        running: true
+        command: ["sh", "-c",
+            'for f in "$1"/*.desktop "$1"/.[!.]*.desktop; do [ -f "$f" ] || continue; ' +
+            'printf "%s\\t%s\\n" "${f##*/}" "$(sed -n "s/^Icon=//p" "$f" | head -n 1)"; done',
+            "sh", root.dir]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var icons = {}
+                var lines = text.split("\n")
+                for (var i = 0; i < lines.length; i++) {
+                    var parts = lines[i].split("\t")
+                    if (parts.length >= 2 && parts[1].trim() !== "") icons[parts[0]] = parts[1].trim()
+                }
+                root.launcherIcons = icons
+            }
+        }
+    }
+
+    onDirChanged: root.scanLaunchers()
+
+    Connections {
+        target: folderModel
+        function onCountChanged() { root.scanLaunchers() }
+    }
+
+    function iconPathFor(name, isDir) {
+        if (isDir) return IconResolver.forFolder()
+        if (name.endsWith(".desktop")) {
+            var fromEntry = IconResolver.forApp(root.entryFor(name))
+            if (fromEntry !== "") return fromEntry
+            var fromFile = IconResolver.resolve(root.launcherIcons[name] || "")
+            return fromFile !== "" ? fromFile : IconResolver.generic()
+        }
+        var path = IconResolver.forFile(name)
+        return path !== "" ? path : IconResolver.generic()
+    }
+
+    function labelFor(name) {
+        if (!name.endsWith(".desktop")) return name
+        var entry = root.entryFor(name)
+        return entry ? entry.name : name.slice(0, -8)
+    }
+
+    function kindFor(name, isDir) {
+        if (isDir) return "Folder"
+        if (name.endsWith(".desktop")) return "Application"
+        var ext = root.extensionOf(name)
+        return ext === "" ? "Document" : ext.toUpperCase() + " file"
+    }
+
+    function formatSize(bytes) {
+        if (bytes < 1024) return bytes + " B"
+        var units = ["KB", "MB", "GB", "TB"]
+        var value = bytes / 1024
+        var i = 0
+        while (value >= 1024 && i < units.length - 1) {
+            value /= 1024
+            i++
+        }
+        return value.toFixed(value < 10 ? 1 : 0) + " " + units[i]
+    }
+
+    function open(path, name) {
+        var entry = root.entryFor(name)
+        if (entry) {
+            entry.execute()
+            return
+        }
+        Quickshell.execDetached(["xdg-open", path])
+    }
+
+    Process {
+        id: creator
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var path = text.trim()
+                if (path === "") return
+                root.selectOnly(path)
+                root.renaming = path
+            }
+        }
+    }
+
+    function create(script) {
+        if (creator.running) return
+        creator.command = ["sh", "-c", script, "sh", root.dir]
+        creator.running = true
+    }
+
+    function newFolder() {
+        root.create('d="$1/untitled folder"; n=2; while [ -e "$d" ]; do d="$1/untitled folder $n"; n=$((n+1)); done; mkdir -- "$d" && printf "%s" "$d"')
+    }
+
+    function newFile() {
+        root.create('d="$1/untitled file"; n=2; while [ -e "$d" ]; do d="$1/untitled file $n"; n=$((n+1)); done; : > "$d" && printf "%s" "$d"')
+    }
+
+    function pathOfUrl(url) {
+        return decodeURIComponent(String(url).replace(/^file:\/\//, ""))
+    }
+
+    function linkNames(urls) {
+        var names = []
+        var paths = []
+        for (var i = 0; i < urls.length; i++) {
+            var path = root.pathOfUrl(urls[i])
+            if (path === "" || path.indexOf(root.dir + "/") === 0) continue
+            paths.push(path)
+            names.push(path.split("/").filter(function(part) { return part !== "" }).pop())
+        }
+        if (paths.length > 0) {
+            root.run('d="$1"; shift; for f in "$@"; do b="$(basename -- "$f")"; [ -e "$d/$b" ] || [ -L "$d/$b" ] || ln -s -- "$f" "$d/$b"; done', [root.dir].concat(paths))
+        }
+        return names
+    }
+
+    function duplicate(path) {
+        root.run('d="$1 copy"; n=2; while [ -e "$d" ]; do d="$1 copy $n"; n=$((n+1)); done; cp -a -- "$1" "$d"', [path])
+    }
+
+    function compress(path) {
+        root.run('cd "$(dirname "$1")" && tar -czf "$(basename "$1").tar.gz" -- "$(basename "$1")"', [path])
+    }
+
+    function trash(path) {
+        root.run('gio trash -- "$1" || trash-put -- "$1"', [path])
+    }
+
+    function copyPath(path) {
+        Quickshell.execDetached(["wl-copy", path])
+    }
+
+    function reveal(path) {
+        Quickshell.execDetached(["xdg-open", path.slice(0, path.lastIndexOf("/"))])
+    }
+
+    function rename(path, newName) {
+        var name = newName.trim()
+        if (name === "" || name.indexOf("/") >= 0) return
+        root.run('mv -n -- "$1" "$2"', [path, path.slice(0, path.lastIndexOf("/") + 1) + name])
+        WidgetState.renameIcon(path.slice(path.lastIndexOf("/") + 1), name)
+    }
+
+    function cleanUp() {
+        WidgetState.iconPositions = []
+    }
+
+    function setSort(key) {
+        WidgetState.desktopSort = key
+        root.cleanUp()
+    }
+
+    function openSettings() {
+        SettingsLauncher.open("WallpaperPage")
+    }
+
+    function desktopMenu() {
+        var s = WidgetState.desktopSort
+        return [
+            { label: "New Folder", action: "new-folder" },
+            { label: "New File", action: "new-file" },
+            { separator: true },
+            { label: "Change Wallpaper…", action: "wallpaper" },
+            { separator: true },
+            { label: "Sort By", children: [
+                { label: "Name", action: "sort:name", checkable: true, checked: s === "name" },
+                { label: "Kind", action: "sort:kind", checkable: true, checked: s === "kind" },
+                { label: "Date Modified", action: "sort:date", checkable: true, checked: s === "date" },
+                { label: "Size", action: "sort:size", checkable: true, checked: s === "size" }
+            ] },
+            { label: "Clean Up", action: "cleanup" },
+            { label: "Show Hidden Files", action: "hidden", checkable: true, checked: WidgetState.showHidden },
+            { separator: true },
+            { label: "Edit Widgets…", action: "edit" }
+        ]
+    }
+
+    function fileMenu(count) {
+        if (count > 1) return [
+            { label: "Open", action: "open" },
+            { label: "Duplicate", action: "duplicate" },
+            { label: "Compress", action: "compress" },
+            { label: "Copy Paths", action: "copy-path" },
+            { separator: true },
+            { label: "Move " + count + " Items to Trash", action: "trash", danger: true }
+        ]
+        return [
+            { label: "Open", action: "open" },
+            { label: "Show in File Manager", action: "reveal" },
+            { separator: true },
+            { label: "Rename", action: "rename" },
+            { label: "Duplicate", action: "duplicate" },
+            { label: "Compress", action: "compress" },
+            { label: "Get Info", action: "info" },
+            { separator: true },
+            { label: "Copy Path", action: "copy-path" },
+            { separator: true },
+            { label: "Move to Trash", action: "trash", danger: true }
+        ]
+    }
+
+    function handle(action, target) {
+        if (action === "new-folder") root.newFolder()
+        else if (action === "new-file") root.newFile()
+        else if (action === "wallpaper") root.openSettings()
+        else if (action === "cleanup") root.cleanUp()
+        else if (action === "hidden") WidgetState.showHidden = !WidgetState.showHidden
+        else if (action === "edit") WidgetState.openGallery("desktop")
+        else if (action.indexOf("sort:") === 0) root.setSort(action.slice(5))
+        else if (action === "reveal") root.reveal(target.path)
+        else if (action === "rename") root.renaming = target.path
+        else if (action === "info") root.infoTarget = target
+        else if (action === "copy-path") root.copyPath(root.targetsOf(target).join("\n"))
+        else if (action === "open") root.targetsOf(target).forEach(function(path) { root.open(path, root.nameOfPath(path)) })
+        else if (action === "duplicate") root.targetsOf(target).forEach(function(path) { root.duplicate(path) })
+        else if (action === "compress") root.targetsOf(target).forEach(function(path) { root.compress(path) })
+        else if (action === "trash") root.targetsOf(target).forEach(function(path) { root.trash(path) })
+    }
+}

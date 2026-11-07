@@ -1,5 +1,7 @@
+//@ pragma IconTheme MacTahoe-dark
 //@ pragma UseQApplication
 //@ pragma ShellId settings-app
+//@ pragma AppId settings-app
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -9,6 +11,7 @@ import QtQuick.Window
 import Quickshell
 import qs.components.glass
 import qs.components
+import qs.services
 import qs.ui.settings.widgets
 import qs.ui.settings.pages
 
@@ -16,7 +19,7 @@ FloatingWindow {
     id: root
 
     visible: true
-    title: "Réglages"
+    title: I18n.tr("Réglages")
     implicitWidth: 900
     implicitHeight: 620
     minimumSize: Qt.size(860, 560)
@@ -26,13 +29,26 @@ FloatingWindow {
         target: Quickshell
         function onReloadCompleted() { Quickshell.watchFiles = false }
     }
-    Component.onCompleted: Quickshell.watchFiles = false
+    Component.onCompleted: {
+        Quickshell.watchFiles = false
+        Theme.applyToCompositor = false
+        var wanted = Quickshell.env("LICKINTOSH_PAGE")
+        if (wanted) {
+            for (var i = 0; i < root.flatItems.length; i++) {
+                if (root.flatItems[i].component === wanted) {
+                    root.currentIndex = i
+                    root._navHistory = [i]
+                    break
+                }
+            }
+        }
+    }
 
     readonly property var sections: [
         {
             title: "",
             items: [
-                { name: "Compte",    icon: "user.svg",                   implemented: false }
+                { name: "Compte",    icon: "user.svg",                   component: "AccountPage", implemented: true }
             ]
         },
         {
@@ -46,28 +62,23 @@ FloatingWindow {
             ]
         },
         {
-            title: "Système",
+            title: I18n.tr("Système"),
             items: [
                 { name: "Général",                  icon: "settings/general.svg",       component: "GeneralPage", implemented: true },
-                { name: "Apparence",                 icon: "settings/appearance.svg",    implemented: false },
+                { name: "Apparence",                 icon: "settings/appearance.svg",    component: "AppearancePage", implemented: true },
                 { name: "IA",                         icon: "ai.svg",                     component: "AiSettingsPage", implemented: true },
                 { name: "Control Center",             icon: "control-center.svg",         component: "ControlCenterPage", implemented: true },
                 { name: "Bureau et Dock",             icon: "settings/dock.svg",          component: "DockPage", implemented: true },
                 { name: "Top Bar",                    icon: "settings/menu bar.svg",      component: "TopBarPage", implemented: true },
                 { name: "Moniteurs",                  icon: "settings/display.svg",       component: "MonitorsPage", implemented: true },
                 { name: "Spotlight",                  icon: "settings/spotlight.svg",     component: "SpotlightPage", implemented: true },
-                { name: "Fond d'écran",               icon: "settings/wallpaper.svg",     implemented: false }
+                { name: "Fond d'écran",               icon: "settings/wallpaper.svg",     component: "WallpaperPage", implemented: true }
             ]
         },
         {
             title: "",
             items: [
-                { name: "Notifications",       icon: "settings/notifications.svg", implemented: false },
-                { name: "Son",                  icon: "volume/audio-volume-3.svg", implemented: false },
-                { name: "Focus",                 icon: "dnd.svg",                   implemented: false },
-                { name: "Écran de verrouillage", icon: "settings/lockscreen.svg",    implemented: false },
-                { name: "Confidentialité et sécurité", icon: "lock.svg",            implemented: false },
-                { name: "Touch ID et mot de passe",    icon: "notch/key.svg",       implemented: false }
+                { name: "Écran de verrouillage", icon: "settings/lockscreen.svg",    component: "LockScreenPage", implemented: true }
             ]
         }
     ]
@@ -124,7 +135,7 @@ FloatingWindow {
     Rectangle {
         id: _windowCard
         anchors.fill: parent
-        color: "#0d0d0d"
+        color: Theme.window
         clip: true
 
         RowLayout {
@@ -143,7 +154,7 @@ FloatingWindow {
                     anchors.fill: _sidebarRoot
                     anchors.margins: -6
                     radius: _sidebarRoot.radius + 6
-                    color: "#40000000"
+                    color: Theme.shadow
                 }
 
                 Rectangle {
@@ -153,8 +164,8 @@ FloatingWindow {
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     radius: 18
-                    color: "#30161616"
-                    border.color: "#20ffffff"
+                    color: Theme.panel
+                    border.color: Theme.panelRim
                     border.width: 1
                     clip: true
 
@@ -204,7 +215,7 @@ FloatingWindow {
                                     cursorShape: Qt.PointingHandCursor
                                     onEntered: _trafficLights._hovered = true
                                     onExited:  _trafficLights._hovered = false
-                                    onClicked: root.close()
+                                    onClicked: Qt.quit()
                                 }
                             }
 
@@ -228,7 +239,7 @@ FloatingWindow {
                                     cursorShape: Qt.PointingHandCursor
                                     onEntered: _trafficLights._hovered = true
                                     onExited:  _trafficLights._hovered = false
-                                    onClicked: root.showMinimized()
+                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.window.move({ workspace = \"special:minimized\" })"])
                                 }
                             }
 
@@ -252,9 +263,7 @@ FloatingWindow {
                                     cursorShape: Qt.PointingHandCursor
                                     onEntered: _trafficLights._hovered = true
                                     onExited:  _trafficLights._hovered = false
-                                    onClicked: root.visibility === Window.Maximized
-                                               ? root.showNormal()
-                                               : root.showMaximized()
+                                    onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.window.fullscreen({ mode = \"maximized\", action = \"toggle\" })"])
                                 }
                             }
                         }
@@ -269,7 +278,7 @@ FloatingWindow {
                         Rectangle {
                             anchors.fill: parent
                             radius: height / 2
-                            color: "#12ffffff"
+                            color: Theme.fillSubtle
 
                             RowLayout {
                                 anchors.fill: parent
@@ -286,7 +295,7 @@ FloatingWindow {
                                 TextInput {
                                     id: _searchField
                                     Layout.fillWidth: true
-                                    color: "#fff"
+                                    color: Theme.textPrimary
                                     font.pixelSize: 13
                                     clip: true
                                     selectByMouse: true
@@ -294,7 +303,7 @@ FloatingWindow {
 
                                     CFText {
                                         anchors.verticalCenter: parent.verticalCenter
-                                        text: "Rechercher"
+                                        text: I18n.tr("Rechercher")
                                         font.pixelSize: 13
                                         gray: true
                                         visible: _searchField.text.length === 0
@@ -375,7 +384,7 @@ FloatingWindow {
                                             height: _matchesSearch ? 36 : 0
                                             visible: _matchesSearch
                                             radius: 8
-                                            color: _row._selected ? "#1C7AFF" : (_mouse.containsMouse ? "#10ffffff" : "transparent")
+                                            color: _row._selected ? Theme.accent : (_mouse.containsMouse ? Theme.fillHover : "transparent")
                                             Behavior on color { ColorAnimation { duration: 100 } }
 
                                             RowLayout {
@@ -400,7 +409,7 @@ FloatingWindow {
                                                 CFText {
                                                     text: _row.modelData.name
                                                     font.pixelSize: 14
-                                                    color: "#fff"
+                                                    color: _row._selected ? Theme.onAccent : Theme.textPrimary
                                                     Layout.fillWidth: true
                                                     elide: Text.ElideRight
                                                 }
@@ -446,15 +455,15 @@ FloatingWindow {
                                 anchors.fill: _navBg
                                 anchors.margins: -4
                                 radius: _navBg.radius + 4
-                                color: "#30000000"
+                                color: Theme.shadow
                             }
 
                             Rectangle {
                                 id: _navBg
                                 anchors.fill: parent
                                 radius: 16
-                                color: "#18ffffff"
-                                border.color: "#14ffffff"
+                                color: Theme.fillControl
+                                border.color: Theme.controlRim
                                 border.width: 1
 
                             Row {
@@ -484,7 +493,7 @@ FloatingWindow {
                                     width: 1
                                     height: 18
                                     anchors.verticalCenter: parent.verticalCenter
-                                    color: "#18ffffff"
+                                    color: Theme.separator
                                 }
 
                                 Item {
@@ -513,7 +522,7 @@ FloatingWindow {
                             text: root.currentItem ? root.currentItem.name : ""
                             font.pixelSize: 22
                             font.weight: Font.Bold
-                            color: "#fff"
+                            color: Theme.textPrimary
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                         }
@@ -530,6 +539,7 @@ FloatingWindow {
                             if (!root.currentItem) return _placeholderComp
                             if (!root.currentItem.implemented) return _placeholderComp
                             switch (root.currentItem.component) {
+                                case "AccountPage":   return _accountComp
                                 case "WifiPage":      return _wifiComp
                                 case "BluetoothPage": return _btComp
                                 case "BatteryPage":   return _battComp
@@ -540,6 +550,9 @@ FloatingWindow {
                                 case "ControlCenterPage": return _ccPageComp
                                 case "MonitorsPage": return _monitorsComp
                                 case "SpotlightPage": return _spotlightComp
+                                case "WallpaperPage": return _wallpaperComp
+                                case "AppearancePage": return _appearanceComp
+                                case "LockScreenPage": return _lockScreenComp
                                 default:              return _placeholderComp
                             }
                         }
@@ -550,6 +563,7 @@ FloatingWindow {
     }
 
     Component { id: _placeholderComp; PlaceholderPage { pageTitle: root.currentItem ? root.currentItem.name : ""; icon: root.currentItem ? root.currentItem.icon : "" } }
+    Component { id: _accountComp; AccountPage {} }
     Component { id: _wifiComp;   WifiPage {} }
     Component { id: _btComp;     BluetoothPage {} }
     Component { id: _battComp;   BatteryPage {} }
@@ -560,4 +574,7 @@ FloatingWindow {
     Component { id: _ccPageComp; ControlCenterPage {} }
     Component { id: _monitorsComp; MonitorsPage {} }
     Component { id: _spotlightComp; SpotlightPage {} }
+    Component { id: _appearanceComp; AppearancePage {} }
+    Component { id: _wallpaperComp; WallpaperPage {} }
+    Component { id: _lockScreenComp; LockScreenPage {} }
 }

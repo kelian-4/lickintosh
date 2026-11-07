@@ -27,17 +27,13 @@ RowLayout {
     property int notifUnreadCount: 0
     property real barWidth: 0
 
-    FontLoader {
-        id: macFont
-        source: "../../../assets/fonts/SFPR/SF-Pro-Rounded-Regular.otf"
-    }
 
     Item {
         id: systemTrayItem
         Layout.alignment: Qt.AlignVCenter
         implicitWidth:  systemTray.implicitWidth
         implicitHeight: systemTray.implicitHeight
-        visible: ShellConfig.options.topbar.showSystemTray
+        visible: ShellConfig.options.topbar.showSystemTray && systemTray.implicitWidth > 0
 
         SystemTray {
             id: systemTray
@@ -60,6 +56,7 @@ RowLayout {
 
         BTDeviceTray {
             Layout.alignment: Qt.AlignVCenter
+            visible: implicitWidth > 0
         }
 
         Volume {
@@ -98,8 +95,8 @@ RowLayout {
 
         Item {
             id: spotlightBtn
-            width: 18
-            height: 18
+            width: 16
+            height: 16
             Layout.alignment: Qt.AlignVCenter
             visible: ShellConfig.options.topbar.showSpotlight
 
@@ -127,8 +124,8 @@ RowLayout {
         }
 
         MouseArea {
-            width: 16
-            height: 16
+            width: 14
+            height: 14
             Layout.alignment: Qt.AlignVCenter
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
@@ -137,8 +134,8 @@ RowLayout {
 
             VectorImage {
                 anchors.centerIn: parent
-                width: 16
-                height: 16
+                width: 14
+                height: 14
                 source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/control-center.svg")
                 preferredRendererType: VectorImage.CurveRenderer
                 layer.enabled: true
@@ -151,8 +148,8 @@ RowLayout {
 
         Item {
             id: aiBtn
-            width: 18
-            height: 18
+            width: 16
+            height: 16
             Layout.alignment: Qt.AlignVCenter
             visible: ShellConfig.options.topbar.showAI
 
@@ -202,7 +199,7 @@ RowLayout {
                     text:           root.notifUnreadCount > 99 ? "99+" : root.notifUnreadCount.toString()
                     font.pixelSize: 10
                     font.weight:    Font.Bold
-                    font.family:    "SF Pro Rounded"
+                    font.family:    "SF Pro Text"
                     color:          "#fff"
                     renderType:     Text.NativeRendering
                 }

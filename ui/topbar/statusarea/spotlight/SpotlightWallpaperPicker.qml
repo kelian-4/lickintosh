@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import qs.services
 
 ListView {
     id: root
@@ -82,7 +83,7 @@ ListView {
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             text: tile.modelData.title || ""
-            color: "#ffffff"
+            color: Theme.ink(parent, false)
             font.pixelSize: 11
         }
 

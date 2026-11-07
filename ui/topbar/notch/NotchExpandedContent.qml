@@ -1,20 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.components
 import qs.services
 import qs.ui.topbar.notch.activities
 
-/*
-    En "expanded" (clic sur la notch) :
-      - Un évènement vraiment URGENT/transitoire (alarme qui sonne,
-        minuteur terminé, notification, connexion Bluetooth) prend
-        l'écran en entier temporairement — c'est voulu, ça expire seul.
-      - Sinon, TOUJOURS le hub (NotchDashboard), même si un "mode"
-        continu est actif (Game Mode, média, batterie en charge,
-        caméra/micro) : ces états restent visibles comme petits badges
-        DANS le hub (cf. NotchDashboard.qml), jamais en accaparant tout
-        l'écran — pour qu'on puisse toujours accéder au reste de la
-        notch, avec juste un petit bouton pour désactiver le mode.
-*/
 Item {
     id: root
 
@@ -32,21 +21,14 @@ Item {
             color: "#FFFFFF"
             font.pixelSize: 13
             font.bold: true
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
         }
 
-        Loader {
+        PageLoader {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: {
-                switch (root.kind) {
-                    case "timer":        return timerComp
-                    case "alarm":        return alarmComp
-                    case "notification": return notificationComp
-                    case "bluetooth":    return bluetoothComp
-                    default:             return dashboardComp
-                }
-            }
+            index: root.pageIndex(root.kind)
+            pages: [dashboardComp, timerComp, alarmComp, notificationComp, bluetoothComp]
         }
     }
 
@@ -55,6 +37,16 @@ Item {
     Component { id: notificationComp; NotificationActivity {} }
     Component { id: bluetoothComp;    BluetoothActivity {} }
     Component { id: dashboardComp;    NotchDashboard {} }
+
+    function pageIndex(k) {
+        switch (k) {
+            case "timer":        return 1
+            case "alarm":        return 2
+            case "notification": return 3
+            case "bluetooth":    return 4
+            default:             return 0
+        }
+    }
 
     function title(k) {
         switch (k) {

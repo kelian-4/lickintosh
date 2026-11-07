@@ -58,12 +58,12 @@ Item {
                 root._passwordForSSID = ""
             }
         }
-        function onConnectionFailed(ssid) {
-            root._failedSSIDs[ssid] = true
-            root._failedSSIDsChanged()
-            root._passwordForSSID = ssid
+        function onConnectionFailed(ssid, reason, message) {
+            root._passwordForSSID = ""
         }
         function onPasswordRequired(ssid) {
+            root._failedSSIDs[ssid] = true
+            root._failedSSIDsChanged()
             root._passwordForSSID = ssid
         }
         function onBusyChanged() {
@@ -88,7 +88,7 @@ Item {
             height: 54
 
             CFText {
-                text:           "Wi-Fi"
+                text:           I18n.tr("Wi-Fi")
                 font.weight:    Font.Bold
                 font.pixelSize: 18
                 anchors.left:           parent.left
@@ -132,7 +132,7 @@ Item {
                     radius: 2
                     color: "#50ffffff"
                     opacity: _vbar.pressed ? 0.9 : (_vbar.hovered ? 0.7 : 0.0)
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.75) } }
                 }
                 background: Item {}
             }
@@ -145,7 +145,7 @@ Item {
                 Item { width: parent.width; height: 10 }
 
                 CFText {
-                    text:          "Connecté"
+                    text:          I18n.tr("Connecté")
                     font.pixelSize: 13
                     gray:           true
                     visible:        NetworkManager.active !== null
@@ -163,7 +163,7 @@ Item {
                 Item { width: parent.width; height: NetworkManager.networksKnown.length > 0 ? 8 : 0 }
 
                 CFText {
-                    text:           "Réseaux connus"
+                    text:           I18n.tr("Réseaux connus")
                     font.pixelSize: 13
                     gray:           true
                     visible:        NetworkManager.networksKnown.filter(function(n) { return !n.active }).length > 0
@@ -199,7 +199,7 @@ Item {
                     property bool _shown: false
 
                     CFText {
-                        text:           "Autres réseaux"
+                        text:           I18n.tr("Autres réseaux")
                         font.pixelSize: 13
                         gray:           true
                         anchors.left:           parent.left
@@ -214,7 +214,7 @@ Item {
                         icon:     "chevron-right.svg"
                         size:     14
                         rotation: _otherHeader._shown ? 90 : 0
-                        Behavior on rotation { NumberAnimation { duration: 200 } }
+                        Behavior on rotation { NumberAnimation { duration: ShellMotion.effects() } }
                     }
 
                     MouseArea {
@@ -259,12 +259,21 @@ Item {
             height: 44
 
             CFText {
-                text:           "Paramètres Wi-Fi…"
+                text:           I18n.tr("Paramètres Wi-Fi…")
                 font.pixelSize: 14
                 gray:           true
                 anchors.left:           parent.left
                 anchors.leftMargin:     20
                 anchors.verticalCenter: parent.verticalCenter
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape:  Qt.PointingHandCursor
+                onClicked: {
+                    SettingsLauncher.open("WifiPage")
+                    root.closeRequested()
+                }
             }
         }
     }
@@ -288,13 +297,17 @@ Item {
                                               && net.isSecure
                                               && root._passwordForSSID === net.ssid
 
+        readonly property string _failMsg: _nr.net ? NetworkManager.failureMessage(_nr.net.ssid) : ""
+        readonly property bool _showFailure: !isActive && !_showPassword && _failMsg !== ""
+
         readonly property bool _showError: _nr.net
                                            && root._failedSSIDs[_nr.net.ssid] === true
                                            && _nr._showPassword
 
-        height: _showPassword ? rowHeight + (_showError ? 68 : 48) : rowHeight
+        height: _showPassword ? rowHeight + (_showError ? 68 : 48)
+                                : _showFailure ? rowHeight + _failText.implicitHeight + 8 : rowHeight
         Behavior on height {
-            NumberAnimation { duration: 180; easing.type: Easing.OutBack; easing.overshoot: 0.5 }
+            NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
         }
 
         Rectangle {
@@ -323,7 +336,7 @@ Item {
                     anchors.centerIn: parent
                     icon:  _nr.signalIcon
                     size:  root.iconSize
-                    color: _nr.isActive ? "#1C7AFF" : "#fff"
+                    color: _nr.isActive ? Theme.accent : "#fff"
                 }
             }
 
@@ -335,14 +348,14 @@ Item {
             }
 
             CFText {
-                text:           "Déconnexion…"
+                text:           I18n.tr("Déconnexion…")
                 font.pixelSize: 12
                 gray:           true
                 visible:        _nr.isActive && _nr.net && root._disconnectingSSID === _nr.net.ssid
             }
 
             CFText {
-                text:           "Connexion…"
+                text:           I18n.tr("Connexion…")
                 font.pixelSize: 12
                 gray:           true
                 visible:        !_nr.isActive && _nr.net && root._connectingSSID === _nr.net.ssid
@@ -356,6 +369,20 @@ Item {
             }
         }
 
+        CFText {
+            id:                  _failText
+            visible:             _nr._showFailure
+            anchors.top:         _row.bottom
+            anchors.left:        parent.left
+            anchors.right:       parent.right
+            anchors.leftMargin:  64
+            anchors.rightMargin: 20
+            text:                _nr._failMsg
+            color:               "#FF6B6B"
+            font.pixelSize:      11
+            wrapMode:            Text.WordWrap
+        }
+
         Item {
             id:                  _pwArea
             anchors.top:         _row.bottom
@@ -366,16 +393,18 @@ Item {
             height:              _nr._showError ? 64 : 44
             visible:             _nr._showPassword
             opacity:             _nr._showPassword ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 160 } }
+            Behavior on opacity { NumberAnimation { duration: ShellMotion.effects(0.8) } }
 
             CFText {
                 id: _errorText
                 visible:        _nr._showError
-                text:           "Mot de passe incorrect, réessayez"
+                text:           I18n.tr("Mot de passe incorrect, réessayez")
                 color:          "#FF6B6B"
                 font.pixelSize: 11
                 anchors.top:        parent.top
                 anchors.left:       parent.left
+                anchors.right:      parent.right
+                elide:              Text.ElideRight
                 bottomPadding:      6
             }
 
@@ -387,10 +416,10 @@ Item {
                 anchors.rightMargin:     8
                 height:                  32
                 echoMode:                TextInput.Password
-                placeholderText:         "Mot de passe"
-                color:                   "#ffffff"
+                placeholderText:         I18n.tr("Mot de passe")
+                color: Theme.ink(parent, false)
                 font.pixelSize:          13
-                font.family:             "SF Pro Rounded"
+                font.family:             "SF Pro Text"
                 renderType:              Text.NativeRendering
                 selectionColor:          "#50ffffff"
                 selectedTextColor:       "#ffffff"
@@ -425,10 +454,10 @@ Item {
 
                 CFText {
                     anchors.centerIn: parent
-                    text:           "Joindre"
+                    text:           I18n.tr("Joindre")
                     font.pixelSize: 13
                     font.weight:    Font.DemiBold
-                    color:          "#ffffff"
+                    color: Theme.ink(parent, false)
                 }
 
                 MouseArea {
@@ -531,7 +560,7 @@ Item {
             y: root._ctxY
             width: 170
             radius: 10
-            color: "#e6202020"
+            color: Theme.popup("#e6202020")
             border.color: "#20ffffff"
             border.width: 1
             implicitHeight: _wifiCtxCol.implicitHeight + 8
@@ -546,7 +575,7 @@ Item {
                 spacing: 2
 
                 CtxItem {
-                    label: root._ctxNet && root._ctxNet.active ? "Déconnecter" : "Connecter"
+                    label: root._ctxNet && root._ctxNet.active ? I18n.tr("Déconnecter") : I18n.tr("Connecter")
                     onActivated: {
                         if (!root._ctxNet) return
                         if (root._ctxNet.active) {
@@ -562,7 +591,7 @@ Item {
                 CtxItem {
                     visible: root._ctxNet && NetworkManager.networksKnown.indexOf(root._ctxNet) !== -1
                     height: visible ? 32 : 0
-                    label: "Oublier ce réseau"
+                    label: I18n.tr("Oublier ce réseau")
                     destructive: true
                     onActivated: {
                         if (root._ctxNet) {

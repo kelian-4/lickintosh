@@ -4,15 +4,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 
-/*
-    Météo — approche reprise de caelestia-dots/shell (services/Weather.qml,
-    GPLv3) : géolocalisation IP via ip-api.com, données météo via
-    Open-Meteo (api.open-meteo.com), aucune clé API. Réimplémenté ici
-    avec XMLHttpRequest (JS natif Qt Quick) au lieu de leur wrapper
-    interne "Requests" (dépend de leur plugin C++ Caelestia.Config).
-    Étendu avec les prévisions 7 jours + lever/coucher du soleil pour
-    la page Weather complète (cf. WeatherTab.qml de caelestia).
-*/
 Singleton {
     id: root
 
@@ -20,7 +11,7 @@ Singleton {
 
     property bool available: false
     property string city: ""
-    property string loc: ""       // "lat,lon"
+    property string loc: ""
 
     property real tempC: 0
     property real feelsLikeC: 0
@@ -31,7 +22,21 @@ Singleton {
     property string sunrise: ""
     property string sunset: ""
 
-    property var forecast: []     // [{ date, weekday, code, tempMax, tempMin }]
+    property var forecast: []
+
+    readonly property string iconFile: root._iconFor(root.weatherCode)
+
+    function _iconFor(code) {
+        if (code === 0 || code === 1) return "weather/sun.svg"
+        if (code === 2) return "weather/cloud-sun.svg"
+        if (code === 3 || code === 45 || code === 48) return "weather/clouds.svg"
+        if (code === 51 || code === 53 || code === 55 || code === 56 || code === 57) return "notch/cloud-drizzle.svg"
+        if (code >= 61 && code <= 67) return "weather/cloud-rain.svg"
+        if (code === 80 || code === 81 || code === 82) return "weather/cloud-rain.svg"
+        if ((code >= 71 && code <= 77) || code === 85 || code === 86) return "weather/cloud-snow.svg"
+        if (code === 95 || code === 96 || code === 99) return "notch/cloud-lightning.svg"
+        return "weather/clouds.svg"
+    }
 
     function _get(url, onDone) {
         var xhr = new XMLHttpRequest()
@@ -97,8 +102,6 @@ Singleton {
         })
     }
 
-    // Table de correspondance WMO weather_code -> description, reprise
-    // de caelestia (services/Weather.qml, getWeatherCondition()).
     function _conditionFor(code) {
         const conditions = {
             0: "Ciel dégagé", 1: "Ciel dégagé", 2: "Partiellement nuageux", 3: "Couvert",
@@ -116,7 +119,7 @@ Singleton {
     }
 
     Timer {
-        interval: 3600000 // 1h, comme caelestia
+        interval: 3600000
         running: true
         repeat: true
         triggeredOnStart: true

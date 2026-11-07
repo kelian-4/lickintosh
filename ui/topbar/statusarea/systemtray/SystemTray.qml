@@ -32,6 +32,7 @@ RowLayout {
     Item {
         id: overflowClip
         clip: true
+        visible: root.expanded || overflowClip.Layout.preferredWidth > 0
         Layout.alignment: Qt.AlignVCenter
         implicitHeight: overflowRow.implicitHeight
         Layout.preferredWidth: root.expanded ? Math.min(overflowRow.implicitWidth, root.maxWidth) : 0

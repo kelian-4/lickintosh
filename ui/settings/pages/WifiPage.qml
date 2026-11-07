@@ -45,12 +45,12 @@ ContentPage {
                 root._passwordForSSID = ""
             }
         }
-        function onConnectionFailed(ssid) {
-            root._failedSSIDs[ssid] = true
-            root._failedSSIDsChanged()
-            root._passwordForSSID = ssid
+        function onConnectionFailed(ssid, reason, message) {
+            root._passwordForSSID = ""
         }
         function onPasswordRequired(ssid) {
+            root._failedSSIDs[ssid] = true
+            root._failedSSIDsChanged()
             root._passwordForSSID = ssid
         }
         function onBusyChanged() {
@@ -58,13 +58,12 @@ ContentPage {
         }
     }
 
-    // ---------------- Wi-Fi : toggle + réseau actif ----------------
     ContentSection {
         title: ""
 
         ConfigSwitch {
-            text: "Wi-Fi"
-            description: "Configurer le Wi-Fi pour connecter cet appareil à internet."
+            text: I18n.tr("Wi-Fi")
+            description: I18n.tr("Configurer le Wi-Fi pour connecter cet appareil à internet.")
             checked: NetworkManager.wifiEnabled
             onToggled: function(value) { NetworkManager.enableWifi(value) }
         }
@@ -104,7 +103,7 @@ ContentPage {
                     anchors.centerIn: parent
                     icon: root._signalIcon(NetworkManager.active)
                     size: root.iconSize
-                    color: NetworkManager.active ? "#1C7AFF" : "#fff"
+                    color: NetworkManager.active ? Theme.accent : "#fff"
                 }
             }
 
@@ -116,11 +115,11 @@ ContentPage {
                     text: NetworkManager.active ? NetworkManager.active.ssid
                           : (NetworkManager.wifiEnabled ? "Non connecté" : "Wi-Fi désactivé")
                     font.pixelSize: 14
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 CFText {
-                    text: NetworkManager.active ? "Connecté" : ""
+                    text: NetworkManager.active ? I18n.tr("Connecté") : ""
                     font.pixelSize: 12
                     color: "#4CD964"
                     visible: NetworkManager.active !== null
@@ -147,9 +146,9 @@ ContentPage {
 
                 CFText {
                     anchors.centerIn: parent
-                    text: "Détails…"
+                    text: I18n.tr("Détails…")
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {
@@ -167,9 +166,8 @@ ContentPage {
         }
     }
 
-    // ---------------- Réseaux connus ----------------
     ContentSection {
-        title: "Réseau connu"
+        title: I18n.tr("Réseau connu")
         visible: NetworkManager.wifiEnabled && root._knownNetworks.length > 0
 
         Repeater {
@@ -183,9 +181,8 @@ ContentPage {
         }
     }
 
-    // ---------------- Autres réseaux ----------------
     ContentSection {
-        title: "Autres réseaux"
+        title: I18n.tr("Autres réseaux")
         visible: NetworkManager.wifiEnabled && _otherNets.count > 0
 
         Repeater {
@@ -216,9 +213,9 @@ ContentPage {
 
                 CFText {
                     anchors.centerIn: parent
-                    text: "Autre…"
+                    text: I18n.tr("Autre…")
                     font.pixelSize: 12
-                    color: "#fff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {
@@ -232,19 +229,18 @@ ContentPage {
         }
     }
 
-    // ---------------- Options de jointure automatique ----------------
     ContentSection {
         title: ""
 
         ConfigSwitch {
-            text: "Demander à rejoindre les réseaux"
-            description: "Les réseaux connus sont rejoints automatiquement. Si aucun réseau connu n'est disponible, vous devrez en choisir un manuellement."
+            text: I18n.tr("Demander à rejoindre les réseaux")
+            description: I18n.tr("Les réseaux connus sont rejoints automatiquement. Si aucun réseau connu n'est disponible, vous devrez en choisir un manuellement.")
             checked: false
         }
 
         ConfigSwitch {
-            text: "Demander à rejoindre les points d'accès"
-            description: "Permettre à cet appareil de découvrir automatiquement les points d'accès personnels à proximité quand aucun réseau Wi-Fi n'est disponible."
+            text: I18n.tr("Demander à rejoindre les points d'accès")
+            description: I18n.tr("Permettre à cet appareil de découvrir automatiquement les points d'accès personnels à proximité quand aucun réseau Wi-Fi n'est disponible.")
             checked: false
         }
     }
@@ -324,11 +320,15 @@ ContentPage {
                                               && net.isSecure
                                               && root._passwordForSSID === net.ssid
 
+        readonly property string _failMsg: _nr.net ? NetworkManager.failureMessage(_nr.net.ssid) : ""
+        readonly property bool _showFailure: !isActive && !_showPassword && _failMsg !== ""
+
         readonly property bool _showError: _nr.net
                                            && root._failedSSIDs[_nr.net.ssid] === true
                                            && _nr._showPassword
 
-        Layout.preferredHeight: _showPassword ? root.rowHeight + _pwArea.height : root.rowHeight
+        Layout.preferredHeight: _showPassword ? root.rowHeight + _pwArea.height
+                                              : _showFailure ? root.rowHeight + _failText.implicitHeight + 10 : root.rowHeight
 
         Rectangle {
             anchors.fill:    parent
@@ -355,7 +355,7 @@ ContentPage {
                     anchors.centerIn: parent
                     icon: _nr.signalIcon
                     size: root.iconSize
-                    color: _nr.isActive ? "#1C7AFF" : "#fff"
+                    color: _nr.isActive ? Theme.accent : "#fff"
                 }
             }
 
@@ -367,14 +367,14 @@ ContentPage {
             }
 
             CFText {
-                text: "Déconnexion…"
+                text: I18n.tr("Déconnexion…")
                 font.pixelSize: 12
                 gray: true
                 visible: _nr.isActive && _nr.net && root._disconnectingSSID === _nr.net.ssid
             }
 
             CFText {
-                text: "Connexion…"
+                text: I18n.tr("Connexion…")
                 font.pixelSize: 12
                 gray: true
                 visible: !_nr.isActive && _nr.net && root._connectingSSID === _nr.net.ssid
@@ -386,6 +386,20 @@ ContentPage {
                 visible: _nr.net && _nr.net.isSecure
                 gray: true
             }
+        }
+
+        CFText {
+            id: _failText
+            visible: _nr._showFailure
+            anchors.top: _row.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 44
+            anchors.rightMargin: 12
+            text: _nr._failMsg
+            color: "#FF6B6B"
+            font.pixelSize: 11
+            wrapMode: Text.WordWrap
         }
 
         Item {
@@ -401,11 +415,13 @@ ContentPage {
             CFText {
                 id: _errorText
                 visible: _nr._showError
-                text: "Mot de passe incorrect, réessayez"
+                text: NetworkManager.failureMessage(_nr.net ? _nr.net.ssid : "") || I18n.tr("Mot de passe incorrect, réessayez")
                 color: "#FF6B6B"
                 font.pixelSize: 11
                 anchors.top:  parent.top
                 anchors.left: parent.left
+                anchors.right: parent.right
+                wrapMode: Text.WordWrap
                 bottomPadding: 6
             }
 
@@ -417,8 +433,8 @@ ContentPage {
                 anchors.rightMargin: 8
                 height: 32
                 echoMode: TextInput.Password
-                placeholderText: "Mot de passe"
-                color: "#ffffff"
+                placeholderText: I18n.tr("Mot de passe")
+                color: Theme.textPrimary
                 font.pixelSize: 13
                 renderType: Text.NativeRendering
                 selectionColor: "#50ffffff"
@@ -455,10 +471,10 @@ ContentPage {
 
                 CFText {
                     anchors.centerIn: parent
-                    text: "Joindre"
+                    text: I18n.tr("Joindre")
                     font.pixelSize: 13
                     font.weight: Font.DemiBold
-                    color: "#ffffff"
+                    color: Theme.textPrimary
                 }
 
                 MouseArea {
@@ -571,7 +587,7 @@ ContentPage {
                 y: root._ctxY
                 width: 170
                 radius: 10
-                color: "#e6202020"
+                color: Theme.popup("#e6202020")
                 border.color: "#20ffffff"
                 border.width: 1
                 implicitHeight: _wifiCtxCol.implicitHeight + 8
@@ -586,7 +602,7 @@ ContentPage {
                     spacing: 2
 
                     CtxItem {
-                        label: root._ctxNet && root._ctxNet.active ? "Déconnecter" : "Connecter"
+                        label: root._ctxNet && root._ctxNet.active ? I18n.tr("Déconnecter") : I18n.tr("Connecter")
                         onActivated: {
                             if (!root._ctxNet) return
                             if (root._ctxNet.active) {
@@ -602,7 +618,7 @@ ContentPage {
                     CtxItem {
                         visible: root._ctxNet && NetworkManager.networksKnown.indexOf(root._ctxNet) !== -1
                         height: visible ? 32 : 0
-                        label: "Oublier ce réseau"
+                        label: I18n.tr("Oublier ce réseau")
                         destructive: true
                         onActivated: {
                             if (root._ctxNet) {
@@ -638,7 +654,7 @@ ContentPage {
             height: _detailsCol.implicitHeight + 32
             anchors.centerIn: parent
             radius: 14
-            color: "#e6202020"
+            color: Theme.popup("#e6202020")
             border.color: "#20ffffff"
             border.width: 1
 
@@ -663,13 +679,13 @@ ContentPage {
                         Layout.preferredWidth: 28
                         Layout.preferredHeight: 28
                         radius: 14
-                        color: "#fff"
+                        color: Theme.textPrimary
 
                         CFVI {
                             anchors.centerIn: parent
                             icon: root._signalIcon(NetworkManager.active && NetworkManager.active.ssid === NetworkManager.detailsSSID ? NetworkManager.active : null)
                             size: 16
-                            color: "#1C7AFF"
+                            color: Theme.accent
                         }
                     }
 
@@ -681,12 +697,12 @@ ContentPage {
                             text: NetworkManager.detailsSSID
                             font.pixelSize: 15
                             font.weight: Font.Bold
-                            color: "#fff"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                         }
 
                         CFText {
-                            text: NetworkManager.active && NetworkManager.active.ssid === NetworkManager.detailsSSID ? "Connecté" : "Non connecté"
+                            text: NetworkManager.active && NetworkManager.active.ssid === NetworkManager.detailsSSID ? I18n.tr("Connecté") : I18n.tr("Non connecté")
                             font.pixelSize: 12
                             color: NetworkManager.active && NetworkManager.active.ssid === NetworkManager.detailsSSID ? "#4CD964" : "#888"
                         }
@@ -723,7 +739,7 @@ ContentPage {
                 }
 
                 CFText {
-                    text: "Analyse en cours…"
+                    text: I18n.tr("Analyse en cours…")
                     font.pixelSize: 12
                     gray: true
                     visible: NetworkManager.detailsLoading
@@ -750,7 +766,7 @@ ContentPage {
                         CFText {
                             text: value
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                         }
@@ -786,7 +802,7 @@ ContentPage {
                                 CFText {
                                     text: _ddRoot.value
                                     font.pixelSize: 12
-                                    color: "#fff"
+                                    color: Theme.textPrimary
                                     Layout.fillWidth: true
                                     elide: Text.ElideRight
                                 }
@@ -801,7 +817,7 @@ ContentPage {
                     }
 
                     CFText {
-                        text: "Configuration IPv4"
+                        text: I18n.tr("Configuration IPv4")
                         font.pixelSize: 11
                         font.weight: Font.Bold
                         gray: true
@@ -829,9 +845,9 @@ ContentPage {
 
                             CFText {
                                 anchors.centerIn: parent
-                                text: "Renouveler le bail DHCP"
+                                text: I18n.tr("Renouveler le bail DHCP")
                                 font.pixelSize: 12
-                                color: "#fff"
+                                color: Theme.textPrimary
                             }
 
                             MouseArea {
@@ -847,7 +863,7 @@ ContentPage {
                     DetailRow { label: "ID client DHCP (si requis)"; value: "" }
 
                     CFText {
-                        text: "Configuration IPv6"
+                        text: I18n.tr("Configuration IPv6")
                         font.pixelSize: 11
                         font.weight: Font.Bold
                         gray: true
@@ -881,7 +897,7 @@ ContentPage {
                         CFText {
                             id: _forgetLabel
                             anchors.centerIn: parent
-                            text: "Oublier ce réseau…"
+                            text: I18n.tr("Oublier ce réseau…")
                             font.pixelSize: 12
                             color: "#FF6B6B"
                         }
@@ -911,9 +927,9 @@ ContentPage {
 
                         CFText {
                             anchors.centerIn: parent
-                            text: "Annuler"
+                            text: I18n.tr("Annuler")
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                         }
 
                         MouseArea {
@@ -929,14 +945,14 @@ ContentPage {
                         Layout.preferredWidth: 60
                         Layout.preferredHeight: 28
                         radius: 7
-                        color: _okBtnMouse.containsMouse ? Qt.rgba(0.15, 0.51, 1, 1) : "#1C7AFF"
+                        color: _okBtnMouse.containsMouse ? Qt.lighter(Theme.accent, 1.15) : Theme.accent
                         Behavior on color { ColorAnimation { duration: 100 } }
 
                         CFText {
                             anchors.centerIn: parent
-                            text: "OK"
+                            text: I18n.tr("OK")
                             font.pixelSize: 12
-                            color: "#fff"
+                            color: Theme.textPrimary
                         }
 
                         MouseArea {
@@ -976,7 +992,7 @@ ContentPage {
                 height: _manualCol.implicitHeight + 32
                 anchors.centerIn: parent
                 radius: 14
-                color: "#e6202020"
+                color: Theme.popup("#e6202020")
                 border.color: "#20ffffff"
                 border.width: 1
 
@@ -994,14 +1010,14 @@ ContentPage {
                     spacing: 14
 
                     CFText {
-                        text: "Autre réseau"
+                        text: I18n.tr("Autre réseau")
                         font.pixelSize: 15
                         font.weight: Font.Bold
-                        color: "#fff"
+                        color: Theme.textPrimary
                     }
 
                     CFText {
-                        text: "Saisissez le nom d'un réseau Wi-Fi non diffusé."
+                        text: I18n.tr("Saisissez le nom d'un réseau Wi-Fi non diffusé.")
                         font.pixelSize: 12
                         gray: true
                         Layout.fillWidth: true
@@ -1013,7 +1029,7 @@ ContentPage {
                         spacing: 4
 
                         CFText {
-                            text: "Nom du réseau"
+                            text: I18n.tr("Nom du réseau")
                             font.pixelSize: 11
                             gray: true
                         }
@@ -1027,8 +1043,8 @@ ContentPage {
                                 root._manualSSID = text
                                 if (text.trim().length > 0) root._manualError = false
                             }
-                            placeholderText: "Nom du réseau"
-                            color: "#ffffff"
+                            placeholderText: I18n.tr("Nom du réseau")
+                            color: Theme.textPrimary
                             font.pixelSize: 13
                             renderType: Text.NativeRendering
                             selectionColor: "#50ffffff"
@@ -1043,7 +1059,7 @@ ContentPage {
                         }
 
                         CFText {
-                            text: "Un nom de réseau est requis"
+                            text: I18n.tr("Un nom de réseau est requis")
                             font.pixelSize: 11
                             color: "#FF6B6B"
                             visible: root._manualError
@@ -1051,7 +1067,7 @@ ContentPage {
                     }
 
                     ConfigSwitch {
-                        text: "Réseau sécurisé"
+                        text: I18n.tr("Réseau sécurisé")
                         checked: root._manualSecure
                         onToggled: function(v) { root._manualSecure = v }
                     }
@@ -1062,7 +1078,7 @@ ContentPage {
                         visible: root._manualSecure
 
                         CFText {
-                            text: "Mot de passe"
+                            text: I18n.tr("Mot de passe")
                             font.pixelSize: 11
                             gray: true
                         }
@@ -1074,8 +1090,8 @@ ContentPage {
                             text: root._manualPassword
                             onTextChanged: root._manualPassword = text
                             echoMode: TextInput.Password
-                            placeholderText: "Mot de passe"
-                            color: "#ffffff"
+                            placeholderText: I18n.tr("Mot de passe")
+                            color: Theme.textPrimary
                             font.pixelSize: 13
                             renderType: Text.NativeRendering
                             selectionColor: "#50ffffff"
@@ -1109,9 +1125,9 @@ ContentPage {
 
                             CFText {
                                 anchors.centerIn: parent
-                                text: "Annuler"
+                                text: I18n.tr("Annuler")
                                 font.pixelSize: 12
-                                color: "#fff"
+                                color: Theme.textPrimary
                             }
 
                             MouseArea {
@@ -1127,14 +1143,14 @@ ContentPage {
                             Layout.preferredWidth: 70
                             Layout.preferredHeight: 28
                             radius: 7
-                            color: _manualJoinMouse.containsMouse ? Qt.rgba(0.15, 0.51, 1, 1) : "#1C7AFF"
+                            color: _manualJoinMouse.containsMouse ? Qt.lighter(Theme.accent, 1.15) : Theme.accent
                             Behavior on color { ColorAnimation { duration: 100 } }
 
                             CFText {
                                 anchors.centerIn: parent
-                                text: "Joindre"
+                                text: I18n.tr("Joindre")
                                 font.pixelSize: 12
-                                color: "#fff"
+                                color: Theme.textPrimary
                             }
 
                             MouseArea {

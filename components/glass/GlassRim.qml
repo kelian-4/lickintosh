@@ -25,6 +25,7 @@ Item {
     ShaderEffect {
         anchors.fill:    parent
         blending:        true
+        property variant  source:       null
         property vector2d iResolution:  box.iResolution
         property vector2d boxSize:      box.boxSize
         property vector4d cornerRadii:  box.cornerRadii

@@ -1,14 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import QtQuick.VectorImage
+import Quickshell
+import qs.components
 import qs.services
 
-/*
-    Contenu compact : icône réelle du projet (assets/icons/...), pas
-    un glyphe inventé — chemins relatifs depuis ui/topbar/notch/ (3
-    niveaux jusqu'à la racine), même convention que le FontLoader de
-    TopBar.qml ("../../../assets/...").
-*/
 Item {
     id: root
     property bool peek: false
@@ -16,17 +13,21 @@ Item {
     readonly property string kind: NotchState.primaryKind
     readonly property bool hasKind: root.kind !== "none"
 
+    readonly property string themeDir: Quickshell.shellDir + "/assets/icons_desktop/MacTahoe/"
+
+    readonly property bool themedGlyph: root.kind === "gamemode"
+
     function _icon(k) {
         switch (k) {
-            case "timer":          return "../../../assets/icons/notch/clock.svg"
-            case "stopwatch":      return "../../../assets/icons/notch/clock.svg"
-            case "alarm":          return "../../../assets/icons/dropdown/clock.svg"
-            case "notification":   return "../../../assets/icons/notch/bell.svg"
-            case "bluetooth":      return "../../../assets/icons/bluetooth/bluetooth.svg"
-            case "battery":        return "../../../assets/icons/battery/zap.svg"
-            case "gamemode":       return "../../../assets/icons/notch/award.svg"
-            case "capture-camera": return "../../../assets/icons/notch/camera.svg"
-            case "capture-mic":    return "../../../assets/icons/notch/mic.svg"
+            case "timer":          return "notch/clock.svg"
+            case "stopwatch":      return "notch/clock.svg"
+            case "alarm":          return "dropdown/clock.svg"
+            case "notification":   return "notch/bell.svg"
+            case "bluetooth":      return "bluetooth/bluetooth.svg"
+            case "gamemode":       return root.themeDir + "actions/symbolic/gamepad-symbolic.svg"
+            case "focus":          return "dnd.svg"
+            case "capture-camera": return "notch/camera.svg"
+            case "capture-mic":    return "notch/mic.svg"
             default:               return ""
         }
     }
@@ -37,10 +38,10 @@ Item {
             case "timer":          return TimerState.formatRemaining(TimerState.remainingMs)
             case "stopwatch":      return StopwatchState.formatElapsed(StopwatchState.elapsedMs)
             case "alarm":          return "Alarme"
-            case "notification":   return NotchState.topUrgent ? NotchState.topUrgent.title : "Notification"
-            case "bluetooth":      return NotchState.topUrgent ? NotchState.topUrgent.title : "Bluetooth"
-            case "battery":        return "Charge · " + NotchState.batteryPercent + "%"
+            case "notification":   return NotchState.topUrgent ? NotchState.topUrgent.title : I18n.tr("Notification")
+            case "bluetooth":      return NotchState.topUrgent ? NotchState.topUrgent.title : I18n.tr("Bluetooth")
             case "gamemode":       return "Game Mode"
+            case "focus":          return "Focus"
             case "capture-camera": return "Caméra active"
             case "capture-mic":    return "Micro actif"
             default:               return ""
@@ -54,9 +55,6 @@ Item {
         spacing: 8
         visible: root.hasKind
 
-        // Le média n'a pas d'icône SVG dédiée dans assets/ : on montre
-        // la pochette (Mpris) si disponible, sinon un simple carré vide
-        // plutôt que d'inventer un glyphe.
         Rectangle {
             visible: root.kind === "media"
             Layout.preferredWidth: 14
@@ -73,13 +71,30 @@ Item {
             }
         }
 
-        VectorImage {
-            visible: root.kind !== "media" && root.kind !== "none"
+        CFVI {
+            visible: root.kind !== "media" && root.kind !== "none" && !root.themedGlyph
+            Layout.alignment: Qt.AlignVCenter
             Layout.preferredWidth: 14
             Layout.preferredHeight: 14
+            size: 14
+            icon: root._icon(root.kind)
+            colorized: root.kind === "focus"
+            color: root.kind === "focus" ? "#BF8AFF" : "#ffffff"
+        }
+
+        VectorImage {
+            visible: root.themedGlyph
             Layout.alignment: Qt.AlignVCenter
-            source: root._icon(root.kind)
+            Layout.preferredWidth: 14
+            Layout.preferredHeight: 14
+            source: root.themedGlyph ? "file://" + root._icon(root.kind) : ""
             preferredRendererType: VectorImage.CurveRenderer
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                brightness: 1.0
+                colorization: 1.0
+                colorizationColor: "#ffffff"
+            }
         }
 
         Text {
@@ -89,9 +104,44 @@ Item {
             text: root._label(root.kind)
             color: "#FFFFFF"
             font.pixelSize: 12
-            font.family: "SF Pro Rounded"
+            font.family: "SF Pro Text"
             elide: Text.ElideRight
             renderType: Text.NativeRendering
+        }
+
+        Item {
+            Layout.fillWidth: true
+            visible: !root.peek
+        }
+
+        Row {
+            id: wave
+            visible: root.kind === "media"
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredHeight: 14
+            spacing: 2
+
+            Repeater {
+                model: [520, 380, 610, 440]
+
+                delegate: Rectangle {
+                    id: bar
+                    required property var modelData
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 2.5
+                    height: 4
+                    radius: 1.25
+                    color: "#FFFFFF"
+
+                    SequentialAnimation on height {
+                        running: wave.visible
+                        loops: Animation.Infinite
+                        NumberAnimation { to: 14; duration: bar.modelData; easing.type: Easing.InOutSine }
+                        NumberAnimation { to: 4; duration: bar.modelData; easing.type: Easing.InOutSine }
+                    }
+                }
+            }
         }
     }
 }

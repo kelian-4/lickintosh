@@ -1,69 +1,70 @@
 pragma Singleton
 import QtQuick
+import qs.services
 
 QtObject {
-    property list<var> menus: [
+    property var menus: [
         {
-            label: "Fichier",
+            label: I18n.tr("Fichier"),
             items: [
-                { label: "Nouvel onglet", mods: "CTRL", key: "T" },
-                { label: "Nouvelle fenêtre", mods: "CTRL", key: "N" },
-                { label: "Fenêtre privée", mods: "CTRL SHIFT", key: "N" },
-                { label: "Ouvrir fichier", mods: "CTRL", key: "O" },
+                { label: I18n.tr("Nouvel onglet"), mods: "CTRL", key: "T", icon: "notch/plus-square.svg" },
+                { label: I18n.tr("Nouvelle fenêtre"), mods: "CTRL", key: "N", icon: "notch/layout.svg" },
+                { label: I18n.tr("Fenêtre privée"), mods: "CTRL SHIFT", key: "N", icon: "notch/eye-off.svg" },
+                { label: I18n.tr("Ouvrir fichier"), mods: "CTRL", key: "O", icon: "notch/file.svg" },
                 { separator: true },
-                { label: "Fermer l'onglet", mods: "CTRL", key: "W" },
-                { label: "Fermer la fenêtre", mods: "CTRL SHIFT", key: "W" },
+                { label: I18n.tr("Fermer l'onglet"), mods: "CTRL", key: "W", icon: "notch/x.svg" },
+                { label: I18n.tr("Fermer la fenêtre"), mods: "CTRL SHIFT", key: "W", icon: "notch/x.svg" },
                 { separator: true },
-                { label: "Enregistrer la page", mods: "CTRL", key: "S", disabled: true },
-                { label: "Imprimer", mods: "CTRL", key: "P" }
+                { label: I18n.tr("Enregistrer la page"), mods: "CTRL", key: "S", disabled: true, icon: "notch/save.svg" },
+                { label: I18n.tr("Imprimer"), mods: "CTRL", key: "P", icon: "notch/file-text.svg" }
             ]
         },
         {
-            label: "Édition",
+            label: I18n.tr("Édition"),
             items: [
-                { label: "Annuler", mods: "CTRL", key: "Z" },
-                { label: "Rétablir", mods: "CTRL SHIFT", key: "Z", disabled: true },
+                { label: I18n.tr("Annuler"), mods: "CTRL", key: "Z", icon: "notch/rotate-ccw.svg" },
+                { label: I18n.tr("Rétablir"), mods: "CTRL SHIFT", key: "Z", disabled: true, icon: "notch/rotate-cw.svg" },
                 { separator: true },
-                { label: "Couper", mods: "CTRL", key: "X" },
-                { label: "Copier", mods: "CTRL", key: "C" },
-                { label: "Coller", mods: "CTRL", key: "V" },
+                { label: I18n.tr("Couper"), mods: "CTRL", key: "X", icon: "notch/crop.svg" },
+                { label: I18n.tr("Copier"), mods: "CTRL", key: "C", icon: "notch/copy.svg" },
+                { label: I18n.tr("Coller"), mods: "CTRL", key: "V", icon: "notch/clipboard.svg" },
                 { separator: true },
-                { label: "Tout sélectionner", mods: "CTRL", key: "A" },
-                { label: "Rechercher", mods: "CTRL", key: "F" }
+                { label: I18n.tr("Tout sélectionner"), mods: "CTRL", key: "A", icon: "notch/check.svg" },
+                { label: I18n.tr("Rechercher"), mods: "CTRL", key: "F", icon: "notch/search.svg" }
             ]
         },
         {
-            label: "Affichage",
+            label: I18n.tr("Affichage"),
             items: [
-                { label: "Recharger", mods: "CTRL", key: "R" },
+                { label: I18n.tr("Recharger"), mods: "CTRL", key: "R", icon: "notch/refresh-cw.svg" },
                 { separator: true },
-                { label: "Zoom avant", mods: "CTRL", key: "plus" },
-                { label: "Zoom arrière", mods: "CTRL", key: "minus" },
-                { label: "Taille réelle", mods: "CTRL", key: "0" },
+                { label: I18n.tr("Zoom avant"), mods: "CTRL", key: "plus", icon: "notch/zoom-in.svg" },
+                { label: I18n.tr("Zoom arrière"), mods: "CTRL", key: "minus", icon: "notch/zoom-out.svg" },
+                { label: I18n.tr("Taille réelle"), mods: "CTRL", key: "0", icon: "notch/maximize-2.svg" },
                 { separator: true },
-                { label: "Plein écran", mods: "", key: "F11" }
+                { label: I18n.tr("Plein écran"), mods: "", key: "F11", icon: "notch/maximize.svg" }
             ]
         },
         {
-            label: "Historique",
+            label: I18n.tr("Historique"),
             items: [
-                { label: "Afficher tout l'historique", mods: "CTRL", key: "H", icon: "notch/clock.svg" },
+                { label: I18n.tr("Afficher tout l'historique"), mods: "CTRL", key: "H", icon: "notch/clock.svg" },
                 { separator: true },
-                { label: "Précédent", mods: "ALT", key: "Left", icon: "chevron-left.svg" },
-                { label: "Suivant", mods: "ALT", key: "Right", icon: "chevron-right.svg" },
-                { label: "Accueil", mods: "ALT", key: "Home", icon: "notch/home.svg" },
-                { label: "Résultats de recherche", mods: "", key: "", disabled: true, icon: "search.svg" },
+                { label: I18n.tr("Précédent"), mods: "ALT", key: "Left", icon: "chevron-left.svg" },
+                { label: I18n.tr("Suivant"), mods: "ALT", key: "Right", icon: "chevron-right.svg" },
+                { label: I18n.tr("Accueil"), mods: "ALT", key: "Home", icon: "notch/home.svg" },
+                { label: I18n.tr("Résultats de recherche"), mods: "", key: "", disabled: true, icon: "search.svg" },
                 { separator: true },
-                { label: "Onglets récemment fermés", mods: "", key: "", disabled: true, icon: "notch/x.svg" },
-                { label: "Rouvrir l'onglet fermé", mods: "CTRL SHIFT", key: "T", icon: "notch/folder.svg" },
-                { label: "Rouvrir la session", mods: "", key: "", disabled: true, icon: "notch/layers.svg" }
+                { label: I18n.tr("Onglets récemment fermés"), mods: "", key: "", disabled: true, icon: "notch/x.svg" },
+                { label: I18n.tr("Rouvrir l'onglet fermé"), mods: "CTRL SHIFT", key: "T", icon: "notch/folder.svg" },
+                { label: I18n.tr("Rouvrir la session"), mods: "", key: "", disabled: true, icon: "notch/layers.svg" }
             ]
         },
         {
-            label: "Favoris",
+            label: I18n.tr("Favoris"),
             items: [
-                { label: "Ajouter aux favoris", mods: "CTRL", key: "D" },
-                { label: "Afficher les favoris", mods: "CTRL SHIFT", key: "O" }
+                { label: I18n.tr("Ajouter aux favoris"), mods: "CTRL", key: "D", icon: "notch/plus.svg" },
+                { label: I18n.tr("Afficher les favoris"), mods: "CTRL SHIFT", key: "O", icon: "notch/eye.svg" }
             ]
         }
     ]

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.components.glass
+import qs.services
 
 Item {
     id: root
@@ -65,25 +66,25 @@ Item {
 
                 Text {
                     text: delegateRoot.modelData.label
-                    color: "#FFFFFF"
+                    color: Theme.ink(parent, false)
                     font.pixelSize: 13
                     font.bold: true
-                    font.family: "monospace"
+                    font.family: "SF Mono"
                     renderType: Text.NativeRendering
                 }
                 Text {
                     text: delegateRoot.modelData.sub || ""
                     visible: (delegateRoot.modelData.sub || "") !== ""
-                    color: "#FFFFFF"
+                    color: Theme.ink(parent, false)
                     font.pixelSize: 12
-                    font.family: "monospace"
+                    font.family: "SF Mono"
                     renderType: Text.NativeRendering
                 }
                 Item { Layout.fillWidth: true }
                 Text {
                     text: delegateRoot.modelData.desc || ""
                     visible: (delegateRoot.modelData.desc || "") !== ""
-                    color: "#FFFFFF"
+                    color: Theme.ink(parent, false)
                     font.pixelSize: 11
                     elide: Text.ElideRight
                     Layout.maximumWidth: 150
@@ -123,7 +124,7 @@ Item {
             anchors.centerIn: parent
             width: parent.width - 24
             text: root.emptyMessage
-            color: "#FFFFFF"
+            color: Theme.ink(parent, false)
             font.pixelSize: 12
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter

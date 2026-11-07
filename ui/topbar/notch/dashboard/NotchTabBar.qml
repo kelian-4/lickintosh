@@ -1,72 +1,107 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import qs.services
 
-// Barre d'onglets calquée sur modules/dashboard/Tabs.qml de caelestia :
-// 4 onglets, icône + libellé, indicateur actif souligné.
-RowLayout {
+Item {
     id: root
+
     property int currentIndex: 0
+    property real indicatorX: 0
+    property real indicatorWidth: 0
+    property bool settled: false
+
     readonly property var tabs: [
-        { label: "Dashboard",   icon: "▦" },
-        { label: "Media",       icon: "♪" },
-        { label: "Performance", icon: "◈" },
-        { label: "Weather",     icon: "☁" }
+        { label: I18n.tr("Dashboard"),   icon: "grid.svg" },
+        { label: I18n.tr("Performance"), icon: "bar-chart2.svg" }
     ]
 
     Layout.fillWidth: true
-    spacing: 0
+    implicitHeight: 28
 
-    Repeater {
-        model: root.tabs
+    Timer {
+        interval: 60
+        running: true
+        onTriggered: root.settled = true
+    }
 
-        // Le délégué racine DOIT être un simple Item (pas un Layout) :
-        // un MouseArea avec anchors.fill à l'intérieur d'un Layout
-        // entre en conflit avec la gestion de géométrie du Layout
-        // (warning "Detected anchors on an item that is managed by a
-        // layout"). Le ColumnLayout interne, lui, est un pur enfant de
-        // cet Item (anchors.fill), pas un enfant géré par un Layout
-        // parent — donc pas de conflit.
-        delegate: Item {
-            id: tabDelegate
-            required property var modelData
-            required property int index
-            Layout.fillWidth: true
-            implicitHeight: content.implicitHeight
+    Rectangle {
+        id: indicator
+        x: root.indicatorX
+        width: root.indicatorWidth
+        height: 28
+        radius: 14
+        color: "#1F1F1F"
 
-            ColumnLayout {
-                id: content
-                anchors.fill: parent
-                spacing: 4
-
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 5
-                    Text {
-                        text: tabDelegate.modelData.icon
-                        color: root.currentIndex === tabDelegate.index ? "#1C7AFF" : "#8A8A8A"
-                        font.pixelSize: 12
-                    }
-                    Text {
-                        text: tabDelegate.modelData.label
-                        color: root.currentIndex === tabDelegate.index ? "#FFFFFF" : "#8A8A8A"
-                        font.pixelSize: 11
-                        font.bold: root.currentIndex === tabDelegate.index
-                        font.family: "SF Pro Rounded"
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 2
-                    radius: 1
-                    color: root.currentIndex === tabDelegate.index ? "#1C7AFF" : "#2A2A2A"
-                }
+        Behavior on x {
+            enabled: root.settled
+            NumberAnimation {
+                duration: ShellMotion.spatial(0.6)
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: ShellMotion.spatialCurve
             }
+        }
 
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.currentIndex = tabDelegate.index
+        Behavior on width {
+            enabled: root.settled
+            NumberAnimation {
+                duration: ShellMotion.spatial(0.6)
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: ShellMotion.spatialCurve
+            }
+        }
+    }
+
+    Row {
+        anchors.left: parent.left
+        anchors.top: parent.top
+        spacing: 6
+
+        Repeater {
+            model: root.tabs
+
+            delegate: Item {
+                id: tab
+                required property var modelData
+                required property int index
+                readonly property bool active: root.currentIndex === tab.index
+
+                width: tabContent.implicitWidth + 24
+                height: 28
+
+                Binding { target: root; property: "indicatorX"; value: tab.x; when: tab.active }
+                Binding { target: root; property: "indicatorWidth"; value: tab.width; when: tab.active }
+
+                Row {
+                    id: tabContent
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    TintedIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        size: 14
+                        source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/notch/" + tab.modelData.icon)
+                        tint: tab.active ? "#FFFFFF" : "#8A8A8A"
+
+                        Behavior on tint { ColorAnimation { duration: ShellMotion.effects(0.8) } }
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: tab.modelData.label
+                        color: tab.active ? "#FFFFFF" : "#8A8A8A"
+                        font.pixelSize: 13
+                        font.bold: tab.active
+                        font.family: "SF Pro Text"
+
+                        Behavior on color { ColorAnimation { duration: ShellMotion.effects(0.8) } }
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.currentIndex = tab.index
+                }
             }
         }
     }

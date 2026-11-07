@@ -3,12 +3,13 @@ import QtQuick.VectorImage
 import QtQuick.Effects
 import Quickshell
 import qs.components.glass
+import qs.services
 
 ListView {
     id: root
 
     required property string      searchText
-    required property list<var>   answers
+    required property var   answers
     required property string      fontFamily
     required property string      fontFamilyMedium
     required property int         currentIdx
@@ -93,6 +94,9 @@ ListView {
             } else if (row.modelData.reindex) {
                 root.reindexRequested()
                 root.itemClicked(row.modelData)
+            } else if (row.modelData.powerAction) {
+                PowerState.request(row.modelData.powerAction)
+                root.itemClicked(row.modelData)
             } else if (row.modelData.cmd) {
                 Quickshell.execDetached(["sh", "-c", row.modelData.cmd])
                 root.itemClicked(row.modelData)
@@ -109,7 +113,7 @@ ListView {
             bottomPadding: 4
             leftPadding: 12
             text: row.modelData._section || ""
-            color: "#ffffff"
+            color: Theme.ink(parent, false)
             opacity: 0.5
             font.family:    root.fontFamilyMedium
             font.pixelSize: 12
@@ -143,13 +147,13 @@ ListView {
                 property bool directLoadFailed: false
                 onStatusChanged: if (status === Image.Error) directLoadFailed = true
                 source: {
-                    if (row.isApp) return Quickshell.iconPath(row.modelData.icon, true)
+                    if (row.isApp) return IconResolver.byName(row.modelData.icon)
                     if (row.modelData.isWallpaper && !directLoadFailed) return "file://" + row.modelData.path
                     if (row.modelData.clipImage && !directLoadFailed) return "file://" + row.modelData.clipImage
                     if (row.modelData.isImage && !directLoadFailed) return "file://" + row.modelData.path
                     if (row.modelData.isEmoji) return row.modelData.emojiUrl
-                    if (row.modelData.icon && !row.modelData.icon.endsWith(".svg")) return Quickshell.iconPath(row.modelData.icon, true)
-                    return Quickshell.iconPath("image-x-generic", true)
+                    if (row.modelData.icon && !row.modelData.icon.endsWith(".svg")) return IconResolver.byName(row.modelData.icon)
+                    return IconResolver.byName("image-x-generic")
                 }
                 fillMode: (row.modelData.isWallpaper || row.modelData.clipImage || row.modelData.isImage) ? Image.PreserveAspectCrop : Image.PreserveAspectFit
                 sourceSize.width:  72
@@ -162,7 +166,7 @@ ListView {
                 anchors.centerIn: parent
                 width: 22; height: 22
                 visible: !!(row.modelData.icon && row.modelData.icon.endsWith(".svg"))
-                source: row.modelData.icon && row.modelData.icon.endsWith(".svg") 
+                source: row.modelData.icon && row.modelData.icon.endsWith(".svg")
                         ? (row.modelData.icon.startsWith("/") ? "file://" + row.modelData.icon : Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + row.modelData.icon))
                         : ""
                 preferredRendererType: VectorImage.CurveRenderer
@@ -177,7 +181,7 @@ ListView {
                 anchors.centerIn: parent
                 visible:  (!row.isApp && !row.modelData.isWallpaper && !row.modelData.clipImage && !row.modelData.isImage && !row.modelData.isEmoji && !row.modelData.icon) || (ico.status !== Image.Ready && !row.modelData.icon)
                 text:     row.modelData.isEmoji ? row.modelData.value : (row.modelData.name || row.modelData.title || "?")[0].toUpperCase()
-                color:          "#ffffff"
+                color: Theme.ink(parent, false)
                 font.pixelSize: row.modelData.isEmoji ? 20 : 16
                 font.weight:    Font.Bold
                 renderType:     Text.NativeRendering
@@ -191,7 +195,7 @@ ListView {
             anchors.leftMargin:  10
             anchors.right:       parent.right
             anchors.rightMargin: 12
-            text:           row.modelData.name || row.modelData.title || ""
+            text:           I18n.tr(row.modelData.name || row.modelData.title || "")
             color:          row.modelData.isTodoItem && row.modelData.todoDone ? "#80ffffff" : "#ffffff"
             font.family:    root.fontFamilyMedium
             font.pixelSize: 15
@@ -213,7 +217,7 @@ ListView {
                 if (row.modelData.isWallpaper) return "Fond d'écran"
                 if (row.modelData.isCalc) return "Calculatrice"
                 if (row.modelData.isWeb) return "Recherche"
-                return row.modelData.description || ""
+                return I18n.tr(row.modelData.description || "")
             }
             color:          "#80ffffff"
             font.family:    root.fontFamily

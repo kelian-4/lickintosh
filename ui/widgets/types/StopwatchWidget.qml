@@ -1,0 +1,56 @@
+import QtQuick
+import QtQuick.Layouts
+import qs.services
+import qs.ui.widgets
+
+Item {
+    id: root
+
+    property var look: null
+
+    property string size: "s"
+
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 6
+
+        Text {
+            text: I18n.tr("Stopwatch")
+            color: "#ff9f0a"
+            font.pixelSize: 13
+            font.weight: Font.Bold
+            font.family: "SF Pro Text"
+            renderType: Text.NativeRendering
+        }
+
+        Text {
+            text: StopwatchState.formatElapsed(StopwatchState.elapsedMs)
+            color: root.look.primary
+            font.pixelSize: root.size === "s" ? 26 : 40
+            font.weight: Font.Light
+            font.family: "SF Pro Text"
+            renderType: Text.NativeRendering
+        }
+
+        Item { Layout.fillHeight: true }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+
+            WidgetButton {
+                look: root.look
+                text: StopwatchState.running ? I18n.tr("Stop") : I18n.tr("Start")
+                tint: StopwatchState.running ? "#ff453a" : "#30d158"
+                onClicked: StopwatchState.toggle()
+            }
+
+            WidgetButton {
+                look: root.look
+                visible: !StopwatchState.running && StopwatchState.elapsedMs > 0
+                text: I18n.tr("Reset")
+                onClicked: StopwatchState.reset()
+            }
+        }
+    }
+}

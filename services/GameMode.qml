@@ -21,9 +21,6 @@ Singleton {
         enabled = false
     }
 
-    // Activation : coupe animations / blur / ombres / arrondis Hyprland via l'API Lua
-    // (hl.config, Hyprland 0.55+ — "hyprctl keyword" ne s'applique plus sur une config Lua),
-    // colle les fenêtres (gaps à 0) et passe le profil d'alimentation en performance.
     Process {
         id: _onCmd
         command: [
@@ -55,8 +52,6 @@ Singleton {
         }
     }
 
-    // Désactivation : recharge hyprland.lua (restaure les valeurs d'origine du fichier)
-    // et repasse le profil d'alimentation en équilibré.
     Process {
         id: _offCmd
         command: ["hyprctl", "reload"]

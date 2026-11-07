@@ -5,6 +5,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import qs.components.glass
+import qs.services
 
 Item {
     id: root
@@ -13,6 +14,7 @@ Item {
     signal closeRequested()
     signal openAbout()
     signal lockRequested()
+    signal powerRequested(string action)
 
     readonly property int menuWidth: 260
     readonly property int rowHeight: 30
@@ -29,24 +31,46 @@ Item {
         id: _openSettings
         command: ["quickshell", "-p", Quickshell.shellDir + "/settings.qml"]
         running: false
-        stdout: SplitParser { onRead: data => console.log("[AppleMenu Settings stdout]", data) }
-        stderr: SplitParser { onRead: data => console.log("[AppleMenu Settings stderr]", data) }
-        onExited: (exitCode, exitStatus) => console.log("[AppleMenu Settings] exited", exitCode, exitStatus)
     }
 
     function openSettingsApp() {
-        console.log("[AppleMenu] launching settings via execDetached, shellDir=", Quickshell.shellDir)
-        Quickshell.execDetached(["quickshell", "-p", Quickshell.shellDir + "/settings.qml"])
-        console.log("[AppleMenu] execDetached call returned")
+        SettingsLauncher.open("")
+    }
+
+    readonly property var packageSites: ({
+        "arch": "https://archlinux.org/packages/",
+        "manjaro": "https://packages.manjaro.org/",
+        "debian": "https://packages.debian.org/",
+        "ubuntu": "https://packages.ubuntu.com/",
+        "fedora": "https://packages.fedoraproject.org/",
+        "opensuse": "https://software.opensuse.org/",
+        "nixos": "https://search.nixos.org/packages",
+        "gentoo": "https://packages.gentoo.org/",
+        "alpine": "https://pkgs.alpinelinux.org/packages",
+        "void": "https://voidlinux.org/packages/"
+    })
+    property string distroIds: ""
+    readonly property string packagesUrl: {
+        const ids = distroIds.split(/\s+/).filter(x => x.length > 0)
+        for (const id of ids) {
+            if (packageSites[id]) return packageSites[id]
+            if (id.indexOf("opensuse") === 0) return packageSites["opensuse"]
+        }
+        return ""
+    }
+
+    Process {
+        id: _distro
+        command: ["sh", "-c", ". /etc/os-release 2>/dev/null; echo \"$ID $ID_LIKE\""]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: root.distroIds = text.trim().toLowerCase()
+        }
     }
 
     Process { id: _suspend;  command: ["systemctl", "suspend"];  running: false }
-    Process { id: _reboot;   command: ["systemctl", "reboot"];   running: false }
-    Process { id: _poweroff; command: ["systemctl", "poweroff"]; running: false }
-    Process { id: _exit;     command: ["sh", "-c", "hyprctl dispatch 'hl.dsp.exit()'"]; running: false }
     Process { id: _kill;     command: ["sh", "-c", "hyprctl kill"];          running: false }
 
-    
     BoxGlass {
         anchors.fill: parent
         radius: 12
@@ -54,8 +78,6 @@ Item {
         rimStrength: 1.7
         light: "#20ffffff"
     }
-
-    
 
     component MenuRow: Item {
         id: _mr
@@ -150,7 +172,6 @@ Item {
         color: root.sepColor
     }
 
-    
     Column {
         id: menuCol
         anchors.top: parent.top
@@ -160,7 +181,7 @@ Item {
         spacing: 2
 
         MenuRow {
-            label: "About this Mac"
+            label: I18n.tr("About this Mac")
             icon: "dropdown/mac.svg"
             onActivated: {
                 root.openAbout()
@@ -171,33 +192,37 @@ Item {
         MenuSep {}
 
         MenuRow {
-            label: "System Settings…"
+            label: I18n.tr("System Settings…")
             icon: "dropdown/settings.svg"
             onActivated: {
-                console.log("[AppleMenu] System Settings clicked")
                 root.openSettingsApp()
                 root.closeRequested()
             }
         }
         MenuRow {
-            label: "App Store"
+            label: I18n.tr("App Store")
             icon: "dropdown/store.svg"
-            dimmed: true
+            dimmed: root.packagesUrl === ""
+            onActivated: {
+                if (root.packagesUrl === "") return
+                Quickshell.execDetached(["xdg-open", root.packagesUrl])
+                root.closeRequested()
+            }
         }
 
         MenuSep {}
 
         MenuRow {
-            label: "Recent Items"
+            id: recentRow
+            label: I18n.tr("Recent Items")
             icon: "dropdown/clock.svg"
             hasSub: true
-            dimmed: true
         }
 
         MenuSep {}
 
         MenuRow {
-            label: "Force Quit…"
+            label: I18n.tr("Force Quit…")
             icon: "notch/x-circle.svg"
             shortcut: "⇧⌘⌫"
             onActivated: _kill.running = true
@@ -206,33 +231,42 @@ Item {
         MenuSep {}
 
         MenuRow {
-            label: "Sleep"
+            label: I18n.tr("Sleep")
             icon: "dropdown/sleep.svg"
             onActivated: _suspend.running = true
         }
         MenuRow {
-            label: "Restart…"
+            label: I18n.tr("Restart…")
             icon: "dropdown/reload.svg"
-            onActivated: _reboot.running = true
+            onActivated: {
+                root.powerRequested("reboot")
+                root.closeRequested()
+            }
         }
         MenuRow {
-            label: "Shut Down…"
+            label: I18n.tr("Shut Down…")
             icon: "dropdown/power.svg"
-            onActivated: _poweroff.running = true
+            onActivated: {
+                root.powerRequested("poweroff")
+                root.closeRequested()
+            }
         }
 
         MenuSep {}
 
         MenuRow {
-            label: "Log Out…"
+            label: I18n.tr("Log Out…")
             icon: "notch/log-out.svg"
-            onActivated: _exit.running = true
+            onActivated: {
+                root.powerRequested("logout")
+                root.closeRequested()
+            }
         }
 
         MenuSep {}
 
         MenuRow {
-            label: "Lock Screen"
+            label: I18n.tr("Lock Screen")
             icon: "dropdown/lock.svg"
             shortcut: "⌃⌘L"
             onActivated: {
@@ -244,14 +278,147 @@ Item {
         Item { height: 4; width: 1 }
     }
 
+    readonly property bool recentOpen: recentRow._hovered || recentSub.hovered
+    property bool recentShown: false
+
+    onRecentOpenChanged: {
+        if (recentOpen) {
+            recentHide.stop()
+            recentShown = true
+        } else {
+            recentHide.restart()
+        }
+    }
+
+    onOpenedChanged: {
+        if (opened) RecentFiles.refresh()
+        else recentShown = false
+    }
+
+    Timer {
+        id: recentHide
+        interval: 120
+        onTriggered: root.recentShown = false
+    }
+
+    Item {
+        id: recentSub
+        readonly property bool hovered: subHover.hovered
+        readonly property var items: RecentFiles.files.slice(0, 10)
+        x: root.menuWidth - 4
+        y: menuCol.y + recentRow.y - 6
+        width: 280
+        height: subCol.implicitHeight + 12
+        visible: opacity > 0
+        opacity: root.recentShown ? 1 : 0
+        z: 5
+
+        Behavior on opacity {
+            NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
+        }
+
+        HoverHandler { id: subHover }
+
+        BoxGlass {
+            anchors.fill: parent
+            radius: 12
+            color: Qt.rgba(0.08, 0.08, 0.08, 0.75)
+            rimStrength: 1.7
+            light: "#20ffffff"
+        }
+
+        Column {
+            id: subCol
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 6
+            spacing: 2
+
+            Item {
+                visible: recentSub.items.length === 0
+                width: recentSub.width
+                height: root.rowHeight
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 14
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: I18n.tr("No Recent Items")
+                    color: root.dimColor
+                    font.pixelSize: 13
+                    renderType: Text.NativeRendering
+                }
+            }
+
+            Repeater {
+                model: recentSub.items
+
+                delegate: Item {
+                    id: recentItem
+                    required property string modelData
+                    property bool hovered: false
+
+                    width: recentSub.width
+                    height: root.rowHeight
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.leftMargin: 5
+                        anchors.rightMargin: 5
+                        radius: 5
+                        color: recentItem.hovered ? root.hoverColor : "transparent"
+                    }
+
+                    Image {
+                        id: recentIcon
+                        anchors.left: parent.left
+                        anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 16
+                        height: 16
+                        sourceSize: Qt.size(64, 64)
+                        mipmap: true
+                        source: IconResolver.byName(IconResolver.fileIconName(RecentFiles.nameOf(recentItem.modelData)))
+                    }
+
+                    Text {
+                        anchors.left: recentIcon.right
+                        anchors.leftMargin: 10
+                        anchors.right: parent.right
+                        anchors.rightMargin: 14
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: RecentFiles.nameOf(recentItem.modelData)
+                        elide: Text.ElideMiddle
+                        color: recentItem.hovered ? root.hoverTextColor : root.textColor
+                        font.pixelSize: 13
+                        renderType: Text.NativeRendering
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: recentItem.hovered = true
+                        onExited: recentItem.hovered = false
+                        onClicked: {
+                            Quickshell.execDetached(["xdg-open", recentItem.modelData])
+                            root.closeRequested()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     opacity: opened ? 1 : 0
     scale:   opened ? 1 : 0.95
     transformOrigin: Item.TopLeft
 
     Behavior on opacity {
-        NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
     }
     Behavior on scale {
-        NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
     }
 }
