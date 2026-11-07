@@ -34,9 +34,36 @@ Singleton {
     readonly property bool canGoNext:       root.activePlayer ? root.activePlayer.canGoNext       : false
     readonly property bool canGoPrevious:   root.activePlayer ? root.activePlayer.canGoPrevious   : false
     readonly property bool canTogglePlaying: root.activePlayer ? root.activePlayer.canTogglePlaying : false
+    readonly property bool canSeek:          root.activePlayer ? (root.activePlayer.canSeek && root.activePlayer.positionSupported && root.activePlayer.lengthSupported) : false
+
+    readonly property bool shuffleSupported: root.activePlayer ? (root.activePlayer.shuffleSupported && root.activePlayer.canControl) : false
+    readonly property bool shuffle:          root.activePlayer ? root.activePlayer.shuffle : false
+    readonly property bool loopSupported:    root.activePlayer ? (root.activePlayer.loopSupported && root.activePlayer.canControl) : false
+    readonly property bool loopActive:       root.activePlayer ? root.activePlayer.loopState !== MprisLoopState.None : false
+    readonly property bool loopTrack:        root.activePlayer ? root.activePlayer.loopState === MprisLoopState.Track : false
+
+    property int positionWatchers: 0
+
+    Timer {
+        interval: 1000
+        repeat: true
+        running: root.positionWatchers > 0 && root.isPlaying && root.activePlayer !== null && root.activePlayer.positionSupported
+        onTriggered: root.activePlayer.positionChanged()
+    }
+
+    function watchPosition(on) { root.positionWatchers = Math.max(0, root.positionWatchers + (on ? 1 : -1)) }
 
     function togglePlaying() { if (root.activePlayer) root.activePlayer.togglePlaying() }
     function next()          { if (root.activePlayer) root.activePlayer.next() }
     function previous()      { if (root.activePlayer) root.activePlayer.previous() }
-    function seek(pos)       { if (root.activePlayer) root.activePlayer.position = pos }
+    function seek(pos)       { if (root.activePlayer && root.canSeek) root.activePlayer.position = pos }
+    function toggleShuffle() { if (root.shuffleSupported) root.activePlayer.shuffle = !root.activePlayer.shuffle }
+
+    function cycleLoop() {
+        if (!root.loopSupported) return
+        var next = root.activePlayer.loopState === MprisLoopState.None ? MprisLoopState.Playlist
+                 : root.activePlayer.loopState === MprisLoopState.Playlist ? MprisLoopState.Track
+                 : MprisLoopState.None
+        root.activePlayer.loopState = next
+    }
 }
