@@ -181,7 +181,7 @@ Scope {
     GlobalShortcut {
         appid: "lickintosh"
         name: "lock"
-        description: I18n.tr("Verrouille la session")
+        description: "Lock the session"
         onPressed: root.lock()
     }
 }

@@ -21,7 +21,7 @@ Scope {
 
     GlobalShortcut {
         name: "spotlight"
-        description: "Basculer Spotlight"
+        description: "Toggle Spotlight"
         onPressed: {
             if (root.opened) {
                 if (spotlightLoader.item) spotlightLoader.item.closeGracefully()
