@@ -11,6 +11,7 @@ Singleton {
     property bool fast: false
     property int transitionEpoch: 0
     property bool sessionLocked: false
+    property bool closing: false
     readonly property bool captureBlocked: sessionLocked || unlockSettle.running
 
     onSessionLockedChanged: {
@@ -59,6 +60,10 @@ Singleton {
 
         function onRawEvent(event) {
             var n = event.name
+            if (n === "closewindow") {
+                root.closing = true
+                closingOff.restart()
+            }
             if (root.geometryEvents.indexOf(n) === -1)
                 return
             if (root.transitionEvents.indexOf(n) !== -1)
@@ -75,6 +80,12 @@ Singleton {
             if (root.captureUsers > 0)
                 root.refreshWindows()
         }
+    }
+
+    Timer {
+        id: closingOff
+        interval: 700
+        onTriggered: root.closing = false
     }
 
     Timer {

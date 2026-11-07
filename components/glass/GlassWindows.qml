@@ -159,7 +159,7 @@ Item {
                 onRestartRequested: view.restart()
             }
 
-            captureSource: gate.armed && !restarting ? modelData.wayland : null
+            captureSource: gate.armed && !restarting && !GlassTracker.closing ? modelData.wayland : null
             live: false
             visible: shown
             opacity: hasContent ? (translucent ? 1 : Math.min(1, captureOpacity)) : 0
