@@ -108,7 +108,6 @@ Singleton {
         if (MprisState.hasPlayer && MprisState.isPlaying) return "media"
         if (TimerState.running)     return "timer"
         if (StopwatchState.running) return "stopwatch"
-        if (root.batteryCharging)   return "battery"
         if (GameMode.enabled)       return "gamemode"
         if (root.focusActive)       return "focus"
         return "none"

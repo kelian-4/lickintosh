@@ -105,13 +105,6 @@ RowLayout {
     }
 
     Badge {
-        shown: NotchState.batteryCharging
-        icon: Quickshell.shellDir + "/assets/icons_desktop/MacTahoe/status/symbolic/battery-level-" + Math.max(0, Math.min(100, Math.round(NotchState.batteryPercent / 10) * 10)) + "-charging-symbolic.svg"
-        tint: "#4ADE80"
-        label: NotchState.batteryPercent + "%"
-    }
-
-    Badge {
         shown: NotifService.dndEnabled
         icon: "dnd.svg"
         tint: "#BF8AFF"
