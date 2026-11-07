@@ -1,12 +1,16 @@
+<div align="center">
+
+**🇬🇧 English** · **🇫🇷 [Français](README.fr.md)**
+
 # 【 lickintosh 】
 
-**Une interface de bureau inspirée de macOS Tahoe pour Hyprland, écrite avec [Quickshell](https://quickshell.org).**
+**A macOS Tahoe-inspired desktop shell for Hyprland, built with [Quickshell](https://quickshell.org).**
 
-![Dernier commit](https://img.shields.io/github/last-commit/kelian-4/lickintosh/dev?style=for-the-badge&labelColor=1e1e2e)
-![Étoiles](https://img.shields.io/github/stars/kelian-4/lickintosh?style=for-the-badge&labelColor=1e1e2e)
-![Taille du dépôt](https://img.shields.io/github/repo-size/kelian-4/lickintosh?style=for-the-badge&labelColor=1e1e2e)
+![Last commit](https://img.shields.io/github/last-commit/kelian-4/lickintosh/dev?style=for-the-badge&labelColor=1e1e2e)
+![Stars](https://img.shields.io/github/stars/kelian-4/lickintosh?style=for-the-badge&labelColor=1e1e2e)
+![Repo size](https://img.shields.io/github/repo-size/kelian-4/lickintosh?style=for-the-badge&labelColor=1e1e2e)
 
-[Fonctionnalités](#-fonctionnalités-) · [Installation](#-installation-) · [Raccourcis](#-raccourcis-clavier-) · [Configuration](#-configuration-) · [FAQ](#-faq-) · [Remerciements](#-remerciements-et-licences-)
+[Features](#-features-) · [Installation](#-installation-) · [Keybinds](#-keybinds-) · [Configuration](#-configuration-) · [FAQ](#-faq-) · [Credits](#-credits-and-licenses-)
 
 </div>
 <img width="1366" height="768" alt="2026-11-06_12:53:14" src="https://github.com/user-attachments/assets/4973a757-5baf-4a7e-9ff1-4ed01412cb63" />
@@ -14,70 +18,70 @@
 
 
 > [!WARNING]
-> **Version : bêta 1.** Le projet fonctionne au quotidien sur ma machine (lol), mais je n'ai pas pu le tester sur beaucoup de configurations. Attends-toi à des bugs par endroit, et ouvre une issue quand tu en trouves un.
+> **Version: beta 1.** The project runs daily on my machine (lol), but I haven't been able to test it on many setups. Expect bugs here and there, and please open an issue when you find one.
 
 
 
 
 
-## • fonctionnalités •
+## • features •
 
-**Barre supérieure**
-- **Menu Apple** : À propos, Réglages Système, App Store (ouvre la page des paquets officiels de ta distribution), Éléments récents, Forcer à quitter, Suspendre, Redémarrer, Éteindre, Se déconnecter, Verrouiller.
-- **Menu global** : le menu de l'application active, avec des modèles par type d'application (navigateur, gestionnaire de fichiers, IDE, messagerie, lecteur multimédia, design, etc.).
+**Top bar**
+- **Apple menu**: About, System Settings, App Store (opens your distribution's official package page), Recent Items, Force Quit, Sleep, Restart, Shut Down, Log Out, Lock.
+- **Global menu**: the active application's menu, with templates per app type (browser, file manager, IDE, messaging, media player, design, etc.).
 
 <img width="315" height="402" alt="2026-11-06_12:56:03" src="https://github.com/user-attachments/assets/3046dd1f-4fb9-4690-b929-6a4bd5731239" />
 
-- **Zone d'état** : Wi-Fi, Bluetooth, volume, batterie, Spotlight, assistant IA, Centre de contrôle, centre de notifications, zone de notification (tray), horloge.
+- **Status area**: Wi-Fi, Bluetooth, volume, battery, Spotlight, AI assistant, Control Center, notification center, system tray, clock.
 
-- **Notch** : une pastille qui s'étend pour les notifications et les contenus en cours. Elle respecte le mode Concentration et peut être désactivée dans les réglages.
+- **Notch**: a pill that expands for notifications and ongoing activity. It respects Focus mode and can be turned off in the settings.
 
 **Dock**
-- **Applications** : épinglées, avec indicateurs d'applications ouvertes, corbeille et grossissement au survol.
-- **Réglages** : taille des icônes, échelle du dock et débordement des icônes.
+- **Applications**: pinned apps, running-app indicators, trash and hover magnification.
+- **Settings**: icon size, dock scale and icon overflow.
 
 
 <p align="center"><img src="assets/readme/dock.gif" width="800" alt="Dock"></p>
 
 
-**Bureau**
-- **Icônes de fichiers** : grille, sélection multiple, déplacement avec permutation animée.
-- **Widgets** : batterie, Bluetooth, calendrier, horloge analogique et numérique, Concentration, média, notes, citation, chronomètre, tâches, minuteur, volume, météo. Trois thèmes : verre, clair et sombre.
+**Desktop**
+- **File icons**: grid, multi-selection, drag and drop with animated swapping.
+- **Widgets**: battery, Bluetooth, calendar, analog and digital clocks, Focus, media, notes, quote, stopwatch, tasks, timer, volume, weather. Three themes: glass, light and dark.
 
-**Centre de contrôle**
-- **Contrôles modifiables** : Wi-Fi, lecture en cours, Bluetooth, KDE Connect, Concentration, capture d'écran, partage d'écran, luminosité, son, mode sombre, calculatrice, mode jeu, minuteur, alarme, chronomètre, maintien en éveil.
+**Control Center**
+- **Editable controls**: Wi-Fi, now playing, Bluetooth, KDE Connect, Focus, screenshot, screen sharing, brightness, sound, dark mode, calculator, game mode, timer, alarm, stopwatch, keep awake.
 <img width="344" height="516" alt="2026-11-06_12:57:26" src="https://github.com/user-attachments/assets/c359e406-c772-440f-8302-68cea59db5d5" />
 
 **Spotlight**
-- **Sources** : applications, fichiers (dont les fichiers récents), actions système, calculatrice, historique du presse-papiers (texte et images).
-- **Réglages** : chaque source s'active ou se désactive, avec des préfixes pour cibler un mode.
+- **Sources**: applications, files (including recent files), system actions, calculator, clipboard history (text and images).
+- **Settings**: each source can be turned on or off, with prefixes to target a specific mode.
 
 
 <p align="center"><img src="assets/readme/spotlight.gif" width="800" alt="Spotlight"></p>
 
 
-**Écran de verrouillage**
-- **Authentification** par PAM, styles d'horloge, lecteur multimédia et notifications.
-- **Verrouillage au démarrage** : l'écran de verrouillage s'affiche avant l'interface.
-- **`hypridle`** : verrouillage, extinction de l'écran, mise en veille.
+**Lock screen**
+- **Authentication** through PAM, clock styles, media player and notifications.
+- **Lock at startup**: the lock screen appears before the interface.
+- **`hypridle`**: lock, screen off, suspend.
 
 <img width="1366" height="768" alt="1" src="https://github.com/user-attachments/assets/6c98b03f-9987-4055-88e4-af598535ca06" />
 
-**Autres**
-- **Affichages à l'écran** pour le volume et la luminosité, popups de notifications et de batterie.
-- **Assistant IA** avec quatre fournisseurs : Anthropic, OpenAI, Google (Gemini) et Ollama (local).
-- **Application de réglages** : compte, IA, apparence, batterie, Bluetooth, Centre de contrôle, Dock, général, écran de verrouillage, moniteurs, Spotlight, barre supérieure, fond d'écran, Wi-Fi.
+**Other**
+- **On-screen displays** for volume and brightness, notification and battery popups.
+- **AI assistant** with four providers: Anthropic, OpenAI, Google (Gemini) and Ollama (local).
+- **Settings app**: account, AI, appearance, battery, Bluetooth, Control Center, Dock, general, lock screen, monitors, Spotlight, top bar, wallpaper, Wi-Fi.
 <img width="362" height="228" alt="2026-11-06_13:00:26" src="https://github.com/user-attachments/assets/69bf0564-28a9-490e-a93e-dcb4d8228b9d" />
 
-## • prérequis •
+## • requirements •
 
-| Élément | Détail |
+| Item | Details |
 |---|---|
-| **Hyprland** | 0.57 ou plus (la configuration fournie utilise la configuration Lua) |
-| **Quickshell** | 0.3 ou plus, avec les modules Qt 6 `QtGraphs`, `QtQuick.VectorImage`, `QtDeclarative` et `QtWayland` |
-| **Outils** | ImageMagick, `brightnessctl`, `playerctl`, `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `jq`, `curl`, `xdg-utils`, `xdg-user-dirs`, PipeWire (`pw-dump`), WirePlumber (`wpctl`), NetworkManager (`nmcli`) |
+| **Hyprland** | 0.57 or newer (the bundled configuration uses the Lua config) |
+| **Quickshell** | 0.3 or newer, with the Qt 6 modules `QtGraphs`, `QtQuick.VectorImage`, `QtDeclarative` and `QtWayland` |
+| **Tools** | ImageMagick, `brightnessctl`, `playerctl`, `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `jq`, `curl`, `xdg-utils`, `xdg-user-dirs`, PipeWire (`pw-dump`), WirePlumber (`wpctl`), NetworkManager (`nmcli`) |
 | **Services** | NetworkManager, BlueZ, UPower, power-profiles-daemon |
-| **Configuration Hyprland fournie** | `hypridle`, `cliphist`, `hyprpolkitagent`, et les programmes de `assets/config/hypr/hyprlua/programs.lua` (terminal, gestionnaire de fichiers, navigateur, éditeur de code, lecteur multimédia) que tu peux remplacer par les tiens |
+| **Bundled Hyprland config** | `hypridle`, `cliphist`, `hyprpolkitagent`, and the programs from `assets/config/hypr/hyprlua/programs.lua` (terminal, file manager, browser, code editor, media player), which you can replace with your own |
 
 ## • installation •
 
@@ -87,99 +91,99 @@ cd lickintosh
 ./setup.fish
 ```
 
-Le script est écrit pour fish. Ne le lance pas en root : il demande `sudo` (ou `doas`) lui-même quand il en a besoin.
+The script is written for fish. Don't run it as root: it asks for `sudo` (or `doas`) itself when needed.
 
-| Option | Effet |
+| Option | Effect |
 |---|---|
-| `--skip-deps` | Ne vérifie ni n'installe les dépendances |
-| `--no-launch` | N'essaie pas de lancer le shell à la fin |
+| `--skip-deps` | Doesn't check or install dependencies |
+| `--no-launch` | Doesn't try to start the shell at the end |
 
-Si Quickshell tourne déjà, relance-le complètement pour charger la nouvelle copie.
+If Quickshell is already running, restart it completely to load the new copy.
 
 > [!TIP]
-> **Mise à jour** : `git pull` puis relance `./setup.fish`. Une méthode plus conviviale arrivera plus tard.
+> **Updating**: run `git pull`, then `./setup.fish` again. A friendlier method will come later.
 
-## • raccourcis clavier •
+## • keybinds •
 
-Le modificateur principal est `SUPER`.
+The main modifier is `SUPER`.
 
-| Raccourci | Action |
+| Shortcut | Action |
 |---|---|
-| `SUPER + Espace` | Spotlight |
-| `CTRL + SUPER + Q` | Verrouiller l'écran |
+| `SUPER + Space` | Spotlight |
+| `CTRL + SUPER + Q` | Lock the screen |
 | `SUPER + T` | Terminal |
-| `SUPER + D` | Gestionnaire de fichiers |
-| `SUPER + B` | Navigateur |
-| `SUPER + C` | Éditeur de code |
-| `SUPER + M` | Lecteur multimédia |
-| `SUPER + Q` | Fermer la fenêtre |
-| `SUPER + F` | Plein écran |
-| `SUPER + V` | Fenêtre flottante |
-| `SUPER + Tab` / `SUPER + SHIFT + Tab` | Fenêtre suivante / précédente |
-| `SUPER + flèches` | Changer le focus |
-| `SUPER + SHIFT + flèches` | Déplacer la fenêtre |
-| `SUPER + ALT + flèches` | Redimensionner la fenêtre |
-| `SUPER + 1` à `0` | Aller à l'espace de travail 1 à 10 |
-| `SUPER + SHIFT + 1` à `0` | Envoyer la fenêtre à l'espace de travail |
-| `CTRL + SUPER + gauche` / `droite` | Espace de travail précédent / suivant |
-| `SUPER + S` | Espace de travail spécial |
-| `SUPER + Impr` | Capture d'une zone, enregistrée dans `~/Pictures/Screenshots` et copiée |
-| `SUPER + SHIFT + Impr` | Capture d'une zone, copiée seulement |
-| `ALT + SUPER + Échap` | Tuer une fenêtre (`hyprctl kill`) |
+| `SUPER + D` | File manager |
+| `SUPER + B` | Browser |
+| `SUPER + C` | Code editor |
+| `SUPER + M` | Media player |
+| `SUPER + Q` | Close the window |
+| `SUPER + F` | Fullscreen |
+| `SUPER + V` | Floating window |
+| `SUPER + Tab` / `SUPER + SHIFT + Tab` | Next / previous window |
+| `SUPER + arrows` | Change focus |
+| `SUPER + SHIFT + arrows` | Move the window |
+| `SUPER + ALT + arrows` | Resize the window |
+| `SUPER + 1` to `0` | Go to workspace 1 to 10 |
+| `SUPER + SHIFT + 1` to `0` | Send the window to a workspace |
+| `CTRL + SUPER + left` / `right` | Previous / next workspace |
+| `SUPER + S` | Special workspace |
+| `SUPER + Print` | Area screenshot, saved to `~/Pictures/Screenshots` and copied |
+| `SUPER + SHIFT + Print` | Area screenshot, copied only |
+| `ALT + SUPER + Escape` | Kill a window (`hyprctl kill`) |
 
 ## • configuration •
 
-Presque tout se règle dans l'application **Réglages**, ouverte depuis le menu Apple (« Réglages Système… ») ou le dock. Les valeurs sont enregistrées par le shell dans son fichier de configuration.
+Almost everything is set in the **Settings** app, opened from the Apple menu ("System Settings…") or the dock. Values are saved by the shell in its configuration file.
 
 <p align="center">
-<img width="49%" alt="Réglages" src="https://github.com/user-attachments/assets/657b6060-fc4f-4797-9326-94cabac4d5cf" />
-<img width="49%" alt="Réglages" src="https://github.com/user-attachments/assets/ae88562b-6be1-4818-a47e-15a2a8c40081" />
+<img width="49%" alt="Settings" src="https://github.com/user-attachments/assets/657b6060-fc4f-4797-9326-94cabac4d5cf" />
+<img width="49%" alt="Settings" src="https://github.com/user-attachments/assets/ae88562b-6be1-4818-a47e-15a2a8c40081" />
 </p>
 
 
-## • structure du dépôt •
+## • repository layout •
 
-| Dossier | Contenu |
+| Folder | Contents |
 |---|---|
-| `shell.qml`, `settings.qml` | Points d'entrée du shell et de l'application de réglages |
-| `ui/` | Interface : barre, dock, bureau, verrouillage, OSD, réglages, widgets |
-| `components/` | Composants réutilisables (boutons, curseurs, verre, etc.) |
-| `services/` | Services et états partagés (réseau, Bluetooth, thème, configuration, langue, etc.) |
-| `assets/` | Icônes, polices, curseur, fonds d'écran, shaders, traductions (`assets/i18n`) et configuration Hyprland |
-| `tools/` | Scripts d'appoint (historique de batterie, énergie, calculatrice, vignettes, shaders Liquid Glass) |
-| `docs/` | Notes de recherche, dont `liquid-glass-research.md` |
-| `setup.fish` | Script d'installation |
+| `shell.qml`, `settings.qml` | Entry points of the shell and of the settings app |
+| `ui/` | Interface: bar, dock, desktop, lock screen, OSD, settings, widgets |
+| `components/` | Reusable components (buttons, sliders, glass, etc.) |
+| `services/` | Shared services and state (network, Bluetooth, theme, configuration, language, etc.) |
+| `assets/` | Icons, fonts, cursor, wallpapers, shaders, translations (`assets/i18n`) and Hyprland configuration |
+| `tools/` | Helper scripts (battery history, power, calculator, thumbnails, Liquid Glass shaders) |
+| `docs/` | Research notes, including `liquid-glass-research.md` |
+| `setup.fish` | Installation script |
 
-Les shaders Liquid Glass se recompilent avec `tools/liquid-glass/build-shaders.sh`.
+The Liquid Glass shaders are rebuilt with `tools/liquid-glass/build-shaders.sh`.
 
 ## • faq •
 
-### Comment changer la langue ?
-La langue du système est détectée au lancement (français, anglais ou espagnol, anglais par défaut). Pour la forcer : **Réglages › Général › Langue et région**.
+### How do I change the language?
+The system language is detected at launch (French, English or Spanish, English by default). To force one: **Settings › General › Language & Region**.
 
-### Pourquoi les fenêtres n'ont-elles pas le style macOS Tahoe ?
-Je travaille encore sur des thèmes pour les fenêtres.
+### Why don't windows have the macOS Tahoe style?
+I'm still working on window themes.
 
-### Ma distribution n'est pas Arch, Debian ou Fedora, que faire ?
-Seules ces familles bénéficient de l'installation automatique des dépendances. Sur les autres, installe les paquets de la section [prérequis](#-prérequis-) à la main, puis lance `./setup.fish --skip-deps`.
-Tu peux aussi procéder manuellement ou, mieux, contribuer au script.
+### My distribution isn't Arch, Debian or Fedora, what do I do?
+Only those families get automatic dependency installation. On others, install the packages from the [requirements](#-requirements-) section by hand, then run `./setup.fish --skip-deps`.
+You can also set things up manually or, even better, contribute to the script.
 
-### Quickshell est introuvable dans mes dépôts
-Il n'est pas présent dans toutes les versions d'Arch, Debian et Fedora : le script l'indique et propose le dépôt tiers adapté.
+### Quickshell isn't in my repositories
+It isn't available in every Arch, Debian and Fedora release: the script tells you and suggests the matching third-party repository.
 
-### Certains textes ne sont pas traduits
-Les traductions anglaise et espagnole sont récentes et peuvent contenir des erreurs. Certains textes restent en français : messages de l'assistant IA et du script d'installation. Ouvre une issue pour les signaler, ou, mieux, contribue à la traduction du projet.
+### Some texts aren't translated
+The English and Spanish translations are recent and may contain mistakes. Some texts remain in French: AI assistant messages and the installation script. Open an issue to report them or, even better, contribute to the project's translation.
 
-## • remerciements et licences •
+## • credits and licenses •
 
-- **Liquid Glass** : l'effet est adapté de [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
-- **Lecteur multimédia** : le widget « Lecture en cours » et le lecteur de l'écran de verrouillage sont adaptés de [0-ss/MacShell](https://github.com/0-ss/MacShell) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
-- **MacTahoe Liquid KDE** : voir `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
-- **Icônes** : thème [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) de vinceliuice, variante « bold ».
-- **Polices SF, curseur et fonds d'écran** : fournis dans `assets/`. Leurs droits appartiennent à leurs auteurs respectifs (les polices San Francisco et les fonds d'écran macOS sont des ressources d'Apple).
+- **Liquid Glass**: the effect is adapted from [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (MIT license). The license text is in `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
+- **Media player**: the "Now Playing" widget and the lock screen player are adapted from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT license). The license text is in `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
+- **MacTahoe Liquid KDE**: see `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
+- **Icons**: [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) by vinceliuice, "bold" variant.
+- **SF fonts, cursor and wallpapers**: shipped in `assets/`. Their rights belong to their respective authors (the San Francisco fonts and the macOS wallpapers are Apple resources).
 
-lickintosh est un projet indépendant, sans lien avec Apple. macOS et Tahoe sont des marques d'Apple Inc.
+lickintosh is an independent project, not affiliated with Apple. macOS and Tahoe are trademarks of Apple Inc.
 
-## • licence •
+## • license •
 
 [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/).
