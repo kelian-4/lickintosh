@@ -1568,7 +1568,10 @@ Scope {
                                 CFText {
                                     anchors.left: focusCircle.right
                                     anchors.leftMargin: 9
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 11
                                     anchors.verticalCenter: parent.verticalCenter
+                                    elide: Text.ElideRight
                                     text: I18n.tr("Focus")
                                     font.pixelSize: 12
                                     font.weight: Font.Bold
@@ -1787,7 +1790,10 @@ Scope {
                                 CFText {
                                     anchors.left: darkCircle.right
                                     anchors.leftMargin: 9
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 11
                                     anchors.verticalCenter: parent.verticalCenter
+                                    elide: Text.ElideRight
                                     text: I18n.tr("Dark Mode")
                                     font.pixelSize: 12
                                     font.weight: Font.Bold
@@ -2470,6 +2476,8 @@ Scope {
                                                 color: _swResetMouse.containsMouse ? "#40ff453a" : "#20ff453a"
                                                 CFText {
                                                     anchors.centerIn: parent
+                                                    width: Math.min(implicitWidth, parent.width - 16)
+                                                    elide: Text.ElideRight
                                                     text: I18n.tr("Réinitialiser")
                                                     font.pixelSize: 12
                                                     color: "#ff453a"

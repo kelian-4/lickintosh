@@ -264,6 +264,8 @@ BoxGlass {
 
                     Text {
                         anchors.centerIn: parent
+                        width: Math.min(implicitWidth, parent.width - 16)
+                        elide: Text.ElideRight
                         text: root.isStack ? I18n.tr("Effacer") : I18n.tr("Rappeler plus tard")
                         font.pixelSize: 13
                         font.weight: Font.DemiBold

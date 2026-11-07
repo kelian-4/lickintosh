@@ -171,6 +171,8 @@ Item {
 
 	    CFText {
                 visible: root.topConsumers.length === 0
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
                 text: root.hasCollectedOnce ? I18n.tr("No Apps Using Significant Energy") : I18n.tr("Calculating...")
                 gray: true
                 font.pixelSize: 12

@@ -242,7 +242,7 @@ ContentPage {
                 spacing: 10
 
                 Rectangle {
-                    width: 54
+                    width: Math.max(54, _defaultLabel.implicitWidth + 20)
                     height: 26
                     radius: 13
                     color: Theme.fillControl
@@ -250,6 +250,7 @@ ContentPage {
                     border.color: Theme.accent
 
                     CFText {
+                        id: _defaultLabel
                         anchors.centerIn: parent
                         text: I18n.tr("Défaut")
                         font.pixelSize: 12
@@ -352,12 +353,13 @@ ContentPage {
         }
 
         Rectangle {
-            Layout.preferredWidth: 190
+            Layout.preferredWidth: Math.max(190, _resetElementLabel.implicitWidth + 24)
             Layout.preferredHeight: 32
             radius: 16
             color: Theme.accent
 
             CFText {
+                id: _resetElementLabel
                 anchors.centerIn: parent
                 text: I18n.tr("Réinitialiser cet élément")
                 font.pixelSize: 13
@@ -514,12 +516,13 @@ ContentPage {
     }
 
     Rectangle {
-        Layout.preferredWidth: 150
+        Layout.preferredWidth: Math.max(150, _resetBlurLabel.implicitWidth + 24)
         Layout.preferredHeight: 32
         radius: 16
         color: Theme.accent
 
         CFText {
+            id: _resetBlurLabel
             anchors.centerIn: parent
             text: I18n.tr("Réinitialiser le flou")
             font.pixelSize: 13

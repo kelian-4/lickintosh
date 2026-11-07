@@ -238,7 +238,7 @@ ContentPage {
 
             Rectangle {
                 id: _resetBtn
-                Layout.preferredWidth: 172
+                Layout.preferredWidth: Math.max(172, _resetLabel.implicitWidth + 24)
                 Layout.preferredHeight: 28
                 radius: 7
                 visible: root.activeTarget === "lockscreen"
@@ -250,6 +250,7 @@ ContentPage {
                 Behavior on color { ColorAnimation { duration: 100 } }
 
                 CFText {
+                    id: _resetLabel
                     anchors.centerIn: parent
                     text: I18n.tr("Revenir au fond par défaut")
                     font.pixelSize: 12
