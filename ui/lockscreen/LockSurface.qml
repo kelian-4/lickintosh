@@ -19,8 +19,7 @@ WlSessionLockSurface {
     required property LockContext context
 
     readonly property bool unlocking: unlockAnim.running
-    property var controlCenter: null
-    readonly property bool controlCenterAvailable: ShellConfig.options.lockscreen.showControlCenter && root.controlCenter !== null && ControlCatalog.lockHasItems
+    readonly property bool controlCenterAvailable: ShellConfig.options.lockscreen.showControlCenter
     property bool controlCenterOpen: false
 
     LiquidGlassBackdrop {
@@ -156,31 +155,14 @@ WlSessionLockSurface {
             onClicked: root.controlCenterOpen = !root.controlCenterOpen
         }
 
-        Item {
-            id: lockCCHost
-            property Item panel: null
-            readonly property bool wanted: root.controlCenterOpen && root.controlCenterAvailable
-
-            width: root.controlCenter ? root.controlCenter.gridImplicitWidth : 0
-            height: panel ? panel.height : 0
+        LockControlCenter {
+            id: lockControlCenter
+            glassBackdrop: lockBackdrop
+            open: root.controlCenterOpen && root.controlCenterAvailable
             anchors.top: statusIndicators.bottom
             anchors.topMargin: 14
             anchors.right: parent.right
             anchors.rightMargin: 14
-
-            opacity: wanted ? 1 : 0
-            visible: opacity > 0
-            scale: wanted ? 1 : 0.96
-            transformOrigin: Item.TopRight
-            Behavior on opacity { NumberAnimation { duration: root.reduceMotion ? 1 : 180; easing.type: Easing.OutCubic } }
-            Behavior on scale   { NumberAnimation { duration: root.reduceMotion ? 1 : 180; easing.type: Easing.OutCubic } }
-
-            function build() {
-                if (panel || !root.controlCenter || !ControlCatalog.lockHasItems) return
-                panel = root.controlCenter.body.createObject(lockCCHost, { lockMode: true, backdrop: lockBackdrop })
-            }
-
-            onWantedChanged: if (wanted) build()
         }
 
         Text {
