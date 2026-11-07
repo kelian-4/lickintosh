@@ -232,4 +232,14 @@ ContentPage {
             onToggled: function(v) { root.cfg.showMediaPlayer = v }
         }
     }
+
+    ContentSection {
+        title: I18n.tr("Centre de contrôle")
+
+        ConfigSwitch {
+            text: I18n.tr("Accès au centre de contrôle minimal (Wi-Fi, Bluetooth, luminosité, volume)")
+            checked: root.cfg.showControlCenter
+            onToggled: function(v) { root.cfg.showControlCenter = v }
+        }
+    }
 }

@@ -19,6 +19,8 @@ WlSessionLockSurface {
     required property LockContext context
 
     readonly property bool unlocking: unlockAnim.running
+    readonly property bool controlCenterAvailable: ShellConfig.options.lockscreen.showControlCenter
+    property bool controlCenterOpen: false
 
     LiquidGlassBackdrop {
         id: lockBackdrop
@@ -131,10 +133,35 @@ WlSessionLockSurface {
             NumberAnimation { duration: root.reduceMotion ? 1 : 380; easing.type: Easing.OutCubic }
         }
 
+        MouseArea {
+            anchors.fill: parent
+            enabled: root.controlCenterOpen
+            onClicked: root.controlCenterOpen = false
+        }
+
         LockStatusIndicators {
+            id: statusIndicators
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.topMargin: 20
+            anchors.rightMargin: 24
+        }
+
+        MouseArea {
+            visible: root.controlCenterAvailable
+            anchors.fill: statusIndicators
+            anchors.margins: -10
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.controlCenterOpen = !root.controlCenterOpen
+        }
+
+        LockControlCenter {
+            id: lockControlCenter
+            glassBackdrop: lockBackdrop
+            open: root.controlCenterOpen && root.controlCenterAvailable
+            anchors.top: statusIndicators.bottom
+            anchors.topMargin: 14
+            anchors.right: parent.right
             anchors.rightMargin: 24
         }
 
