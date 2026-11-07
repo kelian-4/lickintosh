@@ -36,7 +36,7 @@
 - **Réglages** : taille des icônes, échelle du dock et débordement des icônes.
 
 
-https://github.com/user-attachments/assets/b5b7b8f4-d506-4ea4-b731-4262e5bf2b2d
+<p align="center"><img src="assets/readme/dock.gif" width="800" alt="Dock"></p>
 
 
 **Bureau**
@@ -52,7 +52,7 @@ https://github.com/user-attachments/assets/b5b7b8f4-d506-4ea4-b731-4262e5bf2b2d
 - **Réglages** : chaque source s'active ou se désactive, avec des préfixes pour cibler un mode.
 
 
-https://github.com/user-attachments/assets/db8b4ba8-542b-44b9-95dc-92a8775aa294
+<p align="center"><img src="assets/readme/spotlight.gif" width="800" alt="Spotlight"></p>
 
 
 **Écran de verrouillage**
@@ -128,9 +128,10 @@ Le modificateur principal est `SUPER`.
 
 Presque tout se règle dans l'application **Réglages**, ouverte depuis le menu Apple (« Réglages Système… ») ou le dock. Les valeurs sont enregistrées par le shell dans son fichier de configuration.
 
-<img width="1366" height="768" alt="2026-11-06_13:01:23" src="https://github.com/user-attachments/assets/657b6060-fc4f-4797-9326-94cabac4d5cf" /> 
-
-<img width="924" height="621" alt="image" src="https://github.com/user-attachments/assets/ae88562b-6be1-4818-a47e-15a2a8c40081" />
+<p align="center">
+<img width="49%" alt="Réglages" src="https://github.com/user-attachments/assets/657b6060-fc4f-4797-9326-94cabac4d5cf" />
+<img width="49%" alt="Réglages" src="https://github.com/user-attachments/assets/ae88562b-6be1-4818-a47e-15a2a8c40081" />
+</p>
 
 
 ## • structure du dépôt •
@@ -177,4 +178,4 @@ lickintosh est un projet indépendant, sans lien avec Apple. macOS et Tahoe sont
 
 ## • licence •
 
-PolyForm Noncommercial 1.0.0.
+[PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/).
