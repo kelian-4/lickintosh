@@ -96,7 +96,21 @@ Singleton {
     property int  dismissGen:   0
     property bool centerOpened: false
 
-    onDndEnabledChanged: NotchState.focusActive = root.dndEnabled
+    onDndEnabledChanged: {
+        NotchState.focusActive = root.dndEnabled
+        if (ShellConfig.ready) ShellConfig.options.session.focus = root.dndEnabled
+    }
+
+    function _restoreFocus() {
+        if (ShellConfig.ready) root.dndEnabled = ShellConfig.options.session.focus
+    }
+
+    Component.onCompleted: root._restoreFocus()
+
+    Connections {
+        target: ShellConfig
+        function onReadyChanged() { root._restoreFocus() }
+    }
 
     onCenterOpenedChanged: {
         if (root.centerOpened) {

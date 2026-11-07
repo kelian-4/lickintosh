@@ -79,7 +79,7 @@
 |---|---|
 | **Hyprland** | 0.57 or newer (the bundled configuration uses the Lua config) |
 | **Quickshell** | 0.3 or newer, with the Qt 6 modules `QtGraphs`, `QtQuick.VectorImage`, `QtDeclarative` and `QtWayland` |
-| **Tools** | ImageMagick, `brightnessctl`, `playerctl`, `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `jq`, `curl`, `xdg-utils`, `xdg-user-dirs`, PipeWire (`pw-dump`), WirePlumber (`wpctl`), NetworkManager (`nmcli`) |
+| **Tools** | Python 3 (terminal calculator), ImageMagick, `brightnessctl`, `playerctl`, `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `jq`, `curl`, `xdg-utils`, `xdg-user-dirs`, PipeWire (`pw-dump`), WirePlumber (`wpctl`), NetworkManager (`nmcli`) |
 | **Services** | NetworkManager, BlueZ, UPower, power-profiles-daemon |
 | **Bundled Hyprland config** | `hypridle`, `cliphist`, `hyprpolkitagent`, and the programs from `assets/config/hypr/hyprlua/programs.lua` (terminal, file manager, browser, code editor, media player), which you can replace with your own |
 

@@ -411,14 +411,31 @@ Scope {
         }
     }
 
-    property bool focusOn: false
+    readonly property bool focusOn: NotifService.dndEnabled
     property bool darkOn:  false
     property bool recording: false
 
     Process { id: _darkToggleCmd; command: ["sh", "-c", "~/.config/hypr/scripts/toggle-theme.sh"] }
     Process {
         id: _calcCmd
-        command: ["foot", "--title=calculator", "-e", "qalc", "-i"]
+        command: [
+            "sh", "-c",
+            "script=\"$1\"; " +
+            "if command -v python3 >/dev/null 2>&1; then run=\"python3 $script\"; " +
+            "elif command -v qalc >/dev/null 2>&1; then run=\"qalc -i\"; " +
+            "else echo \"python3 introuvable\" >&2; exit 1; fi; " +
+            "if command -v foot >/dev/null 2>&1; then exec foot --title=calculator -e sh -c \"$run\"; " +
+            "elif command -v kitty >/dev/null 2>&1; then exec kitty --title calculator sh -c \"$run\"; " +
+            "elif command -v alacritty >/dev/null 2>&1; then exec alacritty --title calculator -e sh -c \"$run\"; " +
+            "elif command -v ghostty >/dev/null 2>&1; then exec ghostty --title=calculator -e sh -c \"$run\"; " +
+            "elif command -v wezterm >/dev/null 2>&1; then exec wezterm start -- sh -c \"$run\"; " +
+            "elif command -v konsole >/dev/null 2>&1; then exec konsole -e sh -c \"$run\"; " +
+            "elif command -v gnome-terminal >/dev/null 2>&1; then exec gnome-terminal --title=calculator -- sh -c \"$run\"; " +
+            "elif command -v xterm >/dev/null 2>&1; then exec xterm -T calculator -e sh -c \"$run\"; " +
+            "else echo \"aucun terminal trouve\" >&2; exit 1; fi",
+            "sh",
+            Quickshell.shellDir + "/tools/calculator/calc.py"
+        ]
         stderr: SplitParser {
             onRead: line => console.warn("Calculator launch error: " + line)
         }
@@ -1580,8 +1597,7 @@ Scope {
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
-                                        root.focusOn = !root.focusOn
-                                        NotifService.dndEnabled = root.focusOn
+                                        NotifService.dndEnabled = !NotifService.dndEnabled
                                     }
                                     onPressed: focusWidget.isPressed = true
                                     onReleased: focusWidget.isPressed = false

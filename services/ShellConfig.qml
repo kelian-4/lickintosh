@@ -194,6 +194,12 @@ Singleton {
                 property bool   lockAtStartup:              false
             }
 
+            property JsonObject session: JsonObject {
+                property bool focus: false
+                property bool keepAwake: false
+                property bool gameMode: false
+            }
+
             property JsonObject controlCenter: JsonObject {
                 property bool keepAwakeSeeded: false
                 property list<var> items: [
