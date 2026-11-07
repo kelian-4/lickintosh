@@ -8,6 +8,7 @@ import Quickshell.Services.Pipewire
 import qs.components
 import qs.components.glass
 import qs.services
+import qs.ui.topbar.statusarea.notifcenter
 
 Item {
     id: root

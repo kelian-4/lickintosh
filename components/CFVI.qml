@@ -12,7 +12,7 @@ VectorImage {
     property int size: 16
     property bool colorized: true
     property string icon: ""
-    source: icon.startsWith("/") ? "file://" + icon : Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + icon)
+    source: icon === "" ? "" : icon.startsWith("/") ? "file://" + icon : Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/" + icon)
     width: size
     height: size
     preferredRendererType: VectorImage.CurveRenderer
