@@ -99,6 +99,41 @@ WlSessionLockSurface {
             }
         }
 
+        Item {
+            id: albumBackdrop
+            anchors.fill: parent
+            opacity: mediaPlayer.visible ? Math.max(0, Math.min(1, mediaPlayer.artT)) : 0
+            visible: opacity > 0.003
+
+            Rectangle {
+                anchors.fill: parent
+                color: "#0c0c10"
+            }
+
+            Image {
+                id: albumImage
+                anchors.fill: parent
+                source: mediaPlayer.fileUrl(MprisState.artUrl)
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                sourceSize: Qt.size(400, 400)
+                visible: false
+            }
+
+            MultiEffect {
+                anchors.fill: parent
+                source: albumImage
+                visible: albumImage.status === Image.Ready
+                scale: 1.25
+                autoPaddingEnabled: false
+                blurEnabled: true
+                blurMax: 64
+                blur: 1.0
+                saturation: 0.25
+                brightness: -0.16
+            }
+        }
+
         Rectangle {
             anchors.fill: parent
             color: "#000000"

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import qs.components
 import qs.components.glass
 import qs.services
@@ -17,9 +18,13 @@ Item {
     property string mode: "bubble"
     readonly property bool artMode: root.mode === "art"
     readonly property bool lyricsMode: root.mode === "lyrics"
-    readonly property real artSize: root.artMode ? 220 : 58
-    readonly property real scrubY: root.artMode ? 300 : (root.lyricsMode ? 252 : 88)
-    implicitHeight: root.visible ? root.scrubY + 62 : 0
+    readonly property real bigArt: 244
+    readonly property real artGap: 22
+    property real artT: root.artMode ? 1 : 0
+    Behavior on artT { NumberAnimation { duration: 650; easing.type: Easing.OutQuint } }
+    readonly property real scrubY: root.artMode ? 76 : (root.lyricsMode ? 252 : 88)
+    readonly property real pillH: root.scrubY + 62
+    implicitHeight: root.visible ? root.pillH + (root.artMode ? root.bigArt + root.artGap : 0) : 0
     Behavior on implicitHeight {
         NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
     }
@@ -70,9 +75,48 @@ Item {
         onTriggered: root.seekHold = false
     }
 
+    Item {
+        id: cover
+        readonly property real pillTop: root.height - root.pillH
+        readonly property real t: root.artT
+        x: 16 + (Math.round((root.width - width) / 2) - 16) * t
+        y: pillTop + 16 + ((pillTop - root.artGap - root.bigArt) - (pillTop + 16)) * t
+        width: 58 + (root.bigArt - 58) * t
+        height: width
+        z: 5
+        opacity: root.hasPlayer ? 1 : 0
+
+        RectangularShadow {
+            anchors.fill: parent
+            radius: art.r
+            blur: 40
+            spread: 0
+            offset.y: 14
+            color: Qt.rgba(0, 0, 0, 0.55)
+            opacity: Math.max(0, Math.min(1, cover.t))
+        }
+
+        PlayerArt {
+            id: art
+            anchors.fill: parent
+            r: 11 + 17 * cover.t
+            source: root.fileUrl(MprisState.artUrl)
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.mode = root.artMode ? "bubble" : "art"
+            }
+        }
+    }
+
     CFClippingRect {
         id: pill
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: root.pillH
+        Behavior on height { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
         radius: 28
 
         BoxGlass {
@@ -85,38 +129,10 @@ Item {
             highlightEnabled: true
         }
 
-        PlayerArt {
-            id: art
-            x: root.artMode ? Math.round((pill.width - width) / 2) : 16
-            y: 16
-            width: root.artSize
-            height: root.artSize
-            r: root.artMode ? 16 : 11
-            source: root.fileUrl(MprisState.artUrl)
-
-            Behavior on x { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
-            Behavior on width { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
-            Behavior on height { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
-            Behavior on r { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
-
-            GlassRim {
-                anchors.fill: parent
-                radius: art.r
-                baseColor: "transparent"
-                glowColor: Qt.rgba(1, 1, 1, 0.5)
-                glowEdgeBand: 0.025
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.mode = root.artMode ? "bubble" : "art"
-            }
-        }
-
         Column {
             x: root.artMode ? 20 : 87
-            y: root.artMode ? 16 + root.artSize + 14 : 16 + (58 - height) / 2
+            y: 16 + (58 - height) / 2
+            visible: true
             width: pill.width - x - 18
             spacing: 2
 
@@ -129,7 +145,7 @@ Item {
                 elide: Text.ElideRight
                 color: "white"
                 font.family: root.fam
-                font.pixelSize: root.artMode ? 18 : 15
+                font.pixelSize: root.artMode ? 17 : 15
                 font.weight: Font.DemiBold
                 renderType: Text.NativeRendering
             }
@@ -139,7 +155,7 @@ Item {
                 text: MprisState.trackArtist.length > 0 ? MprisState.trackArtist : MprisState.identity
                 color: Qt.rgba(1, 1, 1, 0.66)
                 fam: root.fam
-                pixelSize: root.artMode ? 15 : 13
+                pixelSize: root.artMode ? 14 : 13
                 weight: Font.Normal
                 fade: 14
                 animate: MprisState.isPlaying
