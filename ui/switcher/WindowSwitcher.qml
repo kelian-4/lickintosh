@@ -21,63 +21,69 @@ Scope {
         return a.indexOf("0x") === 0 ? a : "0x" + a
     }
 
+    function hyprFor(handle) {
+        var list = Hyprland.toplevels.values
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].wayland === handle) return list[i]
+        }
+        return null
+    }
+
     function track() {
-        var t = Hyprland.activeToplevel
+        var t = ToplevelManager.activeToplevel
         if (!t) return
-        var addr = root.normalize(t.address)
-        if (addr === "") return
-        var list = [addr]
+        var list = [t]
         for (var i = 0; i < root.mru.length && list.length < 80; i++) {
-            if (root.mru[i] !== addr) list.push(root.mru[i])
+            if (root.mru[i] !== t) list.push(root.mru[i])
         }
         root.mru = list
     }
 
     function build() {
         try { Hyprland.refreshToplevels() } catch (e) {}
-        var values = Hyprland.toplevels.values
-        var windows = []
-        for (var i = 0; i < values.length; i++) {
-            var t = values[i]
-            var ipc = t.lastIpcObject || {}
-            var cls = ipc["class"] || ""
-            if (cls === "") continue
-            if (ipc.mapped === false) continue
-            var addr = root.normalize(t.address)
-            var rank = root.mru.indexOf(addr)
-            var ws = ipc.workspace && ipc.workspace.id ? ipc.workspace.id : 0
-            windows.push({
-                cls: cls,
-                title: ipc.title || t.title || "",
-                addr: addr,
-                ws: ws,
-                rank: rank < 0 ? 100000 + i : rank
-            })
+        var all = []
+        var vals = ToplevelManager.toplevels.values
+        for (var i = 0; i < vals.length; i++) all.push(vals[i])
+
+        var order = []
+        var active = ToplevelManager.activeToplevel
+        if (active && all.indexOf(active) >= 0) order.push(active)
+        for (var m = 0; m < root.mru.length; m++) {
+            if (all.indexOf(root.mru[m]) >= 0 && order.indexOf(root.mru[m]) < 0) order.push(root.mru[m])
         }
-        windows.sort(function(a, b) { return a.rank - b.rank })
+        for (var j = 0; j < all.length; j++) {
+            if (order.indexOf(all[j]) < 0) order.push(all[j])
+        }
 
         var seen = {}
         var out = []
-        for (var j = 0; j < windows.length; j++) {
-            var w = windows[j]
-            if (seen[w.cls] !== undefined) {
-                out[seen[w.cls]].count++
+        for (var k = 0; k < order.length; k++) {
+            var t = order[k]
+            var cls = t.appId || ""
+            if (cls === "") continue
+            if (seen[cls] !== undefined) {
+                out[seen[cls]].count++
                 continue
             }
-            var entry = DesktopEntries.heuristicLookup(w.cls)
+            var entry = DesktopEntries.heuristicLookup(cls)
             var icon = entry && entry.icon ? IconResolver.byName(entry.icon) : ""
-            if (icon === "") icon = IconResolver.byName(w.cls.toLowerCase())
+            if (icon === "") icon = IconResolver.byName(cls)
+            if (icon === "") icon = IconResolver.byName(cls.toLowerCase())
             if (icon === "") icon = IconResolver.generic()
-            seen[w.cls] = out.length
+            var h = root.hyprFor(t)
+            var ipc = h && h.lastIpcObject ? h.lastIpcObject : {}
+            seen[cls] = out.length
             out.push({
-                cls: w.cls,
-                name: entry && entry.name ? entry.name : w.cls,
+                cls: cls,
+                name: entry && entry.name ? entry.name : cls,
                 icon: icon,
-                addr: w.addr,
-                ws: w.ws,
+                handle: t,
+                addr: h ? root.normalize(h.address) : "",
+                ws: ipc.workspace && ipc.workspace.id ? ipc.workspace.id : 0,
                 count: 1
             })
         }
+        console.log("[switcher] windows=" + all.length + " apps=" + out.length)
         return out
     }
 
@@ -105,7 +111,7 @@ Scope {
         idleTimer.stop()
         var target = root.apps[root.index]
         root.opened = false
-        if (!target || target.addr === "") return
+        if (!target) return
         root.pending = target
         focusTimer.restart()
     }
@@ -117,9 +123,13 @@ Scope {
             var t = root.pending
             root.pending = null
             if (!t) return
-            Hyprland.dispatch('hl.dsp.focus({ window = "address:' + t.addr + '" })')
-            if (t.ws > 0) Hyprland.dispatch('hl.dsp.focus({ workspace = "' + t.ws + '" })')
-            Hyprland.dispatch('hl.dsp.window.bring_to_top()')
+            if (t.addr !== "") {
+                Hyprland.dispatch('hl.dsp.focus({ window = "address:' + t.addr + '" })')
+                if (t.ws > 0) Hyprland.dispatch('hl.dsp.focus({ workspace = "' + t.ws + '" })')
+                Hyprland.dispatch('hl.dsp.window.bring_to_top()')
+            } else if (t.handle) {
+                t.handle.activate()
+            }
         }
     }
 
@@ -130,8 +140,16 @@ Scope {
     }
 
     Connections {
-        target: Hyprland
+        target: ToplevelManager
         function onActiveToplevelChanged() { root.track() }
+    }
+
+    IpcHandler {
+        target: "switcher"
+        function next(): void { root.step(1) }
+        function prev(): void { root.step(-1) }
+        function commit(): void { root.commit() }
+        function cancel(): void { root.cancel() }
     }
 
     Component.onCompleted: root.track()
