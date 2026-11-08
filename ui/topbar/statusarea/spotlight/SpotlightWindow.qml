@@ -639,6 +639,16 @@ Scope {
                 anchors.fill: parent
             }
 
+            Loader {
+                anchors.fill: parent
+                active: ShellConfig.options.wallpaper.videoPath !== ""
+                source: "../../../../components/VideoWallpaper.qml"
+                onLoaded: {
+                    item.source = Qt.binding(function() { return ShellConfig.options.wallpaper.videoPath })
+                    item.paused = Qt.binding(function() { return GameMode.enabled })
+                }
+            }
+
             Image {
                 visible: false
                 width: 1

@@ -450,5 +450,9 @@
  "Le Wi-Fi est désactivé": "Wi-Fi is turned off",
  "Couleurs plus chaudes pour réduire la lumière bleue": "Warmer colours to reduce blue light",
  "hyprsunset est introuvable : installe-le pour utiliser Night Shift": "hyprsunset was not found: install it to use Night Shift",
- "Température de couleur": "Colour temperature"
+ "Température de couleur": "Colour temperature",
+ "Fond animé": "Animated wallpaper",
+ "Une vidéo jouée en boucle sur le bureau (formats mp4, webm, mkv, mov). Elle se met en pause en mode jeu.": "A video looped on the desktop (mp4, webm, mkv, mov). It pauses in Game Mode.",
+ "Aucune vidéo trouvée dans": "No video found in",
+ "Cliquer de nouveau sur la vidéo active pour la retirer.": "Click the active video again to remove it."
 }

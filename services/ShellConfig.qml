@@ -170,6 +170,7 @@ Singleton {
 
             property JsonObject wallpaper: JsonObject {
                 property string path: ""
+                property string videoPath: ""
 
                 property string lockscreenPath: ""
             }

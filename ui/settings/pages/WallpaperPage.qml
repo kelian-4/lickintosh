@@ -106,7 +106,23 @@ ContentPage {
         onExited: root.userThumbsGen++
     }
 
-    function refreshUser() { if (ShellConfig.ready) userProc.running = true }
+    property var videoList: []
+
+    Process {
+        id: videoProc
+        running: false
+        command: ["sh", "-c",
+            "find " + root._safeShellPath(root.userDir) + " " + root._safeShellPath(root.shippedDir) +
+            " -maxdepth 2 -type f \\( -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.mov' \\) 2>/dev/null | sort | head -60"]
+        stdout: StdioCollector { id: videoOut }
+        onExited: root.videoList = root._parse(videoOut.text)
+    }
+
+    function refreshUser() {
+        if (!ShellConfig.ready) return
+        userProc.running = true
+        videoProc.running = true
+    }
 
     Component.onCompleted: root.refreshUser()
 
@@ -330,6 +346,66 @@ ContentPage {
             text: root.userList.length === 0
                 ? "Aucune image dans " + root.userDir + " — le dossier se règle dans Réglages > Spotlight."
                 : "Dossier : " + root.userDir
+            font.pixelSize: 12
+            gray: true
+            Layout.fillWidth: true
+        }
+    }
+
+    ContentSection {
+        title: I18n.tr("Fond animé")
+
+        CFText {
+            text: I18n.tr("Une vidéo jouée en boucle sur le bureau (formats mp4, webm, mkv, mov). Elle se met en pause en mode jeu.")
+            font.pixelSize: 12
+            gray: true
+            Layout.fillWidth: true
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: 8
+
+            Repeater {
+                model: root.videoList
+
+                delegate: Rectangle {
+                    id: _video
+                    required property string modelData
+                    readonly property bool selected: ShellConfig.options.wallpaper.videoPath === modelData
+                    width: Math.min(260, _videoLabel.implicitWidth + 24)
+                    height: 28
+                    radius: 7
+                    color: _video.selected ? Theme.accent : (_videoMouse.containsMouse ? "#22ffffff" : "#18ffffff")
+                    border.color: "#14ffffff"
+                    border.width: 1
+
+                    CFText {
+                        id: _videoLabel
+                        anchors.centerIn: parent
+                        width: parent.width - 24
+                        elide: Text.ElideMiddle
+                        horizontalAlignment: Text.AlignHCenter
+                        text: _video.modelData.split("/").pop()
+                        font.pixelSize: 12
+                        color: Theme.textPrimary
+                    }
+
+                    MouseArea {
+                        id: _videoMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: ShellConfig.options.wallpaper.videoPath = _video.selected ? "" : _video.modelData
+                    }
+                }
+            }
+        }
+
+        CFText {
+            text: root.videoList.length === 0
+                ? I18n.tr("Aucune vidéo trouvée dans") + " " + root.userDir
+                : I18n.tr("Cliquer de nouveau sur la vidéo active pour la retirer.")
             font.pixelSize: 12
             gray: true
             Layout.fillWidth: true
