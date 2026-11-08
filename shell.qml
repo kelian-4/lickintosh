@@ -20,6 +20,7 @@ import qs.ui.topbar.menubar.applemenu
 import qs.ui.dock
 import qs.ui.topbar.statusarea.spotlight
 import qs.ui.osd
+import qs.ui.switcher
 import qs.ui.lockscreen
 import qs.ui.desktop
 import qs.ui.widgets
@@ -225,6 +226,7 @@ ShellRoot {
     LazyLoader { active: appRoot.interfaceShown && !GameMode.enabled; DesktopLayer {} }
     WidgetGallery {}
     LazyLoader { active: appRoot.interfaceShown; Dock {} }
+    WindowSwitcher {}
     SpotlightWindow {
         opened: appRoot.spotlightOpened
         onCloseRequested: appRoot.spotlightOpened = false

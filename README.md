@@ -124,6 +124,7 @@ The main modifier is `SUPER`.
 | `SUPER + Q` | Close the window |
 | `SUPER + F` | Fullscreen |
 | `SUPER + V` | Floating window |
+| `ALT + Tab` / `ALT + SHIFT + Tab` | Application switcher (hold ALT, tap Tab to cycle, release ALT to switch) |
 | `SUPER + Tab` / `SUPER + SHIFT + Tab` | Next / previous window |
 | `SUPER + arrows` | Change focus |
 | `SUPER + SHIFT + arrows` | Move the window |
@@ -182,7 +183,7 @@ The English and Spanish translations are recent and may contain mistakes. Some t
 ## • credits and licenses •
 
 - **Liquid Glass**: the effect is adapted from [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (MIT license). The license text is in `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
-- **Media player**: the "Now Playing" widget and the lock screen player are adapted from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT license). The license text is in `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
+- **MacShell**: the "Now Playing" widget, the lock screen player and the ideas behind the start script, `--doctor`/`--uninstall` and the Alt+Tab switcher come from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT license). The license text is in `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
 - **MacTahoe Liquid KDE**: see `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
 - **Icons**: [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) by vinceliuice, "bold" variant.
 - **SF fonts, cursor and wallpapers**: shipped in `assets/`. Their rights belong to their respective authors (the San Francisco fonts and the macOS wallpapers are Apple resources).

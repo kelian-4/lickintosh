@@ -17,6 +17,8 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(programs.browser))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(programs.codeEditor))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd(programs.mediaPlayer))
 
+hl.bind("ALT + Tab", hl.dsp.global("quickshell:switcher-next"))
+hl.bind("ALT + SHIFT + Tab", hl.dsp.global("quickshell:switcher-prev"))
 hl.bind(mainMod .. " + Tab", hl.dsp.window.cycle_next(), { repeating = true })
 hl.bind(mainMod .. " + SHIFT + Tab", hl.dsp.window.cycle_next({ next = false }), { repeating = true })
 
