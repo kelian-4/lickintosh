@@ -363,4 +363,38 @@ ContentPage {
     }
 
     Component.onCompleted: root._fillLevelSeries()
+
+    ContentSection {
+        title: I18n.tr("Utilisation énergétique")
+
+        Repeater {
+            model: ShellConfig.topConsumers
+
+            RowLayout {
+                required property var modelData
+                Layout.fillWidth: true
+                spacing: 10
+
+                CFText {
+                    text: modelData.name
+                    font.pixelSize: 14
+                    color: Theme.textPrimary
+                    Layout.fillWidth: true
+                }
+
+                CFText {
+                    text: "CPU " + modelData.cpu.toFixed(1) + "% · RAM " + ShellConfig.formatMemory(modelData.rssMb)
+                    font.pixelSize: 12
+                    gray: true
+                }
+            }
+        }
+
+        CFText {
+            text: I18n.tr("Analyse en cours…")
+            font.pixelSize: 13
+            gray: true
+            visible: !ShellConfig.hasCollectedOnce
+        }
+    }
 }
