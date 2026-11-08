@@ -436,5 +436,16 @@
  "Ce qu'on automatise une fois, on ne le refait plus jamais mal.": "What you automate once, you never do badly again.",
  "La curiosité est le seul debugger qui ne ment jamais.": "Curiosity is the only debugger that never lies.",
  "Un plan simple exécuté vaut mieux qu'un plan parfait remis à demain.": "A simple plan carried out beats a perfect plan put off until tomorrow.",
- "Le meilleur moment pour documenter, c'était avant d'oublier pourquoi.": "The best time to document was before you forgot why."
+ "Le meilleur moment pour documenter, c'était avant d'oublier pourquoi.": "The best time to document was before you forgot why.",
+ "Centre de contrôle": "Control Center",
+ "Accès au centre de contrôle minimal (Wi-Fi, Bluetooth, luminosité, volume)": "Minimal Control Center access (Wi-Fi, Bluetooth, brightness, volume)",
+ "Aucune carte Wi-Fi disponible": "No Wi-Fi adapter available",
+ "Permission refusée par NetworkManager": "Permission denied by NetworkManager",
+ "Réseau introuvable ou hors de portée": "Network not found or out of range",
+ "Connecté au routeur mais aucune adresse IP attribuée (DHCP)": "Connected to the router but no IP address assigned (DHCP)",
+ "Échec de la connexion : ": "Connection failed: ",
+ "Échec de la connexion (cause inconnue)": "Connection failed (unknown cause)",
+ "La connexion a expiré : le routeur ne répond pas": "Connection timed out: the router is not responding",
+ "Mot de passe invalide (8 à 63 caractères)": "Invalid password (8 to 63 characters)",
+ "Le Wi-Fi est désactivé": "Wi-Fi is turned off"
 }

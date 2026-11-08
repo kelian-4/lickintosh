@@ -255,5 +255,13 @@
  "Memory": "Mémoire",
  "Load": "Charge",
  "Storage": "Stockage",
- "Muted": "Muet"
+ "Muted": "Muet",
+ "Now": "Maint.",
+ "Today": "Auj.",
+ "H:": "Max:",
+ "L:": "Min:",
+ "Paused": "En pause",
+ "Running": "En cours",
+ "OK": "OK",
+ "New Task": "Nouvelle tâche"
 }

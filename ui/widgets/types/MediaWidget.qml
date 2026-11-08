@@ -220,7 +220,7 @@ Item {
         weight: Font.Medium
         fade: 20 * w.k
         startPad: 17 * w.k
-        animate: w.playing
+        animate: true
     }
 
     PlayerBtn {

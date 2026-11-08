@@ -10,6 +10,9 @@ Switch {
 
     property int switchHeight: 22
     property int switchWidth: 54
+    readonly property real knobInset: Math.max(2, control.switchHeight * 0.085)
+    readonly property real knobH0: control.switchHeight - 2 * control.knobInset
+    readonly property real knobW0: Math.round(control.knobH0 * 1.6)
 
     indicator: Rectangle {
         id: bg
@@ -21,8 +24,8 @@ Switch {
         color: Theme.themed(control) ? (control.checked ? Theme.accent : Theme.controlTrack) : (control.checked ? "#1C7AFF" : "#20000000")
         Behavior on color {
             ColorAnimation {
-                duration: 500
-                easing.type: Easing.InOutQuad
+                duration: 320
+                easing.type: Easing.OutCubic
             }
         }
 
@@ -30,9 +33,9 @@ Switch {
             id: handle
             backdrop: null
             anchors.verticalCenter: parent.verticalCenter
-            x: control.checked ? bg.width - width - 2 : 2
-            width: control.down ? (control.switchWidth / 2) + 14 : (control.switchWidth / 2) + 8
-            height: control.down ? control.switchHeight + 6 : control.switchHeight - 4
+            x: control.checked ? bg.width - width - control.knobInset : control.knobInset
+            width: control.knobW0 + (control.down ? control.switchHeight * 0.14 : 0)
+            height: control.knobH0 + (control.down ? control.switchHeight * 0.07 : 0)
             radius: 999
             color: control.down ? "#20ffffff" : "#ffffff"
             light: control.down ? "#fff" : "transparent"
@@ -40,22 +43,23 @@ Switch {
 
             Behavior on x {
                 NumberAnimation {
-                    duration: 200
-                    easing.type: Easing.InOutQuad
+                    duration: 300
+                    easing.type: Easing.OutBack
+                    easing.overshoot: 1.2
                 }
             }
             Behavior on width {
                 NumberAnimation {
-                    duration: 300
+                    duration: 320
                     easing.type: Easing.OutBack
-                    easing.overshoot: 3
+                    easing.overshoot: 2.4
                 }
             }
             Behavior on height {
                 NumberAnimation {
-                    duration: 300
+                    duration: 320
                     easing.type: Easing.OutBack
-                    easing.overshoot: 3
+                    easing.overshoot: 2.4
                 }
             }
         }

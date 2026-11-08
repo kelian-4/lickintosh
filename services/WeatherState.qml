@@ -22,9 +22,24 @@ Singleton {
     property string sunrise: ""
     property string sunset: ""
 
+    property bool isDay: true
     property var forecast: []
+    property var hourly: []
 
     readonly property string iconFile: root._iconFor(root.weatherCode)
+
+    readonly property string kind: root._kindFor(root.weatherCode, root.isDay)
+
+    function _kindFor(code, day) {
+        if (code === 0 || code === 1) return day ? "sun" : "moon"
+        if (code === 2) return day ? "partly" : "partlyNight"
+        if (code === 45 || code === 48) return "fog"
+        if (code >= 51 && code <= 67) return "rain"
+        if (code >= 80 && code <= 82) return "rain"
+        if ((code >= 71 && code <= 77) || code === 85 || code === 86) return "snow"
+        if (code === 95 || code === 96 || code === 99) return "storm"
+        return "cloud"
+    }
 
     function _iconFor(code) {
         if (code === 0 || code === 1) return "weather/sun.svg"
@@ -68,7 +83,8 @@ Singleton {
         var parts = root.loc.split(",")
         var lat = parts[0], lon = parts[1]
         var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon
-                 + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m"
+                 + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day"
+                 + "&hourly=temperature_2m,weather_code,is_day"
                  + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset"
                  + "&timezone=auto&forecast_days=7"
 
@@ -83,6 +99,25 @@ Singleton {
             root.windSpeed   = json.current.wind_speed_10m
             root.weatherCode = json.current.weather_code
             root.description = root._conditionFor(json.current.weather_code)
+            root.isDay       = json.current.is_day !== 0
+
+            if (json.hourly && json.hourly.time) {
+                var hrs = []
+                var cur = String(json.current.time || "").substring(0, 13)
+                var start = 0
+                for (var h = 0; h < json.hourly.time.length; h++) {
+                    if (json.hourly.time[h].substring(0, 13) === cur) { start = h; break }
+                }
+                for (var j = start; j < json.hourly.time.length && hrs.length < 6; j++) {
+                    hrs.push({
+                        time:  json.hourly.time[j],
+                        temp:  Math.round(json.hourly.temperature_2m[j]),
+                        code:  json.hourly.weather_code[j],
+                        isDay: json.hourly.is_day[j] !== 0
+                    })
+                }
+                root.hourly = hrs
+            }
             root.available   = true
 
             if (json.daily && json.daily.time) {

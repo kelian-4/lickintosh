@@ -21,7 +21,7 @@ Item {
 
     BoxGlass {
         anchors.fill: parent
-        radius: root.info && root.info.w === 4 ? 25 : 40
+        radius: root.info && root.info.w === 4 ? 26 : 32
         color: "#20000000"
         light: "#80ffffff"
         rimStrength: 1.0
@@ -50,9 +50,9 @@ Item {
         spacing: 10
 
         Rectangle {
-            width: 40
-            height: 40
-            radius: 20
+            width: 38
+            height: 38
+            radius: 19
             color: root.tint
 
             CFVI {
@@ -69,8 +69,8 @@ Item {
             Text {
                 text: root.info ? root.info.title : ""
                 color: Theme.ink(parent, false)
-                font.pixelSize: 12
-                font.weight: Font.Bold
+                font.pixelSize: 13
+                font.weight: Font.DemiBold
                 font.family: "SF Pro Text"
                 renderType: Text.NativeRendering
             }
@@ -78,7 +78,8 @@ Item {
             Text {
                 text: root.info ? root.info.subtitle : ""
                 color: Qt.rgba(1, 1, 1, 0.6)
-                font.pixelSize: 11
+                font.pixelSize: 12
+                font.weight: Font.DemiBold
                 font.family: "SF Pro Text"
                 renderType: Text.NativeRendering
             }
@@ -100,18 +101,18 @@ Item {
 
         CFVI {
             anchors.left: parent.left
-            anchors.leftMargin: 15
+            anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             icon: root.info && root.info.id === "volumeWidget" ? "volume/audio-volume-1.svg" : "sun-small.svg"
-            size: 14
+            size: 16
         }
 
         CFVI {
             anchors.right: parent.right
-            anchors.rightMargin: 15
+            anchors.rightMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             icon: root.info && root.info.id === "volumeWidget" ? "volume/audio-volume-3.svg" : "sun-huge.svg"
-            size: 18
+            size: 16
         }
     }
 
@@ -122,8 +123,8 @@ Item {
         Rectangle {
             x: 12
             y: 12
-            width: 44
-            height: 44
+            width: 52
+            height: 52
             radius: 10
             color: "#40ffffff"
 
@@ -139,7 +140,8 @@ Item {
             y: 66
             text: root.info ? root.info.subtitle : ""
             color: Qt.rgba(1, 1, 1, 0.6)
-            font.pixelSize: 11
+            font.pixelSize: 12
+            font.weight: Font.DemiBold
             font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }
