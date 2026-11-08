@@ -17,8 +17,8 @@ Item {
     property string mode: "bubble"
     readonly property bool artMode: root.mode === "art"
     readonly property bool lyricsMode: root.mode === "lyrics"
-    readonly property real artSize: root.artMode ? 260 : 58
-    readonly property real scrubY: root.artMode ? 340 : (root.lyricsMode ? 282 : 88)
+    readonly property real artSize: root.artMode ? 220 : 58
+    readonly property real scrubY: root.artMode ? 300 : (root.lyricsMode ? 252 : 88)
     implicitHeight: root.visible ? root.scrubY + 62 : 0
     Behavior on implicitHeight {
         NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
@@ -99,6 +99,14 @@ Item {
             Behavior on height { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
             Behavior on r { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
 
+            GlassRim {
+                anchors.fill: parent
+                radius: art.r
+                baseColor: "transparent"
+                glowColor: Qt.rgba(1, 1, 1, 0.5)
+                glowEdgeBand: 0.025
+            }
+
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
@@ -143,7 +151,7 @@ Item {
             x: 18
             y: 84
             width: pill.width - 36
-            height: 190
+            height: 160
             clip: true
             visible: opacity > 0
             opacity: root.lyricsMode && LyricsState.status === "ok" ? 1 : 0
@@ -189,7 +197,7 @@ Item {
             x: 18
             y: 84
             width: pill.width - 36
-            height: 190
+            height: 160
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             text: LyricsState.status === "loading" ? I18n.tr("Loading lyrics…") : I18n.tr("No lyrics found")

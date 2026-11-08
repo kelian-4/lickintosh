@@ -74,6 +74,7 @@ Singleton {
                 if (res.status !== "success") return
                 root.city = res.city || ""
                 root.loc  = res.lat + "," + res.lon
+                root._fetchWeather()
             })
         }
     }
@@ -158,6 +159,13 @@ Singleton {
         running: true
         repeat: true
         triggeredOnStart: true
+        onTriggered: root.reload()
+    }
+
+    Timer {
+        interval: 30000
+        running: !root.available
+        repeat: true
         onTriggered: root.reload()
     }
 }

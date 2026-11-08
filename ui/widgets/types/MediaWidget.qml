@@ -44,7 +44,10 @@ Item {
     function tintFace(l, satMul) { return Qt.hsla(w.tintH, Math.min(0.7, w.tintS * satMul), l, 1) }
 
     property bool lyricsOn: false
-    readonly property bool wantLyrics: w.lyricsOn && w.isLarge && w.visible
+    readonly property bool wantLyrics: w.lyricsOn && !w.isSmall && w.visible
+    readonly property real lyX: w.isLarge ? w.mx : w.textX
+    readonly property real lyW: w.isLarge ? w.wr - 2 * w.mx : w.wr - w.textX - w.mx - 50
+    readonly property real lyPx: w.isLarge ? 22 : 17
     onWantLyricsChanged: LyricsState.watch(w.wantLyrics)
 
     Component.onCompleted: MprisState.watchPosition(true)
@@ -205,9 +208,9 @@ Item {
 
     ListView {
         id: lv
-        x: w.mx * w.k
+        x: w.lyX * w.k
         y: w.artY * w.k
-        width: (w.wr - 2 * w.mx) * w.k
+        width: w.lyW * w.k
         height: w.artS * w.k
         clip: true
         visible: opacity > 0
@@ -235,7 +238,7 @@ Item {
             color: w.fg
             opacity: !LyricsState.synced ? 0.9 : (ln.index === lv.cur ? 1 : 0.35)
             font.family: w.fam
-            font.pixelSize: 22 * w.k
+            font.pixelSize: w.lyPx * w.k
             font.weight: Font.Bold
             renderType: Text.NativeRendering
             Behavior on opacity { NumberAnimation { duration: 260 } }
@@ -251,24 +254,24 @@ Item {
 
     Text {
         visible: w.wantLyrics && LyricsState.status !== "ok"
-        x: w.mx * w.k
+        x: w.lyX * w.k
         y: w.artY * w.k
-        width: (w.wr - 2 * w.mx) * w.k
+        width: w.lyW * w.k
         height: w.artS * w.k
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: LyricsState.status === "loading" ? I18n.tr("Loading lyrics…") : I18n.tr("No lyrics found")
         color: w.fg2
         font.family: w.fam
-        font.pixelSize: 17 * w.k
+        font.pixelSize: (w.isLarge ? 17 : 14) * w.k
         font.weight: Font.DemiBold
         renderType: Text.NativeRendering
     }
 
     PlayerBtn {
-        visible: w.isLarge
+        visible: !w.isSmall
         x: (w.wr - w.mx - 38) * w.k
-        y: 14 * w.k
+        y: (w.isLarge ? 14 : 18) * w.k
         width: 38 * w.k
         height: width
         dark: w.dark
@@ -284,6 +287,8 @@ Item {
     }
 
     Text {
+        opacity: w.wantLyrics && w.isMedium ? 0 : 1
+        Behavior on opacity { NumberAnimation { duration: 240 } }
         x: w.textX * w.k
         y: w.titleCY * w.k - height / 2
         width: (w.wr - w.textX - w.mx - (w.isMedium ? 50 : 0)) * w.k
@@ -299,6 +304,8 @@ Item {
     }
 
     MarqueeText {
+        opacity: w.wantLyrics && w.isMedium ? 0 : 1
+        Behavior on opacity { NumberAnimation { duration: 240 } }
         x: (w.textX - 17) * w.k
         y: w.subCY * w.k - height / 2
         width: (w.wr - (w.textX - 17) - (w.mx - 17) - (w.isMedium ? 50 : 0)) * w.k
