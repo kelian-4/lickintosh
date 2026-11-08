@@ -1,0 +1,118 @@
+#!/bin/sh
+CONF="${XDG_CONFIG_HOME:-$HOME/.config}"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/lickintosh"
+LOG="$STATE/shell.log"
+AUTO="$STATE/auto-env"
+PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+export PATH
+
+mkdir -p "$STATE" 2>/dev/null
+
+if [ -f "$LOG" ] && [ "$(wc -c < "$LOG" 2>/dev/null | tr -d ' ')" -gt 1048576 ] 2>/dev/null; then
+    mv -f "$LOG" "$LOG.old" 2>/dev/null
+fi
+
+log() {
+    printf '%s lickintosh-start: %s\n' "$(date '+%F %T')" "$*" >> "$LOG" 2>/dev/null
+}
+
+if ! command -v qs >/dev/null 2>&1; then
+    echo "lickintosh-start: qs (quickshell) not found in PATH" >&2
+    log "qs (quickshell) not found in PATH"
+    exit 1
+fi
+
+i=0
+while [ "$i" -lt 100 ]; do
+    if [ -n "${WAYLAND_DISPLAY:-}" ] && [ -S "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/$WAYLAND_DISPLAY" ]; then
+        break
+    fi
+    i=$((i + 1))
+    sleep 0.2
+done
+
+if pgrep -u "$(id -u)" -fx '(.*/)?(qs|quickshell)( (-c|--config) quickshell)?' >/dev/null 2>&1; then
+    exit 0
+fi
+
+export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
+export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Hyprland}"
+export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-wayland}"
+
+if [ -f "$AUTO" ]; then
+    set -a
+    . "$AUTO"
+    set +a
+fi
+if [ -f "$CONF/lickintosh/env" ]; then
+    set -a
+    . "$CONF/lickintosh/env"
+    set +a
+fi
+
+if command -v dbus-update-activation-environment >/dev/null 2>&1; then
+    dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP >/dev/null 2>&1
+fi
+
+applied=""
+soft=0
+
+rung() {
+    [ "$1" -ge 2 ] || return 0
+    if [ -z "${QSG_RHI_BACKEND:-}" ]; then
+        export QSG_RHI_BACKEND=opengl
+        applied="$applied QSG_RHI_BACKEND=opengl"
+    fi
+    [ "$1" -ge 3 ] || return 0
+    if [ -z "${QSG_RENDER_LOOP:-}" ]; then
+        export QSG_RENDER_LOOP=basic
+        applied="$applied QSG_RENDER_LOOP=basic"
+    fi
+    [ "$1" -ge 4 ] || return 0
+    if [ -z "${QT_QUICK_BACKEND:-}" ]; then
+        export QT_QUICK_BACKEND=software
+        soft=1
+    fi
+}
+
+fast=0
+while :; do
+    rung "$fast"
+    log "starting qs (attempt $((fast + 1)))${applied:+, fallback settings:$applied}$([ "$soft" = 1 ] && printf ' QT_QUICK_BACKEND=software')"
+    start=$(date +%s)
+    qs >>"$LOG" 2>&1 &
+    pid=$!
+    if [ -n "$applied" ] && [ "$soft" = 0 ] && [ ! -s "$AUTO" ]; then
+        keep="$applied"
+        (
+            sleep 10
+            if kill -0 "$pid" 2>/dev/null; then
+                for kv in $keep; do
+                    printf '%s\n' "$kv"
+                done > "$AUTO"
+                log "remembered:$keep"
+            fi
+        ) &
+    fi
+    wait "$pid"
+    rc=$?
+    case "$rc" in
+        0|130|143) exit 0 ;;
+    esac
+    now=$(date +%s)
+    log "qs exited with code $rc after $((now - start)) s"
+    if [ $((now - start)) -lt 5 ]; then
+        fast=$((fast + 1))
+    else
+        fast=0
+    fi
+    if [ "$fast" -ge 6 ]; then
+        msg="Lickintosh keeps crashing right after it starts. See $LOG"
+        echo "lickintosh-start: $msg" >&2
+        log "giving up: $msg"
+        command -v notify-send >/dev/null 2>&1 && notify-send -u critical "Lickintosh" "$msg"
+        exit 1
+    fi
+    sleep 1
+done

@@ -97,11 +97,16 @@ The script is written for fish. Don't run it as root: it asks for `sudo` (or `do
 |---|---|
 | `--skip-deps` | Doesn't check or install dependencies |
 | `--no-launch` | Doesn't try to start the shell at the end |
+| `--doctor` | Checks the whole setup (session, Hyprland, Quickshell modules, tools, services, installed files, recent errors) and explains each problem |
+| `--uninstall` | Removes the shell after saving a backup (your settings, fonts, icons and cursor are kept unless you say otherwise) |
 
 If Quickshell is already running, restart it completely to load the new copy.
 
 > [!TIP]
 > **Updating**: run `git pull`, then `./setup.fish` again. A friendlier method will come later.
+
+> [!NOTE]
+> The shell is started by `tools/lickintosh-start`: it waits for Hyprland, never starts a second copy, restarts the shell after a crash and, after repeated quick crashes, tries simpler graphics settings. The log is in `~/.local/state/lickintosh/shell.log`. Your own environment variables go in `~/.config/lickintosh/env`.
 
 ## • keybinds •
 

@@ -1,15 +1,16 @@
 #!/usr/bin/env fish
 
-set -l repo (realpath (status dirname))
-set -l qs_dst ~/.config/quickshell
-set -l fonts_dst ~/.local/share/fonts/SF
-set -l icons_dst ~/.icons
-set -l hypr_dst ~/.config/hypr
+set -g repo (realpath (status dirname))
+set -g qs_dst ~/.config/quickshell
+set -g fonts_dst ~/.local/share/fonts/SF
+set -g icons_dst ~/.icons
+set -g hypr_dst ~/.config/hypr
 
-set -l setup_only_assets fonts icons_desktop MacOS-Tahoe-Cursor config
-set -l managed shell.qml settings.qml components services ui tools
+set -g setup_only_assets fonts icons_desktop MacOS-Tahoe-Cursor config
+set -g managed shell.qml settings.qml components services ui tools
+set -g required_tools 'magick|convert:imagemagick' brightnessctl:brightnessctl playerctl:playerctl wl-copy:wl-clipboard grim:grim slurp:slurp hyprpicker:hyprpicker jq:jq curl:curl xdg-open:xdg-utils xdg-user-dir:xdg-user-dirs pw-dump:pipewire wpctl:wireplumber nmcli:networkmanager bluetoothctl:bluez upower:upower powerprofilesctl:power-profiles-daemon
 
-argparse skip-deps no-launch -- $argv; or exit 1
+argparse skip-deps no-launch doctor uninstall -- $argv; or exit 1
 
 if test (id -u) -eq 0
     echo "Ne lance pas setup.fish en root : les fichiers seraient installes pour root. Il demande sudo lui-meme quand il en a besoin." >&2
@@ -347,6 +348,238 @@ function ini_set --argument-names file section key value
     rm -f $tmp
 end
 
+function d_ok
+    echo "    [ok] $argv"
+end
+
+function d_bad
+    echo "    [!!] $argv"
+    set -g doctor_bad (math $doctor_bad + 1)
+end
+
+function d_info
+    echo "    [..] $argv"
+end
+
+function run_doctor
+    set -g doctor_bad 0
+    set -l state_dir ~/.local/state/lickintosh
+    set -l log $state_dir/shell.log
+
+    say "Session"
+    set -l os_id (os_field /etc/os-release ID)
+    d_info "distribution : $os_id, famille "(detect_family "$os_id" (os_field /etc/os-release ID_LIKE))
+    if test "$XDG_SESSION_TYPE" = wayland
+        d_ok "session Wayland"
+    else
+        d_bad "la session n'est pas Wayland (XDG_SESSION_TYPE=$XDG_SESSION_TYPE)"
+    end
+    if set -q HYPRLAND_INSTANCE_SIGNATURE
+        set -l hv (Hyprland --version 2>/dev/null | head -1 | string match -r '\d+\.\d+\.\d+')
+        if test -z "$hv"
+            set hv (hyprctl version 2>/dev/null | string match -r '\d+\.\d+\.\d+' | head -1)
+        end
+        if test -z "$hv"
+            d_info "version de Hyprland introuvable"
+        else if version_ge $hv 0.57.0
+            d_ok "Hyprland $hv"
+        else
+            d_bad "Hyprland $hv : la configuration Lua demande 0.57 ou plus"
+        end
+    else
+        d_info "pas dans une session Hyprland : verifications de session ignorees"
+    end
+    if test -f ~/.config/hypr/hyprland.lua
+        d_ok "configuration Lua presente (~/.config/hypr/hyprland.lua)"
+    else
+        d_bad "~/.config/hypr/hyprland.lua est absent : lance setup.fish pour installer la configuration"
+    end
+    if grep -rqs lickintosh-start ~/.config/hypr
+        d_ok "autostart : lickintosh-start"
+    else
+        d_bad "l'autostart ne lance pas lickintosh-start (le shell ne sera pas relance apres un plantage) : relance setup.fish"
+    end
+
+    say "Quickshell"
+    set -l qs_bin
+    for c in qs quickshell
+        if command -q $c
+            set qs_bin $c
+            break
+        end
+    end
+    if test -z "$qs_bin"
+        d_bad "Quickshell est introuvable dans le PATH"
+    else
+        set -l qv ($qs_bin --version 2>/dev/null | head -1 | string match -r '\d+\.\d+\.\d+')
+        if test -n "$qv"; and not version_ge $qv 0.2.0
+            d_bad "Quickshell $qv est trop ancien (0.2.0 minimum)"
+        else
+            d_ok "Quickshell $qv"
+        end
+        set -l mods QtQuick Quickshell QtQuick.Layouts QtQuick.Controls QtQuick.VectorImage QtQuick.Effects QtQuick.Window QtQuick.Shapes QtGraphs Qt.labs.folderlistmodel Quickshell.Io Quickshell.Wayland Quickshell.Hyprland Quickshell.Widgets Quickshell.Services.UPower Quickshell.Bluetooth Quickshell.Services.Pipewire Quickshell.Services.Notifications Quickshell.Services.SystemTray Quickshell.Services.Pam Quickshell.Services.Mpris
+        set -l missing_mods (qml_missing $qs_bin $mods)
+        if test (count $missing_mods) -eq 0
+            d_ok "tous les modules QML sont disponibles"
+        else
+            d_bad "modules QML manquants : $missing_mods"
+        end
+    end
+
+    say "Outils"
+    set -l missing_tools (missing_items $required_tools)
+    if test (count $missing_tools) -eq 0
+        d_ok "tous les outils requis sont installes"
+    else
+        d_bad "outils manquants (paquets) : $missing_tools"
+    end
+    if command -q fish
+        d_ok "fish "(fish --version | string match -r '\d+\.\d+\.\d+')
+    end
+
+    say "Services"
+    for u in NetworkManager bluetooth upower power-profiles-daemon
+        if systemctl is-active --quiet $u.service 2>/dev/null
+            d_ok "$u actif"
+        else if systemctl cat $u.service >/dev/null 2>&1
+            d_bad "$u est installe mais inactif : sudo systemctl enable --now $u"
+        else
+            d_info "$u n'est pas installe"
+        end
+    end
+    for u in pipewire wireplumber
+        if systemctl --user is-active --quiet $u.service 2>/dev/null
+            d_ok "$u actif"
+        else if systemctl --user cat $u.service >/dev/null 2>&1
+            d_bad "$u est inactif : systemctl --user enable --now $u"
+        else
+            d_info "$u n'est pas gere par systemd (ignore)"
+        end
+    end
+    for n in dunst mako swaync
+        pgrep -x $n >/dev/null 2>&1; and d_bad "$n tourne et prend le nom D-Bus des notifications : arrete-le (systemctl --user disable --now $n)"
+    end
+
+    say "Installation"
+    if test -f $qs_dst/shell.qml
+        d_ok "shell installe dans $qs_dst"
+        set -l changed
+        for e in $managed
+            test -e $repo/$e; or continue
+            diff -rq $repo/$e $qs_dst/$e >/dev/null 2>&1; or set -a changed $e
+        end
+        if test (count $changed) -eq 0
+            d_ok "l'installation est identique au depot"
+        else
+            d_info "different du depot : $changed (relance setup.fish pour mettre a jour)"
+        end
+    else
+        d_bad "$qs_dst/shell.qml est absent : lance setup.fish"
+    end
+    test -f $qs_dst/tools/lickintosh-start; and d_ok "lanceur de demarrage present"; or d_bad "tools/lickintosh-start est absent de l'installation"
+    test -f $qs_dst/ui/lockscreen/pam.d/lickintosh-lock; and d_ok "configuration PAM de l'ecran de verrouillage presente"; or d_bad "ui/lockscreen/pam.d/lickintosh-lock est absent"
+    if command -q fc-list; and fc-list 2>/dev/null | grep -qi "SF Pro"
+        d_ok "police SF Pro installee"
+    else
+        d_bad "police SF Pro introuvable (fc-list) : lance setup.fish"
+    end
+    test -d $icons_dst/MacTahoe-dark; and d_ok "theme d'icones MacTahoe-dark"; or d_bad "theme d'icones MacTahoe-dark absent de $icons_dst"
+    test -d $icons_dst/MacOS-Tahoe-Cursor; and d_ok "curseur MacOS-Tahoe-Cursor"; or d_bad "curseur MacOS-Tahoe-Cursor absent de $icons_dst"
+
+    say "Etat du shell"
+    if pgrep -x quickshell >/dev/null 2>&1
+        d_ok "Quickshell tourne"
+    else
+        d_bad "Quickshell ne tourne pas : sh $qs_dst/tools/lickintosh-start"
+    end
+    if test -f $log
+        set -l errs (grep -E 'ERROR|FATAL|invalid object|Segmentation|giving up' $log | tail -5)
+        if test (count $errs) -eq 0
+            d_ok "aucune erreur grave dans $log"
+        else
+            d_bad "erreurs recentes dans $log :"
+            for l in $errs
+                echo "         $l"
+            end
+        end
+    else
+        d_info "pas encore de journal ($log)"
+    end
+    if command -q lspci
+        for l in (lspci 2>/dev/null | grep -Ei 'vga|3d controller|display controller')
+            d_info "carte graphique : "(string replace -r '^\S+ ' '' -- $l)
+        end
+    end
+
+    echo
+    if test $doctor_bad -eq 0
+        say "Aucun probleme detecte."
+    else
+        say "$doctor_bad probleme(s) a regler."
+        return 1
+    end
+end
+
+function run_uninstall
+    set -l backup_root ~/.local/share/lickintosh/backups
+    say "Desinstallation de Lickintosh"
+    set -l present
+    for e in $managed assets
+        test -e $qs_dst/$e; and set -a present $e
+    end
+    if test (count $present) -eq 0
+        echo "    rien a desinstaller dans $qs_dst"
+        return 0
+    end
+    echo "    sera retire de $qs_dst : $present"
+    echo "    tes reglages (fichiers de configuration du shell) sont conserves"
+    ask "    Continuer ?"; or begin
+        echo "    annule"
+        return 0
+    end
+    set -l backup $backup_root/(date +%Y%m%d-%H%M%S)
+    mkdir -p $backup
+    for e in $present
+        cp -a $qs_dst/$e $backup/$e
+    end
+    echo "    sauvegarde : $backup"
+    pkill -f lickintosh-start >/dev/null 2>&1
+    command -q qs; and qs kill >/dev/null 2>&1
+    for e in $present
+        rm -rf $qs_dst/$e
+    end
+    echo "    shell retire"
+    set -l old (ls -1d $backup_root/* 2>/dev/null | sort)
+    if test (count $old) -gt 3
+        for d in $old[1..-4]
+            rm -rf $d
+        end
+    end
+    if test -d $fonts_dst; and ask "    Retirer aussi les polices SF ($fonts_dst) ?"
+        rm -rf $fonts_dst
+        command -q fc-cache; and fc-cache -f
+        echo "    polices retirees"
+    end
+    for t in MacTahoe-dark MacOS-Tahoe-Cursor
+        if test -e $icons_dst/$t; and ask "    Retirer aussi $icons_dst/$t ?"
+            rm -rf $icons_dst/$t
+            echo "    $t retire"
+        end
+    end
+    echo "    la configuration Hyprland ($hypr_dst) n'a pas ete modifiee : retire la ligne qui lance lickintosh-start dans hyprlua/programs.lua si tu veux supprimer l'autostart"
+    say "Desinstallation terminee. Pour revenir en arriere : copie le contenu de $backup dans $qs_dst"
+end
+
+if set -q _flag_doctor
+    run_doctor
+    exit $status
+end
+
+if set -q _flag_uninstall
+    run_uninstall
+    exit $status
+end
+
 if not test -f $repo/shell.qml
     echo "shell.qml introuvable dans $repo : setup.fish doit rester a la racine du depot." >&2
     exit 1
@@ -372,7 +605,7 @@ else
     contains -- $family arch debian fedora; and set auto 1
     echo "    distribution : $family"
 
-    set -l req 'magick|convert:imagemagick' brightnessctl:brightnessctl playerctl:playerctl wl-copy:wl-clipboard grim:grim slurp:slurp hyprpicker:hyprpicker jq:jq curl:curl xdg-open:xdg-utils xdg-user-dir:xdg-user-dirs pw-dump:pipewire wpctl:wireplumber nmcli:networkmanager bluetoothctl:bluez upower:upower powerprofilesctl:power-profiles-daemon
+        set -l req $required_tools
     set -l missing_req (missing_items $req)
 
     if test $auto -eq 1
@@ -770,8 +1003,9 @@ else
             pgrep -x quickshell >/dev/null 2>&1; and pkill -x quickshell
             sleep 0.5
         end
-        $qs_bin -d -n
-        sleep 2
+        nohup sh $qs_dst/tools/lickintosh-start >/dev/null 2>&1 &
+        disown
+        sleep 3
         if pgrep -x quickshell >/dev/null 2>&1
             echo "    Quickshell lance"
         else
