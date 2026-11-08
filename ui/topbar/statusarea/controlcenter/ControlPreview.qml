@@ -64,9 +64,12 @@ Item {
 
         Column {
             anchors.verticalCenter: parent.verticalCenter
+            width: Math.max(0, root.width - 12 - 38 - 10 - 20)
             spacing: 1
 
             Text {
+                width: parent.width
+                elide: Text.ElideRight
                 text: root.info ? root.info.title : ""
                 color: Theme.ink(parent, false)
                 font.pixelSize: 13
@@ -76,6 +79,8 @@ Item {
             }
 
             Text {
+                width: parent.width
+                elide: Text.ElideRight
                 text: root.info ? root.info.subtitle : ""
                 color: Qt.rgba(1, 1, 1, 0.6)
                 font.pixelSize: 12
@@ -138,6 +143,8 @@ Item {
         Text {
             x: 12
             y: 66
+            width: Math.max(0, root.width - 24)
+            elide: Text.ElideRight
             text: root.info ? root.info.subtitle : ""
             color: Qt.rgba(1, 1, 1, 0.6)
             font.pixelSize: 12
