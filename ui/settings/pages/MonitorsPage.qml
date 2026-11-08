@@ -689,6 +689,29 @@ ContentPage {
         Layout.fillWidth: true
     }
 
+
+    ContentSection {
+        title: I18n.tr("Night Shift")
+
+        ConfigSwitch {
+            text: I18n.tr("Night Shift")
+            description: NightShift.available ? I18n.tr("Couleurs plus chaudes pour réduire la lumière bleue") : I18n.tr("hyprsunset est introuvable : installe-le pour utiliser Night Shift")
+            checked: NightShift.enabled
+            onToggled: function(v) { if (NightShift.available) NightShift.enabled = v }
+        }
+
+        ConfigSlider {
+            visible: NightShift.enabled
+            text: I18n.tr("Température de couleur")
+            value: NightShift.temperature
+            from: NightShift.minTemperature
+            to: NightShift.maxTemperature
+            decimals: 0
+            valueSuffix: " K"
+            onMoved: function(v) { NightShift.setTemperature(v) }
+        }
+    }
+
     Item {
         Layout.fillWidth: true
         Layout.preferredHeight: 20

@@ -198,6 +198,8 @@ Singleton {
                 property bool focus: false
                 property bool keepAwake: false
                 property bool gameMode: false
+                property bool nightShift: false
+                property int nightTemperature: 4000
             }
 
             property JsonObject controlCenter: JsonObject {

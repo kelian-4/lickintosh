@@ -447,5 +447,8 @@
  "Échec de la connexion (cause inconnue)": "Connection failed (unknown cause)",
  "La connexion a expiré : le routeur ne répond pas": "Connection timed out: the router is not responding",
  "Mot de passe invalide (8 à 63 caractères)": "Invalid password (8 to 63 characters)",
- "Le Wi-Fi est désactivé": "Wi-Fi is turned off"
+ "Le Wi-Fi est désactivé": "Wi-Fi is turned off",
+ "Couleurs plus chaudes pour réduire la lumière bleue": "Warmer colours to reduce blue light",
+ "hyprsunset est introuvable : installe-le pour utiliser Night Shift": "hyprsunset was not found: install it to use Night Shift",
+ "Température de couleur": "Colour temperature"
 }

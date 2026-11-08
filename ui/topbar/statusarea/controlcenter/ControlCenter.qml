@@ -2022,6 +2022,42 @@ Scope {
 
                     Repeater {
                         model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("nightShiftWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: nightShiftWidget
+                                widgetId: nightShiftWidget.modelData.uid
+                                xPos: root.packedX(nightShiftWidget.widgetId)
+                                yPos: root.packedY(nightShiftWidget.widgetId)
+                                width: root.box
+                                height: root.box
+                                radius: 32
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                enabled: NightShift.enabled
+                                light: nightShiftWidget.enabled ? "transparent" : root.glassRimColor
+                                rimStrength: nightShiftWidget.enabled ? 0 : root.glassRimStrength
+                                color: nightShiftWidget.enabled ? "#fff" : root.glassColor
+                                opacity: NightShift.available ? 1 : 0.45
+                                CFVI {
+                                    anchors.centerIn: parent
+                                    size: 26
+                                    icon: "notch/sunset.svg"
+                                    color: NightShift.enabled ? Theme.accent : "#fff"
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: NightShift.toggle()
+                                    onPressed: if (!root.subOpened) nightShiftWidget.isPressed = true
+                                    onReleased: nightShiftWidget.isPressed = false
+                                    onCanceled: nightShiftWidget.isPressed = false
+                                }
+                            }
+                    }
+
+                    Repeater {
+                        model: ScriptModel {
                             values: ControlCatalog.instancesOfType("timerWidget")
                             objectProp: "uid"
                         }

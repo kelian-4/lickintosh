@@ -49,7 +49,8 @@ Singleton {
         { id: "timerWidget",     title: I18n.tr("Timer"),         icon: "notch/clock.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" },
         { id: "alarmWidget",     title: I18n.tr("Alarm"),         icon: "notch/bell.svg",                  category: "utilities",    w: 1, h: 1, subtitle: "" },
         { id: "stopwatchWidget", title: I18n.tr("Stopwatch"),     icon: "notch/watch.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" },
-        { id: "keepAwakeWidget", title: I18n.tr("Keep Awake"),    icon: "notch/coffee.svg",                category: "utilities",    w: 1, h: 1, subtitle: "" }
+        { id: "keepAwakeWidget", title: I18n.tr("Keep Awake"),    icon: "notch/coffee.svg",                category: "utilities",    w: 1, h: 1, subtitle: "" },
+        { id: "nightShiftWidget", title: I18n.tr("Night Shift"), icon: "notch/sunset.svg",                category: "display",      w: 1, h: 1, subtitle: "" }
     ]
 
     readonly property var built: root.build(root.savedPositions(), "")

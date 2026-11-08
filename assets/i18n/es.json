@@ -728,5 +728,9 @@
  "Mot de passe invalide (8 à 63 caractères)": "Contraseña no válida (de 8 a 63 caracteres)",
  "Le Wi-Fi est désactivé": "El Wi-Fi está desactivado",
  "Loading lyrics…": "Cargando letra…",
- "No lyrics found": "Letra no encontrada"
+ "No lyrics found": "Letra no encontrada",
+ "Night Shift": "Night Shift",
+ "Couleurs plus chaudes pour réduire la lumière bleue": "Colores más cálidos para reducir la luz azul",
+ "hyprsunset est introuvable : installe-le pour utiliser Night Shift": "No se encuentra hyprsunset: instálalo para usar Night Shift",
+ "Température de couleur": "Temperatura de color"
 }
