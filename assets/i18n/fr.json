@@ -263,5 +263,7 @@
  "Paused": "En pause",
  "Running": "En cours",
  "OK": "OK",
- "New Task": "Nouvelle tâche"
+ "New Task": "Nouvelle tâche",
+ "Loading lyrics…": "Chargement des paroles…",
+ "No lyrics found": "Paroles introuvables"
 }

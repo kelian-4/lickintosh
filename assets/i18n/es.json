@@ -726,5 +726,7 @@
  "Échec de la connexion (cause inconnue)": "Error de conexión (causa desconocida)",
  "La connexion a expiré : le routeur ne répond pas": "La conexión expiró: el router no responde",
  "Mot de passe invalide (8 à 63 caractères)": "Contraseña no válida (de 8 a 63 caracteres)",
- "Le Wi-Fi est désactivé": "El Wi-Fi está desactivado"
+ "Le Wi-Fi est désactivé": "El Wi-Fi está desactivado",
+ "Loading lyrics…": "Cargando letra…",
+ "No lyrics found": "Letra no encontrada"
 }

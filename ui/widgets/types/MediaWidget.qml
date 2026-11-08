@@ -43,8 +43,15 @@ Item {
     readonly property bool faceTint: w.tintKnown && w.hasPlayer && w.look !== null && !w.look.glass
     function tintFace(l, satMul) { return Qt.hsla(w.tintH, Math.min(0.7, w.tintS * satMul), l, 1) }
 
+    property bool lyricsOn: false
+    readonly property bool wantLyrics: w.lyricsOn && w.isLarge && w.visible
+    onWantLyricsChanged: LyricsState.watch(w.wantLyrics)
+
     Component.onCompleted: MprisState.watchPosition(true)
-    Component.onDestruction: MprisState.watchPosition(false)
+    Component.onDestruction: {
+        MprisState.watchPosition(false)
+        if (w.wantLyrics) LyricsState.watch(false)
+    }
 
     Canvas {
         id: tintSampler
@@ -186,12 +193,94 @@ Item {
     readonly property real ctlCY: w.hr - 44
 
     PlayerArt {
+        opacity: w.wantLyrics ? 0 : 1
+        Behavior on opacity { NumberAnimation { duration: 240 } }
         x: w.artX * w.k
         y: w.artY * w.k
         width: w.artS * w.k
         height: width
         r: 11 * w.k
         source: w.artSrc
+    }
+
+    ListView {
+        id: lv
+        x: w.mx * w.k
+        y: w.artY * w.k
+        width: (w.wr - 2 * w.mx) * w.k
+        height: w.artS * w.k
+        clip: true
+        visible: opacity > 0
+        opacity: w.wantLyrics && LyricsState.status === "ok" ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 240 } }
+        model: LyricsState.lines
+        spacing: 8 * w.k
+        boundsBehavior: Flickable.StopAtBounds
+        interactive: !LyricsState.synced
+        highlightRangeMode: LyricsState.synced ? ListView.StrictlyEnforceRange : ListView.NoHighlightRange
+        preferredHighlightBegin: height / 2 - 22 * w.k
+        preferredHighlightEnd: height / 2 + 22 * w.k
+        highlightMoveDuration: 380
+        currentIndex: LyricsState.synced ? Math.max(0, lv.cur) : 0
+
+        readonly property int cur: LyricsState.indexAt(MprisState.position)
+
+        delegate: Text {
+            id: ln
+            required property var modelData
+            required property int index
+            width: lv.width - 6 * w.k
+            wrapMode: Text.WordWrap
+            text: ln.modelData.text !== "" ? ln.modelData.text : "\u266a"
+            color: w.fg
+            opacity: !LyricsState.synced ? 0.9 : (ln.index === lv.cur ? 1 : 0.35)
+            font.family: w.fam
+            font.pixelSize: 22 * w.k
+            font.weight: Font.Bold
+            renderType: Text.NativeRendering
+            Behavior on opacity { NumberAnimation { duration: 260 } }
+
+            MouseArea {
+                anchors.fill: parent
+                enabled: LyricsState.synced && MprisState.canSeek
+                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                onClicked: MprisState.seek(ln.modelData.t)
+            }
+        }
+    }
+
+    Text {
+        visible: w.wantLyrics && LyricsState.status !== "ok"
+        x: w.mx * w.k
+        y: w.artY * w.k
+        width: (w.wr - 2 * w.mx) * w.k
+        height: w.artS * w.k
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        text: LyricsState.status === "loading" ? I18n.tr("Loading lyrics…") : I18n.tr("No lyrics found")
+        color: w.fg2
+        font.family: w.fam
+        font.pixelSize: 17 * w.k
+        font.weight: Font.DemiBold
+        renderType: Text.NativeRendering
+    }
+
+    PlayerBtn {
+        visible: w.isLarge
+        x: (w.wr - w.mx - 38) * w.k
+        y: 14 * w.k
+        width: 38 * w.k
+        height: width
+        dark: w.dark
+        hasPlayer: w.hasPlayer
+        fam: w.fam
+        kind: "lyrics"
+        col: w.lyricsOn ? w.fgBtn : w.fgDim
+        gw: 24 * w.k
+        gh: 20 * w.k
+        on: w.lyricsOn
+        enabledBtn: w.hasPlayer
+        onClicked: w.lyricsOn = !w.lyricsOn
     }
 
     Text {

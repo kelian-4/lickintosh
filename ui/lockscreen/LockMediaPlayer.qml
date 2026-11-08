@@ -13,7 +13,21 @@ Item {
     readonly property bool hasPlayer: MprisState.hasPlayer
     visible: root.hasPlayer
     implicitWidth: 372
-    implicitHeight: visible ? 150 : 0
+
+    property string mode: "bubble"
+    readonly property bool artMode: root.mode === "art"
+    readonly property bool lyricsMode: root.mode === "lyrics"
+    readonly property real artSize: root.artMode ? 260 : 58
+    readonly property real scrubY: root.artMode ? 340 : (root.lyricsMode ? 282 : 88)
+    implicitHeight: root.visible ? root.scrubY + 62 : 0
+    Behavior on implicitHeight {
+        NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
+    }
+
+    onHasPlayerChanged: if (!root.hasPlayer) root.mode = "bubble"
+
+    readonly property bool wantLyrics: root.lyricsMode && root.visible
+    onWantLyricsChanged: LyricsState.watch(root.wantLyrics)
 
     opacity: root.hasPlayer ? 1 : 0
     Behavior on opacity {
@@ -45,7 +59,10 @@ Item {
 
     onVisibleChanged: MprisState.watchPosition(root.visible)
     Component.onCompleted: if (root.visible) MprisState.watchPosition(true)
-    Component.onDestruction: if (root.visible) MprisState.watchPosition(false)
+    Component.onDestruction: {
+        if (root.visible) MprisState.watchPosition(false)
+        if (root.wantLyrics) LyricsState.watch(false)
+    }
 
     Timer {
         id: seekHoldTimer
@@ -69,19 +86,34 @@ Item {
         }
 
         PlayerArt {
-            x: 16
+            id: art
+            x: root.artMode ? Math.round((pill.width - width) / 2) : 16
             y: 16
-            width: 58
-            height: 58
-            r: 11
+            width: root.artSize
+            height: root.artSize
+            r: root.artMode ? 16 : 11
             source: root.fileUrl(MprisState.artUrl)
+
+            Behavior on x { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+            Behavior on width { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+            Behavior on height { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+            Behavior on r { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.mode = root.artMode ? "bubble" : "art"
+            }
         }
 
         Column {
-            x: 87
-            y: 16 + (58 - height) / 2
+            x: root.artMode ? 20 : 87
+            y: root.artMode ? 16 + root.artSize + 14 : 16 + (58 - height) / 2
             width: pill.width - x - 18
             spacing: 2
+
+            Behavior on x { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+            Behavior on y { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
 
             Text {
                 width: parent.width
@@ -89,7 +121,7 @@ Item {
                 elide: Text.ElideRight
                 color: "white"
                 font.family: root.fam
-                font.pixelSize: 15
+                font.pixelSize: root.artMode ? 18 : 15
                 font.weight: Font.DemiBold
                 renderType: Text.NativeRendering
             }
@@ -99,17 +131,80 @@ Item {
                 text: MprisState.trackArtist.length > 0 ? MprisState.trackArtist : MprisState.identity
                 color: Qt.rgba(1, 1, 1, 0.66)
                 fam: root.fam
-                pixelSize: 13
+                pixelSize: root.artMode ? 15 : 13
                 weight: Font.Normal
                 fade: 14
                 animate: MprisState.isPlaying
             }
         }
 
+        ListView {
+            id: lv
+            x: 18
+            y: 84
+            width: pill.width - 36
+            height: 190
+            clip: true
+            visible: opacity > 0
+            opacity: root.lyricsMode && LyricsState.status === "ok" ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 240 } }
+            model: LyricsState.lines
+            spacing: 8
+            boundsBehavior: Flickable.StopAtBounds
+            interactive: !LyricsState.synced
+            highlightRangeMode: LyricsState.synced ? ListView.StrictlyEnforceRange : ListView.NoHighlightRange
+            preferredHighlightBegin: height / 2 - 22
+            preferredHighlightEnd: height / 2 + 22
+            highlightMoveDuration: 380
+            currentIndex: LyricsState.synced ? Math.max(0, lv.cur) : 0
+
+            readonly property int cur: LyricsState.indexAt(MprisState.position)
+
+            delegate: Text {
+                id: ln
+                required property var modelData
+                required property int index
+                width: lv.width - 6
+                wrapMode: Text.WordWrap
+                text: ln.modelData.text !== "" ? ln.modelData.text : "\u266a"
+                color: "white"
+                opacity: !LyricsState.synced ? 0.9 : (ln.index === lv.cur ? 1 : 0.35)
+                font.family: root.fam
+                font.pixelSize: 19
+                font.weight: Font.Bold
+                renderType: Text.NativeRendering
+                Behavior on opacity { NumberAnimation { duration: 260 } }
+
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: LyricsState.synced && MprisState.canSeek
+                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    onClicked: MprisState.seek(ln.modelData.t)
+                }
+            }
+        }
+
+        Text {
+            visible: root.lyricsMode && LyricsState.status !== "ok"
+            x: 18
+            y: 84
+            width: pill.width - 36
+            height: 190
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            text: LyricsState.status === "loading" ? I18n.tr("Loading lyrics…") : I18n.tr("No lyrics found")
+            color: Qt.rgba(1, 1, 1, 0.6)
+            font.family: root.fam
+            font.pixelSize: 15
+            font.weight: Font.DemiBold
+            renderType: Text.NativeRendering
+        }
+
         Item {
             id: scrub
             x: 18
-            y: 88
+            y: root.scrubY
+            Behavior on y { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
             width: pill.width - 36
             height: 16
 
@@ -233,6 +328,22 @@ Item {
                 enabledBtn: MprisState.canGoNext
                 onClicked: MprisState.next()
             }
+        }
+
+        PlayerBtn {
+            x: pill.width - 18 - width
+            y: scrub.y + scrub.height + 6
+            width: 32
+            height: 34
+            dark: true
+            hasPlayer: root.hasPlayer
+            kind: "lyrics"
+            col: root.lyricsMode ? "white" : Qt.rgba(1, 1, 1, 0.55)
+            gw: 22
+            gh: 18
+            on: root.lyricsMode
+            enabledBtn: true
+            onClicked: root.mode = root.lyricsMode ? "bubble" : "lyrics"
         }
     }
 }
