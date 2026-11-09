@@ -753,5 +753,10 @@
  "Theme": "Tema",
  "Thème": "Tema",
  "Bureau (mode clair)": "Escritorio (modo claro)",
- "La sélection ci-dessous s'applique au bureau en mode clair. Sans fond choisi ici, le fond du bureau est utilisé.": "La selección de abajo se aplica al escritorio en modo claro. Sin fondo aquí, se usa el del escritorio."
+ "La sélection ci-dessous s'applique au bureau en mode clair. Sans fond choisi ici, le fond du bureau est utilisé.": "La selección de abajo se aplica al escritorio en modo claro. Sin fondo aquí, se usa el del escritorio.",
+ "Flou classique": "Desenfoque clásico",
+ "Brume": "Bruma",
+ "Givre": "Escarcha",
+ "Prisme": "Prisma",
+ "Aurore": "Aurora"
 }

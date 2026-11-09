@@ -471,5 +471,10 @@
  "Module QtMultimedia manquant": "QtMultimedia module missing",
  "Thème": "Theme",
  "Bureau (mode clair)": "Desktop (light mode)",
- "La sélection ci-dessous s'applique au bureau en mode clair. Sans fond choisi ici, le fond du bureau est utilisé.": "The selection below applies to the desktop in light mode. With none chosen here, the desktop wallpaper is used."
+ "La sélection ci-dessous s'applique au bureau en mode clair. Sans fond choisi ici, le fond du bureau est utilisé.": "The selection below applies to the desktop in light mode. With none chosen here, the desktop wallpaper is used.",
+ "Flou classique": "Classic blur",
+ "Brume": "Haze",
+ "Givre": "Frost",
+ "Prisme": "Prism",
+ "Aurore": "Aurora"
 }
