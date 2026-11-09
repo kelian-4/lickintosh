@@ -18,7 +18,8 @@ Item {
     property string mode: "bubble"
     readonly property bool artMode: root.mode === "art"
     readonly property bool lyricsMode: root.mode === "lyrics"
-    readonly property real bigArt: 244
+    property real maxArt: 244
+    readonly property real bigArt: Math.max(96, Math.min(244, root.maxArt))
     readonly property real artGap: 22
     property real artT: root.artMode ? 1 : 0
     Behavior on artT { NumberAnimation { duration: 650; easing.type: Easing.OutQuint } }
