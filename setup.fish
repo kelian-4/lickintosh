@@ -424,6 +424,9 @@ function run_doctor
         else
             d_bad "modules QML manquants : $missing_mods"
         end
+        if test (count (qml_missing $qs_bin QtMultimedia)) -gt 0
+            d_info "QtMultimedia absent : les fonds d'ecran video sont indisponibles (paquet qt6-multimedia)"
+        end
     end
 
     say "Outils"

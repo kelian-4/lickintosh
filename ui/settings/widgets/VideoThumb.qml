@@ -44,7 +44,9 @@ Item {
             }
 
             Loader {
+                id: _frame
                 anchors.fill: parent
+                onStatusChanged: if (status === Loader.Error) console.warn("[wallpaper video] QtMultimedia introuvable : installer qt6-multimedia")
                 source: "../../../components/VideoFrame.qml"
                 onLoaded: item.source = Qt.binding(function() { return root.path })
                 layer.enabled: true
@@ -52,6 +54,17 @@ Item {
                     maskEnabled: true
                     maskSource: _maskShape
                 }
+            }
+
+            CFText {
+                anchors.centerIn: parent
+                width: parent.width - 12
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                visible: _frame.status === Loader.Error
+                text: I18n.tr("Module QtMultimedia manquant")
+                font.pixelSize: 11
+                gray: true
             }
 
             Rectangle {

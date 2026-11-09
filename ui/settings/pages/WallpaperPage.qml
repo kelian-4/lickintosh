@@ -361,13 +361,6 @@ ContentPage {
     ContentSection {
         title: I18n.tr("Fond animé")
 
-        CFText {
-            text: I18n.tr("Une vidéo jouée en boucle sur le bureau (formats mp4, webm, mkv, mov). Elle se met en pause en mode jeu.")
-            font.pixelSize: 12
-            gray: true
-            Layout.fillWidth: true
-        }
-
         Flow {
             Layout.fillWidth: true
             spacing: 12
@@ -386,11 +379,10 @@ ContentPage {
         }
 
         CFText {
-            text: root.videoList.length === 0
-                ? I18n.tr("Aucune vidéo trouvée dans") + " " + root.userDir
-                : I18n.tr("Cliquer de nouveau sur la vidéo active pour la retirer.")
+            text: I18n.tr("Aucune vidéo trouvée dans") + " " + root.userDir
             font.pixelSize: 12
             gray: true
+            visible: root.videoList.length === 0
             Layout.fillWidth: true
         }
     }
