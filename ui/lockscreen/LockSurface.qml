@@ -9,6 +9,8 @@ import qs.components
 import qs.components.glass
 import qs.services
 import qs.ui.topbar.statusarea.notifcenter
+import "mac"
+
 
 WlSessionLockSurface {
     id: root
@@ -96,41 +98,6 @@ WlSessionLockSurface {
             }
             Component.onCompleted: {
                 wallpaperImage.scale = 1
-            }
-        }
-
-        Item {
-            id: albumBackdrop
-            anchors.fill: parent
-            opacity: mediaPlayer.visible ? Math.max(0, Math.min(1, mediaPlayer.artT)) : 0
-            visible: opacity > 0.003
-
-            Rectangle {
-                anchors.fill: parent
-                color: "#0c0c10"
-            }
-
-            Image {
-                id: albumImage
-                anchors.fill: parent
-                source: mediaPlayer.fileUrl(MprisState.artUrl)
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                sourceSize: Qt.size(400, 400)
-                visible: false
-            }
-
-            MultiEffect {
-                anchors.fill: parent
-                source: albumImage
-                visible: albumImage.status === Image.Ready
-                scale: 1.25
-                autoPaddingEnabled: false
-                blurEnabled: true
-                blurMax: 64
-                blur: 1.0
-                saturation: 0.25
-                brightness: -0.16
             }
         }
 
@@ -236,7 +203,7 @@ WlSessionLockSurface {
             readonly property int clockWeightQt: LockClockStyle.weightFor(clockCfg.clockWeight)
 
             readonly property int baseDigitSize: Math.round(Math.min(root.width * 0.09, 92))
-            readonly property int targetDigitSize: clockCfg.clockLarge ? baseDigitSize : Math.round(baseDigitSize * 0.58)
+            readonly property int targetDigitSize: Math.round((clockCfg.clockLarge ? baseDigitSize : baseDigitSize * 0.58) * (1 - 0.46 * macPlayer.squash))
 
             property int digitSize: targetDigitSize
             onTargetDigitSizeChanged: digitSize = targetDigitSize
@@ -361,20 +328,23 @@ WlSessionLockSurface {
             id: notifStack
             glassBackdrop: lockBackdrop
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: mediaPlayer.top
+            anchors.bottom: loginArea.top
             anchors.bottomMargin: visible ? 16 : 0
         }
 
-        LockMediaPlayer {
-            id: mediaPlayer
-            maxArt: loginArea.y - 20 - 138 - 22 - (clockRow.y + clockRow.height) - 28
-            screenW: root.width
-            lyricsH: Math.max(140, Math.min(root.height * 0.42, 440, loginArea.y - 20 - 150 - 24 - (clockRow.y + clockRow.height) - 28))
-            glassBackdrop: lockBackdrop
-            visible: ShellConfig.options.lockscreen.showMediaPlayer
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: loginArea.top
-            anchors.bottomMargin: (MprisState.hasPlayer && mediaPlayer.visible) ? 20 : 0
+        Item {
+            id: clockExtent
+            height: clockRow.y + clockRow.height - Math.round(root.height * 0.075)
+        }
+
+        MacNowPlaying {
+            id: macPlayer
+            sceneParent: background
+            clock: clockExtent
+            login: loginArea
+            isPrimary: ShellConfig.options.lockscreen.showMediaPlayer
+            shown: !root.unlocking
+            leaving: root.unlocking
         }
 
         Column {
