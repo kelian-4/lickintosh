@@ -98,7 +98,7 @@ Item {
 
         Image {
             anchors.fill: parent
-            source: root.wallpaperPath !== "" ? "file://" + root.wallpaperPath : ""
+            source: GlassWallpaper.sourceUrl(root.wallpaperPath)
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
             cache: true

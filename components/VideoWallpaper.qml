@@ -1,5 +1,6 @@
 import QtQuick
 import QtMultimedia
+import qs.components.glass
 
 Item {
     id: root
@@ -24,6 +25,33 @@ Item {
         onMediaStatusChanged: if (mediaStatus === MediaPlayer.LoadedMedia && root.run) player.play()
         onErrorOccurred: function(error, errorString) { console.warn("[wallpaper video] " + errorString) }
     }
+
+    function grabFrame() {
+        if (!output.visible || output.width <= 0) return
+        output.grabToImage(function(result) {
+            GlassWallpaper.videoGrab = result
+            GlassWallpaper.videoUrl = result.url.toString()
+        }, Qt.size(Math.min(1920, output.width), Math.min(1080, output.height)))
+    }
+
+    onSourceChanged: {
+        GlassWallpaper.videoUrl = ""
+        grabTimer.restart()
+    }
+
+    Timer {
+        id: grabTimer
+        interval: 900
+        repeat: false
+        onTriggered: root.grabFrame()
+    }
+
+    Connections {
+        target: player
+        function onPlaybackStateChanged() { if (player.playbackState === MediaPlayer.PlayingState) grabTimer.restart() }
+    }
+
+    Component.onDestruction: GlassWallpaper.videoUrl = ""
 
     VideoOutput {
         id: output
