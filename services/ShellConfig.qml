@@ -175,6 +175,7 @@ Singleton {
                 property string path: ""
                 property string videoPath: ""
                 property string pathDark: ""
+                property string pathLight: ""
 
                 property string lockscreenPath: ""
             }

@@ -20,7 +20,10 @@ Singleton {
             var dark = ShellConfig.options.wallpaper.pathDark
             return dark !== "" ? dark : pairOf(basePath, "Dark")
         }
-        if (Theme.isLight) return pairOf(basePath, "Light")
+        if (Theme.isLight) {
+            var light = ShellConfig.options.wallpaper.pathLight
+            return light !== "" ? light : pairOf(basePath, "Light")
+        }
         return basePath
     }
 

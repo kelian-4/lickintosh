@@ -46,6 +46,7 @@ ContentPage {
     function pathOf(target) {
         if (target === "lockscreen") return ShellConfig.options.wallpaper.lockscreenPath
         if (target === "desktopDark") return ShellConfig.options.wallpaper.pathDark
+        if (target === "desktopLight") return ShellConfig.options.wallpaper.pathLight
         if (ShellConfig.options.wallpaper.videoPath !== "") return ""
         return ShellConfig.options.wallpaper.path
     }
@@ -55,6 +56,7 @@ ContentPage {
     function apply(path) {
         if (root.activeTarget === "lockscreen") ShellConfig.options.wallpaper.lockscreenPath = path
         else if (root.activeTarget === "desktopDark") ShellConfig.options.wallpaper.pathDark = path
+        else if (root.activeTarget === "desktopLight") ShellConfig.options.wallpaper.pathLight = path
         else {
             ShellConfig.options.wallpaper.videoPath = ""
             ShellConfig.options.wallpaper.path = path
@@ -152,6 +154,7 @@ ContentPage {
             Repeater {
                 model: [
                     { key: "desktop",    label: I18n.tr("Bureau") },
+                    { key: "desktopLight", label: I18n.tr("Bureau (mode clair)") },
                     { key: "desktopDark", label: I18n.tr("Bureau (mode sombre)") },
                     { key: "lockscreen", label: I18n.tr("Écran de verrouillage") }
                 ]
@@ -165,8 +168,8 @@ ContentPage {
                     readonly property string shownPath: root.pathOf(_preview.modelData.key)
 
                     Item {
-                        Layout.preferredWidth: 200
-                        Layout.preferredHeight: 116
+                        Layout.preferredWidth: 150
+                        Layout.preferredHeight: 87
 
                         CFClippingRect {
                             anchors.fill: parent
@@ -178,7 +181,7 @@ ContentPage {
                                 source: _preview.shownPath !== "" ? "file://" + _preview.shownPath : ""
                                 fillMode: Image.PreserveAspectCrop
                                 asynchronous: true
-                                sourceSize: Qt.size(400, 232)
+                                sourceSize: Qt.size(300, 174)
                             }
 
                             Loader {
@@ -232,7 +235,9 @@ ContentPage {
                 ? I18n.tr("La sélection ci-dessous s'applique à l'écran de verrouillage.")
                 : (root.activeTarget === "desktopDark"
                     ? I18n.tr("La sélection ci-dessous s'applique au bureau en mode sombre. Sans fond choisi ici, le fond du bureau est utilisé.")
-                    : I18n.tr("La sélection ci-dessous s'applique au bureau."))
+                    : (root.activeTarget === "desktopLight"
+                        ? I18n.tr("La sélection ci-dessous s'applique au bureau en mode clair. Sans fond choisi ici, le fond du bureau est utilisé.")
+                        : I18n.tr("La sélection ci-dessous s'applique au bureau.")))
             font.pixelSize: 12
             gray: true
             Layout.fillWidth: true
