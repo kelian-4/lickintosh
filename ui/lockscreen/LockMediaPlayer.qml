@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Effects
+import Quickshell
 import qs.components
 import qs.components.glass
 import qs.services
@@ -15,19 +16,43 @@ Item {
     visible: root.hasPlayer
     implicitWidth: 372
 
-    property string mode: "bubble"
-    readonly property bool artMode: root.mode === "art"
-    readonly property bool lyricsMode: root.mode === "lyrics"
+    property real screenW: 1920
+    property real lyricsH: 360
     property real maxArt: 244
     readonly property real bigArt: Math.max(96, Math.min(244, root.maxArt))
     readonly property real artGap: 22
+    readonly property real sideGap: 32
+    readonly property real sideLyrW: Math.max(260, Math.min(560, root.screenW - 372 - root.sideGap - 96))
+
+    property string mode: "bubble"
+    readonly property bool artMode: root.mode === "art" || root.mode === "artlyrics"
+    readonly property bool lyricsMode: root.mode === "lyrics" || root.mode === "artlyrics"
+    readonly property bool sideMode: root.mode === "artlyrics"
+
     property real artT: root.artMode ? 1 : 0
     Behavior on artT { NumberAnimation { duration: 650; easing.type: Easing.OutQuint } }
-    readonly property real scrubY: root.artMode ? 76 : (root.lyricsMode ? 252 : 88)
+    property real lyrT: root.lyricsMode ? 1 : 0
+    Behavior on lyrT { NumberAnimation { duration: 650; easing.type: Easing.OutQuint } }
+    property real sideT: root.sideMode ? 1 : 0
+    Behavior on sideT { NumberAnimation { duration: 650; easing.type: Easing.OutQuint } }
+
+    readonly property real scrubY: root.artMode ? 76 : 88
     readonly property real pillH: root.scrubY + 62
-    implicitHeight: root.visible ? root.pillH + (root.artMode ? root.bigArt + root.artGap : 0) : 0
+    implicitHeight: root.visible ? root.pillH + (root.artMode ? root.bigArt + root.artGap : (root.lyricsMode ? root.lyricsH + 24 : 0)) : 0
     Behavior on implicitHeight {
         NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
+    }
+
+    transform: Translate { x: -root.sideT * (root.sideLyrW + root.sideGap) / 2 }
+
+    function nextOnCover() {
+        var m = root.mode
+        root.mode = m === "bubble" ? "art" : m === "art" ? "bubble" : m === "lyrics" ? "artlyrics" : "lyrics"
+    }
+
+    function nextOnLyrics() {
+        var m = root.mode
+        root.mode = m === "bubble" ? "lyrics" : m === "lyrics" ? "bubble" : m === "art" ? "artlyrics" : "art"
     }
 
     onHasPlayerChanged: if (!root.hasPlayer) root.mode = "bubble"
@@ -106,8 +131,170 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.mode = root.artMode ? "bubble" : "art"
+                onClicked: root.nextOnCover()
             }
+        }
+    }
+
+    Item {
+        id: lyr
+        visible: root.lyrT > 0.01
+        clip: true
+        z: 4
+        readonly property real wTop: Math.min(root.screenW - 80, 620)
+        readonly property real soloH: root.lyricsH
+        readonly property real sideH: root.bigArt + root.artGap + root.pillH
+        readonly property real bottomEdge: (root.height - root.pillH - 24) + (root.pillH + 24) * root.sideT
+        width: wTop + (root.sideLyrW - wTop) * root.sideT
+        height: soloH + (sideH - soloH) * root.sideT
+        x: (root.width - wTop) / 2 + ((root.width + root.sideGap) - (root.width - wTop) / 2) * root.sideT
+        y: bottomEdge - height
+        opacity: Math.max(0, Math.min(1, root.lyrT))
+        scale: 0.94 + 0.06 * root.lyrT
+        transformOrigin: root.sideMode ? Item.Left : Item.Bottom
+
+        property real manual: 0
+        Behavior on manual { NumberAnimation { duration: 260; easing.type: Easing.OutQuint } }
+        Timer {
+            id: manualReset
+            interval: 3500
+            onTriggered: if (LyricsState.synced) lyr.manual = 0
+        }
+        WheelHandler {
+            onWheel: function(ev) {
+                lyr.manual = Math.max(-200, lyr.manual - ev.angleDelta.y * 0.6)
+                manualReset.restart()
+            }
+        }
+
+        readonly property int cur: LyricsState.indexAt(MprisState.position)
+        readonly property bool ready: LyricsState.status === "ok"
+
+        readonly property real scrollTo: {
+            var it = lyr.cur >= 0 ? rep.itemAt(lyr.cur) : null
+            var base = it ? it.y - lyr.height * 0.30 : -lyr.height * 0.30
+            return base + lyr.manual
+        }
+
+        Item {
+            anchors.fill: parent
+            clip: true
+            visible: lyr.ready
+            layer.enabled: true
+            layer.effect: ShaderEffect {
+                fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/assets/shaders/lyricsfade/fade.frag.qsb")
+                property real fadeTop: 0.24
+                property real fadeBottom: 0.30
+            }
+
+            Column {
+                id: col
+                width: parent.width
+                spacing: 20
+
+                Repeater {
+                    id: rep
+                    model: LyricsState.lines
+
+                    delegate: Item {
+                        id: ln
+                        required property var modelData
+                        required property int index
+                        readonly property int rel: lyr.cur < 0 ? 0 : ln.index - lyr.cur
+                        readonly property bool isCur: LyricsState.synced && ln.index === lyr.cur
+                        readonly property bool gap: (ln.modelData.text || "") === ""
+                        width: col.width
+                        height: ln.gap ? 34 : lt.implicitHeight
+
+                        transform: Translate {
+                            id: tr
+                            y: -lyr.scrollTo
+                            Behavior on y { NumberAnimation { duration: 500 + Math.max(0, Math.min(8, ln.rel)) * 20; easing.type: Easing.OutQuint } }
+                        }
+
+                        opacity: !LyricsState.synced ? 0.9 : (ln.isCur ? 1 : (Math.abs(ln.rel) === 1 ? 0.42 : 0.26))
+                        Behavior on opacity { NumberAnimation { duration: 380 } }
+
+                        Text {
+                            id: lt
+                            visible: !ln.gap
+                            width: parent.width
+                            text: ln.modelData.text
+                            wrapMode: Text.WordWrap
+                            color: "white"
+                            font.family: root.fam
+                            font.pixelSize: 31
+                            font.weight: Font.Bold
+                            lineHeight: 1.08
+                            renderType: Text.NativeRendering
+                            transformOrigin: Item.Left
+                            scale: ln.isCur || !LyricsState.synced ? 1 : 0.965
+                            Behavior on scale { NumberAnimation { duration: 420; easing.type: Easing.OutQuint } }
+                            layer.enabled: LyricsState.synced && !ln.isCur && Math.abs(ln.rel) <= 6
+                            layer.effect: MultiEffect {
+                                blurEnabled: true
+                                blurMax: 16
+                                blur: Math.min(0.55, 0.14 * Math.abs(ln.rel))
+                            }
+                        }
+
+                        Row {
+                            visible: ln.gap
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 9
+
+                            Repeater {
+                                model: 3
+
+                                delegate: Rectangle {
+                                    required property int index
+                                    width: 11
+                                    height: 11
+                                    radius: 5.5
+                                    color: "white"
+                                    opacity: ln.isCur ? 0.95 : 0.35
+
+                                    SequentialAnimation on scale {
+                                        running: ln.isCur
+                                        loops: Animation.Infinite
+                                        PauseAnimation { duration: index * 160 }
+                                        NumberAnimation { from: 0.7; to: 1.15; duration: 520; easing.type: Easing.InOutSine }
+                                        NumberAnimation { from: 1.15; to: 0.7; duration: 520; easing.type: Easing.InOutSine }
+                                    }
+                                }
+                            }
+                        }
+
+                        readonly property real shownY: ln.y + tr.y
+                        readonly property bool inBand: ln.shownY + ln.height > lyr.height * 0.20 && ln.shownY < lyr.height * 0.74
+
+                        TapHandler {
+                            enabled: ln.inBand && LyricsState.synced && MprisState.canSeek
+                            onTapped: {
+                                MprisState.seek(ln.modelData.t)
+                                lyr.manual = 0
+                            }
+                        }
+
+                        HoverHandler {
+                            enabled: ln.inBand && LyricsState.synced
+                            cursorShape: Qt.PointingHandCursor
+                        }
+                    }
+                }
+            }
+        }
+
+        Text {
+            anchors.centerIn: parent
+            visible: !lyr.ready
+            horizontalAlignment: Text.AlignHCenter
+            text: LyricsState.status === "loading" || LyricsState.status === "idle" ? I18n.tr("Loading lyrics…") : I18n.tr("No lyrics found")
+            color: Qt.rgba(1, 1, 1, 0.55)
+            font.family: root.fam
+            font.pixelSize: 20
+            font.weight: Font.DemiBold
+            renderType: Text.NativeRendering
         }
     }
 
@@ -161,68 +348,6 @@ Item {
                 fade: 14
                 animate: MprisState.isPlaying
             }
-        }
-
-        ListView {
-            id: lv
-            x: 18
-            y: 84
-            width: pill.width - 36
-            height: 160
-            clip: true
-            visible: opacity > 0
-            opacity: root.lyricsMode && LyricsState.status === "ok" ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 240 } }
-            model: LyricsState.lines
-            spacing: 8
-            boundsBehavior: Flickable.StopAtBounds
-            interactive: !LyricsState.synced
-            highlightRangeMode: LyricsState.synced ? ListView.StrictlyEnforceRange : ListView.NoHighlightRange
-            preferredHighlightBegin: height / 2 - 22
-            preferredHighlightEnd: height / 2 + 22
-            highlightMoveDuration: 380
-            currentIndex: LyricsState.synced ? Math.max(0, lv.cur) : 0
-
-            readonly property int cur: LyricsState.indexAt(MprisState.position)
-
-            delegate: Text {
-                id: ln
-                required property var modelData
-                required property int index
-                width: lv.width - 6
-                wrapMode: Text.WordWrap
-                text: ln.modelData.text !== "" ? ln.modelData.text : "\u266a"
-                color: "white"
-                opacity: !LyricsState.synced ? 0.9 : (ln.index === lv.cur ? 1 : 0.35)
-                font.family: root.fam
-                font.pixelSize: 19
-                font.weight: Font.Bold
-                renderType: Text.NativeRendering
-                Behavior on opacity { NumberAnimation { duration: 260 } }
-
-                MouseArea {
-                    anchors.fill: parent
-                    enabled: LyricsState.synced && MprisState.canSeek
-                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    onClicked: MprisState.seek(ln.modelData.t)
-                }
-            }
-        }
-
-        Text {
-            visible: root.lyricsMode && LyricsState.status !== "ok"
-            x: 18
-            y: 84
-            width: pill.width - 36
-            height: 160
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            text: LyricsState.status === "loading" ? I18n.tr("Loading lyrics…") : I18n.tr("No lyrics found")
-            color: Qt.rgba(1, 1, 1, 0.6)
-            font.family: root.fam
-            font.pixelSize: 15
-            font.weight: Font.DemiBold
-            renderType: Text.NativeRendering
         }
 
         Item {
@@ -368,7 +493,7 @@ Item {
             gh: 18
             on: root.lyricsMode
             enabledBtn: true
-            onClicked: root.mode = root.lyricsMode ? "bubble" : "lyrics"
+            onClicked: root.nextOnLyrics()
         }
     }
 }

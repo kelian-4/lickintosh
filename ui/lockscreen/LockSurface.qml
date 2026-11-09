@@ -368,6 +368,8 @@ WlSessionLockSurface {
         LockMediaPlayer {
             id: mediaPlayer
             maxArt: loginArea.y - 20 - 138 - 22 - (clockRow.y + clockRow.height) - 28
+            screenW: root.width
+            lyricsH: Math.max(140, Math.min(root.height * 0.42, 440, loginArea.y - 20 - 150 - 24 - (clockRow.y + clockRow.height) - 28))
             glassBackdrop: lockBackdrop
             visible: ShellConfig.options.lockscreen.showMediaPlayer
             anchors.horizontalCenter: parent.horizontalCenter
