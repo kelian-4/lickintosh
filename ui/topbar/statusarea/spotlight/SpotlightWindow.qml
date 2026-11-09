@@ -637,9 +637,11 @@ Scope {
             Item {
                 id: bgContent
                 anchors.fill: parent
+                visible: !(videoLayer.item && videoLayer.item.ready)
             }
 
             Loader {
+                id: videoLayer
                 anchors.fill: parent
                 active: ShellConfig.options.wallpaper.videoPath !== ""
                 source: "../../../../components/VideoWallpaper.qml"

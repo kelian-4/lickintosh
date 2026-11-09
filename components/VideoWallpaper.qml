@@ -9,6 +9,7 @@ Item {
     property bool paused: false
 
     readonly property bool run: !root.paused
+    readonly property bool ready: output.visible && player.position > 0
 
     onRunChanged: {
         if (root.run) player.play()

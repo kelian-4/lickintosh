@@ -177,6 +177,13 @@ ContentPage {
                                 sourceSize: Qt.size(400, 232)
                             }
 
+                            Loader {
+                                anchors.fill: parent
+                                active: _preview.modelData.key === "desktop" && ShellConfig.options.wallpaper.videoPath !== ""
+                                source: "../../../components/VideoFrame.qml"
+                                onLoaded: item.source = Qt.binding(function() { return ShellConfig.options.wallpaper.videoPath })
+                            }
+
                             CFText {
                                 anchors.centerIn: parent
                                 text: I18n.tr("Aucun fond d'écran")
