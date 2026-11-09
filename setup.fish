@@ -1,7 +1,9 @@
 #!/usr/bin/env fish
 
 set -g repo (realpath (status dirname))
-set -g qs_dst ~/.config/quickshell
+set -g qs_root ~/.config/quickshell
+set -g qs_name lickintosh
+set -g qs_dst $qs_root/$qs_name
 set -g fonts_dst ~/.local/share/fonts/SF
 set -g icons_dst ~/.icons
 set -g hypr_dst ~/.config/hypr
@@ -547,10 +549,11 @@ function run_uninstall
     end
     echo "    sauvegarde : $backup"
     pkill -f lickintosh-start >/dev/null 2>&1
-    command -q qs; and qs kill >/dev/null 2>&1
+    command -q qs; and qs -c $qs_name kill >/dev/null 2>&1
     for e in $present
         rm -rf $qs_dst/$e
     end
+    rmdir $qs_dst 2>/dev/null
     echo "    shell retire"
     set -l old (ls -1d $backup_root/* 2>/dev/null | sort)
     if test (count $old) -gt 3
@@ -831,7 +834,7 @@ set -l do_shell 1
 if test (count $present) -gt 0
     echo "    deja present : $present"
         if ask "    Remplacer le code du shell ? Une sauvegarde est faite avant."
-        set -l backup $qs_dst.bak-(date +%Y%m%d-%H%M%S)
+        set -l backup ~/.local/share/lickintosh/backups/shell-(date +%Y%m%d-%H%M%S)
         mkdir -p $backup
         for e in $present
             cp -a $qs_dst/$e $backup/$e
@@ -862,10 +865,19 @@ if test $do_shell -eq 1
     echo "    shell copie dans $qs_dst"
     set shell_replaced 1
 
-    for d in $qs_dst/*/
-        if test -f $d/shell.qml
-            echo "    note : "(basename $d)" contient un shell.qml ; qs -c "(basename $d)" ne le trouvera plus (qs -p $d reste possible)"
+    set -l legacy
+    for e in $managed assets
+        test -e $qs_root/$e; and set -a legacy $e
+    end
+    if test -f $qs_root/shell.qml; and test -f $qs_root/tools/lickintosh-start; and test (count $legacy) -gt 0
+        set -l lbackup ~/.local/share/lickintosh/backups/legacy-(date +%Y%m%d-%H%M%S)
+        mkdir -p $lbackup
+        for e in $legacy
+            cp -a $qs_root/$e $lbackup/$e
+            rm -rf $qs_root/$e
         end
+        echo "    ancienne installation a la racine de $qs_root deplacee vers $qs_dst (sauvegarde : $lbackup)"
+        echo "    les autres dossiers de $qs_root sont intacts et qs -c <nom> les retrouve"
     end
     pgrep -x quickshell >/dev/null 2>&1; and echo "    Quickshell tourne deja : relance-le completement pour charger la nouvelle copie."
 end
@@ -990,7 +1002,7 @@ else if test (count $blocking) -gt 0
         echo "      - $b"
     end
 else if test -z "$HYPRLAND_INSTANCE_SIGNATURE"
-    echo "    pas dans une session Hyprland : lance $qs_bin -d -n"
+    echo "    pas dans une session Hyprland : lance $qs_bin -c $qs_name -d -n"
 else
     set -l running 0
     pgrep -x quickshell >/dev/null 2>&1; and set running 1
@@ -998,7 +1010,7 @@ else
         echo "    Quickshell tourne deja et son code n'a pas change"
     else
         if test $running -eq 1
-            $qs_bin kill >/dev/null 2>&1
+            $qs_bin -c $qs_name kill >/dev/null 2>&1
             for n in 1 2 3 4 5 6
                 pgrep -x quickshell >/dev/null 2>&1; or break
                 sleep 0.5
@@ -1012,7 +1024,7 @@ else
         if pgrep -x quickshell >/dev/null 2>&1
             echo "    Quickshell lance"
         else
-            echo "    Quickshell s'est arrete juste apres le lancement : lis $qs_bin log" >&2
+            echo "    Quickshell s'est arrete juste apres le lancement : lis $qs_bin -c $qs_name log" >&2
         end
     end
 end

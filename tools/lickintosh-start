@@ -31,7 +31,7 @@ while [ "$i" -lt 100 ]; do
     sleep 0.2
 done
 
-if pgrep -u "$(id -u)" -fx '(.*/)?(qs|quickshell)( (-c|--config) quickshell)?' >/dev/null 2>&1; then
+if pgrep -u "$(id -u)" -fx '(.*/)?(qs|quickshell)( (-c|--config) (quickshell|lickintosh))?' >/dev/null 2>&1; then
     exit 0
 fi
 
@@ -82,7 +82,7 @@ while :; do
     rung "$fast"
     log "starting qs (attempt $((fast + 1)))${applied:+, fallback settings:$applied}$([ "$soft" = 1 ] && printf ' QT_QUICK_BACKEND=software')"
     start=$(date +%s)
-    qs >>"$LOG" 2>&1 &
+    qs -c lickintosh >>"$LOG" 2>&1 &
     pid=$!
     if [ -n "$applied" ] && [ "$soft" = 0 ] && [ ! -s "$AUTO" ]; then
         keep="$applied"
