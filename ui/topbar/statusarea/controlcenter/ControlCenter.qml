@@ -1874,11 +1874,11 @@ Scope {
                                         anchors.verticalCenter: parent.verticalCenter
                                         width: 38; height: 38; radius: 19
                                         color: Qt.rgba(1, 1, 1, 0.18)
-                                        CFVI {
+                                        ThemeGlyph {
                                             anchors.centerIn: parent
-                                            icon: Theme.isDark ? "notch/moon.svg" : (Theme.isLight ? "weather/sun.svg" : "settings/appearance.svg")
-                                            size: 26
-                                            color: "#fff"
+                                            kind: Theme.isDark ? "dark" : (Theme.isLight ? "light" : "glass")
+                                            size: 24
+                                            col: "#fff"
                                         }
                                     }
 

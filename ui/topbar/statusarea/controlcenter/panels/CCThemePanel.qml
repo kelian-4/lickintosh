@@ -10,13 +10,13 @@ Item {
 
     signal closeRequested()
 
-    readonly property int rowHeight: 48
+    readonly property int rowHeight: 50
     readonly property int maxScrollHeight: 400
 
     readonly property var modes: [
-        { mode: "glass", label: "Liquid Glass", icon: "settings/appearance.svg" },
-        { mode: "light", label: "Clair", icon: "weather/sun.svg" },
-        { mode: "dark", label: "Sombre", icon: "notch/moon.svg" }
+        { mode: "glass", label: "Liquid Glass", icon: "glass" },
+        { mode: "light", label: "Clair", icon: "light" },
+        { mode: "dark", label: "Sombre", icon: "dark" }
     ]
 
     implicitHeight: _content.implicitHeight + 20
@@ -31,17 +31,19 @@ Item {
         width: parent ? parent.width : 0
         height: root.rowHeight
         radius: height / 2
-        color: pill.picked ? "#ffffff" : (pillMa.containsMouse ? Qt.rgba(1, 1, 1, 0.20) : Qt.rgba(1, 1, 1, 0.11))
+        color: pill.picked ? "#ffffff" : (pillMa.containsMouse ? Qt.rgba(0, 0, 0, 0.42) : Qt.rgba(0, 0, 0, 0.30))
+        border.width: pill.picked ? 0 : 1
+        border.color: Qt.rgba(1, 1, 1, 0.16)
         Behavior on color { ColorAnimation { duration: 160 } }
 
-        CFVI {
+        ThemeGlyph {
             visible: pill.icon !== ""
             anchors.left: parent.left
             anchors.leftMargin: 20
             anchors.verticalCenter: parent.verticalCenter
-            icon: pill.icon
+            kind: pill.icon
             size: 22
-            color: pill.picked ? "#000000" : "#ffffff"
+            col: pill.picked ? "#000000" : "#ffffff"
         }
 
         CFText {
@@ -122,7 +124,7 @@ Item {
                 id: _col
                 x: 14
                 width: _scroll.width - 28
-                spacing: 8
+                spacing: 14
 
                 CFText {
                     text: I18n.tr("Appearance")
