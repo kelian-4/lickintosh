@@ -141,7 +141,7 @@ Scope {
             }
             root.wallpaperList = out
 
-            if (root.currentWallpaper === "" && out.length > 0) {
+            if (root.currentWallpaper === "" && ShellConfig.options.wallpaper.videoPath === "" && out.length > 0) {
                 root.setWallpaper(out[0].path, true)
             }
         }
@@ -598,7 +598,7 @@ Scope {
 
     readonly property string currentWallpaper: root.previewWallpaper !== ""
         ? root.previewWallpaper
-        : GlassWallpaper.stillPath
+        : (ShellConfig.options.wallpaper.videoPath !== "" ? "" : GlassWallpaper.stillPath)
 
     function setWallpaper(path, persist) {
         if (persist) {
@@ -626,7 +626,11 @@ Scope {
             property var currentImg: null
 
             onSourceChanged: {
-                if (source === "") { currentImg = null; return }
+                if (source === "") {
+                    currentImg = null
+                    for (var i = bgContent.children.length - 1; i >= 0; i--) bgContent.children[i].destroy()
+                    return
+                }
                 currentImg = imgComp.createObject(bgContent, { path: source })
             }
 
@@ -637,7 +641,6 @@ Scope {
             Item {
                 id: bgContent
                 anchors.fill: parent
-                visible: !(videoLayer.item && videoLayer.item.ready)
             }
 
             Loader {

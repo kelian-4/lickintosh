@@ -46,6 +46,7 @@ ContentPage {
     function pathOf(target) {
         if (target === "lockscreen") return ShellConfig.options.wallpaper.lockscreenPath
         if (target === "desktopDark") return ShellConfig.options.wallpaper.pathDark
+        if (ShellConfig.options.wallpaper.videoPath !== "") return ""
         return ShellConfig.options.wallpaper.path
     }
 
@@ -54,7 +55,10 @@ ContentPage {
     function apply(path) {
         if (root.activeTarget === "lockscreen") ShellConfig.options.wallpaper.lockscreenPath = path
         else if (root.activeTarget === "desktopDark") ShellConfig.options.wallpaper.pathDark = path
-        else ShellConfig.options.wallpaper.path = path
+        else {
+            ShellConfig.options.wallpaper.videoPath = ""
+            ShellConfig.options.wallpaper.path = path
+        }
     }
 
     function applyRandom() {
@@ -189,7 +193,7 @@ ContentPage {
                                 text: I18n.tr("Aucun fond d'écran")
                                 font.pixelSize: 12
                                 gray: true
-                                visible: _preview.shownPath === ""
+                                visible: _preview.shownPath === "" && !(_preview.modelData.key === "desktop" && ShellConfig.options.wallpaper.videoPath !== "")
                             }
                         }
 
@@ -380,7 +384,13 @@ ContentPage {
                     required property string modelData
                     path: modelData
                     selected: ShellConfig.options.wallpaper.videoPath === modelData
-                    onClicked: ShellConfig.options.wallpaper.videoPath = _video.selected ? "" : _video.modelData
+                    onClicked: {
+                        if (_video.selected) ShellConfig.options.wallpaper.videoPath = ""
+                        else {
+                            ShellConfig.options.wallpaper.videoPath = _video.modelData
+                            root.activeTarget = "desktop"
+                        }
+                    }
                 }
             }
         }
