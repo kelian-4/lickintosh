@@ -12,6 +12,11 @@ Singleton {
         return m ? m[1] + kind + m[3] : p
     }
 
+    readonly property string modePath: Theme.isDark ? ShellConfig.options.wallpaper.pathDark
+        : (Theme.isLight ? ShellConfig.options.wallpaper.pathLight : "")
+
+    readonly property bool videoActive: preview === "" && ShellConfig.options.wallpaper.videoPath !== "" && modePath === ""
+
     readonly property string basePath: ShellConfig.options.wallpaper.path
 
     readonly property string stillPath: {
@@ -27,7 +32,7 @@ Singleton {
         return basePath
     }
 
-    readonly property string path: preview === "" && ShellConfig.options.wallpaper.videoPath !== "" && videoUrl !== ""
+    readonly property string path: videoActive && videoUrl !== ""
         ? videoUrl : stillPath
 
     function sourceUrl(p) {

@@ -598,7 +598,7 @@ Scope {
 
     readonly property string currentWallpaper: root.previewWallpaper !== ""
         ? root.previewWallpaper
-        : (ShellConfig.options.wallpaper.videoPath !== "" ? "" : GlassWallpaper.stillPath)
+        : (GlassWallpaper.videoActive ? "" : GlassWallpaper.stillPath)
 
     function setWallpaper(path, persist) {
         if (persist) {
@@ -646,7 +646,7 @@ Scope {
             Loader {
                 id: videoLayer
                 anchors.fill: parent
-                active: ShellConfig.options.wallpaper.videoPath !== ""
+                active: GlassWallpaper.videoActive
                 source: "../../../../components/VideoWallpaper.qml"
                 onLoaded: {
                     item.source = Qt.binding(function() { return ShellConfig.options.wallpaper.videoPath })

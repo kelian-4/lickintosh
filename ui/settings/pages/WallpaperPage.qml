@@ -147,7 +147,7 @@ ContentPage {
     ContentSection {
         title: I18n.tr("Aperçu")
 
-        RowLayout {
+        Flow {
             Layout.fillWidth: true
             spacing: 14
 
