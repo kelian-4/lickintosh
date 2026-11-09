@@ -412,8 +412,6 @@ Scope {
     }
 
     readonly property bool focusOn: NotifService.dndEnabled
-    readonly property bool darkOn: Theme.isDark
-    property string modeBeforeDark: "glass"
     property bool recording: false
 
     function openCalculator() {
@@ -1792,50 +1790,71 @@ Scope {
                                 height: root.box
                                 radius: 32
                                 hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                                enabled: root.darkOn
+                                enabled: false
                                 light: darkWidget.enabled ? "transparent" : root.glassRimColor
                                 rimStrength: darkWidget.enabled ? 0 : root.glassRimStrength
                                 color: darkWidget.enabled ? "#fff" : root.glassColor
-                                CFClippingRect {
-                                    id: darkCircle
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: 11
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 38; height: 38; radius: 19
-                                    color: "transparent"
-                                    CFVI {
-                                        anchors.centerIn: parent
-                                        icon: root.darkOn ? "notch/moon.svg" : "weather/sun.svg"
-                                        size: 26
-                                        color: root.darkOn ? "#F1C40F" : "#fff"
-                                    }
-                                }
-                                CFText {
-                                    anchors.left: darkCircle.right
-                                    anchors.leftMargin: 9
-                                    anchors.right: parent.right
-                                    anchors.rightMargin: 11
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    elide: Text.ElideRight
-                                    text: I18n.tr("Dark Mode")
-                                    font.family: "SF Pro Text"
-                                    font.pixelSize: 13
-                                    font.weight: Font.DemiBold
-                                    color: root.darkOn ? "#000" : "#fff"
-                                }
-                                MouseArea {
+                                Row {
                                     anchors.fill: parent
-                                    onClicked: {
-                                        if (Theme.isDark) {
-                                            Theme.setMode(root.modeBeforeDark)
-                                        } else {
-                                            root.modeBeforeDark = Theme.mode
-                                            Theme.setMode("dark")
+                                    anchors.margins: 8
+                                    spacing: 4
+
+                                    Repeater {
+                                        model: [
+                                            { mode: "glass", label: "Liquid Glass", icon: "settings/appearance.svg" },
+                                            { mode: "light", label: "Clair", icon: "weather/sun.svg" },
+                                            { mode: "dark", label: "Sombre", icon: "notch/moon.svg" }
+                                        ]
+
+                                        delegate: Item {
+                                            id: seg
+                                            required property var modelData
+                                            readonly property bool picked: Theme.mode === seg.modelData.mode
+                                            width: (parent.width - 8) / 3
+                                            height: parent.height
+
+                                            Rectangle {
+                                                anchors.fill: parent
+                                                radius: 24
+                                                color: seg.picked ? "#ffffff" : (segMa.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
+                                                Behavior on color { ColorAnimation { duration: 160 } }
+                                            }
+
+                                            Column {
+                                                anchors.centerIn: parent
+                                                spacing: 6
+                                                width: parent.width - 8
+
+                                                CFVI {
+                                                    anchors.horizontalCenter: parent.horizontalCenter
+                                                    icon: seg.modelData.icon
+                                                    size: 26
+                                                    color: seg.picked ? (seg.modelData.mode === "dark" ? "#F1C40F" : "#000000") : "#ffffff"
+                                                }
+
+                                                CFText {
+                                                    width: parent.width
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                    elide: Text.ElideRight
+                                                    text: I18n.tr(seg.modelData.label)
+                                                    font.family: "SF Pro Text"
+                                                    font.pixelSize: 12
+                                                    font.weight: Font.DemiBold
+                                                    color: seg.picked ? "#000000" : "#ffffff"
+                                                }
+                                            }
+
+                                            MouseArea {
+                                                id: segMa
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                onClicked: Theme.setMode(seg.modelData.mode)
+                                                onPressed: darkWidget.isPressed = true
+                                                onReleased: darkWidget.isPressed = false
+                                                onCanceled: darkWidget.isPressed = false
+                                            }
                                         }
                                     }
-                                    onPressed: darkWidget.isPressed = true
-                                    onReleased: darkWidget.isPressed = false
-                                    onCanceled: darkWidget.isPressed = false
                                 }
                             }
                     }
