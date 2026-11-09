@@ -15,14 +15,14 @@ Item {
     property bool isPrimary: true
     property bool shown: true
     property bool leaving: false
-    readonly property real u: Math.max(0.6, height / 1200)
+    readonly property real u: Math.max(0.75, Math.min(1, height / 1000))
     readonly property string fam: "SF Pro Text"
     readonly property string famDisplay: "SF Pro Display"
 
     readonly property QtObject st: QtObject {
         property string npMode: ""
         property bool artBg: true
-        property string mediaSlot: "top"
+        property string mediaSlot: "bottom"
         property bool engaged: false
         function poke() {}
         function setMediaSlot(v) { mediaSlot = v }
@@ -177,7 +177,7 @@ Item {
         // with the cover floating, the top spot leaves room for it between the clock and the bubble
         // computed from where the clock and the login column END UP, not where they are mid-animation
         readonly property real slotTop: 0.075 * ls.height + clock.height + 22 * ls.u + ls.panelRoom
-        readonly property real slotBottom: ls.height - login.height - 78 * ls.u - height - 26 * ls.u
+        readonly property real slotBottom: login.y - height - 26 * ls.u
         readonly property real base: ls.st.mediaSlot === "bottom" ? slotBottom : slotTop
         property real dragOff: 0
         property bool settling: false
@@ -441,7 +441,7 @@ Item {
                 onClicked: {
                     // lyrics button: with the cover enlarged the cover slides left and the lyrics appear beside it
                     var m = ls.st.npMode;
-                    ls.st.npMode = m === "" ? "lyrics" : m === "lyrics" ? "" : m === "art" ? "artlyrics" : "art";
+                    ls.st.npMode = m === "" ? "artlyrics" : m === "lyrics" || m === "artlyrics" ? "" : "artlyrics";
                     if (ls.lyricsMode && (ls.lyrStatus === "idle" || ls.lyrStatus === "none")) ls.fetchLyrics();
                     ls.st.poke();
                 }
@@ -618,7 +618,7 @@ Item {
         readonly property real hSide: media.width + 24 * ls.u + media.height
         // lyrics-only: below the bubble (top spot, filling the room down to the password field) or above it (bottom spot)
         readonly property real belowY: media.y + media.height + 24 * ls.u
-        readonly property real belowH: Math.max(140 * ls.u, Math.min(ls.lyricsH, (ls.height - login.height - 78 * ls.u - 24 * ls.u) - belowY))
+        readonly property real belowH: Math.max(140 * ls.u, Math.min(ls.lyricsH, (login.y - 24 * ls.u) - belowY))
         readonly property real soloH: ls.lyricsBelow ? belowH : ls.lyricsH
         readonly property real soloY: ls.lyricsBelow ? belowY : media.y - ls.lyricsH - 24 * ls.u
         readonly property real sideY: media.y - media.width - 24 * ls.u
