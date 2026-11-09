@@ -27,8 +27,6 @@ Scope {
     property bool alarmOpened: false
     property bool stopwatchOpened: false
     property bool themeOpened: false
-    property bool themeGrowReady: false
-    property bool themeContentReady: false
     property bool themeClosing: false
     property bool subOpened:  wifiOpened || btOpened || timerOpened || alarmOpened || stopwatchOpened || themeOpened
     property bool playerExpanded: false
@@ -54,7 +52,6 @@ Scope {
 
     Timer { id: _wifiContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.wifiContentReady = true }
     Timer { id: _wifiCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.wifiClosing = false }
-    Timer { id: _themeContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.themeContentReady = true }
     Timer { id: _themeCloseTimer;   interval: ShellMotion.spatial();  onTriggered: root.themeClosing = false }
     Timer { id: _btContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.btContentReady = true }
     Timer { id: _btCloseTimer;   interval: ShellMotion.spatial();  onTriggered: root.btClosing = false }
@@ -85,12 +82,7 @@ Scope {
         if (themeOpened) {
             _themeCloseTimer.stop()
             themeClosing = false
-            themeGrowReady = true
-            _themeContentTimer.restart()
         } else {
-            _themeContentTimer.stop()
-            themeContentReady = false
-            themeGrowReady = false
             themeClosing = true
             _themeCloseTimer.restart()
         }
@@ -198,7 +190,7 @@ Scope {
 
     readonly property int _lastVisibleRow: ControlCatalog.shownRows - 1
 
-    readonly property int _visibleGridHeight: (box*(_lastVisibleRow+1)) + (boxMargin*(_lastVisibleRow+1)) + boxMargin
+    readonly property int _visibleGridHeight: Math.max((box*(_lastVisibleRow+1)) + (boxMargin*(_lastVisibleRow+1)) + boxMargin, (themeOpened || themeClosing) ? 640 : 0)
 
     readonly property color glassColor: "transparent"
     readonly property color textColor:  "#ffffff"
@@ -1808,64 +1800,14 @@ Scope {
                                 widgetId: themeWidget.modelData.uid
                                 xPos: root.packedX(themeWidget.widgetId)
                                 yPos: root.packedY(themeWidget.widgetId)
-                                width: root.themeGrowReady ? root.gridImplicitWidth : root.box*2+root.boxMargin
-                                height: root.themeGrowReady ? _tPanel.implicitHeight : root.box
-                                radius: root.themeGrowReady ? 12 : 32
+                                width: root.box*2+root.boxMargin
+                                height: root.box
                                 hoverFx: !root.themeOpened
                                 enabled: false
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                                overwriteX: root.themeGrowReady
-                                overwriteY: root.themeGrowReady
-                                overwriteXPos: 0
-                                overwriteYPos: root.boxMargin
-
-                                z: (root.themeOpened || root.themeClosing) ? 100 : 0
-                                forceTransparentRim: root.themeOpened
-                                light: themeWidget.forceTransparentRim ? "transparent" : root.glassRimColor
-                                rimStrength: themeWidget.forceTransparentRim ? 0 : root.glassRimStrength
-                                color: themeWidget.forceTransparentRim ? "transparent" : root.glassColor
-
-                                CFClippingRect {
-                                    anchors.fill: parent
-                                    radius: 12
-                                    visible: opacity > 0
-                                    opacity: root.themeContentReady ? 1 : 0
-                                    Behavior on opacity {
-                                        NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve }
-                                    }
-
-                                    BoxGlass {
-                                        backdrop: null
-                                        anchors.fill: parent
-                                        radius: 12
-                                        color: root.glassColor
-                                        light: root.glassRimColor
-                                        rimStrength: 1.3
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            preventStealing: true
-                                            propagateComposedEvents: false
-                                            onPressed: function(e) { e.accepted = true }
-                                            onClicked: function(e) { e.accepted = true }
-                                        }
-
-                                        CCThemePanel {
-                                            id: _tPanel
-                                            width: root.gridImplicitWidth
-                                            onCloseRequested: root.themeOpened = false
-                                        }
-                                    }
-                                }
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
 
                                 Item {
-                                    anchors.left: parent.left
-                                    anchors.top: parent.top
-                                    width: root.box*2+root.boxMargin
-                                    height: root.box
-                                    visible: opacity > 0
-                                    opacity: (!root.themeOpened && !root.themeClosing) ? 1 : 0
-                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+                                    anchors.fill: parent
 
                                     CFClippingRect {
                                         id: themeCircle
@@ -1923,6 +1865,18 @@ Scope {
                                     onCanceled: themeWidget.isPressed = false
                                 }
                             }
+                    }
+
+                    ThemeFan {
+                        id: themeFan
+                        readonly property var inst: ControlCatalog.instancesOfType("darkWidget")
+                        readonly property string uid: themeFan.inst.length > 0 ? themeFan.inst[0].uid : ""
+                        width: root.gridImplicitWidth
+                        height: 640
+                        z: 120
+                        open: root.themeOpened
+                        originX: ccContent.gridX(root.packedX(themeFan.uid)) + (root.box*2+root.boxMargin) / 2
+                        originY: ccContent.gridY(root.packedY(themeFan.uid)) + root.box / 2
                     }
 
                     Repeater {
