@@ -15,7 +15,7 @@ Item {
     property bool isPrimary: true
     property bool shown: true
     property bool leaving: false
-    readonly property real u: Math.max(0.75, Math.min(1, height / 1000))
+    readonly property real u: Math.max(0.85, Math.min(1, height / 900))
     readonly property string fam: "SF Pro Text"
     readonly property string famDisplay: "SF Pro Display"
 
