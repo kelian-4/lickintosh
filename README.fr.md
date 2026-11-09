@@ -38,7 +38,7 @@
 
 **Dock**
 - **Applications** : épinglées, avec indicateurs d'applications ouvertes, corbeille et grossissement au survol.
-- **Réglages** : taille des icônes, échelle du dock et débordement des icônes.
+- **Réglages** : taille des icônes, échelle du dock, débordement et teinte des icônes.
 
 
 <p align="center"><img src="assets/readme/dock.gif" width="800" alt="Dock"></p>
@@ -46,10 +46,11 @@
 
 **Bureau**
 - **Icônes de fichiers** : grille, sélection multiple, déplacement avec permutation animée.
-- **Widgets** : batterie, Bluetooth, calendrier, horloge analogique et numérique, Concentration, média, notes, citation, chronomètre, tâches, minuteur, volume, météo. Trois thèmes : verre, clair et sombre.
+- **Widgets** : batterie, Bluetooth, calendrier, horloge analogique et numérique, horloge mondiale, Concentration, image, média, notes, citation, chronomètre, tâches, minuteur, volume, météo. Trois thèmes : verre, clair et sombre.
+- **Fond d'écran** : images fixes, une image distincte pour le mode sombre et fonds vidéo en boucle (nécessite le module Qt `QtMultimedia` ; en pause en mode jeu).
 
 **Centre de contrôle**
-- **Contrôles modifiables** : Wi-Fi, lecture en cours, Bluetooth, KDE Connect, Concentration, capture d'écran, partage d'écran, luminosité, son, mode sombre, calculatrice, mode jeu, minuteur, alarme, chronomètre, maintien en éveil.
+- **Contrôles modifiables** : Wi-Fi, lecture en cours, Bluetooth, KDE Connect, Concentration, capture d'écran, partage d'écran, luminosité, son, mode sombre, calculatrice, mode jeu, minuteur, alarme, chronomètre, maintien en éveil, Night Shift (nécessite `hyprsunset`).
 <img width="344" height="516" alt="2026-11-06_12:57:26" src="https://github.com/user-attachments/assets/c359e406-c772-440f-8302-68cea59db5d5" />
 
 **Spotlight**
@@ -183,7 +184,7 @@ Les traductions anglaise et espagnole sont récentes et peuvent contenir des err
 ## • remerciements et licences •
 
 - **Liquid Glass** : l'effet est adapté de [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
-- **MacShell** : le widget « Lecture en cours », le lecteur de l'écran de verrouillage et les idées du lanceur de démarrage, de `--doctor`/`--uninstall` et du sélecteur Alt+Tab viennent de [0-ss/MacShell](https://github.com/0-ss/MacShell) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
+- **MacShell** : le widget « Lecture en cours », le lecteur de l'écran de verrouillage, Night Shift, les fonds vidéo, le widget Image, la teinte des icônes du Dock, le fond du mode sombre et les idées du lanceur de démarrage, de `--doctor`/`--uninstall` et du sélecteur Alt+Tab viennent de [0-ss/MacShell](https://github.com/0-ss/MacShell) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
 - **MacTahoe Liquid KDE** : voir `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
 - **Icônes** : thème [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) de vinceliuice, variante « bold ».
 - **Polices SF, curseur et fonds d'écran** : fournis dans `assets/`. Leurs droits appartiennent à leurs auteurs respectifs (les polices San Francisco et les fonds d'écran macOS sont des ressources d'Apple).

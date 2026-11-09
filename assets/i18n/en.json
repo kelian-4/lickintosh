@@ -462,5 +462,10 @@
  "Aucune image trouvée": "No image found",
  "Choisir une image": "Choose an image",
  "Teinter les icônes": "Tint icons",
- "Intensité de la teinte": "Tint intensity"
+ "Intensité de la teinte": "Tint intensity",
+ "Horloge mondiale": "World Clock",
+ "Bureau (mode sombre)": "Desktop (dark mode)",
+ "La sélection ci-dessous s'applique à l'écran de verrouillage.": "The selection below applies to the lock screen.",
+ "La sélection ci-dessous s'applique au bureau en mode sombre. Sans fond choisi ici, le fond du bureau est utilisé.": "The selection below applies to the desktop in dark mode. With none chosen here, the desktop wallpaper is used.",
+ "La sélection ci-dessous s'applique au bureau.": "The selection below applies to the desktop."
 }

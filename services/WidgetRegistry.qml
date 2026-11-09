@@ -26,6 +26,7 @@ Singleton {
         { type: "quote",    title: I18n.tr("Quote of the Day"), file: "QuoteWidget", sizes: ["m", "l"],           icon: "notch/message-square.svg", tint: "#bf5af2" },
         { type: "volume",   title: I18n.tr("Volume"),      file: "VolumeWidget",    sizes: ["s", "m"],           icon: "notch/volume-2.svg",   tint: "#0a84ff" },
         { type: "bluetooth", title: I18n.tr("Bluetooth"),  file: "BluetoothWidget", sizes: ["s", "m", "l"],      icon: "notch/bluetooth.svg",  tint: "#0a84ff" },
+        { type: "worldclock", title: I18n.tr("Horloge mondiale"), file: "WorldClockWidget", sizes: ["m", "l"],   icon: "notch/clock.svg",      tint: "#ff9f0a" },
         { type: "image",    title: I18n.tr("Image"),       file: "ImageWidget",     sizes: ["s", "m", "l"],      icon: "notch/image.svg",      tint: "#30d158" }
     ]
 

@@ -743,5 +743,10 @@
  "Aucune image trouvée": "No se encontró ninguna imagen",
  "Choisir une image": "Elegir una imagen",
  "Teinter les icônes": "Teñir los iconos",
- "Intensité de la teinte": "Intensidad del tinte"
+ "Intensité de la teinte": "Intensidad del tinte",
+ "Horloge mondiale": "Reloj mundial",
+ "Bureau (mode sombre)": "Escritorio (modo oscuro)",
+ "La sélection ci-dessous s'applique à l'écran de verrouillage.": "La selección de abajo se aplica a la pantalla de bloqueo.",
+ "La sélection ci-dessous s'applique au bureau en mode sombre. Sans fond choisi ici, le fond du bureau est utilisé.": "La selección de abajo se aplica al escritorio en modo oscuro. Sin fondo aquí, se usa el del escritorio.",
+ "La sélection ci-dessous s'applique au bureau.": "La selección de abajo se aplica al escritorio."
 }

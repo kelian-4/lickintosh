@@ -598,7 +598,7 @@ Scope {
 
     readonly property string currentWallpaper: root.previewWallpaper !== ""
         ? root.previewWallpaper
-        : ShellConfig.options.wallpaper.path
+        : GlassWallpaper.path
 
     function setWallpaper(path, persist) {
         if (persist) {

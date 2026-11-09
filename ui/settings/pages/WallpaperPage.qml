@@ -43,12 +43,17 @@ ContentPage {
         return out
     }
 
-    readonly property string currentPath: root.activeTarget === "lockscreen"
-        ? ShellConfig.options.wallpaper.lockscreenPath
-        : ShellConfig.options.wallpaper.path
+    function pathOf(target) {
+        if (target === "lockscreen") return ShellConfig.options.wallpaper.lockscreenPath
+        if (target === "desktopDark") return ShellConfig.options.wallpaper.pathDark
+        return ShellConfig.options.wallpaper.path
+    }
+
+    readonly property string currentPath: root.pathOf(root.activeTarget)
 
     function apply(path) {
         if (root.activeTarget === "lockscreen") ShellConfig.options.wallpaper.lockscreenPath = path
+        else if (root.activeTarget === "desktopDark") ShellConfig.options.wallpaper.pathDark = path
         else ShellConfig.options.wallpaper.path = path
     }
 
@@ -143,6 +148,7 @@ ContentPage {
             Repeater {
                 model: [
                     { key: "desktop",    label: I18n.tr("Bureau") },
+                    { key: "desktopDark", label: I18n.tr("Bureau (mode sombre)") },
                     { key: "lockscreen", label: I18n.tr("Écran de verrouillage") }
                 ]
 
@@ -152,9 +158,7 @@ ContentPage {
                     spacing: 6
 
                     readonly property bool isActive: root.activeTarget === _preview.modelData.key
-                    readonly property string shownPath: _preview.modelData.key === "lockscreen"
-                        ? ShellConfig.options.wallpaper.lockscreenPath
-                        : ShellConfig.options.wallpaper.path
+                    readonly property string shownPath: root.pathOf(_preview.modelData.key)
 
                     Item {
                         Layout.preferredWidth: 200
@@ -214,8 +218,10 @@ ContentPage {
 
         CFText {
             text: root.activeTarget === "lockscreen"
-                ? "La sélection ci-dessous s'applique à l'écran de verrouillage."
-                : "La sélection ci-dessous s'applique au bureau."
+                ? I18n.tr("La sélection ci-dessous s'applique à l'écran de verrouillage.")
+                : (root.activeTarget === "desktopDark"
+                    ? I18n.tr("La sélection ci-dessous s'applique au bureau en mode sombre. Sans fond choisi ici, le fond du bureau est utilisé.")
+                    : I18n.tr("La sélection ci-dessous s'applique au bureau."))
             font.pixelSize: 12
             gray: true
             Layout.fillWidth: true
@@ -257,7 +263,7 @@ ContentPage {
                 Layout.preferredWidth: Math.max(172, _resetLabel.implicitWidth + 24)
                 Layout.preferredHeight: 28
                 radius: 7
-                visible: root.activeTarget === "lockscreen"
+                visible: root.activeTarget !== "desktop"
                 opacity: _resetBtn.enabled ? 1 : 0.4
                 enabled: root.currentPath !== ""
                 color: _resetMouse.containsMouse ? "#22ffffff" : "#18ffffff"

@@ -38,7 +38,7 @@
 
 **Dock**
 - **Applications**: pinned apps, running-app indicators, trash and hover magnification.
-- **Settings**: icon size, dock scale and icon overflow.
+- **Settings**: icon size, dock scale, icon overflow and icon tint.
 
 
 <p align="center"><img src="assets/readme/dock.gif" width="800" alt="Dock"></p>
@@ -46,10 +46,11 @@
 
 **Desktop**
 - **File icons**: grid, multi-selection, drag and drop with animated swapping.
-- **Widgets**: battery, Bluetooth, calendar, analog and digital clocks, Focus, media, notes, quote, stopwatch, tasks, timer, volume, weather. Three themes: glass, light and dark.
+- **Widgets**: battery, Bluetooth, calendar, analog and digital clocks, world clock, Focus, image, media, notes, quote, stopwatch, tasks, timer, volume, weather. Three themes: glass, light and dark.
+- **Wallpaper**: still pictures, a separate picture for dark mode, and looping video wallpapers (needs the Qt `QtMultimedia` module; paused in Game Mode).
 
 **Control Center**
-- **Editable controls**: Wi-Fi, now playing, Bluetooth, KDE Connect, Focus, screenshot, screen sharing, brightness, sound, dark mode, calculator, game mode, timer, alarm, stopwatch, keep awake.
+- **Editable controls**: Wi-Fi, now playing, Bluetooth, KDE Connect, Focus, screenshot, screen sharing, brightness, sound, dark mode, calculator, game mode, timer, alarm, stopwatch, keep awake, Night Shift (needs `hyprsunset`).
 <img width="344" height="516" alt="2026-11-06_12:57:26" src="https://github.com/user-attachments/assets/c359e406-c772-440f-8302-68cea59db5d5" />
 
 **Spotlight**
@@ -183,7 +184,7 @@ The English and Spanish translations are recent and may contain mistakes. Some t
 ## • credits and licenses •
 
 - **Liquid Glass**: the effect is adapted from [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (MIT license). The license text is in `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
-- **MacShell**: the "Now Playing" widget, the lock screen player and the ideas behind the start script, `--doctor`/`--uninstall` and the Alt+Tab switcher come from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT license). The license text is in `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
+- **MacShell**: the "Now Playing" widget, the lock screen player, Night Shift, video wallpapers, the Image widget, the Dock icon tint, the dark-mode wallpaper and the ideas behind the start script, `--doctor`/`--uninstall` and the Alt+Tab switcher come from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT license). The license text is in `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
 - **MacTahoe Liquid KDE**: see `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
 - **Icons**: [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) by vinceliuice, "bold" variant.
 - **SF fonts, cursor and wallpapers**: shipped in `assets/`. Their rights belong to their respective authors (the San Francisco fonts and the macOS wallpapers are Apple resources).
