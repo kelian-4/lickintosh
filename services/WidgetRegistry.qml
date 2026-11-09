@@ -25,7 +25,8 @@ Singleton {
         { type: "focus",    title: I18n.tr("Focus"),       file: "FocusWidget",     sizes: ["s", "m"],           icon: "notch/target.svg",     tint: "#ff453a" },
         { type: "quote",    title: I18n.tr("Quote of the Day"), file: "QuoteWidget", sizes: ["m", "l"],           icon: "notch/message-square.svg", tint: "#bf5af2" },
         { type: "volume",   title: I18n.tr("Volume"),      file: "VolumeWidget",    sizes: ["s", "m"],           icon: "notch/volume-2.svg",   tint: "#0a84ff" },
-        { type: "bluetooth", title: I18n.tr("Bluetooth"),  file: "BluetoothWidget", sizes: ["s", "m", "l"],      icon: "notch/bluetooth.svg",  tint: "#0a84ff" }
+        { type: "bluetooth", title: I18n.tr("Bluetooth"),  file: "BluetoothWidget", sizes: ["s", "m", "l"],      icon: "notch/bluetooth.svg",  tint: "#0a84ff" },
+        { type: "image",    title: I18n.tr("Image"),       file: "ImageWidget",     sizes: ["s", "m", "l"],      icon: "notch/image.svg",      tint: "#30d158" }
     ]
 
     readonly property var sizeLabels: ({ s: I18n.tr("Small"), m: I18n.tr("Medium"), l: I18n.tr("Large") })

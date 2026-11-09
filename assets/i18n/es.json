@@ -736,5 +736,10 @@
  "Fond animé": "Fondo animado",
  "Une vidéo jouée en boucle sur le bureau (formats mp4, webm, mkv, mov). Elle se met en pause en mode jeu.": "Un vídeo en bucle en el escritorio (mp4, webm, mkv, mov). Se pausa en modo juego.",
  "Aucune vidéo trouvée dans": "No se encontró ningún vídeo en",
- "Cliquer de nouveau sur la vidéo active pour la retirer.": "Vuelve a pulsar el vídeo activo para quitarlo."
+ "Cliquer de nouveau sur la vidéo active pour la retirer.": "Vuelve a pulsar el vídeo activo para quitarlo.",
+ "Aucune image": "Sin imagen",
+ "Image introuvable": "Imagen no encontrada",
+ "Clic droit › Choisir une image": "Clic derecho › Elegir una imagen",
+ "Aucune image trouvée": "No se encontró ninguna imagen",
+ "Choisir une image": "Elegir una imagen"
 }
