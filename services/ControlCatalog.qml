@@ -43,7 +43,7 @@ Singleton {
         { id: "shareWidget",     title: I18n.tr("Screen Share"),  icon: "screenshare.svg",                 category: "screen",       w: 1, h: 1, subtitle: "" },
         { id: "displayWidget",   title: I18n.tr("Display"),       icon: "sun-small.svg",                   category: "display",      w: 4, h: 1, subtitle: "" },
         { id: "volumeWidget",    title: I18n.tr("Sound"),         icon: "volume/audio-volume-3.svg",       category: "media",        w: 4, h: 1, subtitle: "" },
-        { id: "darkWidget",      title: I18n.tr("Dark Mode"),     icon: "notch/moon.svg",                  category: "display",      w: 2, h: 1, subtitle: I18n.tr("On") },
+        { id: "darkWidget",      title: I18n.tr("Theme"),         icon: "settings/appearance.svg",         category: "display",      w: 2, h: 1, subtitle: "" },
         { id: "calcWidget",      title: I18n.tr("Calculator"),    icon: "calculator.svg",                  category: "utilities",    w: 1, h: 1, subtitle: "" },
         { id: "gameModeWidget",  title: I18n.tr("Game Mode"),     icon: "notch/zap.svg",                   category: "gaming",       w: 1, h: 1, subtitle: "" },
         { id: "timerWidget",     title: I18n.tr("Timer"),         icon: "notch/clock.svg",                 category: "utilities",    w: 1, h: 1, subtitle: "" },

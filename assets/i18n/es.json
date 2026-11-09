@@ -749,5 +749,7 @@
  "La sélection ci-dessous s'applique à l'écran de verrouillage.": "La selección de abajo se aplica a la pantalla de bloqueo.",
  "La sélection ci-dessous s'applique au bureau en mode sombre. Sans fond choisi ici, le fond du bureau est utilisé.": "La selección de abajo se aplica al escritorio en modo oscuro. Sin fondo aquí, se usa el del escritorio.",
  "La sélection ci-dessous s'applique au bureau.": "La selección de abajo se aplica al escritorio.",
- "Module QtMultimedia manquant": "Falta el módulo QtMultimedia"
+ "Module QtMultimedia manquant": "Falta el módulo QtMultimedia",
+ "Theme": "Tema",
+ "Thème": "Tema"
 }

@@ -468,5 +468,6 @@
  "La sélection ci-dessous s'applique à l'écran de verrouillage.": "The selection below applies to the lock screen.",
  "La sélection ci-dessous s'applique au bureau en mode sombre. Sans fond choisi ici, le fond du bureau est utilisé.": "The selection below applies to the desktop in dark mode. With none chosen here, the desktop wallpaper is used.",
  "La sélection ci-dessous s'applique au bureau.": "The selection below applies to the desktop.",
- "Module QtMultimedia manquant": "QtMultimedia module missing"
+ "Module QtMultimedia manquant": "QtMultimedia module missing",
+ "Thème": "Theme"
 }

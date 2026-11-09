@@ -26,7 +26,8 @@ Scope {
     property bool timerOpened: false
     property bool alarmOpened: false
     property bool stopwatchOpened: false
-    property bool subOpened:  wifiOpened || btOpened || timerOpened || alarmOpened || stopwatchOpened
+    property bool themeOpened: false
+    property bool subOpened:  wifiOpened || btOpened || timerOpened || alarmOpened || stopwatchOpened || themeOpened
     property bool playerExpanded: false
 
     property bool wifiGrowReady:   false
@@ -201,6 +202,7 @@ Scope {
                         root._currentWs = ws.name
                         root.wifiOpened = false
                         root.btOpened   = false
+                        root.themeOpened = false
                         root.playerExpanded = false
                         root.closing()
                     }
@@ -521,9 +523,10 @@ Scope {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        if (root.wifiOpened || root.btOpened || root.playerExpanded) {
+                        if (root.wifiOpened || root.btOpened || root.themeOpened || root.playerExpanded) {
                             root.wifiOpened = false
                             root.btOpened   = false
+                            root.themeOpened = false
                             root.playerExpanded = false
                         } else if (!ControlCatalog.galleryOpen) {
                             root.closing()
@@ -1782,79 +1785,145 @@ Scope {
                         }
                         delegate: BoxButton {
                                 required property var modelData
-                                id: darkWidget
-                                widgetId: darkWidget.modelData.uid
-                                xPos: root.packedX(darkWidget.widgetId)
-                                yPos: root.packedY(darkWidget.widgetId)
+                                id: themeWidget
+                                widgetId: themeWidget.modelData.uid
+                                xPos: root.packedX(themeWidget.widgetId)
+                                yPos: root.packedY(themeWidget.widgetId)
+                                readonly property var modes: [
+                                    { mode: "glass", label: "Liquid Glass", icon: "settings/appearance.svg" },
+                                    { mode: "light", label: "Clair", icon: "weather/sun.svg" },
+                                    { mode: "dark", label: "Sombre", icon: "notch/moon.svg" }
+                                ]
+                                readonly property int rowH: 54
+                                readonly property int pad: 12
                                 width: root.box*2+root.boxMargin
-                                height: root.box
-                                radius: 32
+                                height: root.themeOpened ? (themeWidget.pad * 2 + themeWidget.rowH * 3 + 8 * 2) : root.box
+                                radius: root.themeOpened ? 30 : 32
+                                hoverFx: !root.themeOpened
+                                z: root.themeOpened ? 100 : 0
+                                forceTransparentRim: root.themeOpened
                                 hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
                                 enabled: false
-                                light: darkWidget.enabled ? "transparent" : root.glassRimColor
-                                rimStrength: darkWidget.enabled ? 0 : root.glassRimStrength
-                                color: darkWidget.enabled ? "#fff" : root.glassColor
-                                Row {
-                                    anchors.fill: parent
-                                    anchors.margins: 8
-                                    spacing: 4
+                                light: themeWidget.forceTransparentRim ? "transparent" : root.glassRimColor
+                                rimStrength: themeWidget.forceTransparentRim ? 0 : root.glassRimStrength
+                                color: root.themeOpened ? Qt.rgba(0, 0, 0, 0.45) : root.glassColor
+                                Behavior on color { ColorAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+
+                                Item {
+                                    anchors.left: parent.left
+                                    anchors.top: parent.top
+                                    width: root.box*2+root.boxMargin
+                                    height: root.box
+                                    visible: opacity > 0
+                                    opacity: root.themeOpened ? 0 : 1
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
+
+                                    CFClippingRect {
+                                        id: themeCircle
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 11
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: 38; height: 38; radius: 19
+                                        color: Qt.rgba(1, 1, 1, 0.18)
+                                        CFVI {
+                                            anchors.centerIn: parent
+                                            icon: Theme.isDark ? "notch/moon.svg" : (Theme.isLight ? "weather/sun.svg" : "settings/appearance.svg")
+                                            size: 26
+                                            color: "#fff"
+                                        }
+                                    }
+
+                                    Column {
+                                        anchors.left: themeCircle.right
+                                        anchors.leftMargin: 9
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 11
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        spacing: 1
+                                        CFText {
+                                            width: parent.width
+                                            elide: Text.ElideRight
+                                            text: I18n.tr("Theme")
+                                            font.family: "SF Pro Text"
+                                            font.pixelSize: 13
+                                            font.weight: Font.DemiBold
+                                            color: "#fff"
+                                        }
+                                        CFText {
+                                            width: parent.width
+                                            elide: Text.ElideRight
+                                            text: Theme.isDark ? I18n.tr("Sombre") : (Theme.isLight ? I18n.tr("Clair") : "Liquid Glass")
+                                            font.family: "SF Pro Text"
+                                            font.pixelSize: 11
+                                            color: Qt.rgba(1, 1, 1, 0.6)
+                                        }
+                                    }
+                                }
+
+                                Column {
+                                    x: themeWidget.pad
+                                    y: themeWidget.pad
+                                    width: parent.width - themeWidget.pad * 2
+                                    spacing: 8
+                                    visible: opacity > 0
+                                    opacity: root.themeOpened ? 1 : 0
+                                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                                     Repeater {
-                                        model: [
-                                            { mode: "glass", label: "Liquid Glass", icon: "settings/appearance.svg" },
-                                            { mode: "light", label: "Clair", icon: "weather/sun.svg" },
-                                            { mode: "dark", label: "Sombre", icon: "notch/moon.svg" }
-                                        ]
-
-                                        delegate: Item {
-                                            id: seg
+                                        model: themeWidget.modes
+                                        delegate: Rectangle {
+                                            id: row
                                             required property var modelData
-                                            readonly property bool picked: Theme.mode === seg.modelData.mode
-                                            width: (parent.width - 8) / 3
-                                            height: parent.height
+                                            readonly property bool picked: Theme.mode === row.modelData.mode
+                                            width: parent.width
+                                            height: themeWidget.rowH
+                                            radius: height / 2
+                                            color: row.picked ? "#ffffff" : (rowMa.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.09))
+                                            Behavior on color { ColorAnimation { duration: 160 } }
 
-                                            Rectangle {
-                                                anchors.fill: parent
-                                                radius: 24
-                                                color: seg.picked ? "#ffffff" : (segMa.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
-                                                Behavior on color { ColorAnimation { duration: 160 } }
+                                            CFVI {
+                                                anchors.left: parent.left
+                                                anchors.leftMargin: 20
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                icon: row.modelData.icon
+                                                size: 22
+                                                color: row.picked ? "#000000" : "#ffffff"
                                             }
 
-                                            Column {
+                                            CFText {
                                                 anchors.centerIn: parent
-                                                spacing: 6
-                                                width: parent.width - 8
-
-                                                CFVI {
-                                                    anchors.horizontalCenter: parent.horizontalCenter
-                                                    icon: seg.modelData.icon
-                                                    size: 26
-                                                    color: seg.picked ? (seg.modelData.mode === "dark" ? "#F1C40F" : "#000000") : "#ffffff"
-                                                }
-
-                                                CFText {
-                                                    width: parent.width
-                                                    horizontalAlignment: Text.AlignHCenter
-                                                    elide: Text.ElideRight
-                                                    text: I18n.tr(seg.modelData.label)
-                                                    font.family: "SF Pro Text"
-                                                    font.pixelSize: 12
-                                                    font.weight: Font.DemiBold
-                                                    color: seg.picked ? "#000000" : "#ffffff"
-                                                }
+                                                text: I18n.tr(row.modelData.label)
+                                                font.family: "SF Pro Text"
+                                                font.pixelSize: 14
+                                                font.weight: Font.DemiBold
+                                                color: row.picked ? "#000000" : "#ffffff"
                                             }
 
                                             MouseArea {
-                                                id: segMa
+                                                id: rowMa
                                                 anchors.fill: parent
                                                 hoverEnabled: true
-                                                onClicked: Theme.setMode(seg.modelData.mode)
-                                                onPressed: darkWidget.isPressed = true
-                                                onReleased: darkWidget.isPressed = false
-                                                onCanceled: darkWidget.isPressed = false
+                                                onClicked: {
+                                                    Theme.setMode(row.modelData.mode)
+                                                    root.themeOpened = false
+                                                }
                                             }
                                         }
                                     }
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: !root.themeOpened
+                                    onClicked: {
+                                        root.wifiOpened = false
+                                        root.btOpened = false
+                                        root.playerExpanded = false
+                                        root.themeOpened = true
+                                    }
+                                    onPressed: themeWidget.isPressed = true
+                                    onReleased: themeWidget.isPressed = false
+                                    onCanceled: themeWidget.isPressed = false
                                 }
                             }
                     }
