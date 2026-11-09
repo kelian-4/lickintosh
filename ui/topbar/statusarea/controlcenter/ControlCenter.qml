@@ -412,10 +412,10 @@ Scope {
     }
 
     readonly property bool focusOn: NotifService.dndEnabled
-    property bool darkOn:  false
+    readonly property bool darkOn: Theme.isDark
+    property string modeBeforeDark: "glass"
     property bool recording: false
 
-    Process { id: _darkToggleCmd; command: ["sh", "-c", "~/.config/hypr/scripts/toggle-theme.sh"] }
     function openCalculator() {
         var list = Hyprland.toplevels.values
         for (var i = 0; i < list.length; i++) {
@@ -1826,8 +1826,12 @@ Scope {
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
-                                        root.darkOn = !root.darkOn
-                                        _darkToggleCmd.running = true
+                                        if (Theme.isDark) {
+                                            Theme.setMode(root.modeBeforeDark)
+                                        } else {
+                                            root.modeBeforeDark = Theme.mode
+                                            Theme.setMode("dark")
+                                        }
                                     }
                                     onPressed: darkWidget.isPressed = true
                                     onReleased: darkWidget.isPressed = false
