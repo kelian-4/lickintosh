@@ -102,7 +102,7 @@ Item {
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
             cache: true
-            sourceSize: Qt.size(scene.width, scene.height)
+            sourceSize: root.wallpaperPath.indexOf("itemgrabber") === 0 ? Qt.size(0, 0) : Qt.size(scene.width, scene.height)
         }
 
         Loader {

@@ -40,7 +40,6 @@ export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Hyprland}"
 export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-wayland}"
 export QT_LOGGING_RULES="${QT_LOGGING_RULES:-qt.multimedia.ffmpeg*=false}"
-export QT_FFMPEG_DECODING_HW_DEVICE_TYPES="${QT_FFMPEG_DECODING_HW_DEVICE_TYPES:--vdpau}"
 
 if [ -f "$AUTO" ]; then
     set -a
