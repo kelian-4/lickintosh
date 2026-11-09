@@ -20,7 +20,9 @@ Item {
         loops: MediaPlayer.Infinite
         videoOutput: output
         audioOutput: null
-        Component.onCompleted: if (root.run) player.play()
+        onSourceChanged: if (root.run && source != "") player.play()
+        onMediaStatusChanged: if (mediaStatus === MediaPlayer.LoadedMedia && root.run) player.play()
+        onErrorOccurred: function(error, errorString) { console.warn("[wallpaper video] " + errorString) }
     }
 
     VideoOutput {

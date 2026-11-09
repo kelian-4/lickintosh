@@ -370,40 +370,17 @@ ContentPage {
 
         Flow {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: 12
 
             Repeater {
                 model: root.videoList
 
-                delegate: Rectangle {
+                delegate: VideoThumb {
                     id: _video
                     required property string modelData
-                    readonly property bool selected: ShellConfig.options.wallpaper.videoPath === modelData
-                    width: Math.min(260, _videoLabel.implicitWidth + 24)
-                    height: 28
-                    radius: 7
-                    color: _video.selected ? Theme.accent : (_videoMouse.containsMouse ? "#22ffffff" : "#18ffffff")
-                    border.color: "#14ffffff"
-                    border.width: 1
-
-                    CFText {
-                        id: _videoLabel
-                        anchors.centerIn: parent
-                        width: parent.width - 24
-                        elide: Text.ElideMiddle
-                        horizontalAlignment: Text.AlignHCenter
-                        text: _video.modelData.split("/").pop()
-                        font.pixelSize: 12
-                        color: Theme.textPrimary
-                    }
-
-                    MouseArea {
-                        id: _videoMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: ShellConfig.options.wallpaper.videoPath = _video.selected ? "" : _video.modelData
-                    }
+                    path: modelData
+                    selected: ShellConfig.options.wallpaper.videoPath === modelData
+                    onClicked: ShellConfig.options.wallpaper.videoPath = _video.selected ? "" : _video.modelData
                 }
             }
         }
