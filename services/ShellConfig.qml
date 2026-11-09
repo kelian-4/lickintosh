@@ -87,6 +87,9 @@ Singleton {
                 property real height:            60
                 property bool hoverToReveal:     true
                 property bool monochromeIcons:   true
+                property bool iconTint:          false
+                property string iconTintColor:   "#0a84ff"
+                property real iconTintStrength:  1.0
                 property int  iconSize:          54
                 property real iconScale:         1.15
                 property int  iconOverflow:      4

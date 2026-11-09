@@ -1481,9 +1481,15 @@ Scope {
                 mipmap:          true
                 antialiasing:    true
                 visible:         status === Image.Ready && source !== ""
-                layer.enabled:   ShellConfig.options.dockAppearance.monochromeIcons
+                layer.enabled:   ShellConfig.options.dockAppearance.monochromeIcons || ShellConfig.options.dockAppearance.iconTint
                 layer.effect: MultiEffect {
-                    saturation: -1
+                    readonly property bool tinted: ShellConfig.options.dockAppearance.iconTint
+                    readonly property real strength: ShellConfig.options.dockAppearance.iconTintStrength
+                    saturation: tinted ? -0.75 * strength : -1
+                    colorization: tinted ? strength : 0.0
+                    brightness: tinted ? 0.14 * strength : 0.0
+                    contrast: tinted ? 0.04 * strength : 0.0
+                    colorizationColor: ShellConfig.options.dockAppearance.iconTintColor
                 }
             }
 

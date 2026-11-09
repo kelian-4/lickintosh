@@ -460,5 +460,7 @@
  "Image introuvable": "Image not found",
  "Clic droit › Choisir une image": "Right-click › Choose an image",
  "Aucune image trouvée": "No image found",
- "Choisir une image": "Choose an image"
+ "Choisir une image": "Choose an image",
+ "Teinter les icônes": "Tint icons",
+ "Intensité de la teinte": "Tint intensity"
 }
