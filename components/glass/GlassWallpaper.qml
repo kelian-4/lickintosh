@@ -15,6 +15,6 @@ Singleton {
 
     function sourceUrl(p) {
         if (p === "") return ""
-        return p.indexOf("image://") === 0 ? p : "file://" + p
+        return (p.indexOf("image://") === 0 || p.indexOf("itemgrabber") === 0) ? p : "file://" + p
     }
 }
