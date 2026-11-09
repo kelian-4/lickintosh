@@ -98,11 +98,11 @@ Item {
 
         Image {
             anchors.fill: parent
+            sourceSize: root.wallpaperPath.indexOf("itemgrabber") === 0 ? Qt.size(0, 0) : Qt.size(scene.width, scene.height)
             source: GlassWallpaper.sourceUrl(root.wallpaperPath)
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
             cache: true
-            sourceSize: root.wallpaperPath.indexOf("itemgrabber") === 0 ? Qt.size(0, 0) : Qt.size(scene.width, scene.height)
         }
 
         Loader {
