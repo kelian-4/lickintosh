@@ -218,18 +218,21 @@ Scope {
             "[ -z \"$content\" ] && exit 0\n" +
             "dir=\"$HOME/.cache/quickshell/spotlight_clip\"\n" +
             "mkdir -p \"$dir\"\n" +
-            "last=$(ls -t \"$dir\"/*.txt 2>/dev/null | head -1)\n" +
-            "if [ -n \"$last\" ] && [ \"$(cat \"$last\")\" = \"$content\" ]; then exit 0; fi\n" +
-            "printf '%s' \"$content\" > \"$dir/$(date +%s%N).txt\"\n" +
+            "h=$(printf '%s' \"$content\" | sha1sum | cut -d' ' -f1)\n" +
+            "f=\"$dir/$h.txt\"\n" +
+            "if [ -f \"$f\" ]; then touch \"$f\"; else printf '%s' \"$content\" > \"$dir/.$h.$$.tmp\" && mv -f \"$dir/.$h.$$.tmp\" \"$f\"; fi\n" +
             "ls -t \"$dir\" | tail -n +61 | while IFS= read -r old; do rm -f \"$dir/$old\"; done\n"
 
         var imageScript =
             "#!/usr/bin/env bash\n" +
             "dir=\"$HOME/.cache/quickshell/spotlight_clip\"\n" +
             "mkdir -p \"$dir\"\n" +
-            "f=\"$dir/$(date +%s%N).png\"\n" +
-            "cat > \"$f\"\n" +
-            "[ -s \"$f\" ] || { rm -f \"$f\"; exit 0; }\n" +
+            "tmp=\"$dir/.$$.tmp\"\n" +
+            "cat > \"$tmp\"\n" +
+            "[ -s \"$tmp\" ] || { rm -f \"$tmp\"; exit 0; }\n" +
+            "h=$(sha1sum < \"$tmp\" | cut -d' ' -f1)\n" +
+            "f=\"$dir/$h.png\"\n" +
+            "if [ -f \"$f\" ]; then touch \"$f\"; rm -f \"$tmp\"; else mv \"$tmp\" \"$f\"; fi\n" +
             "ls -t \"$dir\" | tail -n +61 | while IFS= read -r old; do rm -f \"$dir/$old\"; done\n"
 
         var lensScript =
@@ -278,8 +281,19 @@ Scope {
         }
     }
 
-    Process { id: clipWatchTextProc;  command: ["bash", "-c", "wl-paste --type text --watch bash ~/.cache/quickshell/spotlight_clip_watch.sh"] }
-    Process { id: clipWatchImageProc; command: ["bash", "-c", "wl-paste --type image/png --watch bash ~/.cache/quickshell/spotlight_clip_watch_img.sh"] }
+    Process {
+        id: clipWatchTextProc
+        command: ["bash", "-c",
+            "w=(wl-paste --type text --watch bash \"$HOME/.cache/quickshell/spotlight_clip_watch.sh\"); " +
+            "if command -v flock >/dev/null 2>&1; then exec flock -n \"$HOME/.cache/quickshell/clip_text.lock\" \"${w[@]}\"; else exec \"${w[@]}\"; fi"]
+    }
+
+    Process {
+        id: clipWatchImageProc
+        command: ["bash", "-c",
+            "w=(wl-paste --type image/png --watch bash \"$HOME/.cache/quickshell/spotlight_clip_watch_img.sh\"); " +
+            "if command -v flock >/dev/null 2>&1; then exec flock -n \"$HOME/.cache/quickshell/clip_img.lock\" \"${w[@]}\"; else exec \"${w[@]}\"; fi"]
+    }
 
     property var clipHistory: []
 
@@ -287,7 +301,9 @@ Scope {
         clipListProc.command = ["bash", "-c",
             "dir=" + root.clipDir + "; " +
             "[ -d \"$dir\" ] || exit 0; " +
-            "ls -t \"$dir\" | head -n " + ShellConfig.options.spotlight.clipboard.maxEntries + " | while IFS= read -r f; do " +
+            "seen=' '; ls -t \"$dir\" | head -n " + ShellConfig.options.spotlight.clipboard.maxEntries + " | while IFS= read -r f; do " +
+            "k=$(cksum < \"$dir/$f\" | cut -d' ' -f1,2 | tr ' ' _); " +
+            "case \"$seen\" in *\" $k \"*) continue ;; esac; seen=\"$seen$k \"; " +
             "case \"$f\" in " +
             "*.png) printf 'image\\t%s/%s\\t\\n' \"$dir\" \"$f\" ;; " +
             "*.txt) line=$(tr '\\n' ' ' < \"$dir/$f\" | cut -c1-80); printf 'text\\t%s/%s\\t%s\\n' \"$dir\" \"$f\" \"$line\" ;; " +
