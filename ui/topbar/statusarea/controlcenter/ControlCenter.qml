@@ -1869,14 +1869,11 @@ Scope {
 
                     ThemeFan {
                         id: themeFan
-                        readonly property var inst: ControlCatalog.instancesOfType("darkWidget")
-                        readonly property string uid: themeFan.inst.length > 0 ? themeFan.inst[0].uid : ""
                         width: root.gridImplicitWidth
                         height: 640
                         z: 120
                         open: root.themeOpened
-                        originX: ccContent.gridX(root.packedX(themeFan.uid)) + (root.box*2+root.boxMargin) / 2
-                        originY: ccContent.gridY(root.packedY(themeFan.uid)) + root.box / 2
+                        glassBackdrop: ccBackdrop
                     }
 
                     Repeater {

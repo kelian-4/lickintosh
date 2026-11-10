@@ -1,19 +1,29 @@
 import QtQuick
 import qs.components
+import qs.components.glass
+import qs.services
 
-Rectangle {
+BoxGlass {
     id: pill
 
     property string label: ""
     property string icon: ""
     property bool picked: false
+    property Item glassBackdrop: null
     signal activated()
+
+    readonly property color inkColor: Theme.ink(pill, false)
+    readonly property bool inkLight: (inkColor.r * 0.299 + inkColor.g * 0.587 + inkColor.b * 0.114) > 0.5
+    readonly property color onPicked: pill.inkLight ? "#000000" : "#ffffff"
 
     height: 46
     radius: height / 2
-    color: pill.picked ? "#ffffff" : (pillMa.containsMouse ? Qt.rgba(0.08, 0.1, 0.14, 0.78) : Qt.rgba(0.08, 0.1, 0.14, 0.62))
-    border.width: pill.picked ? 0 : 1
-    border.color: Qt.rgba(1, 1, 1, 0.22)
+    backdrop: pill.glassBackdrop !== null ? pill.glassBackdrop : (Theme.useGlass(pill) ? registered : null)
+    color: pill.picked
+        ? pill.inkColor
+        : Qt.rgba(pill.inkColor.r, pill.inkColor.g, pill.inkColor.b, pillMa.containsMouse ? 0.14 : 0.07)
+    light: Qt.rgba(1, 1, 1, 0.34)
+    rimStrength: 1.0
     Behavior on color { ColorAnimation { duration: 160 } }
 
     ThemeGlyph {
@@ -23,7 +33,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         kind: pill.icon
         size: 22
-        col: pill.picked ? "#000000" : "#ffffff"
+        col: pill.picked ? pill.onPicked : pill.inkColor
     }
 
     CFText {
@@ -35,7 +45,7 @@ Rectangle {
         font.family: "SF Pro Text"
         font.pixelSize: 14
         font.weight: Font.DemiBold
-        color: pill.picked ? "#000000" : "#ffffff"
+        color: pill.picked ? pill.onPicked : pill.inkColor
     }
 
     MouseArea {

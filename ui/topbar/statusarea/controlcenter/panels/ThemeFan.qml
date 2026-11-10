@@ -8,13 +8,13 @@ Item {
     id: fan
 
     property bool open: false
-    property real originX: width / 2
-    property real originY: 0
+    property Item glassBackdrop: null
 
     readonly property real pillW: 270
     readonly property real pillH: 46
     readonly property real gap: 10
     readonly property real slotX: (width - fan.pillW) / 2
+    readonly property real labelH: 18
 
     readonly property var modes: [
         { mode: "glass", label: "Liquid Glass", icon: "glass" },
@@ -30,97 +30,102 @@ Item {
         return l
     }
 
-    readonly property real topY: 28
-    readonly property real hyprLabelY: fan.topY + fan.modes.length * (fan.pillH + fan.gap) + 18
-    readonly property real hyprY: fan.hyprLabelY + 22
+    readonly property int total: 2 + fan.modes.length + fan.hyprItems.length
 
-    component Fly: Item {
-        id: fly
+    readonly property real labelAY: 6
+    readonly property real modesY: fan.labelAY + fan.labelH + 8
+    readonly property real labelBY: fan.modesY + fan.modes.length * (fan.pillH + fan.gap) + 8
+    readonly property real hyprY: fan.labelBY + fan.labelH + 8
+
+    component Drop: Item {
+        id: drop
         property int order: 0
-        property int count: 1
-        property real targetX: 0
         property real targetY: 0
         property real t: fan.open ? 1 : 0
         Behavior on t {
             SequentialAnimation {
-                PauseAnimation { duration: fan.open ? fly.order * 55 : (fly.count - 1 - fly.order) * 25 }
+                PauseAnimation { duration: fan.open ? drop.order * 50 : (fan.total - 1 - drop.order) * 18 }
                 NumberAnimation {
-                    duration: fan.open ? 520 : 260
-                    easing.type: fan.open ? Easing.OutBack : Easing.InCubic
-                    easing.overshoot: 1.1
+                    duration: fan.open ? 460 : 220
+                    easing.type: fan.open ? Easing.OutCubic : Easing.InCubic
                 }
             }
         }
-        x: (fan.originX - fan.pillW / 2) + (fly.targetX - (fan.originX - fan.pillW / 2)) * fly.t
-        y: (fan.originY - fan.pillH / 2) + (fly.targetY - (fan.originY - fan.pillH / 2)) * fly.t
+        x: fan.slotX
+        y: drop.targetY - 34 * (1 - drop.t)
         width: fan.pillW
-        height: fan.pillH
-        opacity: Math.max(0, Math.min(1, fly.t * 1.8))
-        scale: 0.55 + 0.45 * Math.max(0, Math.min(1, fly.t))
-        visible: fly.t > 0.002
+        opacity: Math.max(0, Math.min(1, drop.t * 1.6))
+        scale: 0.94 + 0.06 * Math.max(0, Math.min(1, drop.t))
+        visible: drop.t > 0.002
+    }
+
+    Drop {
+        order: 0
+        targetY: fan.labelAY
+        height: fan.labelH
+
+        CFText {
+            x: 6
+            text: I18n.tr("Appearance")
+            font.pixelSize: 13
+            font.weight: Font.Bold
+            color: Theme.ink(parent, true)
+        }
     }
 
     Repeater {
         model: fan.modes
 
-        delegate: Fly {
-            id: modeFly
+        delegate: Drop {
+            id: modeDrop
             required property var modelData
             required property int index
-            order: modeFly.index
-            count: fan.modes.length
-            targetX: fan.slotX
-            targetY: fan.topY + modeFly.index * (fan.pillH + fan.gap)
+            order: 1 + modeDrop.index
+            targetY: fan.modesY + modeDrop.index * (fan.pillH + fan.gap)
+            height: fan.pillH
 
             ThemePill {
                 anchors.fill: parent
-                label: I18n.tr(modeFly.modelData.label)
-                icon: modeFly.modelData.icon
-                picked: Theme.mode === modeFly.modelData.mode
-                onActivated: Theme.setMode(modeFly.modelData.mode)
+                glassBackdrop: fan.glassBackdrop
+                label: I18n.tr(modeDrop.modelData.label)
+                icon: modeDrop.modelData.icon
+                picked: Theme.mode === modeDrop.modelData.mode
+                onActivated: Theme.setMode(modeDrop.modelData.mode)
             }
         }
     }
 
-    CFText {
-        x: fan.slotX + 6
-        y: 6
-        text: I18n.tr("Appearance")
-        font.pixelSize: 13
-        font.weight: Font.Bold
-        opacity: fan.open ? 1 : 0
-        visible: opacity > 0.01
-        Behavior on opacity { NumberAnimation { duration: 260 } }
-    }
+    Drop {
+        order: 1 + fan.modes.length
+        targetY: fan.labelBY
+        height: fan.labelH
 
-    CFText {
-        x: fan.slotX + 6
-        y: fan.hyprLabelY
-        text: I18n.tr("Thème de flou Hyprland")
-        font.pixelSize: 13
-        font.weight: Font.Bold
-        opacity: fan.open ? 1 : 0
-        visible: opacity > 0.01
-        Behavior on opacity { NumberAnimation { duration: 320 } }
+        CFText {
+            x: 6
+            text: I18n.tr("Thème de flou Hyprland")
+            font.pixelSize: 13
+            font.weight: Font.Bold
+            color: Theme.ink(parent, true)
+        }
     }
 
     Repeater {
         model: fan.hyprItems
 
-        delegate: Fly {
-            id: hyprFly
+        delegate: Drop {
+            id: hyprDrop
             required property var modelData
             required property int index
-            order: hyprFly.index + 3
-            count: fan.hyprItems.length + 3
-            targetX: fan.slotX
-            targetY: fan.hyprY + hyprFly.index * (fan.pillH + fan.gap)
+            order: 2 + fan.modes.length + hyprDrop.index
+            targetY: fan.hyprY + hyprDrop.index * (fan.pillH + fan.gap)
+            height: fan.pillH
 
             ThemePill {
                 anchors.fill: parent
-                label: hyprFly.modelData.label
-                picked: hyprFly.modelData.id === "" ? !Theme.compositorBlur : Theme.blurPreset === hyprFly.modelData.id
-                onActivated: Theme.setBlurPreset(hyprFly.modelData.id)
+                glassBackdrop: fan.glassBackdrop
+                label: hyprDrop.modelData.label
+                picked: hyprDrop.modelData.id === "" ? !Theme.compositorBlur : Theme.blurPreset === hyprDrop.modelData.id
+                onActivated: Theme.setBlurPreset(hyprDrop.modelData.id)
             }
         }
     }
