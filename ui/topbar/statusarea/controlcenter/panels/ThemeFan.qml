@@ -37,25 +37,38 @@ Item {
     readonly property real labelBY: fan.modesY + fan.modes.length * (fan.pillH + fan.gap) + 8
     readonly property real hyprY: fan.labelBY + fan.labelH + 8
 
+    readonly property real stagger: 45
+    readonly property real itemDur: 460
+    readonly property real span: (fan.total - 1) * fan.stagger + fan.itemDur
+
+    property real prog: 0
+
+    NumberAnimation {
+        id: progAnim
+        target: fan
+        property: "prog"
+        easing.type: Easing.Linear
+    }
+
+    onOpenChanged: {
+        progAnim.stop()
+        progAnim.from = fan.prog
+        progAnim.to = fan.open ? 1 : 0
+        progAnim.duration = Math.max(1, Math.abs(progAnim.to - fan.prog) * fan.span * (fan.open ? 1 : 0.55))
+        progAnim.start()
+    }
+
     component Drop: Item {
         id: drop
         property int order: 0
         property real targetY: 0
-        property real t: fan.open ? 1 : 0
-        Behavior on t {
-            SequentialAnimation {
-                PauseAnimation { duration: fan.open ? drop.order * 50 : (fan.total - 1 - drop.order) * 18 }
-                NumberAnimation {
-                    duration: fan.open ? 460 : 220
-                    easing.type: fan.open ? Easing.OutCubic : Easing.InCubic
-                }
-            }
-        }
+        readonly property real raw: Math.max(0, Math.min(1, (fan.prog * fan.span - drop.order * fan.stagger) / fan.itemDur))
+        readonly property real t: 1 - Math.pow(1 - drop.raw, 3)
         x: fan.slotX
         y: drop.targetY - 34 * (1 - drop.t)
         width: fan.pillW
         opacity: Math.max(0, Math.min(1, drop.t * 1.6))
-        scale: 0.94 + 0.06 * Math.max(0, Math.min(1, drop.t))
+        scale: 0.94 + 0.06 * drop.t
         visible: drop.t > 0.002
     }
 
