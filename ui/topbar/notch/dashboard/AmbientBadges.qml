@@ -97,7 +97,7 @@ RowLayout {
 
     Badge {
         shown: GameMode.enabled
-        icon: Quickshell.shellDir + "/assets/icons_desktop/MacTahoe/actions/symbolic/gamepad-symbolic.svg"
+        icon: Quickshell.env("HOME") + "/.icons/MacTahoe/actions/symbolic/gamepad-symbolic.svg"
         tint: "#FF6B6B"
         label: I18n.tr("Game Mode")
         dismissible: true

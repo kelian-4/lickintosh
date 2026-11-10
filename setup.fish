@@ -4,6 +4,14 @@ set -g repo (realpath (status dirname))
 set -g qs_root ~/.config/quickshell
 set -g qs_name lickintosh
 set -g qs_dst $qs_root/$qs_name
+
+function qs_pattern
+    echo "(^|/)[^ ]*(qs|quickshell)[^ ]* (-c|--config) $qs_name( |\$)"
+end
+
+function qs_running
+    pgrep -u (id -u) -f -- (qs_pattern) >/dev/null 2>&1
+end
 set -g fonts_dst ~/.local/share/fonts/SF
 set -g icons_dst ~/.icons
 set -g hypr_dst ~/.config/hypr
@@ -492,7 +500,7 @@ function run_doctor
     test -d $icons_dst/MacOS-Tahoe-Cursor; and d_ok "curseur MacOS-Tahoe-Cursor"; or d_bad "curseur MacOS-Tahoe-Cursor absent de $icons_dst"
 
     say "Etat du shell"
-    if pgrep -x quickshell >/dev/null 2>&1
+    if qs_running
         d_ok "Quickshell tourne"
     else
         d_bad "Quickshell ne tourne pas : sh $qs_dst/tools/lickintosh-start"
@@ -879,7 +887,7 @@ if test $do_shell -eq 1
         echo "    ancienne installation a la racine de $qs_root deplacee vers $qs_dst (sauvegarde : $lbackup)"
         echo "    les autres dossiers de $qs_root sont intacts et qs -c <nom> les retrouve"
     end
-    pgrep -x quickshell >/dev/null 2>&1; and echo "    Quickshell tourne deja : relance-le completement pour charger la nouvelle copie."
+    qs_running; and echo "    Quickshell tourne deja : relance-le completement pour charger la nouvelle copie."
 end
 
 say "Configuration Hyprland ($hypr_dst)"
@@ -1005,23 +1013,23 @@ else if test -z "$HYPRLAND_INSTANCE_SIGNATURE"
     echo "    pas dans une session Hyprland : lance $qs_bin -c $qs_name -d -n"
 else
     set -l running 0
-    pgrep -x quickshell >/dev/null 2>&1; and set running 1
+    qs_running; and set running 1
     if test $running -eq 1; and test $shell_replaced -eq 0
         echo "    Quickshell tourne deja et son code n'a pas change"
     else
         if test $running -eq 1
             $qs_bin -c $qs_name kill >/dev/null 2>&1
             for n in 1 2 3 4 5 6
-                pgrep -x quickshell >/dev/null 2>&1; or break
+                qs_running; or break
                 sleep 0.5
             end
-            pgrep -x quickshell >/dev/null 2>&1; and pkill -x quickshell
+            qs_running; and pkill -u (id -u) -f -- (qs_pattern)
             sleep 0.5
         end
         nohup sh $qs_dst/tools/lickintosh-start >/dev/null 2>&1 &
         disown
         sleep 3
-        if pgrep -x quickshell >/dev/null 2>&1
+        if qs_running
             echo "    Quickshell lance"
         else
             echo "    Quickshell s'est arrete juste apres le lancement : lis $qs_bin -c $qs_name log" >&2

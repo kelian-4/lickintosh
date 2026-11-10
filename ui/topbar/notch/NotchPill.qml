@@ -13,7 +13,7 @@ Item {
     readonly property string kind: NotchState.primaryKind
     readonly property bool hasKind: root.kind !== "none"
 
-    readonly property string themeDir: Quickshell.shellDir + "/assets/icons_desktop/MacTahoe/"
+    readonly property string themeDir: Quickshell.env("HOME") + "/.icons/MacTahoe/"
 
     readonly property bool themedGlyph: root.kind === "gamemode"
 
