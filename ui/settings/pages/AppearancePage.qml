@@ -228,6 +228,33 @@ ContentPage {
             }
         }
 
+        ConfigSwitch {
+            text: I18n.tr("Assombrir le verre sur fond clair")
+            description: I18n.tr("Teinte plus sombrement les surfaces en verre quand le fond d'écran derrière elles est trop lumineux")
+            checked: ShellConfig.options.appearance.glassAutoDarken
+            onToggled: function(v) { ShellConfig.options.appearance.glassAutoDarken = v }
+        }
+
+        ParamSlider {
+            visible: ShellConfig.options.appearance.glassAutoDarken
+            text: I18n.tr("Seuil de luminosité")
+            from: 0.3
+            to: 0.95
+            decimals: 2
+            source: ShellConfig.options.appearance.glassDarkenThreshold
+            onCommitted: function(v) { ShellConfig.options.appearance.glassDarkenThreshold = v }
+        }
+
+        ParamSlider {
+            visible: ShellConfig.options.appearance.glassAutoDarken
+            text: I18n.tr("Force de l'assombrissement")
+            from: 0
+            to: 0.8
+            decimals: 2
+            source: ShellConfig.options.appearance.glassDarkenStrength
+            onCommitted: function(v) { ShellConfig.options.appearance.glassDarkenStrength = v }
+        }
+
         Column {
             Layout.fillWidth: true
             spacing: 10

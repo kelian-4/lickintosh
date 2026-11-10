@@ -121,6 +121,9 @@ Singleton {
                 property real   blurSurfaceAlpha: 0.30
                 property real   glassTintLight: 0.45
                 property real   glassTintDark: 0.40
+                property bool   glassAutoDarken: true
+                property real   glassDarkenThreshold: 0.72
+                property real   glassDarkenStrength: 0.35
                 property string accentOverride: ""
                 property bool   blurApplied:  false
                 property string blurStatus:   ""

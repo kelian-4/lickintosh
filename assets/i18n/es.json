@@ -758,5 +758,9 @@
  "Brume": "Bruma",
  "Givre": "Escarcha",
  "Prisme": "Prisma",
- "Aurore": "Aurora"
+ "Aurore": "Aurora",
+ "Assombrir le verre sur fond clair": "Oscurecer el vidrio sobre fondo claro",
+ "Teinte plus sombrement les surfaces en verre quand le fond d'écran derrière elles est trop lumineux": "Oscurece las superficies de vidrio cuando el fondo detrás es demasiado luminoso",
+ "Seuil de luminosité": "Umbral de luminosidad",
+ "Force de l'assombrissement": "Intensidad del oscurecimiento"
 }

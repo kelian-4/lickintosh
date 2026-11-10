@@ -476,5 +476,9 @@
  "Brume": "Haze",
  "Givre": "Frost",
  "Prisme": "Prism",
- "Aurore": "Aurora"
+ "Aurore": "Aurora",
+ "Assombrir le verre sur fond clair": "Darken glass over bright wallpapers",
+ "Teinte plus sombrement les surfaces en verre quand le fond d'écran derrière elles est trop lumineux": "Tints glass surfaces darker when the wallpaper behind them is too bright",
+ "Seuil de luminosité": "Brightness threshold",
+ "Force de l'assombrissement": "Darkening strength"
 }

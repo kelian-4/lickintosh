@@ -28,6 +28,15 @@ Item {
     readonly property bool active: backdrop !== null && backdrop.ready && backdrop.captureSettled
     property real level: active ? 1 : 0
 
+    readonly property real darkTarget: root.backdrop
+        ? WallpaperLuma.darkAmount(root.screenPosition.x, root.screenPosition.y, root.effectiveWidth, root.effectiveHeight, root.screenSize.width, root.screenSize.height)
+        : 0
+    property real darkAmount: root.darkTarget
+
+    Behavior on darkAmount {
+        NumberAnimation { duration: 250; easing.type: Easing.InOutSine }
+    }
+
     Behavior on level {
         NumberAnimation {
             duration: root.backdrop && root.backdrop.instantReveal ? 0 : 120
@@ -137,5 +146,13 @@ Item {
 
         vertexShader: Qt.resolvedUrl(root.shaderDir + "TahoeGlass.vert.qsb")
         fragmentShader: Qt.resolvedUrl(root.shaderDir + "TahoeGlass.frag.qsb")
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        radius: root.clampedRadius
+        color: "#000000"
+        opacity: root.level * root.darkAmount
+        visible: opacity > 0.002
     }
 }
