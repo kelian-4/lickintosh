@@ -1,7 +1,7 @@
 //@ pragma IconTheme MacTahoe-dark
 //@ pragma UseQApplication
 //@ pragma ShellId main-shell
-//@ pragma DefaultEnv QT_FFMPEG_DECODING_HW_DEVICE_TYPES = -vdpau
+//@ pragma DefaultEnv QT_FFMPEG_DECODING_HW_DEVICE_TYPES = vaapi,cuda
 //@ pragma DefaultEnv QT_LOGGING_RULES = qt.multimedia.ffmpeg*=false
 import Quickshell
 import Quickshell.Hyprland
