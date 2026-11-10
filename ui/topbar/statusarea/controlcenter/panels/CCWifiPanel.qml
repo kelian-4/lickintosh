@@ -166,13 +166,13 @@ Item {
                     text:           I18n.tr("Réseaux connus")
                     font.pixelSize: 13
                     gray:           true
-                    visible:        NetworkManager.networksKnown.filter(function(n) { return !n.active }).length > 0
+                    visible:        NetworkManager.networksKnown.filter(function(n) { return !!n && !n.active }).length > 0
                     leftPadding:    20
                     bottomPadding:  4
                 }
 
                 Repeater {
-                    model: NetworkManager.networksKnown.filter(function(n) { return !n.active })
+                    model: NetworkManager.networksKnown.filter(function(n) { return !!n && !n.active })
                     delegate: NetRow {
                         required property var modelData
                         width:    parent.width
@@ -231,7 +231,7 @@ Item {
                     Repeater {
                         id: _otherNets
                         model: NetworkManager.networks.filter(function(n) {
-                            return !n.active && NetworkManager.networksKnown.indexOf(n) === -1
+                            return !!n && !n.active && NetworkManager.networksKnown.indexOf(n) === -1
                         })
                         delegate: NetRow {
                             required property var modelData

@@ -329,6 +329,8 @@ WlSessionLockSurface {
             glassBackdrop: lockBackdrop
             anchors.horizontalCenter: parent.horizontalCenter
             y: macPlayer.notifBottom - height - (visible ? 16 : 0)
+            opacity: Math.max(0, 1 - macPlayer.lyrT * 2.2)
+            enabled: opacity > 0.5
         }
 
         Item {

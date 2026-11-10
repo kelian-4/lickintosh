@@ -11,8 +11,8 @@ Item {
         source: root.source !== "" ? "file://" + root.source : ""
         videoOutput: output
         audioOutput: null
-        onMediaStatusChanged: if (mediaStatus === MediaPlayer.LoadedMedia) player.play()
-        onPositionChanged: if (position > 0 && playbackState === MediaPlayer.PlayingState) player.pause()
+        onMediaStatusChanged: if (player.mediaStatus === MediaPlayer.LoadedMedia) player.play()
+        onPositionChanged: if (player.position > 0 && player.playbackState === MediaPlayer.PlayingState) player.pause()
         onErrorOccurred: function(error, errorString) { console.warn("[video preview] " + errorString) }
     }
 

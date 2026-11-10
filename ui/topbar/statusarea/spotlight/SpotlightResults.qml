@@ -147,6 +147,7 @@ ListView {
                 property bool directLoadFailed: false
                 onStatusChanged: if (status === Image.Error) directLoadFailed = true
                 source: {
+                    if (row.modelData.isVideo === true) return ""
                     if (row.isApp) return IconResolver.byName(row.modelData.icon)
                     if (row.modelData.isWallpaper && !directLoadFailed) return "file://" + row.modelData.path
                     if (row.modelData.clipImage && !directLoadFailed) return "file://" + row.modelData.clipImage
