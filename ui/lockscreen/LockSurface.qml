@@ -328,8 +328,7 @@ WlSessionLockSurface {
             id: notifStack
             glassBackdrop: lockBackdrop
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: loginArea.top
-            anchors.bottomMargin: visible ? 16 : 0
+            y: macPlayer.notifBottom - height - (visible ? 16 : 0)
         }
 
         Item {
