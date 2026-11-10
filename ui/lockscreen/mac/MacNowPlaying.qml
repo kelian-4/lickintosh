@@ -197,7 +197,7 @@ Item {
     readonly property bool lyricsBelow: ls.st.mediaSlot !== "bottom"
     readonly property real panelRoom: Math.max(Math.max(0, artT) * (media.width + 24 * ls.u), lyricsBelow ? 0 : Math.max(0, lyrT) * (1 - sideT) * (lyricsH + 24 * ls.u))
     readonly property int springMs: 650
-    readonly property real notifBottom: (media.on && ls.st.mediaSlot === "bottom") ? Math.min(login.y, media.y - ls.panelRoom) : login.y
+    readonly property real notifBottom: (media.on && ls.st.mediaSlot === "bottom") ? Math.min(login.y, media.base - ls.panelRoom) : login.y
     // how far the dragged bubble is pressed past its top / bottom spot (px), 0 when not dragging
     readonly property real pressTop: media.dragging ? Math.max(0, media.slotTop - (media.base + media.dragOff)) : 0
     readonly property real pressBottom: media.dragging ? Math.max(0, (media.base + media.dragOff) - media.slotBottom) : 0
