@@ -478,7 +478,7 @@
  "Prisme": "Prism",
  "Aurore": "Aurora",
  "Assombrir le verre sur fond clair": "Darken glass over bright wallpapers",
- "Teinte plus sombrement les surfaces en verre quand le fond d'écran derrière elles est trop lumineux": "Tints glass surfaces darker when the wallpaper behind them is too bright",
  "Seuil de luminosité": "Brightness threshold",
- "Force de l'assombrissement": "Darkening strength"
+ "Force de l'assombrissement": "Darkening strength",
+ "Teinte plus sombrement le verre quand ce qui se trouve derrière lui (fond, vidéo, fenêtre) est trop lumineux": "Tints glass darker when what is behind it (wallpaper, video, window) is too bright"
 }

@@ -230,7 +230,7 @@ ContentPage {
 
         ConfigSwitch {
             text: I18n.tr("Assombrir le verre sur fond clair")
-            description: I18n.tr("Teinte plus sombrement les surfaces en verre quand le fond d'écran derrière elles est trop lumineux")
+            description: I18n.tr("Teinte plus sombrement le verre quand ce qui se trouve derrière lui (fond, vidéo, fenêtre) est trop lumineux")
             checked: ShellConfig.options.appearance.glassAutoDarken
             onToggled: function(v) { ShellConfig.options.appearance.glassAutoDarken = v }
         }
