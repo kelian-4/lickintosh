@@ -162,6 +162,13 @@ ListView {
                 mipmap:   true
             }
 
+            Loader {
+                anchors.fill: parent
+                active: row.modelData.isVideo === true
+                source: "../../../../components/VideoFrame.qml"
+                onLoaded: item.source = row.modelData.path
+            }
+
             VectorImage {
                 anchors.centerIn: parent
                 width: 22; height: 22

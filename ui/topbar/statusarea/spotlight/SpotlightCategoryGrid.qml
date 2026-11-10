@@ -172,6 +172,13 @@ Item {
                                             mipmap:   true
                                         }
 
+                                        Loader {
+                                            anchors.fill: parent
+                                            active: tile.modelData.isVideo === true
+                                            source: "../../../../components/VideoFrame.qml"
+                                            onLoaded: item.source = tile.modelData.path
+                                        }
+
                                         Text {
                                             anchors.centerIn: parent
                                             visible: ico.status !== Image.Ready

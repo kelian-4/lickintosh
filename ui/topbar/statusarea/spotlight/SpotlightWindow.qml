@@ -129,7 +129,7 @@ Scope {
     Process {
         id: wallProc
         running: false
-        command: ["sh", "-c", "find " + root._safeShellPath(ShellConfig.options.spotlight.indexing.wallpaperDir) + " -maxdepth 2 -type f \\( -name '*.jpg' -o -name '*.png' -o -name '*.jpeg' -o -name '*.webp' \\) 2>/dev/null | head -40"]
+        command: ["sh", "-c", "find " + root._safeShellPath(ShellConfig.options.spotlight.indexing.wallpaperDir) + " -maxdepth 2 -type f \\( -iname '*.jpg' -o -iname '*.png' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.mov' \\) 2>/dev/null | head -60"]
         stdout: StdioCollector { id: wallOut }
         onExited: {
             var lines = wallOut.text.trim().split("\n")
@@ -137,7 +137,7 @@ Scope {
             for (var i = 0; i < lines.length; i++) {
                 var p = lines[i]
                 if (!p || p === "") continue
-                out.push({ title: p.split("/").pop(), description: "Prefix: >~ ou >wall | Fond d'écran", path: p, isWallpaper: true })
+                out.push({ title: p.split("/").pop(), description: "Prefix: >~ ou >wall | Fond d'écran", path: p, isWallpaper: true, isVideo: /\.(mp4|webm|mkv|mov)$/i.test(p) })
             }
             root.wallpaperList = out
 
@@ -600,12 +600,22 @@ Scope {
         ? root.previewWallpaper
         : (GlassWallpaper.videoActive ? "" : GlassWallpaper.stillPath)
 
+    function isVideoPath(path) {
+        return /\.(mp4|webm|mkv|mov)$/i.test(path)
+    }
+
     function setWallpaper(path, persist) {
+        var video = root.isVideoPath(path)
         if (persist) {
-            ShellConfig.options.wallpaper.path = path
+            if (video) {
+                ShellConfig.options.wallpaper.videoPath = path
+            } else {
+                ShellConfig.options.wallpaper.videoPath = ""
+                ShellConfig.options.wallpaper.path = path
+            }
             root.previewWallpaper = ""
             root.pickNextRandom()
-        } else {
+        } else if (!video) {
             root.previewWallpaper = path
         }
     }
