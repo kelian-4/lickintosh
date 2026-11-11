@@ -20,7 +20,8 @@ set -g setup_only_assets fonts icons_desktop MacOS-Tahoe-Cursor config
 set -g managed shell.qml settings.qml components services ui tools
 set -g required_tools 'magick|convert:imagemagick' brightnessctl:brightnessctl playerctl:playerctl wl-copy:wl-clipboard grim:grim slurp:slurp hyprpicker:hyprpicker jq:jq curl:curl xdg-open:xdg-utils xdg-user-dir:xdg-user-dirs pw-dump:pipewire wpctl:wireplumber nmcli:networkmanager bluetoothctl:bluez upower:upower powerprofilesctl:power-profiles-daemon
 
-argparse skip-deps no-launch doctor uninstall -- $argv; or exit 1
+argparse skip-deps no-launch doctor uninstall y/yes deps-plan deps-only gui -- $argv; or exit 1
+set -q _flag_yes; and set -g assume_yes 1
 
 if test (id -u) -eq 0
     echo "Ne lance pas setup.fish en root : les fichiers seraient installes pour root. Il demande sudo lui-meme quand il en a besoin." >&2
@@ -32,6 +33,12 @@ set -l blocking
 set -l warnings
 
 function ask --argument-names question
+    set -q assume_yes; and return 0
+    read -l -P "$question [o/N] " reply; or return 1
+    string match -qr '^(o|O|oui|Oui|y|Y|yes)$' -- $reply
+end
+
+function ask_strict --argument-names question
     read -l -P "$question [o/N] " reply; or return 1
     string match -qr '^(o|O|oui|Oui|y|Y|yes)$' -- $reply
 end
@@ -53,7 +60,9 @@ function version_ge --argument-names have want
 end
 
 function as_root
-    if command -q sudo
+    if set -q LICKINTOSH_ROOT_CMD
+        $LICKINTOSH_ROOT_CMD $argv
+    else if command -q sudo
         sudo $argv
     else if command -q doas
         doas $argv
@@ -234,7 +243,7 @@ function install_quickshell --argument-names family os_id os_like
                 as_root apt-get install -y quickshell
             else if contains -- ubuntu $os_id (string split ' ' -- $os_like)
                 echo "    quickshell n'est pas dans les depots de cette version. Le guide officiel indique le PPA ppa:avengemedia/danklinux."
-                ask "    Ajouter ce PPA (depot tiers) puis installer quickshell ?"; or return 1
+                ask_strict "    Ajouter ce PPA (depot tiers) puis installer quickshell ?"; or return 1
                 as_root apt-get install -y software-properties-common; or return 1
                 as_root add-apt-repository -y ppa:avengemedia/danklinux; or return 1
                 as_root apt-get update; or return 1
@@ -248,7 +257,7 @@ function install_quickshell --argument-names family os_id os_like
                 as_root dnf install -y quickshell
             else
                 echo "    quickshell n'est pas dans les depots actifs. Le guide officiel indique le COPR errornointernet/quickshell."
-                ask "    Activer ce COPR (depot tiers) puis installer quickshell ?"; or return 1
+                ask_strict "    Activer ce COPR (depot tiers) puis installer quickshell ?"; or return 1
                 as_root dnf copr enable -y errornointernet/quickshell; or return 1
                 as_root dnf install -y quickshell
             end
@@ -569,19 +578,80 @@ function run_uninstall
             rm -rf $d
         end
     end
-    if test -d $fonts_dst; and ask "    Retirer aussi les polices SF ($fonts_dst) ?"
+    if test -d $fonts_dst; and not set -q assume_yes; and ask "    Retirer aussi les polices SF ($fonts_dst) ?"
         rm -rf $fonts_dst
         command -q fc-cache; and fc-cache -f
         echo "    polices retirees"
     end
     for t in MacTahoe-dark MacOS-Tahoe-Cursor
-        if test -e $icons_dst/$t; and ask "    Retirer aussi $icons_dst/$t ?"
+        if test -e $icons_dst/$t; and not set -q assume_yes; and ask "    Retirer aussi $icons_dst/$t ?"
             rm -rf $icons_dst/$t
             echo "    $t retire"
         end
     end
     echo "    la configuration Hyprland ($hypr_dst) n'a pas ete modifiee : retire la ligne qui lance lickintosh-start dans hyprlua/programs.lua si tu veux supprimer l'autostart"
     say "Desinstallation terminee. Pour revenir en arriere : copie le contenu de $backup dans $qs_dst"
+end
+
+function json_list
+    set -l out
+    for i in $argv
+        set -a out \"$i\"
+    end
+    echo "["(string join , $out)"]"
+end
+
+function run_deps_plan
+    set -l os_id (os_field /etc/os-release ID)
+    set -l family (detect_family "$os_id" (os_field /etc/os-release ID_LIKE))
+    set -l supported false
+    contains -- $family arch debian fedora; and set supported true
+    set -l have
+    set -l repo
+    set -l skipped
+    for pair in $required_tools
+        set -l parts (string split -m1 : $pair)
+        set -l item $parts[2]
+        if have_any (string split '|' $parts[1])
+            set -a have $item
+        else if test $supported = true
+            set -l ok 1
+            for p in (pkg_for $family $item)
+                pkg_available $family $p; or set ok 0
+            end
+            if test $ok -eq 1
+                set -a repo $item
+            else
+                set -a skipped "$item|not available in the repositories"
+            end
+        else
+            set -a repo $item
+        end
+    end
+    set -l qs_present false
+    for c in qs quickshell
+        command -q $c; and set qs_present true
+    end
+    if test $qs_present = true
+        set -a have quickshell
+    else
+        set -a repo quickshell
+    end
+    echo "{\"family\":\"$family\",\"supported\":$supported,\"have\":"(json_list $have)",\"repo\":"(json_list $repo)",\"skipped\":"(json_list $skipped)"}"
+end
+
+if set -q _flag_deps_plan
+    run_deps_plan
+    exit 0
+end
+
+if set -q _flag_gui
+    command -q qs; or begin
+        echo "qs est introuvable" >&2
+        exit 1
+    end
+    set -lx LICKINTOSH_SETUP $repo/setup.fish
+    exec qs -p $repo/installer
 end
 
 if set -q _flag_doctor
@@ -759,6 +829,17 @@ else
     else
         set -a warnings "Hyprland $hv : la config hyprlua (Lua) demande 0.57 ou plus"
     end
+end
+
+if set -q _flag_deps_only
+    for b in $blocking
+        echo "    manque : $b"
+    end
+    for w in $warnings
+        echo "    a regarder : $w"
+    end
+    say "Prerequis termines."
+    test (count $blocking) -eq 0; and exit 0; or exit 1
 end
 
 say "Polices"
