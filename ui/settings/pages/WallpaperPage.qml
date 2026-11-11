@@ -106,7 +106,7 @@ ContentPage {
     Process {
         id: shippedProc
         running: true
-        command: ["sh", root.listScript, root.shippedDir, root.thumbCacheDir]
+        command: ["bash", root.listScript, root.shippedDir, root.thumbCacheDir]
         stdout: StdioCollector { id: shippedOut }
         onExited: {
             var map = {}
@@ -119,7 +119,7 @@ ContentPage {
     Process {
         id: userProc
         running: false
-        command: ["sh", root.listScript, root.userDir, root.thumbCacheDir]
+        command: ["bash", root.listScript, root.userDir, root.thumbCacheDir]
         stdout: StdioCollector { id: userOut }
         onExited: {
             var map = {}
@@ -132,7 +132,7 @@ ContentPage {
     Process {
         id: thumbProc
         running: false
-        command: ["sh", "-c", "sh \"$1\" \"$2\" \"$4\" --generate; r=$?; [ $r -eq 42 ] && exit 42; sh \"$1\" \"$3\" \"$4\" --generate",
+        command: ["sh", "-c", "bash \"$1\" \"$2\" \"$4\" --generate; r=$?; [ $r -eq 42 ] && exit 42; bash \"$1\" \"$3\" \"$4\" --generate",
             "sh", root.listScript, root.shippedDir, root.userDir, root.thumbCacheDir]
         onExited: function(code) {
             if (code === 42) {

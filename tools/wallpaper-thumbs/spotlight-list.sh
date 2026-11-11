@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 dir="$1"
 cache="$2"
 mode="$3"
@@ -29,7 +29,7 @@ if [ "$mode" = "--generate" ]; then
         t=$(thumb_of "$p")
         if [ -f "$t" ] && [ ! "$p" -nt "$t" ]; then continue; fi
         tmp="$t.tmp.$$"
-        if "$conv" "$p[0]" -thumbnail 224x224^ -gravity center -extent 224x224 -quality 82 "$tmp" 2>/dev/null; then
+        if "$conv" "${p}[0]" -thumbnail 224x224^ -gravity center -extent 224x224 -quality 82 "$tmp" 2>/dev/null; then
             mv -f "$tmp" "$t"
         else
             rm -f "$tmp"

@@ -133,7 +133,7 @@ Scope {
     Process {
         id: wallProc
         running: false
-        command: ["sh", root.wallpaperThumbScript, ShellConfig.options.spotlight.indexing.wallpaperDir, root.wallpaperThumbDir]
+        command: ["bash", root.wallpaperThumbScript, ShellConfig.options.spotlight.indexing.wallpaperDir, root.wallpaperThumbDir]
         stdout: StdioCollector { id: wallOut }
         onExited: {
             var lines = wallOut.text.trim().split("\n")
@@ -167,7 +167,7 @@ Scope {
     Process {
         id: thumbProc
         running: false
-        command: ["sh", root.wallpaperThumbScript, ShellConfig.options.spotlight.indexing.wallpaperDir, root.wallpaperThumbDir, "--generate"]
+        command: ["bash", root.wallpaperThumbScript, ShellConfig.options.spotlight.indexing.wallpaperDir, root.wallpaperThumbDir, "--generate"]
         onExited: function(code) { if (code === 0) wallProc.running = true }
     }
 
