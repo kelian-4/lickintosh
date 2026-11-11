@@ -161,11 +161,12 @@ Item {
                                             onStatusChanged: if (status === Image.Error) directLoadFailed = true
                                             source: {
                                                 if (tile.modelData.isImage && !directLoadFailed) return "file://" + tile.modelData.path
-                                                if (tile.modelData.isWallpaper && !directLoadFailed) return "file://" + tile.modelData.path
+                                                if (tile.modelData.isWallpaper && !directLoadFailed) return "file://" + (tile.modelData.thumb ? tile.modelData.thumb : tile.modelData.path)
                                                 if (tile.modelData.clipImage && !directLoadFailed) return "file://" + tile.modelData.clipImage
                                                 return IconResolver.byName(tile.modelData.icon || "image-x-generic")
                                             }
                                             fillMode: (tile.modelData.isImage || tile.modelData.isWallpaper || tile.modelData.clipImage) ? Image.PreserveAspectCrop : Image.PreserveAspectFit
+                                            asynchronous: true
                                             sourceSize.width:  112
                                             sourceSize.height: 112
                                             smooth:   true

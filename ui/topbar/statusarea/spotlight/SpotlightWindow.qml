@@ -125,26 +125,50 @@ Scope {
     function startReindex() { indexProc.running = true }
 
     property var wallpaperList: []
+    property string wallpaperSignature: ""
+
+    readonly property string wallpaperThumbScript: Quickshell.shellDir + "/tools/wallpaper-thumbs/spotlight-list.sh"
+    readonly property string wallpaperThumbDir: Quickshell.env("HOME") + "/.cache/quickshell/wallpaper_thumbs"
 
     Process {
         id: wallProc
         running: false
-        command: ["sh", "-c", "find " + root._safeShellPath(ShellConfig.options.spotlight.indexing.wallpaperDir) + " -maxdepth 2 -type f \\( -iname '*.jpg' -o -iname '*.png' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.mov' \\) 2>/dev/null | head -60"]
+        command: ["sh", root.wallpaperThumbScript, ShellConfig.options.spotlight.indexing.wallpaperDir, root.wallpaperThumbDir]
         stdout: StdioCollector { id: wallOut }
         onExited: {
             var lines = wallOut.text.trim().split("\n")
             var out = []
+            var missing = false
             for (var i = 0; i < lines.length; i++) {
-                var p = lines[i]
-                if (!p || p === "") continue
-                out.push({ title: p.split("/").pop(), description: "Prefix: >~ ou >wall | Fond d'écran", path: p, isWallpaper: true, isVideo: /\.(mp4|webm|mkv|mov)$/i.test(p) })
+                if (!lines[i]) continue
+                var parts = lines[i].split("\t")
+                var p = parts[0]
+                if (!p) continue
+                var isVideo = /\.(mp4|webm|mkv|mov)$/i.test(p)
+                var thumb = parts.length > 1 ? parts[1] : ""
+                if (!isVideo && thumb === "") missing = true
+                out.push({ title: p.split("/").pop(), description: "Prefix: >~ ou >wall | Fond d'écran", path: p, thumb: thumb, isWallpaper: true, isVideo: isVideo })
             }
-            root.wallpaperList = out
+
+            var signature = JSON.stringify(out)
+            if (signature !== root.wallpaperSignature) {
+                root.wallpaperSignature = signature
+                root.wallpaperList = out
+            }
+
+            if (missing && !thumbProc.running) thumbProc.running = true
 
             if (root.currentWallpaper === "" && ShellConfig.options.wallpaper.videoPath === "" && out.length > 0) {
                 root.setWallpaper(out[0].path, true)
             }
         }
+    }
+
+    Process {
+        id: thumbProc
+        running: false
+        command: ["sh", root.wallpaperThumbScript, ShellConfig.options.spotlight.indexing.wallpaperDir, root.wallpaperThumbDir, "--generate"]
+        onExited: function(code) { if (code === 0) wallProc.running = true }
     }
 
     Connections {
