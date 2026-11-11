@@ -15,6 +15,7 @@ Singleton {
     property string dir: Quickshell.env("HOME") + "/Desktop"
     property alias model: folderModel
     property var selection: []
+    property var layout: []
 
     function isSelected(path) {
         return root.selection.indexOf(path) >= 0

@@ -12,6 +12,7 @@ Item {
     property point windowPosition: Qt.point(0, 0)
 
     property bool captureWindows: false
+    property bool showDesktopItems: root.monitorName === "" || (Quickshell.screens.length > 0 && root.monitorName === Quickshell.screens[0].name)
     property real windowOpacity: 1.0
     property var windowOpacityByClass: ({})
     property string monitorName: ""
@@ -122,6 +123,11 @@ Item {
                 asynchronous: true
                 cache: true
             }
+        }
+
+        DesktopSnapshot {
+            anchors.fill: parent
+            shown: root.showDesktopItems
         }
 
         Loader {

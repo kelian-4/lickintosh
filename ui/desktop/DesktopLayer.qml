@@ -215,6 +215,32 @@ Scope {
                 onTriggered: stage.settled = true
             }
 
+            function publishLayout() {
+                var out = []
+                for (var i = 0; i < DesktopFiles.model.count; i++) {
+                    var name = DesktopFiles.model.get(i, "fileName")
+                    var cell = stage.iconCells[name]
+                    if (cell === undefined) continue
+                    out.push({
+                        name: name,
+                        path: DesktopFiles.model.get(i, "filePath"),
+                        isDir: DesktopFiles.model.get(i, "fileIsDir"),
+                        x: stage.x + stage.cellX(cell.col),
+                        y: stage.y + stage.cellY(cell.row),
+                        w: stage.iconW,
+                        h: stage.iconH
+                    })
+                }
+                DesktopFiles.layout = out
+            }
+
+            onIconCellsChanged: stage.publishLayout()
+            onWidthChanged: stage.publishLayout()
+            onHeightChanged: stage.publishLayout()
+            onXChanged: stage.publishLayout()
+            onYChanged: stage.publishLayout()
+            Component.onDestruction: DesktopFiles.layout = []
+
             onIconColsChanged: stage.relayout()
             onIconRowsChanged: stage.relayout()
             Component.onCompleted: stage.relayout()
