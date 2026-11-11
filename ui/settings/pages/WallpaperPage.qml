@@ -69,52 +69,79 @@ ContentPage {
         root.apply(all[Math.floor(Math.random() * all.length)])
     }
 
-    readonly property string thumbCacheDir: (Quickshell.env("HOME") || "") + "/.cache/quickshell/wallpaper-thumbs"
-    readonly property string genScript: Quickshell.shellDir + "/tools/wallpaper-thumbs/generate.sh"
+    readonly property string thumbCacheDir: (Quickshell.env("HOME") || "") + "/.cache/quickshell/wallpaper_thumbs"
+    readonly property string listScript: Quickshell.shellDir + "/tools/wallpaper-thumbs/spotlight-list.sh"
 
-    function thumbPathFor(kind, index) {
-        return root.thumbCacheDir + "/" + kind + "-" + index + ".jpg"
+    property var thumbs: ({})
+    property bool thumbsFailed: false
+
+    function _isVideo(p) {
+        return /\.(mp4|webm|mkv|mov)$/i.test(p)
     }
 
-    readonly property string shippedListFile: root.thumbCacheDir + "/shipped-list.txt"
-    readonly property string userListFile: root.thumbCacheDir + "/user-list.txt"
+    function _parseList(text, map) {
+        var lines = String(text).trim().split("\n")
+        var out = []
+        var missing = false
+        for (var i = 0; i < lines.length; i++) {
+            if (!lines[i]) continue
+            var parts = lines[i].split("\t")
+            var path = parts[0]
+            if (!path || root._isVideo(path)) continue
+            out.push(path)
+            if (parts.length > 1 && parts[1] !== "") map[path] = parts[1]
+            else missing = true
+        }
+        return { list: out, missing: missing }
+    }
+
+    function _commit(target, result) {
+        var key = JSON.stringify(result.list)
+        if (key !== JSON.stringify(root[target])) root[target] = result.list
+        var copy = Object.assign({}, root.thumbs, result.map)
+        if (JSON.stringify(copy) !== JSON.stringify(root.thumbs)) root.thumbs = copy
+        if (result.missing && !root.thumbsFailed && !thumbProc.running) thumbProc.running = true
+    }
 
     Process {
         id: shippedProc
         running: true
-        command: ["sh", "-c", "mkdir -p " + root._safeShellPath(root.thumbCacheDir) + " && " + root._findCmd(root.shippedDir, root.shippedListFile)]
+        command: ["sh", root.listScript, root.shippedDir, root.thumbCacheDir]
         stdout: StdioCollector { id: shippedOut }
         onExited: {
-            root.shippedList = root._parse(shippedOut.text)
-
-            shippedThumbProc.command = ["bash", root.genScript, root.shippedListFile, "shipped", root.thumbCacheDir]
-            shippedThumbProc.running = true
+            var map = {}
+            var r = root._parseList(shippedOut.text, map)
+            r.map = map
+            root._commit("shippedList", r)
         }
     }
 
     Process {
         id: userProc
         running: false
-        command: ["sh", "-c", "mkdir -p " + root._safeShellPath(root.thumbCacheDir) + " && " + root._findCmd(root.userDir, root.userListFile)]
+        command: ["sh", root.listScript, root.userDir, root.thumbCacheDir]
         stdout: StdioCollector { id: userOut }
         onExited: {
-            root.userList = root._parse(userOut.text)
-            userThumbProc.command = ["bash", root.genScript, root.userListFile, "user", root.thumbCacheDir]
-            userThumbProc.running = true
+            var map = {}
+            var r = root._parseList(userOut.text, map)
+            r.map = map
+            root._commit("userList", r)
         }
     }
 
-    property int shippedThumbsGen: 0
-    property int userThumbsGen: 0
-
     Process {
-        id: shippedThumbProc
-        onExited: root.shippedThumbsGen++
-    }
-
-    Process {
-        id: userThumbProc
-        onExited: root.userThumbsGen++
+        id: thumbProc
+        running: false
+        command: ["sh", "-c", "sh \"$1\" \"$2\" \"$4\" --generate; r=$?; [ $r -eq 42 ] && exit 42; sh \"$1\" \"$3\" \"$4\" --generate",
+            "sh", root.listScript, root.shippedDir, root.userDir, root.thumbCacheDir]
+        onExited: function(code) {
+            if (code === 42) {
+                root.thumbsFailed = true
+                return
+            }
+            shippedProc.running = true
+            userProc.running = true
+        }
     }
 
     property var videoList: []
@@ -324,8 +351,8 @@ ContentPage {
                     required property string modelData
                     required property int index
                     path: modelData
-                    thumbPath: root.thumbPathFor("shipped", index)
-                    thumbsGen: root.shippedThumbsGen
+                    thumbPath: root.thumbs[modelData] || ""
+                    allowOriginal: root.thumbsFailed
                     selected: root.currentPath === modelData
                     onClicked: root.apply(modelData)
                 }
@@ -352,12 +379,12 @@ ContentPage {
                 model: root.userList
 
                 delegate: WallpaperThumb {
-                    id: _thumb
+                    id: _userThumb
                     required property string modelData
                     required property int index
                     path: modelData
-                    thumbPath: root.thumbPathFor("user", index)
-                    thumbsGen: root.userThumbsGen
+                    thumbPath: root.thumbs[modelData] || ""
+                    allowOriginal: root.thumbsFailed
                     selected: root.currentPath === modelData
                     onClicked: root.apply(modelData)
                 }
