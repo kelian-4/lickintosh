@@ -214,18 +214,18 @@ Singleton {
             property JsonObject controlCenter: JsonObject {
                 property bool keepAwakeSeeded: true
                 property list<var> items: [
-                    { "uid": "wifiWidget", "type": "wifiWidget" },
-                    { "uid": "btWidget", "type": "btWidget" },
-                    { "uid": "adWidget", "type": "adWidget" },
-                    { "uid": "musicWidget", "type": "musicWidget" },
-                    { "uid": "focusWidget", "type": "focusWidget" },
-                    { "uid": "stageWidget", "type": "stageWidget" },
-                    { "uid": "shareWidget", "type": "shareWidget" },
-                    { "uid": "darkWidget", "type": "darkWidget" },
-                    { "uid": "calcWidget", "type": "calcWidget" },
-                    { "uid": "gameModeWidget", "type": "gameModeWidget" },
-                    { "uid": "displayWidget", "type": "displayWidget" },
-                    { "uid": "volumeWidget", "type": "volumeWidget" }
+                    { "uid": "wifiWidget", "type": "wifiWidget", "x": 0, "y": 0 },
+                    { "uid": "btWidget", "type": "btWidget", "x": 2, "y": 0 },
+                    { "uid": "adWidget", "type": "adWidget", "x": 3, "y": 0 },
+                    { "uid": "musicWidget", "type": "musicWidget", "x": 0, "y": 1 },
+                    { "uid": "focusWidget", "type": "focusWidget", "x": 2, "y": 1 },
+                    { "uid": "stageWidget", "type": "stageWidget", "x": 2, "y": 2 },
+                    { "uid": "shareWidget", "type": "shareWidget", "x": 3, "y": 2 },
+                    { "uid": "darkWidget", "type": "darkWidget", "x": 0, "y": 3 },
+                    { "uid": "calcWidget", "type": "calcWidget", "x": 2, "y": 3 },
+                    { "uid": "gameModeWidget", "type": "gameModeWidget", "x": 3, "y": 3 },
+                    { "uid": "displayWidget", "type": "displayWidget", "x": 0, "y": 4 },
+                    { "uid": "volumeWidget", "type": "volumeWidget", "x": 0, "y": 5 }
                 ]
             }
         }
