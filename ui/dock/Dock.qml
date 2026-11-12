@@ -157,6 +157,11 @@ Scope {
                 if (fromEntry !== "") return fromEntry
             }
         }
+        var own = ({ "installer-app": "system-software-install", "settings-app": "preferences-system" })[resolveAppId(c).toLowerCase()]
+        if (own) {
+            var ownPath = IconResolver.byName(own)
+            if (ownPath !== "") return ownPath
+        }
         return resolveIcon(resolveAppId(c))
     }
 
