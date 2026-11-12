@@ -210,6 +210,15 @@ Item {
             }
         }
 
+        MenuRow {
+            label: I18n.tr("Installateur Lickintosh…")
+            icon: "settings/update.svg"
+            onActivated: {
+                InstallerLauncher.open("")
+                root.closeRequested()
+            }
+        }
+
         MenuSep {}
 
         MenuRow {

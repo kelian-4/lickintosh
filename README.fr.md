@@ -104,7 +104,7 @@ Le script est écrit pour fish. Ne le lance pas en root : il demande `sudo` (ou 
 Si Quickshell tourne déjà, relance-le complètement pour charger la nouvelle copie.
 
 > [!TIP]
-> **Mise à jour** : `git pull` puis relance `./setup.fish`, ou utilise l'installateur graphique : `./setup.fish --gui` (installation, dépendances, mise à jour, diagnostic, désinstallation).
+> **Mise à jour** : `git pull` puis relance `./setup.fish`, `./setup.fish` ouvre maintenant l'installateur graphique (installation, dépendances, mise à jour, diagnostic, désinstallation) ; ajoute `--cli` pour le déroulé en terminal. Il est aussi dans le menu Apple et dans Réglages → Général → Mises à jour logicielles.
 
 > [!NOTE]
 > Le shell est lancé par `tools/lickintosh-start` : il attend Hyprland, ne démarre jamais une deuxième copie, relance le shell après un plantage et, après plusieurs plantages rapides, essaie des réglages graphiques plus simples. Le journal est dans `~/.local/state/lickintosh/shell.log`. Tes propres variables d'environnement vont dans `~/.config/lickintosh/env`.

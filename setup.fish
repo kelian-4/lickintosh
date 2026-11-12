@@ -17,10 +17,11 @@ set -g icons_dst ~/.icons
 set -g hypr_dst ~/.config/hypr
 
 set -g setup_only_assets fonts icons_desktop MacOS-Tahoe-Cursor config
-set -g managed shell.qml settings.qml components services ui tools
+set -g managed shell.qml settings.qml installer.qml components services ui tools
 set -g required_tools 'magick|convert:imagemagick' brightnessctl:brightnessctl playerctl:playerctl wl-copy:wl-clipboard grim:grim slurp:slurp hyprpicker:hyprpicker jq:jq curl:curl xdg-open:xdg-utils xdg-user-dir:xdg-user-dirs pw-dump:pipewire wpctl:wireplumber nmcli:networkmanager bluetoothctl:bluez upower:upower powerprofilesctl:power-profiles-daemon
 
-argparse skip-deps no-launch doctor uninstall y/yes deps-plan deps-only gui -- $argv; or exit 1
+set -l orig_argv $argv
+argparse skip-deps no-launch doctor uninstall y/yes deps-plan deps-only gui cli -- $argv; or exit 1
 set -q _flag_yes; and set -g assume_yes 1
 
 if test (id -u) -eq 0
@@ -553,6 +554,10 @@ function run_uninstall
         echo "    rien a desinstaller dans $qs_dst"
         return 0
     end
+    if test (realpath $repo) = (realpath $qs_dst 2>/dev/null)
+        echo "    le depot est le dossier du shell ($qs_dst) : desinstallation refusee pour ne pas supprimer le depot." >&2
+        return 1
+    end
     echo "    sera retire de $qs_dst : $present"
     echo "    tes reglages (fichiers de configuration du shell) sont conserves"
     ask "    Continuer ?"; or begin
@@ -645,13 +650,21 @@ if set -q _flag_deps_plan
     exit 0
 end
 
+mkdir -p ~/.local/share/lickintosh
+echo $repo >~/.local/share/lickintosh/repo
+
+set -l want_gui 0
 if set -q _flag_gui
-    command -q qs; or begin
-        echo "qs est introuvable" >&2
-        exit 1
+    set want_gui 1
+else if test (count $orig_argv) -eq 0; and not set -q _flag_cli
+    set want_gui 1
+end
+if test $want_gui -eq 1
+    if command -q qs; and test -f $repo/installer.qml; and set -q WAYLAND_DISPLAY
+        set -lx LICKINTOSH_SETUP $repo/setup.fish
+        exec qs -p $repo/installer.qml >/dev/null 2>&1
     end
-    set -lx LICKINTOSH_SETUP $repo/setup.fish
-    exec qs -p $repo/installer
+    echo "Installateur graphique indisponible (qs, installer.qml ou session Wayland manquant) : installation en terminal."
 end
 
 if set -q _flag_doctor
@@ -920,7 +933,12 @@ for e in $managed assets
 end
 
 set -l do_shell 1
-if test (count $present) -gt 0
+set -l same_dir 0
+test (realpath $repo) = (realpath $qs_dst 2>/dev/null); and set same_dir 1
+if test $same_dir -eq 1
+    set do_shell 0
+    echo "    le depot est deja le dossier du shell : copie ignoree"
+else if test (count $present) -gt 0
     echo "    deja present : $present"
         if ask "    Remplacer le code du shell ? Une sauvegarde est faite avant."
         set -l backup ~/.local/share/lickintosh/backups/shell-(date +%Y%m%d-%H%M%S)

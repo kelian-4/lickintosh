@@ -592,6 +592,44 @@ Item {
                     }
                 }
 
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    CFText {
+                        text: I18n.tr("Installateur Lickintosh")
+                        font.pixelSize: 14
+                        color: Theme.textPrimary
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                    }
+
+                    Rectangle {
+                        Layout.preferredWidth: 90
+                        Layout.preferredHeight: 26
+                        radius: 7
+                        color: _installerMouse.containsMouse ? "#24ffffff" : "#18ffffff"
+                        border.color: "#14ffffff"
+                        border.width: 1
+
+                        CFText {
+                            anchors.centerIn: parent
+                            text: I18n.tr("Ouvrir")
+                            font.pixelSize: 12
+                            color: Theme.textPrimary
+                        }
+
+                        MouseArea {
+                            id: _installerMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: InstallerLauncher.open("UpdatesPage")
+                        }
+                    }
+                }
+
                 CFText {
                     visible: GeneralState.packageManager === "" || GeneralState.packageManager === "unknown"
                     text: I18n.tr("Aucun gestionnaire de paquets pris en charge n'a été détecté.")
