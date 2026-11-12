@@ -52,6 +52,7 @@ Singleton {
                 property list<var> pinnedApps: [
                     { "name": "Finder",   "cmd": "dolphin", "icon": "system-file-manager", "iconPath": "", "autostart": false },
                     { "name": "Terminal", "cmd": "kitty",   "icon": "kitty",               "iconPath": "", "autostart": false },
+                    { "name": "Browser",  "cmd": "brave",   "icon": "brave-browser",       "iconPath": "", "autostart": false },
                     { "name": "Settings", "cmd": "",        "icon": "preferences-system",  "iconPath": "", "autostart": false }
                 ]
                 property list<var> pinnedFiles: []
