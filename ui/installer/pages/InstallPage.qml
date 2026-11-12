@@ -11,16 +11,16 @@ ContentPage {
     ContentSection {
         title: I18n.tr("État")
         IRow {
-            title: I18n.tr("Dépendances")
+            icon: "settings/widgets.svg"; title: I18n.tr("Dépendances")
             subtitle: InstallerState.planBusy ? I18n.tr("Vérification de ce qui est installé…")
-                : !InstallerState.plan ? I18n.tr("Impossible de lire la liste des dépendances")
+                : !InstallerState.plan ? I18n.tr("Impossible de lire la liste des dépendances") + (InstallerState.planError !== "" ? " : " + InstallerState.planError : "")
                 : InstallerState.missing > 0 ? InstallerState.missing + " " + I18n.tr("paquet(s) manquant(s)")
                 : I18n.tr("Tout ce dont Lickintosh a besoin est installé")
             IButton { visible: InstallerState.missing > 0; text: I18n.tr("Installer…"); onClicked: Qt.callLater(function() { InstallerState.requestPage("DependenciesPage") }) }
             IButton { text: I18n.tr("Revérifier"); enabled: !InstallerState.planBusy; onClicked: InstallerState.runPlan() }
         }
         IRow {
-            title: "Lickintosh"
+            icon: "settings/launchpad.svg"; title: "Lickintosh"
             subtitle: InstallerState.installed ? I18n.tr("Installé") : I18n.tr("Pas encore installé")
         }
     }

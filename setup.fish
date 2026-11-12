@@ -603,7 +603,8 @@ function json_list
     for i in $argv
         set -a out \"$i\"
     end
-    echo "["(string join , $out)"]"
+    set -l joined (string join , $out)
+    echo "[$joined]"
 end
 
 function run_deps_plan

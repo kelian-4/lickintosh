@@ -65,14 +65,14 @@ FloatingWindow {
             items: [
                 { name: I18n.tr("Mises à jour"),  icon: "settings/update.svg",    component: "UpdatesPage",      implemented: true },
                 { name: I18n.tr("Diagnostic"),    icon: "settings/accessibility.svg", component: "DoctorPage",   implemented: true },
-                { name: I18n.tr("Outils"),        icon: "settings/dialogs.svg",   component: "ToolsPage",        implemented: true },
-                { name: I18n.tr("Désinstaller"),  icon: "settings/empty.svg",     component: "UninstallPage",    implemented: true }
+                { name: I18n.tr("Outils"),        icon: "settings/general.svg",   component: "ToolsPage",        implemented: true },
+                { name: I18n.tr("Désinstaller"),  icon: "settings/dock.svg",      component: "UninstallPage",    implemented: true }
             ]
         },
         {
             title: "",
             items: [
-                { name: I18n.tr("À propos"),      icon: "logo.svg",               component: "AboutPage",        implemented: true }
+                { name: I18n.tr("À propos"),      icon: "settings/dialogs.svg",   component: "AboutPage",        implemented: true }
             ]
         }
     ]

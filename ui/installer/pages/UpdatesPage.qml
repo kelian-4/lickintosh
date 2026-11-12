@@ -9,14 +9,14 @@ ContentPage {
     id: root
 
     ContentSection {
-        IRow { title: I18n.tr("Installé"); subtitle: InstallerState.installed ? I18n.tr("Installé") : I18n.tr("Pas encore installé") }
+        IRow { icon: "settings/launchpad.svg"; title: I18n.tr("Installé"); subtitle: InstallerState.installed ? I18n.tr("Installé") : I18n.tr("Pas encore installé") }
         IRow {
-            title: I18n.tr("Mettre à jour depuis Git")
+            icon: "settings/update.svg"; title: I18n.tr("Mettre à jour depuis Git")
             subtitle: I18n.tr("Récupère les dernières modifications de ce clone puis les installe. L'ancienne version est sauvegardée avant (les 3 dernières sont gardées).")
             IButton { main: true; text: I18n.tr("Mettre à jour"); enabled: !InstallerState.busy; onClicked: InstallerState.update() }
         }
         IRow {
-            title: I18n.tr("Sauvegardes")
+            icon: "settings/dock.svg"; title: I18n.tr("Sauvegardes")
             subtitle: InstallerState.dataDir + "/backups"
             IButton { text: I18n.tr("Ouvrir"); onClicked: InstallerState.openPath(InstallerState.dataDir + "/backups") }
         }

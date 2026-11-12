@@ -12,7 +12,7 @@ ContentPage {
 
     ContentSection {
         IRow {
-            title: I18n.tr("Désinstaller Lickintosh")
+            icon: "settings/dock.svg"; title: I18n.tr("Désinstaller Lickintosh")
             subtitle: root.confirming ? I18n.tr("Lickintosh est déplacé dans le dossier des sauvegardes. Tes réglages sont conservés.") : I18n.tr("Déplace le shell dans le dossier des sauvegardes. Les polices, les icônes et le curseur restent en place.")
             IButton { visible: root.confirming; text: I18n.tr("Annuler"); onClicked: root.confirming = false }
             IButton {

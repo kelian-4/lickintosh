@@ -183,9 +183,8 @@ Les traductions anglaise et espagnole sont récentes et peuvent contenir des err
 
 ## • remerciements et licences •
 
-- **Liquid Glass** : l'effet est adapté de [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
-- **MacShell** : le widget « Lecture en cours », le lecteur de l'écran de verrouillage, Night Shift, les fonds vidéo, le widget Image, la teinte des icônes du Dock, le fond du mode sombre et les idées du lanceur de démarrage, de `--doctor`/`--uninstall` et du sélecteur Alt+Tab viennent de [0-ss/MacShell](https://github.com/0-ss/MacShell) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
-- **MacTahoe Liquid KDE** : voir `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
+- **Liquid Glass** : [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (MIT) et MacTahoe Liquid KDE (GPL-3.0) ont servi de base d'étude pour l'effet. Les shaders ont été modifiés et améliorés, et le système de capture est le nôtre. Licences : `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt` et `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt`.
+- **MacShell** : certaines fonctionnalités et l'installateur graphique sont adaptés de [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT). Licence : `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
 - **Icônes** : thème [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) de vinceliuice, variante « bold ».
 - **Polices SF, curseur et fonds d'écran** : fournis dans `assets/`. Leurs droits appartiennent à leurs auteurs respectifs (les polices San Francisco et les fonds d'écran macOS sont des ressources d'Apple).
 

@@ -8,10 +8,19 @@ RowLayout {
 
     property string title: ""
     property string subtitle: ""
+    property string icon: ""
     default property alias trailing: _trailing.data
 
     Layout.fillWidth: true
     spacing: 12
+
+    CFVI {
+        visible: root.icon !== ""
+        icon: root.icon
+        size: 26
+        colorized: false
+        Layout.alignment: Qt.AlignVCenter
+    }
 
     Column {
         Layout.fillWidth: true
