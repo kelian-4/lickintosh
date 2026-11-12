@@ -39,6 +39,9 @@ export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
 export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Hyprland}"
 export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-wayland}"
+if [ -z "${QT_QPA_PLATFORMTHEME:-}" ] && command -v qt6ct >/dev/null 2>&1; then
+    export QT_QPA_PLATFORMTHEME=qt6ct
+fi
 export QT_LOGGING_RULES="${QT_LOGGING_RULES:-qt.multimedia.ffmpeg*=false}"
 export QT_FFMPEG_DECODING_HW_DEVICE_TYPES="${QT_FFMPEG_DECODING_HW_DEVICE_TYPES:-vaapi,cuda}"
 
@@ -54,7 +57,7 @@ if [ -f "$CONF/lickintosh/env" ]; then
 fi
 
 if command -v dbus-update-activation-environment >/dev/null 2>&1; then
-    dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP >/dev/null 2>&1
+    dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP QT_QPA_PLATFORMTHEME >/dev/null 2>&1
 fi
 
 applied=""

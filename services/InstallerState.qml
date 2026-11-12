@@ -135,12 +135,19 @@ Singleton {
         planProc.running = true
     }
 
+    readonly property string polkitPrelude:
+        "agent() { pgrep -f '^(/[^ ]*/)?(hyprpolkitagent|polkit-gnome-authentication-agent-1|polkit-kde-authentication-agent-1|lxqt-policykit-agent|polkit-mate-authentication-agent-1|xfce-polkit|lxpolkit)' >/dev/null; }; " +
+        "agent || { systemctl --user start hyprpolkitagent >/dev/null 2>&1; sleep 1; }; " +
+        "agent || for b in /usr/lib/hyprpolkitagent/hyprpolkitagent /usr/libexec/hyprpolkitagent /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 /usr/libexec/polkit-gnome-authentication-agent-1 /usr/lib/polkit-kde-authentication-agent-1 /usr/lib/x86_64-linux-gnu/libexec/polkit-kde-authentication-agent-1; do " +
+        "if [ -x \"$b\" ]; then setsid \"$b\" >/dev/null 2>&1 & sleep 2; break; fi; done; " +
+        "agent || { echo \"Aucun agent polkit actif : installe hyprpolkitagent ou lance ./setup.fish dans un terminal\"; echo \"[exit 1]\"; exit 1; }; "
+
     function installDeps() {
         if (!plan || missing === 0 || depsRunning) return
         depsRunning = true
         depsResult = ""
         depsLog = ""
-        depsProc.command = ["sh", "-c", "LICKINTOSH_ROOT_CMD=pkexec fish \"$1\" --cli -y --deps-only 2>&1; echo \"[exit $?]\"", "sh", script]
+        depsProc.command = ["sh", "-c", root.polkitPrelude + "LICKINTOSH_ROOT_CMD=pkexec fish \"$1\" --cli -y --deps-only 2>&1; echo \"[exit $?]\"", "sh", script]
         depsProc.running = true
     }
 

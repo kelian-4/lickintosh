@@ -33,15 +33,21 @@ set -l shell_replaced 0
 set -l blocking
 set -l warnings
 
-function ask --argument-names question
-    set -q assume_yes; and return 0
-    read -l -P "$question [o/N] " reply; or return 1
-    string match -qr '^(o|O|oui|Oui|y|Y|yes)$' -- $reply
+function ask_strict --argument-names question
+    while true
+        read -l -P "$question [o/N] " reply; or return 1
+        if string match -qri '^(o|oui|y|yes)$' -- $reply
+            return 0
+        else if string match -qri '^(n|non|no)?$' -- $reply
+            return 1
+        end
+        echo "    reponse non reconnue : '$reply'. Reponds par o (oui) ou n (non)." >&2
+    end
 end
 
-function ask_strict --argument-names question
-    read -l -P "$question [o/N] " reply; or return 1
-    string match -qr '^(o|O|oui|Oui|y|Y|yes)$' -- $reply
+function ask --argument-names question
+    set -q assume_yes; and return 0
+    ask_strict $question
 end
 
 function say

@@ -86,7 +86,7 @@ Singleton {
                 property bool enable:            true
                 property real height:            60
                 property bool hoverToReveal:     true
-                property bool monochromeIcons:   true
+                property bool monochromeIcons:   false
                 property bool iconTint:          false
                 property string iconTintColor:   "#0a84ff"
                 property real iconTintStrength:  1.0
@@ -212,7 +212,7 @@ Singleton {
             }
 
             property JsonObject controlCenter: JsonObject {
-                property bool keepAwakeSeeded: false
+                property bool keepAwakeSeeded: true
                 property list<var> items: [
                     { "uid": "wifiWidget", "type": "wifiWidget" },
                     { "uid": "btWidget", "type": "btWidget" },
