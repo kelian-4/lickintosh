@@ -155,7 +155,6 @@ Item {
                     height:         shown ? implicitHeight : 0
                     opacity:        shown ? 1 : 0
                     clip:           true
-                    Behavior on height { NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                     Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                     leftPadding:    20
                     bottomPadding:  4
@@ -171,7 +170,6 @@ Item {
                 Item {
                     width: parent.width
                     height: NetworkManager.networksKnown.length > 0 ? 8 : 0
-                    Behavior on height { NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                 }
 
                 CFText {
@@ -182,7 +180,6 @@ Item {
                     height:         shown ? implicitHeight : 0
                     opacity:        shown ? 1 : 0
                     clip:           true
-                    Behavior on height { NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                     Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                     leftPadding:    20
                     bottomPadding:  4
@@ -216,7 +213,6 @@ Item {
                     height:  _otherNets.count > 0 ? 38 : 0
                     opacity: _otherNets.count > 0 ? 1 : 0
                     clip:    true
-                    Behavior on height  { NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                     Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     CFText {
@@ -250,7 +246,6 @@ Item {
                     opacity: _otherHeader._shown ? 1 : 0
                     clip:    true
                     spacing: 0
-                    Behavior on height  { NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                     Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     Repeater {
@@ -338,10 +333,6 @@ Item {
         visible: height > 0.5
         clip:    true
         Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
-        Behavior on height {
-            NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
-        }
-
         Rectangle {
             anchors.fill:    parent
             anchors.margins: 4

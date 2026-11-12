@@ -124,7 +124,6 @@ Item {
                     height:         shown ? implicitHeight : 0
                     opacity:        shown ? 1 : 0
                     clip:           true
-                    Behavior on height { NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                     Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                     leftPadding:    20
                     bottomPadding:  4
@@ -148,7 +147,6 @@ Item {
                     height:         shown ? implicitHeight : 0
                     opacity:        shown ? 1 : 0
                     clip:           true
-                    Behavior on height { NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
                     Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                     leftPadding:    20
                     bottomPadding:  4
@@ -210,7 +208,6 @@ Item {
         opacity:        (shown && _born) ? 1 : 0
         visible:        height > 0.5
         clip:           true
-        Behavior on height  { NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve } }
         Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
         property bool   _hovered:      false
         readonly property bool _connecting:    modelData !== null && BluetoothState.isConnecting(_dr.modelData)
