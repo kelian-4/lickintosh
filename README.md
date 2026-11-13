@@ -38,7 +38,7 @@
 
 **Dock**
 - **Applications**: pinned apps, running-app indicators, trash and hover magnification.
-- **Settings**: icon size, dock scale and icon overflow.
+- **Settings**: icon size, dock scale, icon overflow and icon tint.
 
 
 <p align="center"><img src="assets/readme/dock.gif" width="800" alt="Dock"></p>
@@ -46,10 +46,11 @@
 
 **Desktop**
 - **File icons**: grid, multi-selection, drag and drop with animated swapping.
-- **Widgets**: battery, Bluetooth, calendar, analog and digital clocks, Focus, media, notes, quote, stopwatch, tasks, timer, volume, weather. Three themes: glass, light and dark.
+- **Widgets**: battery, Bluetooth, calendar, analog and digital clocks, world clock, Focus, image, media, notes, quote, stopwatch, tasks, timer, volume, weather. Three themes: glass, light and dark.
+- **Wallpaper**: still pictures, a separate picture for dark mode, and looping video wallpapers (needs the Qt `QtMultimedia` module; paused in Game Mode).
 
 **Control Center**
-- **Editable controls**: Wi-Fi, now playing, Bluetooth, KDE Connect, Focus, screenshot, screen sharing, brightness, sound, dark mode, calculator, game mode, timer, alarm, stopwatch, keep awake.
+- **Editable controls**: Wi-Fi, now playing, Bluetooth, KDE Connect, Focus, screenshot, screen sharing, brightness, sound, dark mode, calculator, game mode, timer, alarm, stopwatch, keep awake, Night Shift (needs `hyprsunset`).
 <img width="344" height="516" alt="2026-11-06_12:57:26" src="https://github.com/user-attachments/assets/c359e406-c772-440f-8302-68cea59db5d5" />
 
 **Spotlight**
@@ -79,7 +80,7 @@
 |---|---|
 | **Hyprland** | 0.57 or newer (the bundled configuration uses the Lua config) |
 | **Quickshell** | 0.3 or newer, with the Qt 6 modules `QtGraphs`, `QtQuick.VectorImage`, `QtDeclarative` and `QtWayland` |
-| **Tools** | ImageMagick, `brightnessctl`, `playerctl`, `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `jq`, `curl`, `xdg-utils`, `xdg-user-dirs`, PipeWire (`pw-dump`), WirePlumber (`wpctl`), NetworkManager (`nmcli`) |
+| **Tools** | Python 3 (terminal calculator), ImageMagick, `brightnessctl`, `playerctl`, `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `jq`, `curl`, `xdg-utils`, `xdg-user-dirs`, PipeWire (`pw-dump`), WirePlumber (`wpctl`), NetworkManager (`nmcli`) |
 | **Services** | NetworkManager, BlueZ, UPower, power-profiles-daemon |
 | **Bundled Hyprland config** | `hypridle`, `cliphist`, `hyprpolkitagent`, and the programs from `assets/config/hypr/hyprlua/programs.lua` (terminal, file manager, browser, code editor, media player), which you can replace with your own |
 
@@ -97,11 +98,16 @@ The script is written for fish. Don't run it as root: it asks for `sudo` (or `do
 |---|---|
 | `--skip-deps` | Doesn't check or install dependencies |
 | `--no-launch` | Doesn't try to start the shell at the end |
+| `--doctor` | Checks the whole setup (session, Hyprland, Quickshell modules, tools, services, installed files, recent errors) and explains each problem |
+| `--uninstall` | Removes the shell after saving a backup (your settings, fonts, icons and cursor are kept unless you say otherwise) |
 
 If Quickshell is already running, restart it completely to load the new copy.
 
 > [!TIP]
-> **Updating**: run `git pull`, then `./setup.fish` again. A friendlier method will come later.
+> **Updating**: run `git pull`, then `./setup.fish` again, `./setup.fish` now opens the graphical installer (install, dependencies, update, doctor, uninstall); add `--cli` for the terminal flow. It is also in the Apple menu and in Settings → General → Software Update.
+
+> [!NOTE]
+> The shell is started by `tools/lickintosh-start`: it waits for Hyprland, never starts a second copy, restarts the shell after a crash and, after repeated quick crashes, tries simpler graphics settings. The log is in `~/.local/state/lickintosh/shell.log`. Your own environment variables go in `~/.config/lickintosh/env`.
 
 ## • keybinds •
 
@@ -119,6 +125,7 @@ The main modifier is `SUPER`.
 | `SUPER + Q` | Close the window |
 | `SUPER + F` | Fullscreen |
 | `SUPER + V` | Floating window |
+| `ALT + Tab` / `ALT + SHIFT + Tab` | Application switcher (hold ALT, tap Tab to cycle, release ALT to switch) |
 | `SUPER + Tab` / `SUPER + SHIFT + Tab` | Next / previous window |
 | `SUPER + arrows` | Change focus |
 | `SUPER + SHIFT + arrows` | Move the window |
@@ -176,9 +183,8 @@ The English and Spanish translations are recent and may contain mistakes. Some t
 
 ## • credits and licenses •
 
-- **Liquid Glass**: the effect is adapted from [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (MIT license). The license text is in `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
-- **Media player**: the "Now Playing" widget and the lock screen player are adapted from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT license). The license text is in `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
-- **MacTahoe Liquid KDE**: see `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
+- **Liquid Glass**: [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (MIT) and MacTahoe Liquid KDE (GPL-3.0) served as study references for the effect. The shaders were modified and improved, and the capture system is ours. Licenses: `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt` and `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt`.
+- **MacShell**: some features and the graphical installer are adapted from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT). License: `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
 - **Icons**: [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) by vinceliuice, "bold" variant.
 - **SF fonts, cursor and wallpapers**: shipped in `assets/`. Their rights belong to their respective authors (the San Francisco fonts and the macOS wallpapers are Apple resources).
 

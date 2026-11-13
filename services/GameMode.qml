@@ -67,7 +67,19 @@ Singleton {
         }
     }
 
+    function _restore() {
+        if (ShellConfig.ready) root.enabled = ShellConfig.options.session.gameMode
+    }
+
+    Component.onCompleted: root._restore()
+
+    Connections {
+        target: ShellConfig
+        function onReadyChanged() { root._restore() }
+    }
+
     onEnabledChanged: {
+        if (ShellConfig.ready) ShellConfig.options.session.gameMode = enabled
         if (enabled) {
             _onCmd.running = true
             _onPowerCmd.running = true

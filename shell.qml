@@ -1,6 +1,8 @@
 //@ pragma IconTheme MacTahoe-dark
 //@ pragma UseQApplication
 //@ pragma ShellId main-shell
+//@ pragma DefaultEnv QT_FFMPEG_DECODING_HW_DEVICE_TYPES = vaapi,cuda
+//@ pragma DefaultEnv QT_LOGGING_RULES = qt.multimedia.ffmpeg*=false
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
@@ -20,6 +22,7 @@ import qs.ui.topbar.menubar.applemenu
 import qs.ui.dock
 import qs.ui.topbar.statusarea.spotlight
 import qs.ui.osd
+import qs.ui.switcher
 import qs.ui.lockscreen
 import qs.ui.desktop
 import qs.ui.widgets
@@ -225,6 +228,7 @@ ShellRoot {
     LazyLoader { active: appRoot.interfaceShown && !GameMode.enabled; DesktopLayer {} }
     WidgetGallery {}
     LazyLoader { active: appRoot.interfaceShown; Dock {} }
+    WindowSwitcher {}
     SpotlightWindow {
         opened: appRoot.spotlightOpened
         onCloseRequested: appRoot.spotlightOpened = false

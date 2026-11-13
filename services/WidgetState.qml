@@ -202,6 +202,39 @@ Singleton {
         root.setList(zone, list)
     }
 
+    property var imageChoices: []
+
+    function setImage(zone, id, path) {
+        var list = root.listOf(zone)
+        var i = root.indexOfId(list, id)
+        if (i < 0) return
+        list[i] = Object.assign({}, list[i], { image: path })
+        root.setList(zone, list)
+    }
+
+    function refreshImages() {
+        if (!ShellConfig.ready) return
+        imageProc.running = true
+    }
+
+    Process {
+        id: imageProc
+        running: false
+        command: ["sh", "-c",
+            "d=\"$1\"; case \"$d\" in '~'*) d=\"$HOME${d#'~'}\";; esac; " +
+            "find \"$d\" \"$2\" -maxdepth 2 -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) 2>/dev/null | sort | head -40",
+            "sh", ShellConfig.options.spotlight.indexing.wallpaperDir, Quickshell.shellDir + "/assets/wallpapers"]
+        stdout: StdioCollector { id: imageOut }
+        onExited: root.imageChoices = String(imageOut.text).trim().split("\n").filter(function(l) { return l !== "" })
+    }
+
+    Connections {
+        target: ShellConfig
+        function onReadyChanged() { root.refreshImages() }
+    }
+
+    Component.onCompleted: root.refreshImages()
+
     function resizeWidget(zone, id, size) {
         var list = root.listOf(zone)
         var i = root.indexOfId(list, id)
@@ -251,6 +284,15 @@ Singleton {
                 { label: I18n.tr("Dark"), action: "theme:dark", checkable: true, checked: current === "dark" }
             ] })
             var resolved = WidgetRegistry.resolve(widget)
+            if (resolved.type === "image") {
+                var picks = []
+                for (var k = 0; k < root.imageChoices.length; k++) {
+                    var p = root.imageChoices[k]
+                    picks.push({ label: p.split("/").pop(), action: "image:" + p, checkable: true, checked: widget.image === p })
+                }
+                if (picks.length === 0) picks.push({ label: I18n.tr("Aucune image trouvée"), action: "none", disabled: true })
+                entries.push({ label: I18n.tr("Choisir une image"), children: picks })
+            }
             var sizes = WidgetRegistry.sizesOf(resolved.type, resolved.variant)
             if (sizes.length > 1) {
                 for (var i = 0; i < sizes.length; i++) {
@@ -275,6 +317,7 @@ Singleton {
         else if (action === "up") root.shiftWidget(zone, id, -1)
         else if (action === "down") root.shiftWidget(zone, id, 1)
         else if (action.indexOf("size:") === 0) root.resizeWidget(zone, id, action.slice(5))
+        else if (action.indexOf("image:") === 0) root.setImage(zone, id, action.slice(6))
         else if (action.indexOf("theme:") === 0) root.setTheme(zone, id, action.slice(6))
     }
 

@@ -93,7 +93,7 @@ Scope {
 
     function pinnedIconFor(entry) {
         if (dockRoot.pinnedKey(entry) === "settings-app")
-            return Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons_desktop/" + Theme.iconTheme + "/apps/scalable/preferences-system.svg")
+            return Qt.resolvedUrl("file://" + Quickshell.env("HOME") + "/.icons/" + Theme.iconTheme + "/apps/scalable/preferences-system.svg")
         if (dockRoot._isThemeName(entry.icon)) {
             var byName = IconResolver.byName(entry.icon)
             if (byName !== "") return byName
@@ -156,6 +156,11 @@ Scope {
                 var fromEntry = IconResolver.forApp(entry)
                 if (fromEntry !== "") return fromEntry
             }
+        }
+        var own = ({ "installer-app": "system-software-install", "settings-app": "preferences-system" })[resolveAppId(c).toLowerCase()]
+        if (own) {
+            var ownPath = IconResolver.byName(own)
+            if (ownPath !== "") return ownPath
         }
         return resolveIcon(resolveAppId(c))
     }
@@ -1481,9 +1486,15 @@ Scope {
                 mipmap:          true
                 antialiasing:    true
                 visible:         status === Image.Ready && source !== ""
-                layer.enabled:   ShellConfig.options.dockAppearance.monochromeIcons
+                layer.enabled:   ShellConfig.options.dockAppearance.monochromeIcons || ShellConfig.options.dockAppearance.iconTint
                 layer.effect: MultiEffect {
-                    saturation: -1
+                    readonly property bool tinted: ShellConfig.options.dockAppearance.iconTint
+                    readonly property real strength: ShellConfig.options.dockAppearance.iconTintStrength
+                    saturation: tinted ? -0.75 * strength : -1
+                    colorization: tinted ? strength : 0.0
+                    brightness: tinted ? 0.14 * strength : 0.0
+                    contrast: tinted ? 0.04 * strength : 0.0
+                    colorizationColor: ShellConfig.options.dockAppearance.iconTintColor
                 }
             }
 

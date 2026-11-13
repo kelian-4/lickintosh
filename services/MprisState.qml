@@ -43,9 +43,10 @@ Singleton {
     readonly property bool loopTrack:        root.activePlayer ? root.activePlayer.loopState === MprisLoopState.Track : false
 
     property int positionWatchers: 0
+    property int fastWatchers: 0
 
     Timer {
-        interval: 1000
+        interval: root.fastWatchers > 0 ? 250 : 1000
         repeat: true
         running: root.positionWatchers > 0 && root.isPlaying && root.activePlayer !== null && root.activePlayer.positionSupported
         onTriggered: root.activePlayer.positionChanged()

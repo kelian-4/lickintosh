@@ -13,9 +13,9 @@ return {
     browser = firstAvailable({ "helium", "zen-browser", "firefox", "brave", "google-chrome-stable", "chromium", "librewolf", "microsoft-edge-stable", "vivaldi", "opera" }),
     codeEditor = firstAvailable({ "code", "codium", "cursor", "zeditor", "zed", "kate", "gnome-text-editor", "gedit" }),
     mediaPlayer = firstAvailable({ "mpv", "vlc", "celluloid", "haruna", "totem" }),
-    shell = "qs",
+    shell = "sh ~/.config/quickshell/lickintosh/tools/lickintosh-start",
     cursor = {
-        theme = "Aki-Aspen",
+        theme = "MacOS-Tahoe-Cursor",
         size = 24,
     },
 }

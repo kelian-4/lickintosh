@@ -9,7 +9,7 @@ Item {
 
     property string path: ""
     property string thumbPath: ""
-    property int thumbsGen: 0
+    property bool allowOriginal: false
     property bool selected: false
     property string label: String(path).split("/").pop()
 
@@ -19,10 +19,10 @@ Item {
     implicitHeight: 104
 
     property bool _useThumb: true
-    onThumbsGenChanged: root._useThumb = true
+    onThumbPathChanged: root._useThumb = true
 
     readonly property string _effectiveSource:
-        (root._useThumb && root.thumbPath !== "") ? root.thumbPath : root.path
+        (root._useThumb && root.thumbPath !== "") ? root.thumbPath : (root.allowOriginal || !root._useThumb ? root.path : "")
 
     ColumnLayout {
         anchors.fill: parent

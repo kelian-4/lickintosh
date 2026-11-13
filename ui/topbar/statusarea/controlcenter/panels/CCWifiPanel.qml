@@ -15,6 +15,9 @@ Item {
     readonly property int iconSize:        20
     readonly property int maxScrollHeight: 360
 
+    property bool _settled: false
+    Timer { interval: 700; running: true; onTriggered: root._settled = true }
+
     property string _passwordForSSID:  ""
     property string _connectingSSID:   ""
     property string _disconnectingSSID: ""
@@ -148,7 +151,11 @@ Item {
                     text:          I18n.tr("Connecté")
                     font.pixelSize: 13
                     gray:           true
-                    visible:        NetworkManager.active !== null
+                    property bool shown: NetworkManager.active !== null
+                    height:         shown ? implicitHeight : 0
+                    opacity:        shown ? 1 : 0
+                    clip:           true
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                     leftPadding:    20
                     bottomPadding:  4
                 }
@@ -157,22 +164,29 @@ Item {
                     width:    parent.width
                     net:      NetworkManager.active
                     isActive: true
-                    visible:  NetworkManager.active !== null
+                    shown:    NetworkManager.active !== null
                 }
 
-                Item { width: parent.width; height: NetworkManager.networksKnown.length > 0 ? 8 : 0 }
+                Item {
+                    width: parent.width
+                    height: NetworkManager.networksKnown.length > 0 ? 8 : 0
+                }
 
                 CFText {
                     text:           I18n.tr("Réseaux connus")
                     font.pixelSize: 13
                     gray:           true
-                    visible:        NetworkManager.networksKnown.filter(function(n) { return !n.active }).length > 0
+                    property bool shown: NetworkManager.networksKnown.filter(function(n) { return !!n && !n.active }).length > 0
+                    height:         shown ? implicitHeight : 0
+                    opacity:        shown ? 1 : 0
+                    clip:           true
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                     leftPadding:    20
                     bottomPadding:  4
                 }
 
                 Repeater {
-                    model: NetworkManager.networksKnown.filter(function(n) { return !n.active })
+                    model: NetworkManager.networksKnown.filter(function(n) { return !!n && !n.active })
                     delegate: NetRow {
                         required property var modelData
                         width:    parent.width
@@ -188,15 +202,18 @@ Item {
                     height:  1
                     color:   "#10ffffff"
                     anchors.horizontalCenter: parent.horizontalCenter
-                    visible: _otherNets.count > 0
+                    opacity: _otherNets.count > 0 ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                 }
 
                 Item {
                     id:      _otherHeader
                     width:   parent.width
-                    height:  38
-                    visible: _otherNets.count > 0
                     property bool _shown: false
+                    height:  _otherNets.count > 0 ? 38 : 0
+                    opacity: _otherNets.count > 0 ? 1 : 0
+                    clip:    true
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     CFText {
                         text:           I18n.tr("Autres réseaux")
@@ -225,13 +242,16 @@ Item {
 
                 Column {
                     width:   parent.width
-                    visible: _otherHeader._shown
+                    height:  _otherHeader._shown ? implicitHeight : 0
+                    opacity: _otherHeader._shown ? 1 : 0
+                    clip:    true
                     spacing: 0
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
 
                     Repeater {
                         id: _otherNets
                         model: NetworkManager.networks.filter(function(n) {
-                            return !n.active && NetworkManager.networksKnown.indexOf(n) === -1
+                            return !!n && !n.active && NetworkManager.networksKnown.indexOf(n) === -1
                         })
                         delegate: NetRow {
                             required property var modelData
@@ -283,6 +303,9 @@ Item {
         property var  net:      null
         property bool isActive: false
         property bool _hovered: false
+        property bool shown:    true
+        property bool _born:    !root._settled
+        Component.onCompleted: _born = true
 
         readonly property string signalIcon: {
             var s = _nr.net ? (_nr.net.strength || 0) : 0
@@ -304,12 +327,12 @@ Item {
                                            && root._failedSSIDs[_nr.net.ssid] === true
                                            && _nr._showPassword
 
-        height: _showPassword ? rowHeight + (_showError ? 68 : 48)
+        height: !(shown && _born) ? 0 : _showPassword ? rowHeight + (_showError ? 68 : 48)
                                 : _showFailure ? rowHeight + _failText.implicitHeight + 8 : rowHeight
-        Behavior on height {
-            NumberAnimation { duration: ShellMotion.spatial(0.6); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.spatialCurve }
-        }
-
+        opacity: (shown && _born) ? 1 : 0
+        visible: height > 0.5
+        clip:    true
+        Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
         Rectangle {
             anchors.fill:    parent
             anchors.margins: 4

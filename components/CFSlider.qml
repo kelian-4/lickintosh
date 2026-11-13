@@ -34,17 +34,17 @@ Slider {
         x: slider.leftPadding
         y: slider.topPadding + slider.availableHeight / 2 - height / 2
         implicitWidth: 200
-        implicitHeight: 6
+        implicitHeight: 4
         width: slider.availableWidth
         height: implicitHeight
-        radius: 10
+        radius: 2
         color: Theme.themed(slider) ? Theme.controlTrack : "#30000000"
 
         Rectangle {
             width: slider.visualPosition * parent.width
             height: parent.height
             color: slider.fillColor
-            radius: 10
+            radius: 2
         }
     }
 
@@ -54,9 +54,9 @@ Slider {
         visible: opacity > 0
         x: slider.leftPadding + Math.min(slider.availableWidth - width, Math.max(0, (slider.visualPosition * (slider.availableWidth - (width)))))
         y: slider.topPadding + slider.availableHeight / 2 - height / 2
-        width: slider.pressed ? 40 : 30
-        height: slider.pressed ? 25 : 15
-        radius: 99
+        width: slider.pressed ? 27 : 21
+        height: slider.pressed ? 17 : 14
+        radius: height / 2
         color: slider.pressed ? "#20ffffff" : "#ffffff"
         light: slider.pressed ? "#fff" : "transparent"
         rimStrength: slider.pressed ? 1 : 0.8

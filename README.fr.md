@@ -38,7 +38,7 @@
 
 **Dock**
 - **Applications** : épinglées, avec indicateurs d'applications ouvertes, corbeille et grossissement au survol.
-- **Réglages** : taille des icônes, échelle du dock et débordement des icônes.
+- **Réglages** : taille des icônes, échelle du dock, débordement et teinte des icônes.
 
 
 <p align="center"><img src="assets/readme/dock.gif" width="800" alt="Dock"></p>
@@ -46,10 +46,11 @@
 
 **Bureau**
 - **Icônes de fichiers** : grille, sélection multiple, déplacement avec permutation animée.
-- **Widgets** : batterie, Bluetooth, calendrier, horloge analogique et numérique, Concentration, média, notes, citation, chronomètre, tâches, minuteur, volume, météo. Trois thèmes : verre, clair et sombre.
+- **Widgets** : batterie, Bluetooth, calendrier, horloge analogique et numérique, horloge mondiale, Concentration, image, média, notes, citation, chronomètre, tâches, minuteur, volume, météo. Trois thèmes : verre, clair et sombre.
+- **Fond d'écran** : images fixes, une image distincte pour le mode sombre et fonds vidéo en boucle (nécessite le module Qt `QtMultimedia` ; en pause en mode jeu).
 
 **Centre de contrôle**
-- **Contrôles modifiables** : Wi-Fi, lecture en cours, Bluetooth, KDE Connect, Concentration, capture d'écran, partage d'écran, luminosité, son, mode sombre, calculatrice, mode jeu, minuteur, alarme, chronomètre, maintien en éveil.
+- **Contrôles modifiables** : Wi-Fi, lecture en cours, Bluetooth, KDE Connect, Concentration, capture d'écran, partage d'écran, luminosité, son, mode sombre, calculatrice, mode jeu, minuteur, alarme, chronomètre, maintien en éveil, Night Shift (nécessite `hyprsunset`).
 <img width="344" height="516" alt="2026-11-06_12:57:26" src="https://github.com/user-attachments/assets/c359e406-c772-440f-8302-68cea59db5d5" />
 
 **Spotlight**
@@ -79,7 +80,7 @@
 |---|---|
 | **Hyprland** | 0.57 ou plus (la configuration fournie utilise la configuration Lua) |
 | **Quickshell** | 0.3 ou plus, avec les modules Qt 6 `QtGraphs`, `QtQuick.VectorImage`, `QtDeclarative` et `QtWayland` |
-| **Outils** | ImageMagick, `brightnessctl`, `playerctl`, `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `jq`, `curl`, `xdg-utils`, `xdg-user-dirs`, PipeWire (`pw-dump`), WirePlumber (`wpctl`), NetworkManager (`nmcli`) |
+| **Outils** | Python 3, ImageMagick, `brightnessctl`, `playerctl`, `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `jq`, `curl`, `xdg-utils`, `xdg-user-dirs`, PipeWire (`pw-dump`), WirePlumber (`wpctl`), NetworkManager (`nmcli`) |
 | **Services** | NetworkManager, BlueZ, UPower, power-profiles-daemon |
 | **Configuration Hyprland fournie** | `hypridle`, `cliphist`, `hyprpolkitagent`, et les programmes de `assets/config/hypr/hyprlua/programs.lua` (terminal, gestionnaire de fichiers, navigateur, éditeur de code, lecteur multimédia) que tu peux remplacer par les tiens |
 
@@ -97,11 +98,16 @@ Le script est écrit pour fish. Ne le lance pas en root : il demande `sudo` (ou 
 |---|---|
 | `--skip-deps` | Ne vérifie ni n'installe les dépendances |
 | `--no-launch` | N'essaie pas de lancer le shell à la fin |
+| `--doctor` | Vérifie toute l'installation (session, Hyprland, modules Quickshell, outils, services, fichiers installés, erreurs récentes) et explique chaque problème |
+| `--uninstall` | Retire le shell après une sauvegarde (tes réglages, polices, icônes et curseur sont conservés sauf si tu le demandes) |
 
 Si Quickshell tourne déjà, relance-le complètement pour charger la nouvelle copie.
 
 > [!TIP]
-> **Mise à jour** : `git pull` puis relance `./setup.fish`. Une méthode plus conviviale arrivera plus tard.
+> **Mise à jour** : `git pull` puis relance `./setup.fish`, `./setup.fish` ouvre maintenant l'installateur graphique (installation, dépendances, mise à jour, diagnostic, désinstallation) ; ajoute `--cli` pour le déroulé en terminal. Il est aussi dans le menu Apple et dans Réglages → Général → Mises à jour logicielles.
+
+> [!NOTE]
+> Le shell est lancé par `tools/lickintosh-start` : il attend Hyprland, ne démarre jamais une deuxième copie, relance le shell après un plantage et, après plusieurs plantages rapides, essaie des réglages graphiques plus simples. Le journal est dans `~/.local/state/lickintosh/shell.log`. Tes propres variables d'environnement vont dans `~/.config/lickintosh/env`.
 
 ## • raccourcis clavier •
 
@@ -119,6 +125,7 @@ Le modificateur principal est `SUPER`.
 | `SUPER + Q` | Fermer la fenêtre |
 | `SUPER + F` | Plein écran |
 | `SUPER + V` | Fenêtre flottante |
+| `ALT + Tab` / `ALT + SHIFT + Tab` | Sélecteur d'applications (maintiens ALT, tape Tab pour défiler, relâche ALT pour basculer) |
 | `SUPER + Tab` / `SUPER + SHIFT + Tab` | Fenêtre suivante / précédente |
 | `SUPER + flèches` | Changer le focus |
 | `SUPER + SHIFT + flèches` | Déplacer la fenêtre |
@@ -176,9 +183,8 @@ Les traductions anglaise et espagnole sont récentes et peuvent contenir des err
 
 ## • remerciements et licences •
 
-- **Liquid Glass** : l'effet est adapté de [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt`.
-- **Lecteur multimédia** : le widget « Lecture en cours » et le lecteur de l'écran de verrouillage sont adaptés de [0-ss/MacShell](https://github.com/0-ss/MacShell) (licence MIT). Le texte de la licence est dans `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
-- **MacTahoe Liquid KDE** : voir `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt` (GPL-3.0).
+- **Liquid Glass** : [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (MIT) et MacTahoe Liquid KDE (GPL-3.0) ont servi de base d'étude pour l'effet. Les shaders ont été modifiés et améliorés, et le système de capture est le nôtre. Licences : `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt` et `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt`.
+- **MacShell** : certaines fonctionnalités et l'installateur graphique sont adaptés de [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT). Licence : `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
 - **Icônes** : thème [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) de vinceliuice, variante « bold ».
 - **Polices SF, curseur et fonds d'écran** : fournis dans `assets/`. Leurs droits appartiennent à leurs auteurs respectifs (les polices San Francisco et les fonds d'écran macOS sont des ressources d'Apple).
 

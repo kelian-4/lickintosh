@@ -111,7 +111,7 @@ Item {
     ShaderEffect {
         anchors.fill: parent
         blending: true
-        visible: root.level > 0 && root.width > 0 && root.height > 0
+        visible: root.backdrop !== null && root.level > 0 && root.width > 0 && root.height > 0
         opacity: root.level
 
         property variant texUnit: root.backdrop ? root.backdrop.blurSource : null
@@ -134,6 +134,8 @@ Item {
         property real highlightStrength: root.highlightStrength
         property real materialOpacity: root.materialOpacity
         property real centerOpacity: root.centerOpacity
+        property real darkThreshold: ShellConfig.options.appearance.glassAutoDarken ? ShellConfig.options.appearance.glassDarkenThreshold : 1.0
+        property real darkStrength: ShellConfig.options.appearance.glassAutoDarken ? ShellConfig.options.appearance.glassDarkenStrength : 0.0
 
         vertexShader: Qt.resolvedUrl(root.shaderDir + "TahoeGlass.vert.qsb")
         fragmentShader: Qt.resolvedUrl(root.shaderDir + "TahoeGlass.frag.qsb")

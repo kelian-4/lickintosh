@@ -86,7 +86,10 @@ Singleton {
                 property bool enable:            true
                 property real height:            60
                 property bool hoverToReveal:     true
-                property bool monochromeIcons:   true
+                property bool monochromeIcons:   false
+                property bool iconTint:          false
+                property string iconTintColor:   "#0a84ff"
+                property real iconTintStrength:  1.0
                 property int  iconSize:          54
                 property real iconScale:         1.15
                 property int  iconOverflow:      4
@@ -118,6 +121,9 @@ Singleton {
                 property real   blurSurfaceAlpha: 0.30
                 property real   glassTintLight: 0.45
                 property real   glassTintDark: 0.40
+                property bool   glassAutoDarken: true
+                property real   glassDarkenThreshold: 0.70
+                property real   glassDarkenStrength: 0.50
                 property string accentOverride: ""
                 property bool   blurApplied:  false
                 property string blurStatus:   ""
@@ -170,6 +176,9 @@ Singleton {
 
             property JsonObject wallpaper: JsonObject {
                 property string path: ""
+                property string videoPath: ""
+                property string pathDark: ""
+                property string pathLight: ""
 
                 property string lockscreenPath: ""
             }
@@ -194,21 +203,29 @@ Singleton {
                 property bool   lockAtStartup:              false
             }
 
+            property JsonObject session: JsonObject {
+                property bool focus: false
+                property bool keepAwake: false
+                property bool gameMode: false
+                property bool nightShift: false
+                property int nightTemperature: 4000
+            }
+
             property JsonObject controlCenter: JsonObject {
-                property bool keepAwakeSeeded: false
+                property bool keepAwakeSeeded: true
                 property list<var> items: [
-                    { "uid": "wifiWidget", "type": "wifiWidget" },
-                    { "uid": "btWidget", "type": "btWidget" },
-                    { "uid": "adWidget", "type": "adWidget" },
-                    { "uid": "musicWidget", "type": "musicWidget" },
-                    { "uid": "focusWidget", "type": "focusWidget" },
-                    { "uid": "stageWidget", "type": "stageWidget" },
-                    { "uid": "shareWidget", "type": "shareWidget" },
-                    { "uid": "darkWidget", "type": "darkWidget" },
-                    { "uid": "calcWidget", "type": "calcWidget" },
-                    { "uid": "gameModeWidget", "type": "gameModeWidget" },
-                    { "uid": "displayWidget", "type": "displayWidget" },
-                    { "uid": "volumeWidget", "type": "volumeWidget" }
+                    { "uid": "wifiWidget", "type": "wifiWidget", "x": 0, "y": 0 },
+                    { "uid": "btWidget", "type": "btWidget", "x": 2, "y": 0 },
+                    { "uid": "adWidget", "type": "adWidget", "x": 3, "y": 0 },
+                    { "uid": "musicWidget", "type": "musicWidget", "x": 0, "y": 1 },
+                    { "uid": "focusWidget", "type": "focusWidget", "x": 2, "y": 1 },
+                    { "uid": "stageWidget", "type": "stageWidget", "x": 2, "y": 2 },
+                    { "uid": "shareWidget", "type": "shareWidget", "x": 3, "y": 2 },
+                    { "uid": "darkWidget", "type": "darkWidget", "x": 0, "y": 3 },
+                    { "uid": "calcWidget", "type": "calcWidget", "x": 2, "y": 3 },
+                    { "uid": "gameModeWidget", "type": "gameModeWidget", "x": 3, "y": 3 },
+                    { "uid": "displayWidget", "type": "displayWidget", "x": 0, "y": 4 },
+                    { "uid": "volumeWidget", "type": "volumeWidget", "x": 0, "y": 5 }
                 ]
             }
         }

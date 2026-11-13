@@ -22,6 +22,9 @@ Item {
     readonly property bool _btOn:    BluetoothState.enabled
     readonly property var  _devices: BluetoothState.devices
 
+    property bool _settled: false
+    Timer { interval: 700; running: true; onTriggered: root._settled = true }
+
     property var _ctxDevice: null
     property real _ctxX: 0
     property real _ctxY: 0
@@ -117,7 +120,11 @@ Item {
                     font.pixelSize: 13
                     font.weight:    Font.Bold
                     color: Theme.ink(parent, false)
-                    visible:        root._devices.some(function(d) { return d.paired })
+                    property bool shown: root._devices.some(function(d) { return d.paired })
+                    height:         shown ? implicitHeight : 0
+                    opacity:        shown ? 1 : 0
+                    clip:           true
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                     leftPadding:    20
                     bottomPadding:  4
                 }
@@ -125,8 +132,7 @@ Item {
                 Repeater {
                     model: root._adapter ? root._adapter.devices : []
                     delegate: DeviceRow {
-                        visible: modelData !== null && modelData.name !== "" && modelData.paired
-                        height: visible ? root.rowHeight : 0
+                        shown: modelData !== null && modelData.name !== "" && modelData.paired
                     }
                 }
 
@@ -137,7 +143,11 @@ Item {
                     font.pixelSize: 13
                     font.weight:    Font.Bold
                     color: Theme.ink(parent, false)
-                    visible:        root._devices.some(function(d) { return !d.paired })
+                    property bool shown: root._devices.some(function(d) { return !d.paired })
+                    height:         shown ? implicitHeight : 0
+                    opacity:        shown ? 1 : 0
+                    clip:           true
+                    Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
                     leftPadding:    20
                     bottomPadding:  4
                 }
@@ -145,8 +155,7 @@ Item {
                 Repeater {
                     model: root._adapter ? root._adapter.devices : []
                     delegate: DeviceRow {
-                        visible: modelData !== null && modelData.name !== "" && !modelData.paired
-                        height: visible ? root.rowHeight : 0
+                        shown: modelData !== null && modelData.name !== "" && !modelData.paired
                     }
                 }
 
@@ -192,8 +201,14 @@ Item {
         id:             _dr
         required property BluetoothDevice modelData
         width:          parent.width
-        height:         modelData !== null ? root.rowHeight : 0
-        visible:        modelData !== null
+        property bool   shown:  modelData !== null
+        property bool   _born:  !root._settled
+        Component.onCompleted: _born = true
+        height:         (shown && _born) ? root.rowHeight : 0
+        opacity:        (shown && _born) ? 1 : 0
+        visible:        height > 0.5
+        clip:           true
+        Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
         property bool   _hovered:      false
         readonly property bool _connecting:    modelData !== null && BluetoothState.isConnecting(_dr.modelData)
         readonly property bool _disconnecting: modelData !== null && BluetoothState.isDisconnecting(_dr.modelData)

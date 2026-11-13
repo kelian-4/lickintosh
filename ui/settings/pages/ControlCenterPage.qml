@@ -20,7 +20,7 @@ ContentPage {
         { id: "shareWidget",     name: I18n.tr("Partage d'écran"),    icon: "screenshare.svg", locked: false },
         { id: "displayWidget",   name: I18n.tr("Luminosité"),          icon: "sun-small.svg", locked: false },
         { id: "volumeWidget",    name: I18n.tr("Volume"),               icon: "volume/audio-volume-3.svg", locked: false },
-        { id: "darkWidget",      name: I18n.tr("Mode sombre"),         icon: "notch/moon.svg", locked: false },
+        { id: "darkWidget",      name: I18n.tr("Thème"),               icon: "settings/appearance.svg", locked: false },
         { id: "calcWidget",      name: I18n.tr("Calculatrice"),        icon: "", locked: false },
         { id: "gameModeWidget",  name: I18n.tr("Mode jeu"),             icon: "", locked: false },
         { id: "timerWidget",     name: I18n.tr("Minuteur"),             icon: "notch/clock.svg", locked: false },

@@ -22,6 +22,8 @@ layout(std140, binding = 0) uniform buf {
     float highlightStrength;
     float materialOpacity;
     float centerOpacity;
+    float darkThreshold;
+    float darkStrength;
 };
 
 float lgCornerLength(vec2 q)
@@ -149,6 +151,9 @@ void main()
     }
 
     vec4 surface = vec4(col, 1.0) * colorMatrix;
+    float luma = dot(surface.rgb, vec3(0.2126, 0.7152, 0.0722));
+    float darkK = clamp((luma - darkThreshold) / max(1.0 - darkThreshold, 0.01), 0.0, 1.0);
+    surface.rgb *= 1.0 - darkK * darkStrength;
     float coverage = materialOpacity * mix(centerOpacity, 1.0, edgeQ);
     fragColor = surface * (mask * qt_Opacity * coverage);
 }

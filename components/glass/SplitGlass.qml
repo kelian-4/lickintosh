@@ -111,7 +111,7 @@ Item {
     ShaderEffect {
         anchors.fill: parent
         blending: true
-        visible: root.glassOn
+        visible: root.glassOn && root.backdrop !== null
 
         property variant backTex: root.backdrop ? root.backdrop.blurSource : null
         property vector2d itemSize: Qt.vector2d(root.width, root.height)

@@ -47,6 +47,49 @@ ContentPage {
         }
 
         ConfigSwitch {
+            text: I18n.tr("Teinter les icônes")
+            checked: ShellConfig.options.dockAppearance.iconTint
+            onToggled: function(v) { ShellConfig.options.dockAppearance.iconTint = v }
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: 10
+            visible: ShellConfig.options.dockAppearance.iconTint
+
+            Repeater {
+                model: ["#0a84ff", "#bf5af2", "#ff375f", "#ff453a", "#ff9f0a", "#ffd60a", "#30d158", "#40c8e0", "#8e8e93", "#ffffff", "#1c1c1e"]
+
+                delegate: Rectangle {
+                    id: _swatch
+                    required property string modelData
+                    width: 26
+                    height: 26
+                    radius: 13
+                    color: _swatch.modelData
+                    border.width: ShellConfig.options.dockAppearance.iconTintColor === _swatch.modelData ? 3 : 1
+                    border.color: ShellConfig.options.dockAppearance.iconTintColor === _swatch.modelData ? Theme.accent : "#33ffffff"
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: ShellConfig.options.dockAppearance.iconTintColor = _swatch.modelData
+                    }
+                }
+            }
+        }
+
+        ConfigSlider {
+            text: I18n.tr("Intensité de la teinte")
+            visible: ShellConfig.options.dockAppearance.iconTint
+            value: ShellConfig.options.dockAppearance.iconTintStrength
+            from: 0.2
+            to: 1.0
+            decimals: 2
+            onMoved: function(v) { ShellConfig.options.dockAppearance.iconTintStrength = v }
+        }
+
+        ConfigSwitch {
             text: I18n.tr("Grossissement à l'approche du curseur")
             checked: ShellConfig.options.dockAppearance.magnificationEnabled
             onToggled: function(v) { ShellConfig.options.dockAppearance.magnificationEnabled = v }

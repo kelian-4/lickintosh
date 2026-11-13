@@ -26,7 +26,9 @@ Scope {
     property bool timerOpened: false
     property bool alarmOpened: false
     property bool stopwatchOpened: false
-    property bool subOpened:  wifiOpened || btOpened || timerOpened || alarmOpened || stopwatchOpened
+    property bool themeOpened: false
+    property bool themeClosing: false
+    property bool subOpened:  wifiOpened || btOpened || timerOpened || alarmOpened || stopwatchOpened || themeOpened
     property bool playerExpanded: false
 
     property bool wifiGrowReady:   false
@@ -50,6 +52,7 @@ Scope {
 
     Timer { id: _wifiContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.wifiContentReady = true }
     Timer { id: _wifiCloseTimer; interval: ShellMotion.spatial();  onTriggered: root.wifiClosing = false }
+    Timer { id: _themeCloseTimer;   interval: ShellMotion.spatial();  onTriggered: root.themeClosing = false }
     Timer { id: _btContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.btContentReady = true }
     Timer { id: _btCloseTimer;   interval: ShellMotion.spatial();  onTriggered: root.btClosing = false }
     Timer { id: _playerContentTimer; interval: ShellMotion.spatial(0.45); onTriggered: root.playerContentReady = true }
@@ -73,6 +76,15 @@ Scope {
             wifiGrowReady = false
             wifiClosing = true
             _wifiCloseTimer.restart()
+        }
+    }
+    onThemeOpenedChanged: {
+        if (themeOpened) {
+            _themeCloseTimer.stop()
+            themeClosing = false
+        } else {
+            themeClosing = true
+            _themeCloseTimer.restart()
         }
     }
     onBtOpenedChanged: {
@@ -178,7 +190,7 @@ Scope {
 
     readonly property int _lastVisibleRow: ControlCatalog.shownRows - 1
 
-    readonly property int _visibleGridHeight: (box*(_lastVisibleRow+1)) + (boxMargin*(_lastVisibleRow+1)) + boxMargin
+    readonly property int _visibleGridHeight: Math.max((box*(_lastVisibleRow+1)) + (boxMargin*(_lastVisibleRow+1)) + boxMargin, (themeOpened || themeClosing) ? 640 : 0)
 
     readonly property color glassColor: "transparent"
     readonly property color textColor:  "#ffffff"
@@ -201,6 +213,7 @@ Scope {
                         root._currentWs = ws.name
                         root.wifiOpened = false
                         root.btOpened   = false
+                        root.themeOpened = false
                         root.playerExpanded = false
                         root.closing()
                     }
@@ -411,14 +424,46 @@ Scope {
         }
     }
 
-    property bool focusOn: false
-    property bool darkOn:  false
+    readonly property bool focusOn: NotifService.dndEnabled
     property bool recording: false
 
-    Process { id: _darkToggleCmd; command: ["sh", "-c", "~/.config/hypr/scripts/toggle-theme.sh"] }
+    function openCalculator() {
+        var list = Hyprland.toplevels.values
+        for (var i = 0; i < list.length; i++) {
+            var t = list[i]
+            var ipc = t.lastIpcObject
+            var title = (ipc && ipc.title) ? ipc.title : t.title
+            if (title !== "calculator") continue
+            var addr = String(t.address).toLowerCase()
+            if (addr.indexOf("0x") !== 0) addr = "0x" + addr
+            Hyprland.dispatch('hl.dsp.focus({ window = "address:' + addr + '" })')
+            return
+        }
+        _calcCmd.running = true
+    }
+
     Process {
         id: _calcCmd
-        command: ["foot", "--title=calculator", "-e", "qalc", "-i"]
+        command: [
+            "sh", "-c",
+            "script=\"$1\"; lang=\"$2\"; " +
+            "if pgrep -f 'tools/calculator/calc.py' | grep -vx \"$$\" >/dev/null 2>&1; then exit 0; fi; " +
+            "if command -v python3 >/dev/null 2>&1; then run=\"python3 '$script' --lang '$lang'\"; " +
+            "elif command -v qalc >/dev/null 2>&1; then run=\"qalc -i\"; " +
+            "else echo \"python3 introuvable\" >&2; exit 1; fi; " +
+            "if command -v foot >/dev/null 2>&1; then exec foot --title=calculator -e sh -c \"$run\"; " +
+            "elif command -v kitty >/dev/null 2>&1; then exec kitty --title calculator sh -c \"$run\"; " +
+            "elif command -v alacritty >/dev/null 2>&1; then exec alacritty --title calculator -e sh -c \"$run\"; " +
+            "elif command -v ghostty >/dev/null 2>&1; then exec ghostty --title=calculator -e sh -c \"$run\"; " +
+            "elif command -v wezterm >/dev/null 2>&1; then exec wezterm start -- sh -c \"$run\"; " +
+            "elif command -v konsole >/dev/null 2>&1; then exec konsole -e sh -c \"$run\"; " +
+            "elif command -v gnome-terminal >/dev/null 2>&1; then exec gnome-terminal --title=calculator -- sh -c \"$run\"; " +
+            "elif command -v xterm >/dev/null 2>&1; then exec xterm -T calculator -e sh -c \"$run\"; " +
+            "else echo \"aucun terminal trouve\" >&2; exit 1; fi",
+            "sh",
+            Quickshell.shellDir + "/tools/calculator/calc.py",
+            I18n.lang
+        ]
         stderr: SplitParser {
             onRead: line => console.warn("Calculator launch error: " + line)
         }
@@ -489,9 +534,10 @@ Scope {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        if (root.wifiOpened || root.btOpened || root.playerExpanded) {
+                        if (root.wifiOpened || root.btOpened || root.themeOpened || root.playerExpanded) {
                             root.wifiOpened = false
                             root.btOpened   = false
+                            root.themeOpened = false
                             root.playerExpanded = false
                         } else if (!ControlCatalog.galleryOpen) {
                             root.closing()
@@ -583,7 +629,7 @@ Scope {
                         y: ccContent.gridY(dropPreview.cellY)
                         width: dropPreview.shape ? dropPreview.shape.w * root.box + (dropPreview.shape.w - 1) * root.boxMargin : root.box
                         height: dropPreview.shape ? dropPreview.shape.h * root.box + (dropPreview.shape.h - 1) * root.boxMargin : root.box
-                        radius: 40
+                        radius: 32
                         color: "#40ffffff"
                         border.width: 2
                         border.color: "#80ffffff"
@@ -679,14 +725,15 @@ Scope {
 
                     component BoxButton: BoxGlass {
                         id: boxbutton
-                        radius: 40
+                        radius: 32
                         backdrop: ccBackdrop
                         property bool enabled: false
-                        property bool hideCause: false
+                        property bool hideCause: false || root.themeOpened || root.themeClosing
                         property bool scaleCause: false
                         property bool forceTransparentRim: false
                         property bool isPressed: false
                         property bool growing: false
+                        property bool hoverFx: true
                         property string widgetId: ""
                         readonly property bool hiddenByUser: boxbutton.widgetId !== "" && ControlCatalog.isLeaving(boxbutton.widgetId)
                         readonly property var info: ControlCatalog.infoOf(ControlCatalog.typeOfUid(boxbutton.widgetId))
@@ -695,7 +742,7 @@ Scope {
 
                         opacity: (boxbutton.hideCause || boxbutton.hiddenByUser || !boxbutton.appeared) ? 0 : 1
                         visible: opacity > 0
-                        scale: boxbutton.dragging ? 1.06 : (boxbutton.scaleCause ? 1.25 : (boxbutton.isPressed ? 0.93 : 1.0))
+                        scale: boxbutton.dragging ? 1.06 : (boxbutton.scaleCause ? 1.25 : (boxbutton.isPressed ? 0.97 : 1.0))
         z: boxbutton.dragging ? 100 : 0
         property bool dragging: false
         property real dragDX: 0
@@ -734,8 +781,9 @@ Scope {
                         }
                         Behavior on scale {
                             NumberAnimation {
-                                duration: ShellMotion.spatial()
-                                easing.type: Easing.BezierSpline
+                                duration: (boxbutton.dragging || boxbutton.scaleCause) ? ShellMotion.spatial() : 200
+                                easing.type: (boxbutton.dragging || boxbutton.scaleCause) ? Easing.BezierSpline : Easing.OutBack
+                                easing.overshoot: 2.4
                                 easing.bezierCurve: ShellMotion.spatialCurve
                             }
                         }
@@ -750,6 +798,14 @@ Scope {
                         }
 
                         readonly property bool editing: ControlCatalog.galleryOpen && boxbutton.widgetId !== ""
+
+                        HoverHandler { id: tileHoverHandler }
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: boxbutton.radius
+                            color: (boxbutton.hoverFx && !boxbutton.editing && tileHoverHandler.hovered) ? Qt.rgba(1, 1, 1, 0.07) : Qt.rgba(1, 1, 1, 0)
+                            Behavior on color { ColorAnimation { duration: 320; easing.type: Easing.OutCubic } }
+                        }
 
                         Rectangle {
                             id: removeBadge
@@ -900,9 +956,10 @@ Scope {
                                 yPos: root.packedY(wifiWidget.widgetId)
                                 width: root.wifiGrowReady ? root.gridImplicitWidth : root.box*2+root.boxMargin
                                 height: root.wifiGrowReady ? _wPanel.implicitHeight : root.box
-                                radius: root.wifiGrowReady ? 12 : 40
+                                radius: root.wifiGrowReady ? 12 : 32
+                                hoverFx: !root.wifiOpened
                                 enabled: root.wifiOn
-                                hideCause: root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                hideCause: root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
                                 overwriteX: root.wifiGrowReady
                                 overwriteY: root.wifiGrowReady
                                 overwriteXPos: 0
@@ -956,17 +1013,17 @@ Scope {
                                         }
                                         CFClippingRect {
                                             id: wifiCircle
-                                            width: 34
-                                            height: 34
-                                            radius: 17
+                                            width: 38
+                                            height: 38
+                                            radius: 19
                                             anchors.left: parent.left
-                                            anchors.leftMargin: 13
+                                            anchors.leftMargin: 11
                                             anchors.verticalCenter: parent.verticalCenter
                                             color: root.wifiOn ? "#fff" : Qt.rgba(1,1,1,0.18)
                                             CFVI {
                                                 anchors.centerIn: parent
-                                                width: 25
-                                                height: 25
+                                                width: 26
+                                                height: 26
                                                 icon: "wifi/nm-signal-100-symbolic.svg"
                                                 color: root.wifiOn ? Theme.accent : "#fff"
                                             }
@@ -975,17 +1032,21 @@ Scope {
                                             anchors.left: wifiCircle.right
                                             anchors.leftMargin: 9
                                             anchors.verticalCenter: parent.verticalCenter
+                                            spacing: 1
                                             CFText {
                                                 text: I18n.tr("Wi-Fi")
-                                                font.weight: Font.Bold
-                                                font.pixelSize: 12
+                                                font.family: "SF Pro Text"
+                                                font.weight: Font.DemiBold
+                                                font.pixelSize: 13
                                                 color: Theme.ink(parent, false)
                                             }
                                             CFText {
                                                 text: root.wifiSSID
-                                                font.pixelSize: 10
+                                                font.family: "SF Pro Text"
+                                                font.weight: Font.DemiBold
+                                                font.pixelSize: 12
                                                 color: Qt.rgba(1,1,1,0.55)
-                                                width: root.box - 10
+                                                width: root.box * 2 + root.boxMargin - 11 - 38 - 9 - 14
                                                 elide: Text.ElideRight
                                             }
                                         }
@@ -1028,10 +1089,11 @@ Scope {
                                 yPos: root.packedY(btWidget.widgetId)
                                 width: root.btGrowReady ? root.gridImplicitWidth : root.box
                                 height: root.btGrowReady ? _btPanel.implicitHeight : root.box
-                                radius: root.btGrowReady ? 12 : 40
+                                radius: root.btGrowReady ? 12 : 32
+                                hoverFx: !root.btOpened
                                 property bool btOn: Bluetooth.defaultAdapter ? Bluetooth.defaultAdapter.enabled : false
                                 enabled: btOn
-                                hideCause: root.wifiOpened || root.wifiClosing || root.playerExpanded || root.playerClosing
+                                hideCause: root.wifiOpened || root.wifiClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
                                 overwriteX: root.btGrowReady
                                 overwriteY: root.btGrowReady
                                 overwriteXPos: 0
@@ -1091,7 +1153,7 @@ Scope {
                                         }
                                     Rectangle {
                                         anchors.fill: parent
-                                        radius: Math.min(40, width / 2)
+                                        radius: Math.min(32, width / 2)
                                         color: "#fff"
                                         opacity: btWidget.enabled ? 1 : 0
                                         Behavior on opacity { NumberAnimation { duration: ShellMotion.fade(); easing.type: Easing.BezierSpline; easing.bezierCurve: ShellMotion.effectsCurve } }
@@ -1145,8 +1207,8 @@ Scope {
                                 yPos: root.packedY(adWidget.widgetId)
                                 width: root.box
                                 height: root.box
-                                radius: 40
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                radius: 32
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
                                 enabled: true
                                 CFVI {
                                     anchors.centerIn: parent
@@ -1180,8 +1242,9 @@ Scope {
                                 yPos: root.packedY(musicWidget.widgetId)
                                 width: root.playerGrowReady ? root.gridImplicitWidth : root.box*2+root.boxMargin
                                 height: root.playerGrowReady ? expCol.implicitHeight + 32 : root.box*2+root.boxMargin
-                                radius: root.playerGrowReady ? 24 : 25
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing
+                                radius: root.playerGrowReady ? 24 : 32
+                                hoverFx: false
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.themeOpened || root.themeClosing
                                 overwriteY: root.playerGrowReady
                                 overwriteXFromRight: root.playerExpanded || root.playerClosing
                                 overwriteRightPos: ccContent.gridX(root.packedX(musicWidget.widgetId)) + (root.box*2+root.boxMargin)
@@ -1209,98 +1272,68 @@ Scope {
                                         }
                                     }
 
-                                    Rectangle {
+                                    PlayerArt {
                                         id: artRect
-                                        anchors.top: parent.top
-                                        anchors.left: parent.left
-                                        anchors.topMargin: 12
-                                        anchors.leftMargin: 12
-                                        width: 44
-                                        height: 44
-                                        radius: 9
-                                        color: Qt.rgba(1,1,1,0.18)
-                                        Image {
-                                            anchors.fill: parent
-                                            source: root.musicArt
-                                            fillMode: Image.PreserveAspectCrop
-                                            visible: root.musicArt !== ""
+                                        x: 12
+                                        y: 12
+                                        width: 52
+                                        height: 52
+                                        r: 10
+                                        source: root.musicArt
+                                    }
+                                    Column {
+                                        x: 12
+                                        y: 66
+                                        width: parent.width - 24
+                                        spacing: 1
+                                        CFText {
+                                            width: parent.width
+                                            text: root.musicTitle
+                                            font.family: "SF Pro Text"
+                                            font.pixelSize: 13
+                                            font.weight: Font.DemiBold
+                                            elide: Text.ElideRight
                                         }
                                         CFText {
-                                            anchors.centerIn: parent
-                                            text: "♪"
-                                            font.pixelSize: 22
+                                            width: parent.width
+                                            text: root.musicArtist
+                                            font.family: "SF Pro Text"
+                                            font.pixelSize: 12
+                                            font.weight: Font.DemiBold
                                             gray: true
-                                            visible: root.musicArt === ""
+                                            elide: Text.ElideRight
                                         }
-                                    }
-                                    CFText {
-                                        id: titleTxt
-                                        anchors.top: artRect.bottom
-                                        anchors.left: parent.left
-                                        anchors.right: parent.right
-                                        anchors.topMargin: 8
-                                        anchors.leftMargin: 12
-                                        anchors.rightMargin: 12
-                                        text: root.musicTitle
-                                        font.pixelSize: 12
-                                        font.weight: Font.Bold
-                                        elide: Text.ElideRight
-                                    }
-                                    CFText {
-                                        anchors.top: titleTxt.bottom
-                                        anchors.left: parent.left
-                                        anchors.right: parent.right
-                                        anchors.topMargin: 2
-                                        anchors.leftMargin: 12
-                                        anchors.rightMargin: 12
-                                        text: root.musicArtist
-                                        font.pixelSize: 10
-                                        gray: true
-                                        elide: Text.ElideRight
                                     }
                                     Row {
-                                        anchors.bottom: parent.bottom
-                                        anchors.bottomMargin: 14
                                         anchors.horizontalCenter: parent.horizontalCenter
-                                        spacing: 22
-                                        CFVI {
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            width: 16
-                                            height: 13
-                                            icon: "music/backward.svg"
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                anchors.margins: -8
-                                                onClicked: {
-                                                    _pPrev.running = true
-                                                }
-                                            }
+                                        y: parent.height - 38
+                                        spacing: 2
+                                        PlayerBtn {
+                                            width: 32
+                                            height: 30
+                                            gw: 22
+                                            gh: 20
+                                            kind: "prev"
+                                            col: Theme.ink(parent, false)
+                                            onClicked: _pPrev.running = true
                                         }
-                                        CFVI {
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            width: 18
-                                            height: 18
-                                            icon: root.musicPlaying ? "music/pause.svg" : "music/play.svg"
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                anchors.margins: -8
-                                                onClicked: {
-                                                    _pPlay.running = true
-                                                }
-                                            }
+                                        PlayerBtn {
+                                            width: 32
+                                            height: 30
+                                            gw: 22
+                                            gh: 22
+                                            kind: root.musicPlaying ? "pause" : "play"
+                                            col: Theme.ink(parent, false)
+                                            onClicked: _pPlay.running = true
                                         }
-                                        CFVI {
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            width: 16
-                                            height: 13
-                                            icon: "music/forward.svg"
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                anchors.margins: -8
-                                                onClicked: {
-                                                    _pNext.running = true
-                                                }
-                                            }
+                                        PlayerBtn {
+                                            width: 32
+                                            height: 30
+                                            gw: 22
+                                            gh: 20
+                                            kind: "next"
+                                            col: Theme.ink(parent, false)
+                                            onClicked: _pNext.running = true
                                         }
                                     }
                                 }
@@ -1545,8 +1578,8 @@ Scope {
                                 yPos: root.packedY(focusWidget.widgetId)
                                 width: root.box*2+root.boxMargin
                                 height: root.box
-                                radius: 40
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                radius: 32
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
                                 enabled: root.focusOn
                                 light: focusWidget.enabled ? "transparent" : root.glassRimColor
                                 rimStrength: focusWidget.enabled ? 0 : root.glassRimStrength
@@ -1573,15 +1606,15 @@ Scope {
                                     anchors.verticalCenter: parent.verticalCenter
                                     elide: Text.ElideRight
                                     text: I18n.tr("Focus")
-                                    font.pixelSize: 12
-                                    font.weight: Font.Bold
+                                    font.family: "SF Pro Text"
+                                    font.pixelSize: 13
+                                    font.weight: Font.DemiBold
                                     color: root.focusOn ? "#000" : "#fff"
                                 }
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
-                                        root.focusOn = !root.focusOn
-                                        NotifService.dndEnabled = root.focusOn
+                                        NotifService.dndEnabled = !NotifService.dndEnabled
                                     }
                                     onPressed: focusWidget.isPressed = true
                                     onReleased: focusWidget.isPressed = false
@@ -1603,8 +1636,8 @@ Scope {
                                 yPos: root.packedY(stageWidget.widgetId)
                                 width: root.box
                                 height: root.box
-                                radius: 22
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                radius: 32
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
                                 CFVI {
                                     anchors.centerIn: parent
                                     width: 24
@@ -1636,8 +1669,8 @@ Scope {
                                 yPos: root.packedY(shareWidget.widgetId)
                                 width: root.box
                                 height: root.box
-                                radius: 22
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                radius: 32
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
                                 enabled: root.recording
                                 CFVI {
                                     anchors.centerIn: parent
@@ -1676,8 +1709,9 @@ Scope {
                                 yPos: root.packedY(displayWidget.widgetId)
                                 width: root.box*4+root.boxMargin*3
                                 height: root.box
-                                radius: 25
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                radius: 26
+                                hoverFx: false
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
 
                                 CFSlider {
                                     autoHideHandle: true
@@ -1693,17 +1727,17 @@ Scope {
                                 }
                                 CFVI {
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 15
+                                    anchors.leftMargin: 14
                                     anchors.verticalCenter: parent.verticalCenter
                                     icon: "sun-small.svg"
-                                    size: 14
+                                    size: 16
                                 }
                                 CFVI {
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 15
+                                    anchors.rightMargin: 14
                                     anchors.verticalCenter: parent.verticalCenter
                                     icon: "sun-huge.svg"
-                                    size: 18
+                                    size: 16
                                 }
                             }
                     }
@@ -1721,8 +1755,9 @@ Scope {
                                 yPos: root.packedY(volumeWidget.widgetId)
                                 width: root.box*4+root.boxMargin*3
                                 height: root.box
-                                radius: 25
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                radius: 26
+                                hoverFx: false
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
 
                                 CFSlider {
                                     autoHideHandle: true
@@ -1739,17 +1774,17 @@ Scope {
                                 }
                                 CFVI {
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 15
+                                    anchors.leftMargin: 14
                                     anchors.verticalCenter: parent.verticalCenter
                                     icon: "volume/audio-volume-1.svg"
-                                    size: 14
+                                    size: 16
                                 }
                                 CFVI {
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 15
+                                    anchors.rightMargin: 14
                                     anchors.verticalCenter: parent.verticalCenter
                                     icon: "volume/audio-volume-3.svg"
-                                    size: 18
+                                    size: 16
                                 }
                             }
                     }
@@ -1761,55 +1796,84 @@ Scope {
                         }
                         delegate: BoxButton {
                                 required property var modelData
-                                id: darkWidget
-                                widgetId: darkWidget.modelData.uid
-                                xPos: root.packedX(darkWidget.widgetId)
-                                yPos: root.packedY(darkWidget.widgetId)
+                                id: themeWidget
+                                widgetId: themeWidget.modelData.uid
+                                xPos: root.packedX(themeWidget.widgetId)
+                                yPos: root.packedY(themeWidget.widgetId)
                                 width: root.box*2+root.boxMargin
                                 height: root.box
-                                radius: 40
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
-                                enabled: root.darkOn
-                                light: darkWidget.enabled ? "transparent" : root.glassRimColor
-                                rimStrength: darkWidget.enabled ? 0 : root.glassRimStrength
-                                color: darkWidget.enabled ? "#fff" : root.glassColor
-                                CFClippingRect {
-                                    id: darkCircle
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: 11
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 38; height: 38; radius: 19
-                                    color: "transparent"
-                                    CFVI {
-                                        anchors.centerIn: parent
-                                        icon: root.darkOn ? "notch/moon.svg" : "weather/sun.svg"
-                                        size: 26
-                                        color: root.darkOn ? "#F1C40F" : "#fff"
+                                hoverFx: !root.themeOpened
+                                enabled: false
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
+
+                                Item {
+                                    anchors.fill: parent
+
+                                    CFClippingRect {
+                                        id: themeCircle
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 11
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: 38; height: 38; radius: 19
+                                        color: Qt.rgba(1, 1, 1, 0.18)
+                                        ThemeGlyph {
+                                            anchors.centerIn: parent
+                                            kind: Theme.isDark ? "dark" : (Theme.isLight ? "light" : "glass")
+                                            size: 24
+                                            col: "#fff"
+                                        }
+                                    }
+
+                                    Column {
+                                        anchors.left: themeCircle.right
+                                        anchors.leftMargin: 9
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 11
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        spacing: 1
+                                        CFText {
+                                            width: parent.width
+                                            elide: Text.ElideRight
+                                            text: I18n.tr("Theme")
+                                            font.family: "SF Pro Text"
+                                            font.pixelSize: 13
+                                            font.weight: Font.DemiBold
+                                            color: "#fff"
+                                        }
+                                        CFText {
+                                            width: parent.width
+                                            elide: Text.ElideRight
+                                            text: Theme.isDark ? I18n.tr("Sombre") : (Theme.isLight ? I18n.tr("Clair") : "Liquid Glass")
+                                            font.family: "SF Pro Text"
+                                            font.pixelSize: 11
+                                            color: Qt.rgba(1, 1, 1, 0.6)
+                                        }
                                     }
                                 }
-                                CFText {
-                                    anchors.left: darkCircle.right
-                                    anchors.leftMargin: 9
-                                    anchors.right: parent.right
-                                    anchors.rightMargin: 11
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    elide: Text.ElideRight
-                                    text: I18n.tr("Dark Mode")
-                                    font.pixelSize: 12
-                                    font.weight: Font.Bold
-                                    color: root.darkOn ? "#000" : "#fff"
-                                }
+
                                 MouseArea {
                                     anchors.fill: parent
+                                    enabled: !root.themeOpened
                                     onClicked: {
-                                        root.darkOn = !root.darkOn
-                                        _darkToggleCmd.running = true
+                                        root.wifiOpened = false
+                                        root.btOpened = false
+                                        root.playerExpanded = false
+                                        root.themeOpened = true
                                     }
-                                    onPressed: darkWidget.isPressed = true
-                                    onReleased: darkWidget.isPressed = false
-                                    onCanceled: darkWidget.isPressed = false
+                                    onPressed: themeWidget.isPressed = true
+                                    onReleased: themeWidget.isPressed = false
+                                    onCanceled: themeWidget.isPressed = false
                                 }
                             }
+                    }
+
+                    ThemeFan {
+                        id: themeFan
+                        width: root.gridImplicitWidth
+                        height: 640
+                        z: 120
+                        open: root.themeOpened
+                        glassBackdrop: ccBackdrop
                     }
 
                     Repeater {
@@ -1825,8 +1889,8 @@ Scope {
                                 yPos: root.packedY(calcWidget.widgetId)
                                 width: root.box
                                 height: root.box
-                                radius: 40
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                radius: 32
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
                                 Item {
                                     anchors.centerIn: parent
                                     width: 22
@@ -1871,7 +1935,7 @@ Scope {
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
-                                        _calcCmd.running = true
+                                        root.openCalculator()
                                     }
                                     onPressed: if (!root.subOpened) calcWidget.isPressed = true
                                     onReleased: calcWidget.isPressed = false
@@ -1893,8 +1957,8 @@ Scope {
                                 yPos: root.packedY(gameModeWidget.widgetId)
                                 width: root.box
                                 height: root.box
-                                radius: 40
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                radius: 32
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
                                 enabled: GameMode.enabled
                                 light: gameModeWidget.enabled ? "transparent" : root.glassRimColor
                                 rimStrength: gameModeWidget.enabled ? 0 : root.glassRimStrength
@@ -1974,8 +2038,8 @@ Scope {
                                 yPos: root.packedY(keepAwakeWidget.widgetId)
                                 width: root.box
                                 height: root.box
-                                radius: 40
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing
+                                radius: 32
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
                                 enabled: KeepAwake.enabled
                                 light: keepAwakeWidget.enabled ? "transparent" : root.glassRimColor
                                 rimStrength: keepAwakeWidget.enabled ? 0 : root.glassRimStrength
@@ -1998,6 +2062,42 @@ Scope {
 
                     Repeater {
                         model: ScriptModel {
+                            values: ControlCatalog.instancesOfType("nightShiftWidget")
+                            objectProp: "uid"
+                        }
+                        delegate: BoxButton {
+                                required property var modelData
+                                id: nightShiftWidget
+                                widgetId: nightShiftWidget.modelData.uid
+                                xPos: root.packedX(nightShiftWidget.widgetId)
+                                yPos: root.packedY(nightShiftWidget.widgetId)
+                                width: root.box
+                                height: root.box
+                                radius: 32
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.themeOpened || root.themeClosing
+                                enabled: NightShift.enabled
+                                light: nightShiftWidget.enabled ? "transparent" : root.glassRimColor
+                                rimStrength: nightShiftWidget.enabled ? 0 : root.glassRimStrength
+                                color: nightShiftWidget.enabled ? "#fff" : root.glassColor
+                                opacity: NightShift.available ? 1 : 0.45
+                                CFVI {
+                                    anchors.centerIn: parent
+                                    size: 26
+                                    icon: "notch/sunset.svg"
+                                    color: NightShift.enabled ? Theme.accent : "#fff"
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: NightShift.toggle()
+                                    onPressed: if (!root.subOpened) nightShiftWidget.isPressed = true
+                                    onReleased: nightShiftWidget.isPressed = false
+                                    onCanceled: nightShiftWidget.isPressed = false
+                                }
+                            }
+                    }
+
+                    Repeater {
+                        model: ScriptModel {
                             values: ControlCatalog.instancesOfType("timerWidget")
                             objectProp: "uid"
                         }
@@ -2009,9 +2109,9 @@ Scope {
                                 yPos: root.packedY(timerWidget.widgetId)
                                 width: root.timerGrowReady ? (root.box*4+root.boxMargin*3) : root.box
                                 height: root.timerGrowReady ? (root.box*2+root.boxMargin) : root.box
-                                radius: root.timerGrowReady ? 30 : 40
+                                radius: root.timerGrowReady ? 30 : 32
                                 z: root.timerOpened || root.timerClosing ? 5 : 0
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.alarmOpened || root.alarmClosing || root.stopwatchOpened || root.stopwatchClosing
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.alarmOpened || root.alarmClosing || root.stopwatchOpened || root.stopwatchClosing || root.themeOpened || root.themeClosing
                                 enabled: TimerState.running || TimerState.firing
 
                                 CFVI {
@@ -2204,12 +2304,12 @@ Scope {
                                 yPos: root.packedY(alarmWidget.widgetId)
                                 width: root.alarmGrowReady ? (root.box*4+root.boxMargin*3) : root.box
                                 height: root.alarmGrowReady ? (root.box*2+root.boxMargin) : root.box
-                                radius: root.alarmGrowReady ? 30 : 40
+                                radius: root.alarmGrowReady ? 30 : 32
                                 z: root.alarmOpened || root.alarmClosing ? 5 : 0
                                 overwriteX: root.alarmGrowReady
                                 overwriteXFromRight: root.alarmGrowReady
                                 overwriteRightPos: root.gridImplicitWidth - root.boxMargin
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.timerOpened || root.timerClosing || root.stopwatchOpened || root.stopwatchClosing
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.timerOpened || root.timerClosing || root.stopwatchOpened || root.stopwatchClosing || root.themeOpened || root.themeClosing
                                 enabled: AlarmState.alarms.filter(function(a) { return a.enabled }).length > 0
 
                                 CFVI {
@@ -2400,12 +2500,12 @@ Scope {
                                 yPos: root.packedY(stopwatchWidget.widgetId)
                                 width: root.stopwatchGrowReady ? (root.box*4+root.boxMargin*3) : root.box
                                 height: root.stopwatchGrowReady ? (root.box*2+root.boxMargin) : root.box
-                                radius: root.stopwatchGrowReady ? 30 : 40
+                                radius: root.stopwatchGrowReady ? 30 : 32
                                 z: root.stopwatchOpened || root.stopwatchClosing ? 5 : 0
                                 overwriteX: root.stopwatchGrowReady
                                 overwriteXFromRight: root.stopwatchGrowReady
                                 overwriteRightPos: root.gridImplicitWidth - root.boxMargin
-                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.timerOpened || root.timerClosing || root.alarmOpened || root.alarmClosing
+                                hideCause: root.wifiOpened || root.wifiClosing || root.btOpened || root.btClosing || root.playerExpanded || root.playerClosing || root.timerOpened || root.timerClosing || root.alarmOpened || root.alarmClosing || root.themeOpened || root.themeClosing
                                 enabled: StopwatchState.running
 
                                 CFVI {

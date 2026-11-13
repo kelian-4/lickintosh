@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.services
+import qs.ui.widgets
 
 Item {
     id: root
@@ -9,17 +10,34 @@ Item {
 
     property string size: "m"
 
+    readonly property real k: Math.min(root.width / 330, root.height / (root.size === "l" ? 326 : 140))
+    readonly property bool isLarge: root.size === "l"
+    readonly property color accent: "#bf5af2"
+    readonly property color fg: root.look ? root.look.primary : "white"
+    readonly property color fg2: root.look ? root.look.secondary : Qt.rgba(1, 1, 1, 0.6)
+
     ColumnLayout {
         anchors.fill: parent
-        spacing: 8
+        spacing: 8 * root.k
 
-        Text {
-            text: I18n.tr("Quote of the Day")
-            color: "#bf5af2"
-            font.pixelSize: 13
-            font.weight: Font.Bold
-            font.family: "SF Pro Text"
-            renderType: Text.NativeRendering
+        Row {
+            spacing: 5 * root.k
+            ExtraBClockGlyph {
+                anchors.verticalCenter: parent.verticalCenter
+                kind: "quote"
+                color: root.accent
+                width: 15 * root.k
+                height: width
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: I18n.tr("Quote of the Day")
+                color: root.accent
+                font.pixelSize: 14 * root.k
+                font.weight: Font.DemiBold
+                font.family: "SF Pro Text"
+                renderType: Text.NativeRendering
+            }
         }
 
         Text {
@@ -28,11 +46,11 @@ Item {
             text: QuoteState.today
             wrapMode: Text.Wrap
             elide: Text.ElideRight
-            verticalAlignment: root.size === "l" ? Text.AlignVCenter : Text.AlignTop
-            color: root.look.primary
-            font.pixelSize: root.size === "l" ? 24 : 15
+            verticalAlignment: root.isLarge ? Text.AlignVCenter : Text.AlignTop
+            color: root.fg
+            font.pixelSize: (root.isLarge ? 28 : 17) * root.k
             font.weight: Font.Medium
-            font.family: "SF Pro Text"
+            font.family: "SF Pro Display"
             renderType: Text.NativeRendering
         }
 
@@ -41,8 +59,8 @@ Item {
             visible: QuoteState.author !== ""
             text: "— " + QuoteState.author
             elide: Text.ElideRight
-            color: root.look.secondary
-            font.pixelSize: 12
+            color: root.fg2
+            font.pixelSize: 13 * root.k
             font.family: "SF Pro Text"
             renderType: Text.NativeRendering
         }

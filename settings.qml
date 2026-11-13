@@ -56,8 +56,6 @@ FloatingWindow {
             items: [
                 { name: "Wi-Fi",     icon: "wifi/wifi.svg",              component: "WifiPage",      implemented: true },
                 { name: "Bluetooth", icon: "bluetooth/bluetooth.svg",    component: "BluetoothPage", implemented: true },
-                { name: "Réseau",    icon: "settings/network.svg",       implemented: false },
-                { name: "VPN",       icon: "settings/network.svg",       implemented: false },
                 { name: "Batterie",  icon: "settings/battery.svg",       component: "BatteryPage",   implemented: true }
             ]
         },

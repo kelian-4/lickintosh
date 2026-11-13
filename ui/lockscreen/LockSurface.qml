@@ -9,6 +9,8 @@ import qs.components
 import qs.components.glass
 import qs.services
 import qs.ui.topbar.statusarea.notifcenter
+import "mac"
+
 
 WlSessionLockSurface {
     id: root
@@ -201,7 +203,7 @@ WlSessionLockSurface {
             readonly property int clockWeightQt: LockClockStyle.weightFor(clockCfg.clockWeight)
 
             readonly property int baseDigitSize: Math.round(Math.min(root.width * 0.09, 92))
-            readonly property int targetDigitSize: clockCfg.clockLarge ? baseDigitSize : Math.round(baseDigitSize * 0.58)
+            readonly property int targetDigitSize: Math.round((clockCfg.clockLarge ? baseDigitSize : baseDigitSize * 0.58) * (1 - 0.46 * macPlayer.squash))
 
             property int digitSize: targetDigitSize
             onTargetDigitSizeChanged: digitSize = targetDigitSize
@@ -326,17 +328,24 @@ WlSessionLockSurface {
             id: notifStack
             glassBackdrop: lockBackdrop
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: mediaPlayer.top
-            anchors.bottomMargin: visible ? 16 : 0
+            y: macPlayer.notifBottom - height - (visible ? 16 : 0)
+            opacity: Math.max(0, 1 - macPlayer.lyrT * 2.2)
+            enabled: opacity > 0.5
         }
 
-        LockMediaPlayer {
-            id: mediaPlayer
-            glassBackdrop: lockBackdrop
-            visible: ShellConfig.options.lockscreen.showMediaPlayer
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: loginArea.top
-            anchors.bottomMargin: (MprisState.hasPlayer && mediaPlayer.visible) ? 20 : 0
+        Item {
+            id: clockExtent
+            height: clockRow.y + clockRow.height - Math.round(root.height * 0.075)
+        }
+
+        MacNowPlaying {
+            id: macPlayer
+            sceneParent: background
+            clock: clockExtent
+            login: loginArea
+            isPrimary: ShellConfig.options.lockscreen.showMediaPlayer
+            shown: !root.unlocking
+            leaving: root.unlocking
         }
 
         Column {

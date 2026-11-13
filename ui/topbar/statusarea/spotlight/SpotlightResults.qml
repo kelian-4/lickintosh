@@ -147,8 +147,9 @@ ListView {
                 property bool directLoadFailed: false
                 onStatusChanged: if (status === Image.Error) directLoadFailed = true
                 source: {
+                    if (row.modelData.isVideo === true) return ""
                     if (row.isApp) return IconResolver.byName(row.modelData.icon)
-                    if (row.modelData.isWallpaper && !directLoadFailed) return "file://" + row.modelData.path
+                    if (row.modelData.isWallpaper && !directLoadFailed) return "file://" + (row.modelData.thumb ? row.modelData.thumb : row.modelData.path)
                     if (row.modelData.clipImage && !directLoadFailed) return "file://" + row.modelData.clipImage
                     if (row.modelData.isImage && !directLoadFailed) return "file://" + row.modelData.path
                     if (row.modelData.isEmoji) return row.modelData.emojiUrl
@@ -156,10 +157,18 @@ ListView {
                     return IconResolver.byName("image-x-generic")
                 }
                 fillMode: (row.modelData.isWallpaper || row.modelData.clipImage || row.modelData.isImage) ? Image.PreserveAspectCrop : Image.PreserveAspectFit
+                asynchronous: true
                 sourceSize.width:  72
                 sourceSize.height: 72
                 smooth:   true
                 mipmap:   true
+            }
+
+            Loader {
+                anchors.fill: parent
+                active: row.modelData.isVideo === true
+                source: "../../../../components/VideoFrame.qml"
+                onLoaded: item.source = row.modelData.path
             }
 
             VectorImage {
