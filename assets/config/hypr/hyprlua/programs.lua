@@ -15,7 +15,7 @@ return {
     mediaPlayer = firstAvailable({ "mpv", "vlc", "celluloid", "haruna", "totem" }),
     shell = "sh ~/.config/quickshell/lickintosh/tools/lickintosh-start",
     cursor = {
-        theme = "Aki-Aspen",
+        theme = "MacOS-Tahoe-Cursor",
         size = 24,
     },
 }

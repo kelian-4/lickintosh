@@ -621,59 +621,110 @@ function run_doctor
     end
 end
 
+function ini_unset --argument-names file section key
+    test -f $file; or return 0
+    set -l tmp (mktemp)
+    awk -F= -v s="[$section]" -v k="$key" '$0==s{f=1;print;next} /^\[/{f=0} f&&$1==k{next} {print}' $file > $tmp
+    cat $tmp > $file
+    rm -f $tmp
+end
+
+function baks_of --argument-names file
+    find (dirname $file) -maxdepth 1 -name (basename $file).bak-'*' 2>/dev/null | sort
+end
+
+function restore_or_remove --argument-names file
+    set -l baks (baks_of $file)
+    if test (count $baks) -gt 0
+        cp -f $baks[-1] $file; and rm -f $baks
+        msg "    restaure : $file"
+    else if test -e $file
+        rm -f $file
+        msg "    supprime : $file"
+    end
+end
+
 function run_uninstall
-    set -l backup_root ~/.local/share/lickintosh/backups
     say "Desinstallation de Lickintosh"
-    set -l present
-    for e in $managed assets
-        test -e $qs_dst/$e; and set -a present $e
-    end
-    if test (count $present) -eq 0
-        msg "    rien a desinstaller dans $qs_dst"
-        return 0
-    end
-    if test (realpath $repo) = (realpath $qs_dst 2>/dev/null)
+    if test -e $qs_dst; and test (realpath $repo) = (realpath $qs_dst)
         msg "    le depot est le dossier du shell ($qs_dst) : desinstallation refusee pour ne pas supprimer le depot." >&2
         return 1
     end
-    msg "    sera retire de $qs_dst : $present"
-    msg "    tes reglages (fichiers de configuration du shell) sont conserves"
+    set -l uid (id -u)
+    set -l data
+    set -a data $qs_dst ~/.config/lickintosh ~/.local/state/lickintosh ~/.cache/lickintosh ~/.local/share/lickintosh ~/.config/macos-shell ~/.local/share/quickshell/battery-history.csv ~/.cache/quickshell/wallpaper_thumbs
+    set -a data (find ~/.cache/quickshell -maxdepth 1 \( -name 'spotlight_*' -o -name 'clip_*.lock' \) 2>/dev/null)
+    set -a data (find /tmp $XDG_RUNTIME_DIR -maxdepth 1 \( -name 'lens.png' -o -name 'qs-ai-stt-*' -o -name 'shell-gemini*' -o -name 'lickintosh-startup-lock*' \) 2>/dev/null)
+    set -l themes (basename -a (find $repo/assets/icons_desktop -mindepth 1 -maxdepth 1 -type d 2>/dev/null) MacOS-Tahoe-Cursor)
+    set -l present
+    for p in $data $fonts_dst
+        test -e $p; and set -a present $p
+    end
+    for t in $themes
+        test -e $icons_dst/$t; and set -a present $icons_dst/$t
+    end
+    set -l hypr_src $repo/assets/config/hypr
+    set -l hypr_rel
+    for f in (find $hypr_src -type f 2>/dev/null | sort)
+        set -l rel (string replace -- "$hypr_src/" "" $f)
+        test -e $hypr_dst/$rel; and set -a hypr_rel $rel
+    end
+    if test (count $present) -eq 0; and test (count $hypr_rel) -eq 0
+        msg "    rien a desinstaller dans $qs_dst"
+        return 0
+    end
+    msg "    sera retire :"
+    for p in $present
+        msg "      - $p"
+    end
+    msg "    les reglages systeme ecrits par setup.fish (GTK, Qt, fontconfig) seront aussi restaures, et la configuration Hyprland installee sera retiree (la derniere sauvegarde est restauree si elle existe)"
+    msg "    tout est supprime definitivement : tes reglages du shell, le dock, les widgets, les notes et les caches"
     ask "    Continuer ?"; or begin
         msg "    annule"
         return 0
     end
-    set -l backup $backup_root/(date +%Y%m%d-%H%M%S)
-    mkdir -p $backup
-    for e in $present
-        cp -a $qs_dst/$e $backup/$e
-    end
-    msg "    sauvegarde : $backup"
     pkill -f lickintosh-start >/dev/null 2>&1
     command -q qs; and qs -c $qs_name kill >/dev/null 2>&1
-    for e in $present
-        rm -rf $qs_dst/$e
+    pkill -f spotlight_clip_watch >/dev/null 2>&1
+    for p in $present
+        rm -rf $p
     end
-    rmdir $qs_dst 2>/dev/null
-    msg "    shell retire"
-    set -l old (ls -1d $backup_root/* 2>/dev/null | sort)
-    if test (count $old) -gt 3
-        for d in $old[1..-4]
-            rm -rf $d
+    rmdir $qs_root 2>/dev/null
+    msg "    fichiers du shell retires"
+    command -q fc-cache; and fc-cache -f
+    for f in $hypr_rel
+        restore_or_remove $hypr_dst/$f
+    end
+    for d in (find $hypr_dst -mindepth 1 -type d -empty 2>/dev/null | sort -r)
+        rmdir $d 2>/dev/null
+    end
+    rmdir $hypr_dst 2>/dev/null
+    if command -q dconf
+        set -l dk icon-theme color-scheme font-name document-font-name cursor-theme cursor-size
+        set -l dv "'MacTahoe-dark'" "'prefer-dark'" "'SF Pro Text 10'" "'SF Pro Text 10'" "'MacOS-Tahoe-Cursor'" 24
+        for i in (seq (count $dk))
+            string match -q -- $dv[$i] (dconf read /org/gnome/desktop/interface/$dk[$i]); and dconf reset /org/gnome/desktop/interface/$dk[$i]
+        end
+        string match -q -- "'close,minimize,maximize:'" (dconf read /org/gnome/desktop/wm/preferences/button-layout); and dconf reset /org/gnome/desktop/wm/preferences/button-layout
+        msg "    reglages GTK (dconf) reinitialises"
+    end
+    for f in ~/.config/qt6ct/qt6ct.conf ~/.config/kdeglobals
+        set -l baks (baks_of $f)
+        if test (count $baks) -gt 0
+            restore_or_remove $f
+        else
+            string match -q MacTahoe-dark -- (ini_get $f Appearance icon_theme); and ini_unset $f Appearance icon_theme
+            string match -q MacTahoe-dark -- (ini_get $f Icons Theme); and ini_unset $f Icons Theme
+            string match -q '*SF Pro Text*' -- (ini_get $f Fonts general); and ini_unset $f Fonts general
         end
     end
-    if test -d $fonts_dst; and not set -q assume_yes; and ask "    Retirer aussi les polices SF ($fonts_dst) ?"
-        rm -rf $fonts_dst
-        command -q fc-cache; and fc-cache -f
-        msg "    polices retirees"
+    set -l fcf ~/.config/fontconfig/fonts.conf
+    set -l fcbaks (baks_of $fcf)
+    if test (count $fcbaks) -gt 0; or grep -q "SF Pro Text" $fcf 2>/dev/null
+        restore_or_remove $fcf
     end
-    for t in MacTahoe-dark MacOS-Tahoe-Cursor
-        if test -e $icons_dst/$t; and not set -q assume_yes; and ask "    Retirer aussi $icons_dst/$t ?"
-            rm -rf $icons_dst/$t
-            msg "    $t retire"
-        end
-    end
-    msg "    la configuration Hyprland ($hypr_dst) n'a pas ete modifiee : retire la ligne qui lance lickintosh-start dans hyprlua/programs.lua si tu veux supprimer l'autostart"
-    say "Desinstallation terminee. Pour revenir en arriere : copie le contenu de $backup dans $qs_dst"
+    rmdir ~/.config/fontconfig 2>/dev/null
+    say "Desinstallation terminee."
 end
 
 function json_list

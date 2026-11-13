@@ -42,6 +42,12 @@ E||Installer ou mettre a jour quickshell ?||Install or update quickshell?||¿Ins
 E||Remplacer le code du shell ? Une sauvegarde est faite avant.||Replace the shell code? A backup is made first.||¿Reemplazar el codigo del shell? Se hace una copia de seguridad antes.||END
 E||Ajouter ce PPA (depot tiers) puis installer quickshell ?||Add this PPA (third-party repository) and install quickshell?||¿Anadir este PPA (repositorio de terceros) e instalar quickshell?||END
 E||Activer ce COPR (depot tiers) puis installer quickshell ?||Enable this COPR (third-party repository) and install quickshell?||¿Activar este COPR (repositorio de terceros) e instalar quickshell?||END
+E||fichiers du shell retires||shell files removed||archivos del shell eliminados||END
+E||sera retire :||will be removed:||se eliminara:||END
+E||reglages GTK (dconf) reinitialises||GTK settings (dconf) reset||ajustes GTK (dconf) restablecidos||END
+E||Desinstallation terminee.||Uninstall complete.||Desinstalacion terminada.||END
+E||les reglages systeme ecrits par setup.fish (GTK, Qt, fontconfig) seront aussi restaures, et la configuration Hyprland installee sera retiree (la derniere sauvegarde est restauree si elle existe)||the system settings written by setup.fish (GTK, Qt, fontconfig) will also be restored, and the installed Hyprland configuration will be removed (the latest backup is restored if one exists)||los ajustes del sistema escritos por setup.fish (GTK, Qt, fontconfig) tambien se restauraran y se eliminara la configuracion de Hyprland instalada (se restaura la ultima copia de seguridad si existe)||END
+E||tout est supprime definitivement : tes reglages du shell, le dock, les widgets, les notes et les caches||everything is deleted permanently: your shell settings, the dock, widgets, notes and caches||todo se elimina de forma permanente: tus ajustes del shell, el dock, los widgets, las notas y las cachés||END
 F||) n'a pas ete modifiee : retire la ligne qui lance lickintosh-start dans hyprlua/programs.lua si tu veux supprimer l'autostart||) was not modified: remove the line that launches lickintosh-start in hyprlua/programs.lua if you want to remove the autostart||) no se ha modificado: elimina la linea que lanza lickintosh-start en hyprlua/programs.lua si quieres quitar el autostart||END
 F||Ne lance pas setup.fish en root : les fichiers seraient installes pour root. Il demande sudo lui-meme quand il en a besoin.||Do not run setup.fish as root: the files would be installed for root. It asks for sudo itself when needed.||No ejecutes setup.fish como root: los archivos se instalarian para root. Pide sudo por si mismo cuando lo necesita.||END
 F||l'autostart ne lance pas lickintosh-start (le shell ne sera pas relance apres un plantage) : relance setup.fish||autostart does not launch lickintosh-start (the shell will not restart after a crash): run setup.fish again||el autostart no lanza lickintosh-start (el shell no se reiniciara tras un fallo): vuelve a ejecutar setup.fish||END
@@ -155,6 +161,8 @@ F||a regarder : ||to review: ||a revisar: ||END
 F||(non defini)||(not set)||(sin definir)||END
 F||attention : ||warning: ||atencion: ||END
 F|| ignoree(s)|| skipped|| omitida(s)||END
+F||restaure : ||restored: ||restaurado: ||END
+F||supprime : ||deleted: ||eliminado: ||END
 F||, famille ||, family ||, familia ||END
 F||est absent||is missing||no existe||END
 F||manque : ||missing: ||falta: ||END

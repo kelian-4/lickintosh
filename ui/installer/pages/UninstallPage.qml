@@ -13,7 +13,7 @@ ContentPage {
     ContentSection {
         IRow {
             icon: "settings/dock.svg"; title: I18n.tr("Désinstaller Lickintosh")
-            subtitle: root.confirming ? I18n.tr("Lickintosh est déplacé dans le dossier des sauvegardes. Tes réglages sont conservés.") : I18n.tr("Déplace le shell dans le dossier des sauvegardes. Les polices, les icônes et le curseur restent en place.")
+            subtitle: root.confirming ? I18n.tr("Tout ce que Lickintosh a créé est supprimé définitivement, y compris tes réglages.") : I18n.tr("Supprime absolument tout ce que Lickintosh a installé ou créé : shell, réglages, polices, icônes, curseur, caches et configuration Hyprland.")
             IButton { visible: root.confirming; text: I18n.tr("Annuler"); onClicked: root.confirming = false }
             IButton {
                 text: root.confirming ? I18n.tr("Désinstaller") : I18n.tr("Désinstaller…")
@@ -26,7 +26,7 @@ ContentPage {
 
     CFText {
         Layout.fillWidth: true
-        text: I18n.tr("Tes réglages sont conservés : réinstaller remet tout en place. La configuration Hyprland n'est pas modifiée.")
+        text: I18n.tr("Action définitive : les réglages du shell sont aussi supprimés. Les sauvegardes de ta configuration Hyprland et des réglages système sont restaurées si elles existent.")
         font.pixelSize: 12
         gray: true
         wrapMode: Text.WordWrap

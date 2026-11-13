@@ -168,7 +168,7 @@ Singleton {
             var k = root.runKind
             if (k === "install" || k === "update" || k === "uninstall") {
                 root.onLine(code === 0 ? "✓ Terminé" : "! Terminé avec le code " + code)
-                root.notice = code === 0 ? (k === "uninstall" ? "Lickintosh a été retiré. Tes réglages sont conservés." : "Terminé.") : "Une erreur est survenue : voir la sortie ci-dessous."
+                root.notice = code === 0 ? (k === "uninstall" ? "Lickintosh a été entièrement supprimé." : "Terminé.") : "Une erreur est survenue : voir la sortie ci-dessous."
                 stateWatch.reload()
                 if (k === "install" || k === "update") root.runPlan()
             }
