@@ -1,0 +1,165 @@
+# Catalogue de traductions de setup.fish. Format : TYPE||francais||anglais||espagnol||END (END protege les espaces de fin)
+# E = message entier (apres retrait des espaces de tete), F = fragment remplace dans tout message
+E||Session||Session||Sesion||END
+E||Outils||Tools||Herramientas||END
+E||Services||Services||Servicios||END
+E||Installation||Installation||Instalacion||END
+E||Etat du shell||Shell status||Estado del shell||END
+E||Polices||Fonts||Fuentes||END
+E||Icones||Icons||Iconos||END
+E||Curseur||Cursor||Cursor||END
+E||Prerequis||Prerequisites||Requisitos previos||END
+E||Prerequis termines.||Prerequisites done.||Requisitos previos listos.||END
+E||Termine.||Done.||Terminado.||END
+E||Lancement du shell||Starting the shell||Iniciando el shell||END
+E||Aucun probleme detecte.||No problems found.||No se detecto ningun problema.||END
+E||Desinstallation de Lickintosh||Uninstalling Lickintosh||Desinstalando Lickintosh||END
+E||Polices par defaut (fontconfig)||Default fonts (fontconfig)||Fuentes predeterminadas (fontconfig)||END
+E||Applications GTK (dconf)||GTK applications (dconf)||Aplicaciones GTK (dconf)||END
+E||Applications Qt (qt6ct, kdeglobals)||Qt applications (qt6ct, kdeglobals)||Aplicaciones Qt (qt6ct, kdeglobals)||END
+E||applique||applied||aplicado||END
+E||non modifie||unchanged||sin cambios||END
+E||deja a jour||already up to date||ya esta actualizado||END
+E||annule||cancelled||cancelado||END
+E||ignore||skipped||omitido||END
+E||ignores||skipped||omitidos||END
+E||shell retire||shell removed||shell eliminado||END
+E||polices retirees||fonts removed||fuentes eliminadas||END
+E||shell conserve tel quel||shell kept as is||shell conservado tal cual||END
+E||Quickshell absent||Quickshell missing||Quickshell ausente||END
+E||Quickshell lance||Quickshell started||Quickshell iniciado||END
+E||a regarder :||to review:||a revisar:||END
+E||shell non lance, il manque :||shell not started, missing:||shell no iniciado, falta:||END
+E||version de Hyprland illisible||Hyprland version unreadable||version de Hyprland ilegible||END
+E||modules QML : tous presents||QML modules: all present||modulos QML: todos presentes||END
+E||Les installer ?||Install them?||¿Instalarlos?||END
+E||Les activer maintenant ?||Enable them now?||¿Activarlos ahora?||END
+E||Appliquer ?||Apply?||¿Aplicar?||END
+E||Continuer ?||Continue?||¿Continuar?||END
+E||Ecraser les polices existantes ?||Overwrite existing fonts?||¿Sobrescribir las fuentes existentes?||END
+E||Installer les paquets Qt correspondants ?||Install the matching Qt packages?||¿Instalar los paquetes Qt correspondientes?||END
+E||Installer ou mettre a jour quickshell ?||Install or update quickshell?||¿Instalar o actualizar quickshell?||END
+E||Remplacer le code du shell ? Une sauvegarde est faite avant.||Replace the shell code? A backup is made first.||¿Reemplazar el codigo del shell? Se hace una copia de seguridad antes.||END
+E||Ajouter ce PPA (depot tiers) puis installer quickshell ?||Add this PPA (third-party repository) and install quickshell?||¿Anadir este PPA (repositorio de terceros) e instalar quickshell?||END
+E||Activer ce COPR (depot tiers) puis installer quickshell ?||Enable this COPR (third-party repository) and install quickshell?||¿Activar este COPR (repositorio de terceros) e instalar quickshell?||END
+F||) n'a pas ete modifiee : retire la ligne qui lance lickintosh-start dans hyprlua/programs.lua si tu veux supprimer l'autostart||) was not modified: remove the line that launches lickintosh-start in hyprlua/programs.lua if you want to remove the autostart||) no se ha modificado: elimina la linea que lanza lickintosh-start en hyprlua/programs.lua si quieres quitar el autostart||END
+F||Ne lance pas setup.fish en root : les fichiers seraient installes pour root. Il demande sudo lui-meme quand il en a besoin.||Do not run setup.fish as root: the files would be installed for root. It asks for sudo itself when needed.||No ejecutes setup.fish como root: los archivos se instalarian para root. Pide sudo por si mismo cuando lo necesita.||END
+F||l'autostart ne lance pas lickintosh-start (le shell ne sera pas relance apres un plantage) : relance setup.fish||autostart does not launch lickintosh-start (the shell will not restart after a crash): run setup.fish again||el autostart no lanza lickintosh-start (el shell no se reiniciara tras un fallo): vuelve a ejecutar setup.fish||END
+F||Installateur graphique indisponible (qs, installer.qml ou session Wayland manquant) : installation en terminal.||Graphical installer unavailable (qs, installer.qml or Wayland session missing): installing in the terminal.||Instalador grafico no disponible (falta qs, installer.qml o una sesion Wayland): instalacion en el terminal.||END
+F||Systeme immuable : installe quickshell dans une couche (rpm-ostree) ou une boite, puis relance setup.fish||Immutable system: install quickshell in a layer (rpm-ostree) or a container, then run setup.fish again||Sistema inmutable: instala quickshell en una capa (rpm-ostree) o un contenedor y vuelve a ejecutar setup.fish||END
+F||quickshell n'est pas dans les depots de cette version de Debian (seulement testing et unstable).||quickshell is not in the repositories of this Debian release (only testing and unstable).||quickshell no esta en los repositorios de esta version de Debian (solo testing y unstable).||END
+F||Installe Quickshell 0.2 ou plus avec le gestionnaire de ta distribution ou depuis les sources : ||Install Quickshell 0.2 or later with your distribution's package manager or from source: ||Instala Quickshell 0.2 o superior con el gestor de tu distribucion o desde el codigo fuente: ||END
+F||openSUSE : depot Open Build Service home:AvengeMedia:danklinux (paquet quickshell), voir ||openSUSE: Open Build Service repository home:AvengeMedia:danklinux (quickshell package), see ||openSUSE: repositorio Open Build Service home:AvengeMedia:danklinux (paquete quickshell), ver ||END
+F||quickshell n'est pas dans les depots de cette version. Le guide officiel indique le PPA ||quickshell is not in the repositories of this release. The official guide points to the PPA ||quickshell no esta en los repositorios de esta version. La guia oficial indica el PPA ||END
+F||QtMultimedia absent : les fonds d'ecran video sont indisponibles (paquet qt6-multimedia)||QtMultimedia missing: video wallpapers are unavailable (package qt6-multimedia)||QtMultimedia ausente: los fondos de pantalla de video no estan disponibles (paquete qt6-multimedia)||END
+F||Quickshell tourne deja : relance-le completement pour charger la nouvelle copie.||Quickshell is already running: restart it completely to load the new copy.||Quickshell ya esta en ejecucion: reinicialo por completo para cargar la nueva copia.||END
+F||quickshell n'est pas dans les depots actifs. Le guide officiel indique le COPR ||quickshell is not in the enabled repositories. The official guide points to the COPR ||quickshell no esta en los repositorios activos. La guia oficial indica el COPR ||END
+F||Desinstallation terminee. Pour revenir en arriere : copie le contenu de ||Uninstall complete. To roll back: copy the contents of ||Desinstalacion terminada. Para volver atras: copia el contenido de ||END
+F||NixOS : ajoute quickshell (nixpkgs) a ta configuration ou a ton profil||NixOS: add quickshell (nixpkgs) to your configuration or profile||NixOS: anade quickshell (nixpkgs) a tu configuracion o a tu perfil||END
+F||pas dans une session Hyprland : verifications de session ignorees||not in a Hyprland session: session checks skipped||no estas en una sesion Hyprland: comprobaciones de sesion omitidas||END
+F||Hyprland est introuvable (la config hyprlua demande 0.57 ou plus)||Hyprland not found (the hyprlua config requires 0.57 or later)||Hyprland no encontrado (la config hyprlua requiere 0.57 o superior)||END
+F||tes reglages (fichiers de configuration du shell) sont conserves||your settings (shell configuration files) are kept||tus ajustes (archivos de configuracion del shell) se conservan||END
+F||est absent : lance setup.fish pour installer la configuration||is missing: run setup.fish to install the configuration||no existe: ejecuta setup.fish para instalar la configuracion||END
+F|| (Qt 6.8 ou plus est necessaire pour QtGraphs et VectorImage)|| (Qt 6.8 or later is needed for QtGraphs and VectorImage)|| (se necesita Qt 6.8 o superior para QtGraphs y VectorImage)||END
+F|| tourne et prend le nom D-Bus des notifications : arrete-le (|| is running and takes the notifications D-Bus name: stop it (|| esta en ejecucion y ocupa el nombre D-Bus de las notificaciones: detenlo (||END
+F|| sera cree : sans-serif et system-ui pointent sur SF Pro Text|| will be created: sans-serif and system-ui point to SF Pro Text|| se creara: sans-serif y system-ui apuntan a SF Pro Text||END
+F||): desinstallation refusee pour ne pas supprimer le depot.||): uninstall refused to avoid deleting the repository.||): desinstalacion rechazada para no borrar el repositorio.||END
+F||Quickshell s'est arrete juste apres le lancement : lis ||Quickshell stopped right after launch: read ||Quickshell se detuvo justo tras iniciarse: lee ||END
+F||police SF Pro introuvable (fc-list) : lance setup.fish||SF Pro font not found (fc-list): run setup.fish||fuente SF Pro no encontrada (fc-list): ejecuta setup.fish||END
+F||configuration PAM de l'ecran de verrouillage presente||lock screen PAM configuration present||configuracion PAM de la pantalla de bloqueo presente||END
+F||le depot est deja le dossier du shell : copie ignoree||the repository is already the shell folder: copy skipped||el repositorio ya es la carpeta del shell: copia omitida||END
+F||ni sudo ni doas : lance cette commande en root : ||neither sudo nor doas found: run this command as root: ||ni sudo ni doas: ejecuta este comando como root: ||END
+F||Quickshell tourne deja et son code n'a pas change||Quickshell is already running and its code has not changed||Quickshell ya esta en ejecucion y su codigo no ha cambiado||END
+F|| : la config hyprlua (Lua) demande 0.57 ou plus|| : the hyprlua (Lua) config requires 0.57 or later|| : la config hyprlua (Lua) requiere 0.57 o superior||END
+F||: setup.fish doit rester a la racine du depot.||: setup.fish must stay at the repository root.||: setup.fish debe permanecer en la raiz del repositorio.||END
+F|| trop ancien : le shell demande 0.2.0 ou plus|| too old: the shell requires 0.2.0 or later|| demasiado antiguo: el shell requiere 0.2.0 o superior||END
+F||quickshell est introuvable : shell non lance||quickshell not found: shell not started||quickshell no encontrado: shell no iniciado||END
+F||la configuration Lua demande 0.57 ou plus||the Lua configuration requires 0.57 or later||la configuracion Lua requiere 0.57 o superior||END
+F|| sont intacts et qs -c <nom> les retrouve|| are untouched and qs -c <name> still finds them|| estan intactas y qs -c <nombre> las sigue encontrando||END
+F|| (relance setup.fish pour mettre a jour)|| (run setup.fish again to update)|| (vuelve a ejecutar setup.fish para actualizar)||END
+F||Quickshell est introuvable dans le PATH||Quickshell not found in PATH||Quickshell no encontrado en el PATH||END
+F||theme d'icones MacTahoe-dark absent de ||MacTahoe-dark icon theme missing from ||tema de iconos MacTahoe-dark ausente de ||END
+F||pas dans une session Hyprland : lance ||not in a Hyprland session: run ||no estas en una sesion Hyprland: ejecuta ||END
+F||la commande qs est absente (seulement ||the qs command is missing (only ||falta el comando qs (solo ||END
+F||tous les modules QML sont disponibles||all QML modules are available||todos los modulos QML estan disponibles||END
+F||tous les outils requis sont installes||all required tools are installed||todas las herramientas requeridas estan instaladas||END
+F||l'installation est identique au depot||the installation matches the repository||la instalacion es identica al repositorio||END
+F||curseur MacOS-Tahoe-Cursor absent de ||MacOS-Tahoe-Cursor cursor missing from ||cursor MacOS-Tahoe-Cursor ausente de ||END
+F||ancienne installation a la racine de ||old installation at the root of ||instalacion antigua en la raiz de ||END
+F|| n'est pas gere par systemd (ignore)|| is not managed by systemd (ignored)|| no esta gestionado por systemd (ignorado)||END
+F|| ne contient pas de dossier cursors|| does not contain a cursors folder|| no contiene una carpeta cursors||END
+F||'. Reponds par o (oui) ou n (non).||'. Answer y (yes) or n (no).||'. Responde s (si) o n (no).||END
+F||le depot est le dossier du shell (||the repository is the shell folder (||el repositorio es la carpeta del shell (||END
+F||ton Quickshell est compile sans : ||your Quickshell is built without: ||tu Quickshell esta compilado sin: ||END
+F||modules QML toujours manquants : ||QML modules still missing: ||modulos QML que siguen faltando: ||END
+F||quickshell 0.2 ou plus est requis||quickshell 0.2 or later is required||se requiere quickshell 0.2 o superior||END
+F|| est trop ancien (0.2.0 minimum)|| is too old (0.2.0 minimum)|| es demasiado antiguo (minimo 0.2.0)||END
+F||services utilisateur inactifs : ||inactive user services: ||servicios de usuario inactivos: ||END
+F||version de Hyprland introuvable||Hyprland version not found||version de Hyprland no encontrada||END
+F|| est absent : lance setup.fish|| is missing: run setup.fish|| no existe: ejecuta setup.fish||END
+F||Retirer aussi les polices SF (||Also remove the SF fonts (||¿Eliminar tambien las fuentes SF (||END
+F|| police(s) existent deja dans || font(s) already exist in || fuente(s) ya existen en ||END
+F||outils manquants (paquets) : ||missing tools (packages): ||herramientas que faltan (paquetes): ||END
+F|| est installe mais inactif : || is installed but inactive: || esta instalado pero inactivo: ||END
+F|| est absent de l'installation|| is missing from the installation|| no existe en la instalacion||END
+F||la session n'est pas Wayland||the session is not Wayland||la sesion no es Wayland||END
+F||autostart : lickintosh-start||autostart: lickintosh-start||autostart: lickintosh-start||END
+F||lanceur de demarrage present||startup launcher present||lanzador de inicio presente||END
+F||services systeme inactifs : ||inactive system services: ||servicios del sistema inactivos: ||END
+F|| existe deja. Le remplacer ?|| already exists. Replace it?|| ya existe. ¿Reemplazarlo?||END
+F||Quickshell ne tourne pas : ||Quickshell is not running: ||Quickshell no esta en ejecucion: ||END
+F||la configuration Hyprland (||the Hyprland configuration (||la configuracion de Hyprland (||END
+F||shell.qml introuvable dans ||shell.qml not found in ||shell.qml no encontrado en ||END
+F||configuration Lua presente||Lua configuration present||configuracion Lua presente||END
+F||outils requis manquants : ||missing required tools: ||herramientas requeridas que faltan: ||END
+F||aucune erreur grave dans ||no serious errors in ||ningun error grave en ||END
+F||rien a desinstaller dans ||nothing to uninstall in ||nada que desinstalar en ||END
+F|| police(s) installee(s), || font(s) installed, || fuente(s) instalada(s), ||END
+F||reponse non reconnue : '||unrecognized answer: '||respuesta no reconocida: '||END
+F||modules QML manquants : ||missing QML modules: ||modulos QML que faltan: ||END
+F||Configuration Hyprland (||Hyprland configuration (||Configuracion de Hyprland (||END
+F||police SF Pro installee||SF Pro font installed||fuente SF Pro instalada||END
+F||pas encore de journal (||no log yet (||todavia no hay registro (||END
+F||les autres dossiers de ||the other folders in ||las demas carpetas de ||END
+F||erreurs recentes dans ||recent errors in ||errores recientes en ||END
+F|| probleme(s) a regler.|| problem(s) to fix.|| problema(s) por resolver.||END
+F||fichier(s) installe(s)||file(s) installed||archivo(s) instalado(s)||END
+F||different du depot : ||differs from the repository: ||distinto del repositorio: ||END
+F||shell installe dans ||shell installed in ||shell instalado en ||END
+F||paquets manquants : ||missing packages: ||paquetes que faltan: ||END
+F||services inactifs : ||inactive services: ||servicios inactivos: ||END
+F|| existe et differe :|| exists and differs:|| existe y es distinto:||END
+F||Gentoo (en root) : ||Gentoo (as root): ||Gentoo (como root): ||END
+F|| n'est pas installe|| is not installed|| no esta instalado||END
+F||aucune police dans ||no fonts in ||ninguna fuente en ||END
+F||carte graphique : ||graphics card: ||tarjeta grafica: ||END
+F||Shell Quickshell (||Quickshell shell (||Shell de Quickshell (||END
+F||Quickshell tourne||Quickshell is running||Quickshell esta en ejecucion||END
+F||aucun theme dans ||no theme in ||ningun tema en ||END
+F||shell copie dans ||shell copied to ||shell copiado en ||END
+F|| est introuvable|| not found|| no encontrado||END
+F||indisponible : ||unavailable: ||no disponible: ||END
+F||installation : ||installing: ||instalando: ||END
+F||distribution : ||distribution: ||distribucion: ||END
+F||session Wayland||Wayland session||sesion Wayland||END
+F|| est inactif : || is inactive: || esta inactivo: ||END
+F||theme d'icones ||icon theme ||tema de iconos ||END
+F||sera retire de ||will be removed from ||se eliminara de ||END
+F||, etape ignoree||, step skipped||, paso omitido||END
+F|| deplacee vers || moved to || movida a ||END
+F|| (sauvegarde : || (backup: || (copia de seguridad: ||END
+F||deja present : ||already present: ||ya presente: ||END
+F||Retirer aussi ||Also remove ||¿Eliminar tambien ||END
+F||sauvegarde : ||backup: ||copia de seguridad: ||END
+F||a regarder : ||to review: ||a revisar: ||END
+F||(non defini)||(not set)||(sin definir)||END
+F||attention : ||warning: ||atencion: ||END
+F|| ignoree(s)|| skipped|| omitida(s)||END
+F||, famille ||, family ||, familia ||END
+F||est absent||is missing||no existe||END
+F||manque : ||missing: ||falta: ||END
+F|| conserve|| kept|| conservado||END
+F|| installe|| installed|| instalado||END
+F||curseur ||cursor ||cursor ||END
+F|| retire|| removed|| eliminado||END
+F|| actif|| active|| activo||END

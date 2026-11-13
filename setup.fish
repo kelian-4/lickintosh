@@ -5,6 +5,75 @@ set -g qs_root ~/.config/quickshell
 set -g qs_name lickintosh
 set -g qs_dst $qs_root/$qs_name
 
+function _detect_lang
+    for v in $LICKINTOSH_LANG $LC_ALL $LC_MESSAGES $LANG
+        test -n "$v"; or continue
+        switch (string lower -- $v)
+            case 'fr*'
+                echo fr
+            case 'es*'
+                echo es
+            case '*'
+                echo en
+        end
+        return
+    end
+    echo en
+end
+
+set -g lang (_detect_lang)
+set -g tr_exact_src
+set -g tr_exact_dst
+set -g tr_frag_src
+set -g tr_frag_dst
+
+if test $lang != fr; and test -r $repo/tools/setup-i18n.txt
+    set -l col 3
+    test $lang = es; and set col 4
+    for line in (cat $repo/tools/setup-i18n.txt)
+        string match -qr '^[EF]\|\|' -- $line; or continue
+        set -l f (string split '||' -- $line)
+        if test $f[1] = E
+            set -a tr_exact_src $f[2]
+            set -a tr_exact_dst $f[$col]
+        else
+            set -a tr_frag_src $f[2]
+            set -a tr_frag_dst $f[$col]
+        end
+    end
+end
+
+function t
+    set -l s (string join ' ' -- $argv)
+    if test $lang = fr; or test -z "$s"
+        printf '%s' $s
+        return
+    end
+    set -l lead (string match -r '^\s*' -- $s)
+    set -l body (string sub -s (math (string length -- "$lead") + 1) -- $s)
+    set -l idx (contains -i -- $body $tr_exact_src)
+    if test -n "$idx"
+        set body $tr_exact_dst[$idx]
+    else
+        set -l mark (printf '\x01')
+        set -l stop (printf '\x02')
+        for i in (seq (count $tr_frag_src))
+            set body (string replace -a -- $tr_frag_src[$i] "$mark$i$stop" $body)
+        end
+        if string match -q "*$mark*" -- $body
+            for i in (seq (count $tr_frag_src))
+                set body (string replace -a -- "$mark$i$stop" $tr_frag_dst[$i] $body)
+            end
+        end
+        set body (string replace -r ' \?$' '?' -- $body)
+    end
+    printf '%s%s' "$lead" $body
+end
+
+function msg
+    printf '%s\n' (t (string join ' ' -- $argv))
+end
+
 function qs_pattern
     echo "(^|/)[^ ]*(qs|quickshell)[^ ]* (-c|--config) $qs_name( |\$)"
 end
@@ -25,7 +94,7 @@ argparse skip-deps no-launch doctor uninstall y/yes deps-plan deps-only gui cli 
 set -q _flag_yes; and set -g assume_yes 1
 
 if test (id -u) -eq 0
-    echo "Ne lance pas setup.fish en root : les fichiers seraient installes pour root. Il demande sudo lui-meme quand il en a besoin." >&2
+    msg "Ne lance pas setup.fish en root : les fichiers seraient installes pour root. Il demande sudo lui-meme quand il en a besoin." >&2
     exit 1
 end
 
@@ -34,14 +103,17 @@ set -l blocking
 set -l warnings
 
 function ask_strict --argument-names question
+    set -l hint "o/N"
+    test $lang = en; and set hint "y/N"
+    test $lang = es; and set hint "s/N"
     while true
-        read -l -P "$question [o/N] " reply; or return 1
-        if string match -qri '^(o|oui|y|yes)$' -- $reply
+        read -l -P (t "$question")" [$hint] " reply; or return 1
+        if string match -qri '^(o|oui|y|yes|s|si|sí)$' -- $reply
             return 0
         else if string match -qri '^(n|non|no)?$' -- $reply
             return 1
         end
-        echo "    reponse non reconnue : '$reply'. Reponds par o (oui) ou n (non)." >&2
+        msg "    reponse non reconnue : '$reply'. Reponds par o (oui) ou n (non)." >&2
     end
 end
 
@@ -51,7 +123,7 @@ function ask --argument-names question
 end
 
 function say
-    echo "==> $argv"
+    echo "==> "(t "$argv")
 end
 
 function have_any
@@ -74,7 +146,7 @@ function as_root
     else if command -q doas
         doas $argv
     else
-        echo "    ni sudo ni doas : lance cette commande en root : $argv" >&2
+        msg "    ni sudo ni doas : lance cette commande en root : $argv" >&2
         return 1
     end
 end
@@ -249,21 +321,21 @@ function install_quickshell --argument-names family os_id os_like
             if pkg_available debian quickshell
                 as_root apt-get install -y quickshell
             else if contains -- ubuntu $os_id (string split ' ' -- $os_like)
-                echo "    quickshell n'est pas dans les depots de cette version. Le guide officiel indique le PPA ppa:avengemedia/danklinux."
+                msg "    quickshell n'est pas dans les depots de cette version. Le guide officiel indique le PPA ppa:avengemedia/danklinux."
                 ask_strict "    Ajouter ce PPA (depot tiers) puis installer quickshell ?"; or return 1
                 as_root apt-get install -y software-properties-common; or return 1
                 as_root add-apt-repository -y ppa:avengemedia/danklinux; or return 1
                 as_root apt-get update; or return 1
                 as_root apt-get install -y quickshell
             else
-                echo "    quickshell n'est pas dans les depots de cette version de Debian (seulement testing et unstable)."
+                msg "    quickshell n'est pas dans les depots de cette version de Debian (seulement testing et unstable)."
                 return 1
             end
         case fedora
             if pkg_available fedora quickshell
                 as_root dnf install -y quickshell
             else
-                echo "    quickshell n'est pas dans les depots actifs. Le guide officiel indique le COPR errornointernet/quickshell."
+                msg "    quickshell n'est pas dans les depots actifs. Le guide officiel indique le COPR errornointernet/quickshell."
                 ask_strict "    Activer ce COPR (depot tiers) puis installer quickshell ?"; or return 1
                 as_root dnf copr enable -y errornointernet/quickshell; or return 1
                 as_root dnf install -y quickshell
@@ -276,15 +348,15 @@ end
 function quickshell_hint --argument-names family
     switch $family
         case suse
-            echo "    openSUSE : depot Open Build Service home:AvengeMedia:danklinux (paquet quickshell), voir https://quickshell.org/docs/v0.3.0/guide/install-setup"
+            msg "    openSUSE : depot Open Build Service home:AvengeMedia:danklinux (paquet quickshell), voir https://quickshell.org/docs/v0.3.0/guide/install-setup"
         case gentoo
-            echo "    Gentoo (en root) : emerge eselect-repository ; eselect repository enable guru ; emerge --sync guru ; emerge gui-apps/quickshell"
+            msg "    Gentoo (en root) : emerge eselect-repository ; eselect repository enable guru ; emerge --sync guru ; emerge gui-apps/quickshell"
         case nixos
-            echo "    NixOS : ajoute quickshell (nixpkgs) a ta configuration ou a ton profil"
+            msg "    NixOS : ajoute quickshell (nixpkgs) a ta configuration ou a ton profil"
         case ostree
-            echo "    Systeme immuable : installe quickshell dans une couche (rpm-ostree) ou une boite, puis relance setup.fish"
+            msg "    Systeme immuable : installe quickshell dans une couche (rpm-ostree) ou une boite, puis relance setup.fish"
         case '*'
-            echo "    Installe Quickshell 0.2 ou plus avec le gestionnaire de ta distribution ou depuis les sources : https://quickshell.org/docs/v0.3.0/guide/install-setup"
+            msg "    Installe Quickshell 0.2 ou plus avec le gestionnaire de ta distribution ou depuis les sources : https://quickshell.org/docs/v0.3.0/guide/install-setup"
     end
 end
 
@@ -310,12 +382,12 @@ function install_items --argument-names family
             if pkg_available $family $p
                 contains -- $p $pkgs; or set -a pkgs $p
             else
-                echo "    indisponible : $p" >&2
+                msg "    indisponible : $p" >&2
             end
         end
     end
     test (count $pkgs) -eq 0; and return 0
-    echo "    installation : $pkgs"
+    msg "    installation : $pkgs"
     pkg_install $family $pkgs
 end
 
@@ -375,16 +447,16 @@ function ini_set --argument-names file section key value
 end
 
 function d_ok
-    echo "    [ok] $argv"
+    msg "    [ok] $argv"
 end
 
 function d_bad
-    echo "    [!!] $argv"
+    msg "    [!!] $argv"
     set -g doctor_bad (math $doctor_bad + 1)
 end
 
 function d_info
-    echo "    [..] $argv"
+    msg "    [..] $argv"
 end
 
 function run_doctor
@@ -528,7 +600,7 @@ function run_doctor
         else
             d_bad "erreurs recentes dans $log :"
             for l in $errs
-                echo "         $l"
+                msg "         $l"
             end
         end
     else
@@ -557,17 +629,17 @@ function run_uninstall
         test -e $qs_dst/$e; and set -a present $e
     end
     if test (count $present) -eq 0
-        echo "    rien a desinstaller dans $qs_dst"
+        msg "    rien a desinstaller dans $qs_dst"
         return 0
     end
     if test (realpath $repo) = (realpath $qs_dst 2>/dev/null)
-        echo "    le depot est le dossier du shell ($qs_dst) : desinstallation refusee pour ne pas supprimer le depot." >&2
+        msg "    le depot est le dossier du shell ($qs_dst) : desinstallation refusee pour ne pas supprimer le depot." >&2
         return 1
     end
-    echo "    sera retire de $qs_dst : $present"
-    echo "    tes reglages (fichiers de configuration du shell) sont conserves"
+    msg "    sera retire de $qs_dst : $present"
+    msg "    tes reglages (fichiers de configuration du shell) sont conserves"
     ask "    Continuer ?"; or begin
-        echo "    annule"
+        msg "    annule"
         return 0
     end
     set -l backup $backup_root/(date +%Y%m%d-%H%M%S)
@@ -575,14 +647,14 @@ function run_uninstall
     for e in $present
         cp -a $qs_dst/$e $backup/$e
     end
-    echo "    sauvegarde : $backup"
+    msg "    sauvegarde : $backup"
     pkill -f lickintosh-start >/dev/null 2>&1
     command -q qs; and qs -c $qs_name kill >/dev/null 2>&1
     for e in $present
         rm -rf $qs_dst/$e
     end
     rmdir $qs_dst 2>/dev/null
-    echo "    shell retire"
+    msg "    shell retire"
     set -l old (ls -1d $backup_root/* 2>/dev/null | sort)
     if test (count $old) -gt 3
         for d in $old[1..-4]
@@ -592,15 +664,15 @@ function run_uninstall
     if test -d $fonts_dst; and not set -q assume_yes; and ask "    Retirer aussi les polices SF ($fonts_dst) ?"
         rm -rf $fonts_dst
         command -q fc-cache; and fc-cache -f
-        echo "    polices retirees"
+        msg "    polices retirees"
     end
     for t in MacTahoe-dark MacOS-Tahoe-Cursor
         if test -e $icons_dst/$t; and not set -q assume_yes; and ask "    Retirer aussi $icons_dst/$t ?"
             rm -rf $icons_dst/$t
-            echo "    $t retire"
+            msg "    $t retire"
         end
     end
-    echo "    la configuration Hyprland ($hypr_dst) n'a pas ete modifiee : retire la ligne qui lance lickintosh-start dans hyprlua/programs.lua si tu veux supprimer l'autostart"
+    msg "    la configuration Hyprland ($hypr_dst) n'a pas ete modifiee : retire la ligne qui lance lickintosh-start dans hyprlua/programs.lua si tu veux supprimer l'autostart"
     say "Desinstallation terminee. Pour revenir en arriere : copie le contenu de $backup dans $qs_dst"
 end
 
@@ -671,7 +743,7 @@ if test $want_gui -eq 1
         set -lx LICKINTOSH_SETUP $repo/setup.fish
         exec qs -p $repo/installer.qml >/dev/null 2>&1
     end
-    echo "Installateur graphique indisponible (qs, installer.qml ou session Wayland manquant) : installation en terminal."
+    msg "Installateur graphique indisponible (qs, installer.qml ou session Wayland manquant) : installation en terminal."
 end
 
 if set -q _flag_doctor
@@ -685,7 +757,7 @@ if set -q _flag_uninstall
 end
 
 if not test -f $repo/shell.qml
-    echo "shell.qml introuvable dans $repo : setup.fish doit rester a la racine du depot." >&2
+    msg "shell.qml introuvable dans $repo : setup.fish doit rester a la racine du depot." >&2
     exit 1
 end
 
@@ -695,7 +767,7 @@ set -l auto 0
 set -l qs_bin
 
 if set -q _flag_skip_deps
-    echo "    ignores"
+    msg "    ignores"
     for c in qs quickshell
         if command -q $c
             set qs_bin $c
@@ -707,14 +779,14 @@ else
     set -l os_like (os_field /etc/os-release ID_LIKE)
     set family (detect_family "$os_id" "$os_like")
     contains -- $family arch debian fedora; and set auto 1
-    echo "    distribution : $family"
+    msg "    distribution : $family"
 
         set -l req $required_tools
     set -l missing_req (missing_items $req)
 
     if test $auto -eq 1
         if test (count $missing_req) -gt 0
-            echo "    outils requis manquants : $missing_req"
+            msg "    outils requis manquants : $missing_req"
             if ask "    Les installer ?"
                 refresh_index $family
                 install_items $family $missing_req
@@ -736,12 +808,12 @@ else
     set -l qs_ok 1
     if test -z "$qs_bin"
         set qs_ok 0
-        echo "    Quickshell absent"
+        msg "    Quickshell absent"
     else
         set qs_ver ($qs_bin --version 2>/dev/null | head -1 | string match -r '\d+\.\d+\.\d+')
         if test -n "$qs_ver"; and not version_ge $qs_ver 0.2.0
             set qs_ok 0
-            echo "    Quickshell $qs_ver trop ancien : le shell demande 0.2.0 ou plus"
+            msg "    Quickshell $qs_ver trop ancien : le shell demande 0.2.0 ou plus"
         end
     end
     if test $qs_ok -eq 0
@@ -766,14 +838,14 @@ else
     end
 
     if test -n "$qs_bin"; and not contains -- "quickshell 0.2 ou plus est requis" $blocking
-        echo "    Quickshell $qs_ver ok"
+        msg "    Quickshell $qs_ver ok"
         if test "$qs_bin" != qs
             set -a warnings "la commande qs est absente (seulement $qs_bin)"
         end
         set -l mods QtQuick Quickshell QtQuick.Layouts QtQuick.Controls QtQuick.VectorImage QtQuick.Effects QtQuick.Window QtQuick.Shapes QtGraphs Qt.labs.folderlistmodel Quickshell.Io Quickshell.Wayland Quickshell.Hyprland Quickshell.Widgets Quickshell.Services.UPower Quickshell.Bluetooth Quickshell.Services.Pipewire Quickshell.Services.Notifications Quickshell.Services.SystemTray Quickshell.Services.Pam Quickshell.Services.Mpris
         set -l missing_mods (qml_missing $qs_bin $mods)
         if test (count $missing_mods) -gt 0
-            echo "    modules QML manquants : $missing_mods"
+            msg "    modules QML manquants : $missing_mods"
             set -l items
             set -l builtin
             for m in $missing_mods
@@ -790,7 +862,7 @@ else
                     refresh_index $family
                     install_items $family $items
                 else
-                    echo "    paquets manquants : "(for i in $items; pkg_for $family $i; end)
+                    msg "    paquets manquants : "(for i in $items; pkg_for $family $i; end)
                 end
                 set -l still
                 for m in (qml_missing $qs_bin $mods)
@@ -801,7 +873,7 @@ else
                 end
             end
         else
-            echo "    modules QML : tous presents"
+            msg "    modules QML : tous presents"
         end
     end
 
@@ -813,7 +885,7 @@ else
                 systemctl is-active --quiet $u.service; or set -a sys_off $u.service
             end
             if test (count $sys_off) -gt 0
-                echo "    services systeme inactifs : $sys_off"
+                msg "    services systeme inactifs : $sys_off"
                 if ask "    Les activer maintenant ?"
                     as_root systemctl enable --now $sys_off
                 else
@@ -826,7 +898,7 @@ else
                 systemctl --user is-active --quiet $u; or set -a usr_off $u
             end
             if test (count $usr_off) -gt 0
-                echo "    services utilisateur inactifs : $usr_off"
+                msg "    services utilisateur inactifs : $usr_off"
                 if ask "    Les activer maintenant ?"
                     systemctl --user enable --now $usr_off
                 else
@@ -840,12 +912,12 @@ else
     command -q Hyprland; and set hv (Hyprland --version 2>/dev/null | head -1 | string match -r '\d+\.\d+\.\d+')
     if test -z "$hv"
         if command -q Hyprland
-            echo "    version de Hyprland illisible"
+            msg "    version de Hyprland illisible"
         else
             set -a warnings "Hyprland est introuvable (la config hyprlua demande 0.57 ou plus)"
         end
     else if version_ge $hv 0.57.0
-        echo "    Hyprland $hv ok"
+        msg "    Hyprland $hv ok"
     else
         set -a warnings "Hyprland $hv : la config hyprlua (Lua) demande 0.57 ou plus"
     end
@@ -853,10 +925,10 @@ end
 
 if set -q _flag_deps_only
     for b in $blocking
-        echo "    manque : $b"
+        msg "    manque : $b"
     end
     for w in $warnings
-        echo "    a regarder : $w"
+        msg "    a regarder : $w"
     end
     say "Prerequis termines."
     test (count $blocking) -eq 0; and exit 0; or exit 1
@@ -865,7 +937,7 @@ end
 say "Polices"
 set -l fonts (find $repo/assets/fonts -type f \( -iname '*.otf' -o -iname '*.ttf' \) 2>/dev/null | sort)
 if test (count $fonts) -eq 0
-    echo "    aucune police dans assets/fonts, etape ignoree"
+    msg "    aucune police dans assets/fonts, etape ignoree"
 else
     set -l conflicts
     for f in $fonts
@@ -873,7 +945,7 @@ else
     end
     set -l overwrite 0
     if test (count $conflicts) -gt 0
-        echo "    "(count $conflicts)" police(s) existent deja dans $fonts_dst"
+        msg "    "(count $conflicts)" police(s) existent deja dans $fonts_dst"
         ask "    Ecraser les polices existantes ?"; and set overwrite 1
     end
     mkdir -p $fonts_dst
@@ -885,7 +957,7 @@ else
         end
         cp -f $f $fonts_dst/$name; and set installed (math $installed + 1)
     end
-    echo "    $installed police(s) installee(s), "(math (count $fonts) - $installed)" ignoree(s)"
+    msg "    $installed police(s) installee(s), "(math (count $fonts) - $installed)" ignoree(s)"
     if test $installed -gt 0
         command -q fc-cache; and fc-cache -f $fonts_dst
     end
@@ -894,7 +966,7 @@ end
 say "Icones"
 set -l themes (find $repo/assets/icons_desktop -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
 if test (count $themes) -eq 0
-    echo "    aucun theme dans assets/icons_desktop, etape ignoree"
+    msg "    aucun theme dans assets/icons_desktop, etape ignoree"
 else
     mkdir -p $icons_dst
     for t in $themes
@@ -903,11 +975,11 @@ else
             if ask "    $icons_dst/$name existe deja. Le remplacer ?"
                 rm -rf $icons_dst/$name
             else
-                echo "    $name conserve"
+                msg "    $name conserve"
                 continue
             end
         end
-        cp -a $t $icons_dst/$name; and echo "    $name installe"
+        cp -a $t $icons_dst/$name; and msg "    $name installe"
         command -q gtk-update-icon-cache; and gtk-update-icon-cache -f -q $icons_dst/$name 2>/dev/null
     end
 end
@@ -915,21 +987,21 @@ end
 say "Curseur"
 set -l cursor_src $repo/assets/MacOS-Tahoe-Cursor
 if not test -d $cursor_src
-    echo "    assets/MacOS-Tahoe-Cursor est absent, etape ignoree"
+    msg "    assets/MacOS-Tahoe-Cursor est absent, etape ignoree"
 else
-    test -d $cursor_src/cursors; or echo "    attention : $cursor_src ne contient pas de dossier cursors"
+    test -d $cursor_src/cursors; or msg "    attention : $cursor_src ne contient pas de dossier cursors"
     set -l cursor_install 1
     if test -e $icons_dst/MacOS-Tahoe-Cursor; or test -L $icons_dst/MacOS-Tahoe-Cursor
         if ask "    $icons_dst/MacOS-Tahoe-Cursor existe deja. Le remplacer ?"
             rm -rf $icons_dst/MacOS-Tahoe-Cursor
         else
             set cursor_install 0
-            echo "    MacOS-Tahoe-Cursor conserve"
+            msg "    MacOS-Tahoe-Cursor conserve"
         end
     end
     if test $cursor_install -eq 1
         mkdir -p $icons_dst
-        cp -a $cursor_src $icons_dst/MacOS-Tahoe-Cursor; and echo "    MacOS-Tahoe-Cursor installe"
+        cp -a $cursor_src $icons_dst/MacOS-Tahoe-Cursor; and msg "    MacOS-Tahoe-Cursor installe"
     end
 end
 
@@ -944,9 +1016,9 @@ set -l same_dir 0
 test (realpath $repo) = (realpath $qs_dst 2>/dev/null); and set same_dir 1
 if test $same_dir -eq 1
     set do_shell 0
-    echo "    le depot est deja le dossier du shell : copie ignoree"
+    msg "    le depot est deja le dossier du shell : copie ignoree"
 else if test (count $present) -gt 0
-    echo "    deja present : $present"
+    msg "    deja present : $present"
         if ask "    Remplacer le code du shell ? Une sauvegarde est faite avant."
         set -l backup ~/.local/share/lickintosh/backups/shell-(date +%Y%m%d-%H%M%S)
         mkdir -p $backup
@@ -954,10 +1026,10 @@ else if test (count $present) -gt 0
             cp -a $qs_dst/$e $backup/$e
             rm -rf $qs_dst/$e
         end
-        echo "    sauvegarde : $backup"
+        msg "    sauvegarde : $backup"
     else
         set do_shell 0
-        echo "    shell conserve tel quel"
+        msg "    shell conserve tel quel"
     end
 end
 
@@ -976,7 +1048,7 @@ if test $do_shell -eq 1
     for f in $repo/assets/*
         test -f $f; and cp -f $f $qs_dst/assets/
     end
-    echo "    shell copie dans $qs_dst"
+    msg "    shell copie dans $qs_dst"
     set shell_replaced 1
 
     set -l legacy
@@ -990,17 +1062,17 @@ if test $do_shell -eq 1
             cp -a $qs_root/$e $lbackup/$e
             rm -rf $qs_root/$e
         end
-        echo "    ancienne installation a la racine de $qs_root deplacee vers $qs_dst (sauvegarde : $lbackup)"
-        echo "    les autres dossiers de $qs_root sont intacts et qs -c <nom> les retrouve"
+        msg "    ancienne installation a la racine de $qs_root deplacee vers $qs_dst (sauvegarde : $lbackup)"
+        msg "    les autres dossiers de $qs_root sont intacts et qs -c <nom> les retrouve"
     end
-    qs_running; and echo "    Quickshell tourne deja : relance-le completement pour charger la nouvelle copie."
+    qs_running; and msg "    Quickshell tourne deja : relance-le completement pour charger la nouvelle copie."
 end
 
 say "Configuration Hyprland ($hypr_dst)"
 set -l hypr_src $repo/assets/config/hypr
 set -l hypr_files (find $hypr_src -type f 2>/dev/null | sort)
 if test (count $hypr_files) -eq 0
-    echo "    assets/config/hypr est absent, etape ignoree"
+    msg "    assets/config/hypr est absent, etape ignoree"
 else
     set -l hypr_copied 0
     for f in $hypr_files
@@ -1011,12 +1083,12 @@ else
         mkdir -p (dirname $dst)
         cp -f $f $dst; and set hypr_copied (math $hypr_copied + 1)
     end
-    echo "    $hypr_copied fichier(s) installe(s)"
+    msg "    $hypr_copied fichier(s) installe(s)"
 end
 
 say "Applications GTK (dconf)"
 if not command -q dconf
-    echo "    dconf est introuvable, etape ignoree"
+    msg "    dconf est introuvable, etape ignoree"
 else
     set -l dconf_keys /org/gnome/desktop/interface/icon-theme /org/gnome/desktop/interface/color-scheme /org/gnome/desktop/interface/font-name /org/gnome/desktop/interface/document-font-name /org/gnome/desktop/wm/preferences/button-layout /org/gnome/desktop/interface/cursor-theme /org/gnome/desktop/interface/cursor-size
     set -l dconf_vals "'MacTahoe-dark'" "'prefer-dark'" "'SF Pro Text 10'" "'SF Pro Text 10'" "'close,minimize,maximize:'" "'MacOS-Tahoe-Cursor'" 24
@@ -1025,23 +1097,23 @@ else
         set -l cur (dconf read $dconf_keys[$i])
         if test "$cur" != "$dconf_vals[$i]"
             set -a pending $i
-            echo "    $dconf_keys[$i] : "(test -n "$cur"; and echo $cur; or echo "(non defini)")" -> $dconf_vals[$i]"
+            msg "    $dconf_keys[$i] : "(test -n "$cur"; and echo $cur; or echo "(non defini)")" -> $dconf_vals[$i]"
         end
     end
     if test (count $pending) -eq 0
-        echo "    deja a jour"
+        msg "    deja a jour"
     else if ask "    Appliquer ?"
         for i in $pending
             dconf write $dconf_keys[$i] $dconf_vals[$i]
         end
-        echo "    applique"
+        msg "    applique"
     else
-        echo "    non modifie"
+        msg "    non modifie"
     end
 end
 
 say "Applications Qt (qt6ct, kdeglobals)"
-command -q qt6ct; or echo "    qt6ct n'est pas installe"
+command -q qt6ct; or msg "    qt6ct n'est pas installe"
 set -l qt_files ~/.config/qt6ct/qt6ct.conf ~/.config/qt6ct/qt6ct.conf ~/.config/kdeglobals
 set -l qt_sections Appearance Fonts Icons
 set -l qt_keys icon_theme general Theme
@@ -1051,11 +1123,11 @@ for i in (seq (count $qt_files))
     set -l cur (ini_get $qt_files[$i] $qt_sections[$i] $qt_keys[$i])
     if test "$cur" != "$qt_values[$i]"
         set -a qt_pending $i
-        echo "    $qt_files[$i] [$qt_sections[$i]] $qt_keys[$i] : '$cur' -> '$qt_values[$i]'"
+        msg "    $qt_files[$i] [$qt_sections[$i]] $qt_keys[$i] : '$cur' -> '$qt_values[$i]'"
     end
 end
 if test (count $qt_pending) -eq 0
-    echo "    deja a jour"
+    msg "    deja a jour"
 else if ask "    Appliquer ?"
     set -l saved
     for i in $qt_pending
@@ -1066,9 +1138,9 @@ else if ask "    Appliquer ?"
         end
         ini_set $f $qt_sections[$i] $qt_keys[$i] $qt_values[$i]
     end
-    echo "    applique"
+    msg "    applique"
 else
-    echo "    non modifie"
+    msg "    non modifie"
 end
 
 say "Polices par defaut (fontconfig)"
@@ -1076,22 +1148,22 @@ set -l fc_file ~/.config/fontconfig/fonts.conf
 set -l fc_tmp (mktemp)
 printf '%s\n' '<?xml version="1.0"?>' '<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">' '<fontconfig>' '  <alias binding="same"><family>sans-serif</family><prefer><family>SF Pro Text</family></prefer></alias>' '  <alias binding="same"><family>system-ui</family><prefer><family>SF Pro Text</family></prefer></alias>' '</fontconfig>' > $fc_tmp
 if test -f $fc_file; and cmp -s $fc_file $fc_tmp
-    echo "    deja a jour"
+    msg "    deja a jour"
 else
     if test -f $fc_file
-        echo "    $fc_file existe et differe :"
+        msg "    $fc_file existe et differe :"
         diff -u $fc_file $fc_tmp | sed 's/^/        /'
     else
-        echo "    $fc_file sera cree : sans-serif et system-ui pointent sur SF Pro Text"
+        msg "    $fc_file sera cree : sans-serif et system-ui pointent sur SF Pro Text"
     end
     if ask "    Appliquer ?"
         backup $fc_file
         mkdir -p (dirname $fc_file)
         cat $fc_tmp > $fc_file
         command -q fc-cache; and fc-cache -f
-        echo "    applique"
+        msg "    applique"
     else
-        echo "    non modifie"
+        msg "    non modifie"
     end
 end
 rm -f $fc_tmp
@@ -1099,29 +1171,29 @@ rm -f $fc_tmp
 say "Termine."
 
 if test (count $warnings) -gt 0
-    echo "    a regarder :"
+    msg "    a regarder :"
     for w in $warnings
-        echo "      - $w"
+        msg "      - $w"
     end
 end
 
 say "Lancement du shell"
 if set -q _flag_no_launch
-    echo "    ignore"
+    msg "    ignore"
 else if test -z "$qs_bin"
-    echo "    quickshell est introuvable : shell non lance"
+    msg "    quickshell est introuvable : shell non lance"
 else if test (count $blocking) -gt 0
-    echo "    shell non lance, il manque :"
+    msg "    shell non lance, il manque :"
     for b in $blocking
-        echo "      - $b"
+        msg "      - $b"
     end
 else if test -z "$HYPRLAND_INSTANCE_SIGNATURE"
-    echo "    pas dans une session Hyprland : lance $qs_bin -c $qs_name -d -n"
+    msg "    pas dans une session Hyprland : lance $qs_bin -c $qs_name -d -n"
 else
     set -l running 0
     qs_running; and set running 1
     if test $running -eq 1; and test $shell_replaced -eq 0
-        echo "    Quickshell tourne deja et son code n'a pas change"
+        msg "    Quickshell tourne deja et son code n'a pas change"
     else
         if test $running -eq 1
             $qs_bin -c $qs_name kill >/dev/null 2>&1
@@ -1136,9 +1208,9 @@ else
         disown
         sleep 3
         if qs_running
-            echo "    Quickshell lance"
+            msg "    Quickshell lance"
         else
-            echo "    Quickshell s'est arrete juste apres le lancement : lis $qs_bin -c $qs_name log" >&2
+            msg "    Quickshell s'est arrete juste apres le lancement : lis $qs_bin -c $qs_name log" >&2
         end
     end
 end

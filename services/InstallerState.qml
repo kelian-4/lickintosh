@@ -83,7 +83,7 @@ Singleton {
     function classify(l) {
         if (/^==>/.test(l)) return "step"
         if (/^\s*\[ok\]/.test(l) || /Aucun probleme detecte|Quickshell lance|Termine\./.test(l)) return "ok"
-        if (/^\s*\[!!\]/.test(l) || /probleme\(s\) a regler|indisponible|manque :/.test(l)) return "warn"
+        if (/^\s*\[!!\]/.test(l) || /probleme\(s\) a regler|problem\(s\) to fix|problema\(s\) por resolver|indisponible|unavailable|no disponible|manque :|missing:|falta:/.test(l)) return "warn"
         if (/^\s*\[\.\.\]/.test(l) || /^\s*-\s/.test(l)) return "dim"
         return "n"
     }
