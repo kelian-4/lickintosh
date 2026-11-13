@@ -20,7 +20,7 @@ floatCentered({ class = "^(org\\.pulseaudio\\.pavucontrol|pavucontrol|com\\.saiv
 floatCentered({ class = "^(nm-connection-editor|blueman-manager)$" }, 0.45, 0.45)
 
 hl.window_rule({
-    match = { title = "^Réglages$" },
+    match = { title = "^(Réglages|Settings|Ajustes|Installateur Lickintosh|Lickintosh Installer|Instalador de Lickintosh)$" },
     float = true,
     center = true,
 })
