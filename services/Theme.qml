@@ -464,9 +464,10 @@ Singleton {
             + "for q in \"$HOME/.config/qt6ct/qt6ct.conf\" \"$HOME/.config/qt5ct/qt5ct.conf\"; do "
             + "[ -f \"$q\" ] && sed -i \"s/^icon_theme=.*/icon_theme=$2/\" \"$q\"; done; "
             + "[ -f \"$HOME/.config/kdeglobals\" ] && sed -i \"/^\\[Icons\\]/,/^\\[/ s/^Theme=.*/Theme=$2/\" \"$HOME/.config/kdeglobals\"; "
-            + "break; fi; done"
+            + "break; fi; done; "
+            + "[ -f \"$3/tools/lickintosh-colors\" ] && sh \"$3/tools/lickintosh-colors\" \"$4\""
         systemProc.running = false
-        systemProc.command = ["sh", "-c", script, "sh", scheme, root.iconTheme]
+        systemProc.command = ["sh", "-c", script, "sh", scheme, root.iconTheme, Quickshell.shellDir, root.isLight ? "light" : "dark"]
         systemProc.running = true
     }
 
