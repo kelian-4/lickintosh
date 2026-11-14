@@ -730,7 +730,7 @@ Scope {
                                          bgWin.height * (bgWin.screen?.devicePixelRatio ?? 1))
                     opacity: 0
 
-                    onStatusChanged: if (status === Image.Ready) { fadeAnim.start(); GlassWallpaper.settle(path) }
+                    onStatusChanged: if (status === Image.Ready) { fadeAnim.start(); if (bgWin.currentImg === img) GlassWallpaper.settle(path) }
 
                     NumberAnimation on opacity {
                         id: fadeAnim

@@ -39,6 +39,7 @@ Singleton {
         ? videoUrl : (settled !== "" ? settled : stillPath)
 
     function settle(p) {
+        if (p !== stillPath) return
         settleTimer.stop()
         settled = p
     }

@@ -11,8 +11,8 @@ Item {
     readonly property var front: frontIsA ? slotA : slotB
     readonly property var incoming: frontIsA ? slotB : slotA
 
-    onPathChanged: {
-        if (path === front.path && !fade.running) return
+    function retarget() {
+        if (path === "" || path === front.path) return
         if (front.path === "") {
             front.path = path
             front.opacity = 1
@@ -24,6 +24,8 @@ Item {
         front.z = 0
         incoming.path = path
     }
+
+    onPathChanged: retarget()
 
     Component.onCompleted: {
         if (path !== "" && front.path === "") {
@@ -43,6 +45,7 @@ Item {
         onFinished: {
             root.front.path = ""
             root.frontIsA = !root.frontIsA
+            root.retarget()
         }
     }
 
