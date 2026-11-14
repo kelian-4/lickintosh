@@ -1,0 +1,55 @@
+#!/bin/sh
+mode="${1:-dark}"
+case "$mode" in
+    light) name=BreezeLight ;;
+    *) name=BreezeDark ;;
+esac
+
+scheme=""
+for d in "$HOME/.local/share/color-schemes" /usr/share/color-schemes /usr/local/share/color-schemes; do
+    if [ -f "$d/$name.colors" ]; then
+        scheme="$d/$name.colors"
+        break
+    fi
+done
+[ -n "$scheme" ] || exit 0
+
+kg="${XDG_CONFIG_HOME:-$HOME/.config}/kdeglobals"
+mkdir -p "$(dirname "$kg")"
+[ -f "$kg" ] || : > "$kg"
+
+tmp=$(mktemp)
+sections=$(grep '^\[' "$scheme" | grep -v '^\[General\]$')
+
+awk -v list="$sections" -v scheme_name="$name" '
+BEGIN {
+    n = split(list, a, "\n")
+    for (i = 1; i <= n; i++) skip[a[i]] = 1
+}
+/^\[/ {
+    drop = ($0 in skip)
+    ingeneral = ($0 == "[General]")
+    if (ingeneral) seen_general = 1
+}
+drop { next }
+ingeneral && /^ColorScheme=/ { if (!set_cs) { print "ColorScheme=" scheme_name; set_cs = 1 } ; next }
+{ print }
+END {
+    if (!seen_general) { print ""; print "[General]"; print "ColorScheme=" scheme_name }
+    else if (!set_cs) { }
+}
+' "$kg" > "$tmp"
+
+if grep -q '^\[General\]$' "$tmp" && ! grep -q '^ColorScheme=' "$tmp"; then
+    awk -v scheme_name="$name" '{ print } /^\[General\]$/ { print "ColorScheme=" scheme_name }' "$tmp" > "$tmp.2" && mv "$tmp.2" "$tmp"
+fi
+
+printf '\n' >> "$tmp"
+awk '/^\[/ { p = ($0 != "[General]") } p { print }' "$scheme" >> "$tmp"
+cat "$tmp" > "$kg"
+rm -f "$tmp"
+
+if command -v dbus-send >/dev/null 2>&1; then
+    dbus-send --session --type=signal /KGlobalSettings org.kde.KGlobalSettings.notifyChange int32:0 int32:0 >/dev/null 2>&1
+fi
+exit 0

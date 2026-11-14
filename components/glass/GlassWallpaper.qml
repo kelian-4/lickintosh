@@ -1,4 +1,5 @@
 pragma Singleton
+import QtQuick
 import Quickshell
 import qs.services
 
@@ -32,8 +33,24 @@ Singleton {
         return basePath
     }
 
+    property string settled: ""
+
     readonly property string path: videoActive && videoUrl !== ""
-        ? videoUrl : stillPath
+        ? videoUrl : (settled !== "" ? settled : stillPath)
+
+    function settle(p) {
+        if (p !== stillPath) return
+        settleTimer.stop()
+        settled = p
+    }
+
+    onStillPathChanged: if (settled !== "" && settled !== stillPath) settleTimer.restart()
+
+    Timer {
+        id: settleTimer
+        interval: 2000
+        onTriggered: GlassWallpaper.settled = GlassWallpaper.stillPath
+    }
 
     function sourceUrl(p) {
         if (p === "") return ""

@@ -1189,6 +1189,7 @@ else if ask "    Appliquer ?"
         end
         ini_set $f $qt_sections[$i] $qt_keys[$i] $qt_values[$i]
     end
+    sh $repo/tools/lickintosh-colors dark; and msg "    palette de couleurs KDE appliquee"
     msg "    applique"
 else
     msg "    non modifie"

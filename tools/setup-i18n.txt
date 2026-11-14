@@ -34,6 +34,7 @@ E||version de Hyprland illisible||Hyprland version unreadable||version de Hyprla
 E||modules QML : tous presents||QML modules: all present||modulos QML: todos presentes||END
 E||Les installer ?||Install them?||¿Instalarlos?||END
 E||Les activer maintenant ?||Enable them now?||¿Activarlos ahora?||END
+E||palette de couleurs KDE appliquee||KDE color scheme applied||Esquema de colores de KDE aplicado||END
 E||Appliquer ?||Apply?||¿Aplicar?||END
 E||Continuer ?||Continue?||¿Continuar?||END
 E||Ecraser les polices existantes ?||Overwrite existing fonts?||¿Sobrescribir las fuentes existentes?||END

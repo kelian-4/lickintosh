@@ -97,32 +97,10 @@ Item {
         width: root.screenSize.width
         height: root.screenSize.height
 
-        Loader {
+        WallpaperCrossfade {
             anchors.fill: parent
-            sourceComponent: root.wallpaperPath.indexOf("itemgrabber") === 0 ? grabImage : fileImage
-        }
-
-        Component {
-            id: fileImage
-
-            Image {
-                source: GlassWallpaper.sourceUrl(root.wallpaperPath)
-                sourceSize: Qt.size(scene.width, scene.height)
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                cache: true
-            }
-        }
-
-        Component {
-            id: grabImage
-
-            Image {
-                source: GlassWallpaper.sourceUrl(root.wallpaperPath)
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                cache: true
-            }
+            path: root.wallpaperPath
+            targetSize: Qt.size(scene.width, scene.height)
         }
 
         DesktopSnapshot {

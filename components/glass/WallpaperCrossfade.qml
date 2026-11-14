@@ -1,0 +1,74 @@
+import QtQuick
+
+Item {
+    id: root
+
+    property string path: ""
+    property size targetSize: Qt.size(0, 0)
+    property int duration: 350
+
+    property bool frontIsA: true
+    readonly property var front: frontIsA ? slotA : slotB
+    readonly property var incoming: frontIsA ? slotB : slotA
+
+    function retarget() {
+        if (path === "" || path === front.path) return
+        if (front.path === "") {
+            front.path = path
+            front.opacity = 1
+            return
+        }
+        fade.stop()
+        incoming.opacity = 0
+        incoming.z = 1
+        front.z = 0
+        incoming.path = path
+        Qt.callLater(checkIncoming)
+    }
+
+    function checkIncoming() {
+        if (incoming.path !== "" && incoming.path === path && incoming.imageStatus === Image.Ready && !fade.running && incoming.opacity < 1) fade.restart()
+    }
+
+    onPathChanged: retarget()
+
+    Component.onCompleted: {
+        if (path !== "" && front.path === "") {
+            front.path = path
+            front.opacity = 1
+        }
+    }
+
+    NumberAnimation {
+        id: fade
+        target: root.incoming
+        property: "opacity"
+        from: 0
+        to: 1
+        duration: root.duration
+        easing.type: Easing.InOutQuad
+        onFinished: {
+            root.front.path = ""
+            root.frontIsA = !root.frontIsA
+            root.retarget()
+        }
+    }
+
+    WallpaperSlot {
+        id: slotA
+        anchors.fill: parent
+        targetSize: root.targetSize
+        onReady: root.slotReady(slotA)
+    }
+
+    WallpaperSlot {
+        id: slotB
+        anchors.fill: parent
+        targetSize: root.targetSize
+        onReady: root.slotReady(slotB)
+    }
+
+    function slotReady(slot) {
+        if (slot === incoming && slot.path !== "" && !fade.running && slot.opacity < 1) fade.restart()
+    }
+}

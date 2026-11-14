@@ -682,10 +682,14 @@ Scope {
                     return
                 }
                 currentImg = imgComp.createObject(bgContent, { path: source })
+                if (currentImg.status === Image.Ready) GlassWallpaper.settle(currentImg.path)
             }
 
             Component.onCompleted: {
-                if (source !== "") currentImg = imgComp.createObject(bgContent, { path: source })
+                if (source !== "") {
+                    currentImg = imgComp.createObject(bgContent, { path: source })
+                    if (currentImg.status === Image.Ready) GlassWallpaper.settle(currentImg.path)
+                }
             }
 
             Item {
@@ -730,7 +734,7 @@ Scope {
                                          bgWin.height * (bgWin.screen?.devicePixelRatio ?? 1))
                     opacity: 0
 
-                    onStatusChanged: if (status === Image.Ready) fadeAnim.start()
+                    onStatusChanged: if (status === Image.Ready) { fadeAnim.start(); if (bgWin.currentImg === img) GlassWallpaper.settle(path) }
 
                     NumberAnimation on opacity {
                         id: fadeAnim
