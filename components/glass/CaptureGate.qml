@@ -13,33 +13,30 @@ Item {
     signal requestFrame()
     signal restartRequested()
 
-    onWantedChanged: {
-        if (!wanted)
-            armed = false
-        else if (calm)
+    // Une fois armee, la source reste branchee : la derniere image capturee est
+    // conservee quand la fenetre quitte l'ecran (autre workspace) et reaffichee
+    // immediatement au retour, au lieu de laisser voir le fond d'ecran.
+    // Une fenetre sans aucune image est armee tout de suite, sans attendre le calme.
+    function evaluate() {
+        if (wanted && (calm || !hasContent))
             armed = true
     }
 
-    onCalmChanged: {
-        if (calm && wanted)
-            armed = true
-    }
-
-    Component.onCompleted: {
-        if (calm && wanted)
-            armed = true
-    }
+    onWantedChanged: evaluate()
+    onCalmChanged: evaluate()
+    onHasContentChanged: evaluate()
+    Component.onCompleted: evaluate()
 
     Timer {
         interval: Math.max(50, root.interval)
-        running: root.armed && root.calm && root.hasContent
+        running: root.armed && root.wanted && root.calm && root.hasContent
         repeat: true
         onTriggered: root.requestFrame()
     }
 
     Timer {
         interval: root.restartDelay
-        running: root.armed && !root.hasContent
+        running: root.armed && root.wanted && !root.hasContent
         repeat: true
         onTriggered: {
             if (root.calm)
