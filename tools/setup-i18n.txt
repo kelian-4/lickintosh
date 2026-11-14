@@ -49,10 +49,16 @@ E||reglages GTK (dconf) reinitialises||GTK settings (dconf) reset||ajustes GTK (
 E||Desinstallation terminee.||Uninstall complete.||Desinstalacion terminada.||END
 E||les reglages systeme ecrits par setup.fish (GTK, Qt, fontconfig) seront aussi restaures, et la configuration Hyprland installee sera retiree (la derniere sauvegarde est restauree si elle existe)||the system settings written by setup.fish (GTK, Qt, fontconfig) will also be restored, and the installed Hyprland configuration will be removed (the latest backup is restored if one exists)||los ajustes del sistema escritos por setup.fish (GTK, Qt, fontconfig) tambien se restauraran y se eliminara la configuracion de Hyprland instalada (se restaura la ultima copia de seguridad si existe)||END
 E||tout est supprime definitivement : tes reglages du shell, le dock, les widgets, les notes et les caches||everything is deleted permanently: your shell settings, the dock, widgets, notes and caches||todo se elimina de forma permanente: tus ajustes del shell, el dock, los widgets, las notas y las cachés||END
+E||Fonds d'ecran||Wallpapers||Fondos de pantalla||END
+E||Installer ttf-nerd-fonts-symbols ?||Install ttf-nerd-fonts-symbols?||¿Instalar ttf-nerd-fonts-symbols?||END
+E||police de symboles Nerd Font absente||Nerd Font symbols font missing||fuente de simbolos Nerd Font ausente||END
+E||police de symboles absente : le pingouin de la barre ne s'affiche pas sans elle||symbols font missing: the menu bar penguin does not display without it||fuente de simbolos ausente: el pinguino de la barra no se muestra sin ella||END
 F||) n'a pas ete modifiee : retire la ligne qui lance lickintosh-start dans hyprlua/programs.lua si tu veux supprimer l'autostart||) was not modified: remove the line that launches lickintosh-start in hyprlua/programs.lua if you want to remove the autostart||) no se ha modificado: elimina la linea que lanza lickintosh-start en hyprlua/programs.lua si quieres quitar el autostart||END
 F||Ne lance pas setup.fish en root : les fichiers seraient installes pour root. Il demande sudo lui-meme quand il en a besoin.||Do not run setup.fish as root: the files would be installed for root. It asks for sudo itself when needed.||No ejecutes setup.fish como root: los archivos se instalarian para root. Pide sudo por si mismo cuando lo necesita.||END
 F||l'autostart ne lance pas lickintosh-start (le shell ne sera pas relance apres un plantage) : relance setup.fish||autostart does not launch lickintosh-start (the shell will not restart after a crash): run setup.fish again||el autostart no lanza lickintosh-start (el shell no se reiniciara tras un fallo): vuelve a ejecutar setup.fish||END
 F||Installateur graphique indisponible (qs, installer.qml ou session Wayland manquant) : installation en terminal.||Graphical installer unavailable (qs, installer.qml or Wayland session missing): installing in the terminal.||Instalador grafico no disponible (falta qs, installer.qml o una sesion Wayland): instalacion en el terminal.||END
+F||police de symboles Nerd Font absente : le pingouin de la barre ne s'affiche pas (arch : ttf-nerd-fonts-symbols)||Nerd Font symbols font missing: the menu bar penguin does not display (arch: ttf-nerd-fonts-symbols)||fuente de simbolos Nerd Font ausente: el pinguino de la barra no se muestra (arch: ttf-nerd-fonts-symbols)||END
+F||police de symboles Nerd Font absente : installe un Nerd Font (Symbols Nerd Font) pour le pingouin de la barre||Nerd Font symbols font missing: install a Nerd Font (Symbols Nerd Font) for the menu bar penguin||fuente de simbolos Nerd Font ausente: instala una Nerd Font (Symbols Nerd Font) para el pinguino de la barra||END
 F||Systeme immuable : installe quickshell dans une couche (rpm-ostree) ou une boite, puis relance setup.fish||Immutable system: install quickshell in a layer (rpm-ostree) or a container, then run setup.fish again||Sistema inmutable: instala quickshell en una capa (rpm-ostree) o un contenedor y vuelve a ejecutar setup.fish||END
 F||quickshell n'est pas dans les depots de cette version de Debian (seulement testing et unstable).||quickshell is not in the repositories of this Debian release (only testing and unstable).||quickshell no esta en los repositorios de esta version de Debian (solo testing y unstable).||END
 F||Installe Quickshell 0.2 ou plus avec le gestionnaire de ta distribution ou depuis les sources : ||Install Quickshell 0.2 or later with your distribution's package manager or from source: ||Instala Quickshell 0.2 o superior con el gestor de tu distribucion o desde el codigo fuente: ||END
@@ -75,6 +81,7 @@ F||Quickshell s'est arrete juste apres le lancement : lis ||Quickshell stopped r
 F||police SF Pro introuvable (fc-list) : lance setup.fish||SF Pro font not found (fc-list): run setup.fish||fuente SF Pro no encontrada (fc-list): ejecuta setup.fish||END
 F||configuration PAM de l'ecran de verrouillage presente||lock screen PAM configuration present||configuracion PAM de la pantalla de bloqueo presente||END
 F||le depot est deja le dossier du shell : copie ignoree||the repository is already the shell folder: copy skipped||el repositorio ya es la carpeta del shell: copia omitida||END
+F||police de symboles presente (pingouin de la barre)||symbols font present (menu bar penguin)||fuente de simbolos presente (pinguino de la barra)||END
 F||ni sudo ni doas : lance cette commande en root : ||neither sudo nor doas found: run this command as root: ||ni sudo ni doas: ejecuta este comando como root: ||END
 F||Quickshell tourne deja et son code n'a pas change||Quickshell is already running and its code has not changed||Quickshell ya esta en ejecucion y su codigo no ha cambiado||END
 F|| : la config hyprlua (Lua) demande 0.57 ou plus|| : the hyprlua (Lua) config requires 0.57 or later|| : la config hyprlua (Lua) requiere 0.57 o superior||END
@@ -128,6 +135,7 @@ F||Configuration Hyprland (||Hyprland configuration (||Configuracion de Hyprland
 F||police SF Pro installee||SF Pro font installed||fuente SF Pro instalada||END
 F||pas encore de journal (||no log yet (||todavia no hay registro (||END
 F||les autres dossiers de ||the other folders in ||las demas carpetas de ||END
+F|| fond(s) copie(s) dans || wallpaper(s) copied to || fondo(s) copiado(s) en ||END
 F||erreurs recentes dans ||recent errors in ||errores recientes en ||END
 F|| probleme(s) a regler.|| problem(s) to fix.|| problema(s) por resolver.||END
 F||fichier(s) installe(s)||file(s) installed||archivo(s) instalado(s)||END
@@ -145,6 +153,7 @@ F||Quickshell tourne||Quickshell is running||Quickshell esta en ejecucion||END
 F||aucun theme dans ||no theme in ||ningun tema en ||END
 F||shell copie dans ||shell copied to ||shell copiado en ||END
 F|| est introuvable|| not found|| no encontrado||END
+F||aucun fond dans ||no wallpapers in ||ningun fondo en ||END
 F||indisponible : ||unavailable: ||no disponible: ||END
 F||installation : ||installing: ||instalando: ||END
 F||distribution : ||distribution: ||distribucion: ||END

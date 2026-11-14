@@ -181,7 +181,7 @@ Item {
         spacing: 2
 
         MenuRow {
-            label: I18n.tr("About this Mac")
+            label: I18n.tr("About this PC")
             icon: "dropdown/mac.svg"
             onActivated: {
                 root.openAbout()

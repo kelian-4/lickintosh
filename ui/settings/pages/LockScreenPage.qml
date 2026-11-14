@@ -15,7 +15,7 @@ ContentPage {
         const p = ShellConfig.options.wallpaper.lockscreenPath
         return p.length > 0
             ? p
-            : Quickshell.shellDir + "/assets/wallpapers/macOS Tahoe 26 Dark Wallpaper.png"
+            : ShellConfig.options.wallpaper.path
     }
 
     ContentSection {
@@ -35,7 +35,7 @@ ContentPage {
 
                 Image {
                     anchors.fill: parent
-                    source: Qt.url("file://" + encodeURI(root.previewPath))
+                    source: root.previewPath !== "" ? Qt.url("file://" + encodeURI(root.previewPath)) : ""
                     fillMode: Image.PreserveAspectCrop
                     sourceSize.width: 640
                     asynchronous: true

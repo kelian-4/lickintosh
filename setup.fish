@@ -83,6 +83,7 @@ function qs_running
 end
 set -g fonts_dst ~/.local/share/fonts/SF
 set -g icons_dst ~/.icons
+set -g wallpapers_dst ~/Pictures/wallpapers
 set -g hypr_dst ~/.config/hypr
 
 set -g setup_only_assets fonts icons_desktop MacOS-Tahoe-Cursor config
@@ -199,8 +200,16 @@ function detect_family --argument-names os_id os_like
     echo unknown
 end
 
+function glyph_font_ok
+    command -q fc-list; or return 0
+    set -l f (fc-list ':charset=f31a' family 2>/dev/null)
+    test (count $f) -gt 0
+end
+
 function pkg_for --argument-names family item
     switch $item
+        case symbols_font
+            test $family = arch; and echo ttf-nerd-fonts-symbols
         case mod_graphs
             switch $family
                 case arch
@@ -534,6 +543,11 @@ function run_doctor
     else
         d_bad "outils manquants (paquets) : $missing_tools"
     end
+    if glyph_font_ok
+        d_ok "police de symboles presente (pingouin de la barre)"
+    else
+        d_bad "police de symboles Nerd Font absente : le pingouin de la barre ne s'affiche pas (arch : ttf-nerd-fonts-symbols)"
+    end
     if command -q fish
         d_ok "fish "(fish --version | string match -r '\d+\.\d+\.\d+')
     end
@@ -683,6 +697,10 @@ function run_uninstall
         msg "    annule"
         return 0
     end
+    for f in (find $repo/assets/wallpapers -maxdepth 1 -type f 2>/dev/null)
+        rm -f $wallpapers_dst/(basename $f)
+    end
+    rmdir $wallpapers_dst 2>/dev/null
     pkill -f lickintosh-start >/dev/null 2>&1
     command -q qs; and qs -c $qs_name kill >/dev/null 2>&1
     pkill -f spotlight_clip_watch >/dev/null 2>&1
@@ -762,6 +780,13 @@ function run_deps_plan
         else
             set -a repo $item
         end
+    end
+    if glyph_font_ok
+        set -a have symbols_font
+    else if test $family = arch
+        set -a repo symbols_font
+    else
+        set -a skipped "symbols_font|install a Nerd Font (Symbols Nerd Font)"
     end
     set -l qs_present false
     for c in qs quickshell
@@ -847,6 +872,20 @@ else
         end
     else
         test (count $missing_req) -gt 0; and set -a warnings "outils requis manquants : $missing_req"
+    end
+
+    if not glyph_font_ok
+        if test $family = arch
+            msg "    police de symboles absente : le pingouin de la barre ne s'affiche pas sans elle"
+            if ask "    Installer ttf-nerd-fonts-symbols ?"
+                refresh_index $family
+                install_items $family symbols_font
+            else
+                set -a warnings "police de symboles Nerd Font absente"
+            end
+        else
+            set -a warnings "police de symboles Nerd Font absente : installe un Nerd Font (Symbols Nerd Font) pour le pingouin de la barre"
+        end
     end
 
     for c in qs quickshell
@@ -1012,6 +1051,21 @@ else
     if test $installed -gt 0
         command -q fc-cache; and fc-cache -f $fonts_dst
     end
+end
+
+say "Fonds d'ecran"
+set -l wps (find $repo/assets/wallpapers -maxdepth 1 -type f 2>/dev/null | sort)
+if test (count $wps) -eq 0
+    msg "    aucun fond dans assets/wallpapers, etape ignoree"
+else
+    mkdir -p $wallpapers_dst
+    set -l wp_new 0
+    for f in $wps
+        set -l name (basename $f)
+        test -e $wallpapers_dst/$name; and continue
+        cp $f $wallpapers_dst/$name; and set wp_new (math $wp_new + 1)
+    end
+    msg "    $wp_new fond(s) copie(s) dans $wallpapers_dst"
 end
 
 say "Icones"

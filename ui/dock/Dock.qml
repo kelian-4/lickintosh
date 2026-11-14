@@ -54,6 +54,7 @@ Scope {
     property var pinnedFiles: []
 
     property var pinnedApps: [
+        { name: "Launchpad", cmd: "__launchpad__", icon: "", iconPath: "", autostart: false },
         { name: "Finder",   cmd: "dolphin",   icon: "system-file-manager", iconPath: "", autostart: false },
         { name: "Terminal", cmd: "kitty",      icon: "kitty",               iconPath: "", autostart: false },
         { name: "Browser",  cmd: "brave",      icon: "brave-browser",      iconPath: "", autostart: false },
@@ -92,6 +93,8 @@ Scope {
     }
 
     function pinnedIconFor(entry) {
+        if (dockRoot.pinnedKey(entry) === "launchpad")
+            return Qt.resolvedUrl("file://" + Quickshell.shellDir + "/assets/pngs/launchpad.png")
         if (dockRoot.pinnedKey(entry) === "settings-app")
             return Qt.resolvedUrl("file://" + Quickshell.env("HOME") + "/.icons/" + Theme.iconTheme + "/apps/scalable/preferences-system.svg")
         if (dockRoot._isThemeName(entry.icon)) {
@@ -380,6 +383,7 @@ Scope {
     function pinnedKey(entry) {
         var cmd = entry.cmd ? entry.cmd.toLowerCase() : ""
         if (cmd === "__settings-app__" || (cmd === "" && entry.name === "Settings")) return "settings-app"
+        if (cmd === "__launchpad__") return "launchpad"
         return cmd
     }
 
@@ -795,6 +799,8 @@ Scope {
                                     onClicked: {
                                         if (_inst.length > 0)
                                             dockRoot.cycleWindow(_groupKey, _inst)
+                                        else if (appCmd === "__launchpad__")
+                                            LauncherState.openApplications()
                                         else if (appCmd === "__settings-app__" || (appCmd === "" && modelData.name === "Settings"))
                                             dockRoot.launchSettingsApp()
                                         else

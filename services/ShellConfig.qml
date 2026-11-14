@@ -18,13 +18,6 @@ Singleton {
     readonly property string filePath: Quickshell.env("HOME") + "/.config/lickintosh/shell-config.json"
     property alias options: configAdapter
 
-    readonly property string defaultWallpaper: Quickshell.shellDir + "/assets/wallpapers/WWDC25 macOS Tahoe city orange.jpeg"
-
-    function seedWallpaper() {
-        if (configAdapter.wallpaper.path === "") {
-            configAdapter.wallpaper.path = root.defaultWallpaper
-        }
-    }
     property bool ready: false
 
     FileView {
@@ -35,7 +28,7 @@ Singleton {
         onAdapterUpdated: writeAdapter()
         onLoaded: {
             root.ready = true
-            root.seedWallpaper()
+            if (configAdapter.spotlight.indexing.wallpaperDir === "~/Pictures/wallpaper") configAdapter.spotlight.indexing.wallpaperDir = "~/Pictures/wallpapers"
             root.seedKeepAwake()
         }
         onLoadFailed: function(error) {
@@ -50,6 +43,7 @@ Singleton {
 
             property JsonObject dock: JsonObject {
                 property list<var> pinnedApps: [
+                    { "name": "Launchpad", "cmd": "__launchpad__", "icon": "", "iconPath": "", "autostart": false },
                     { "name": "Finder",   "cmd": "dolphin", "icon": "system-file-manager", "iconPath": "", "autostart": false },
                     { "name": "Terminal", "cmd": "kitty",   "icon": "kitty",               "iconPath": "", "autostart": false },
                     { "name": "Browser",  "cmd": "brave",   "icon": "brave-browser",       "iconPath": "", "autostart": false },
@@ -155,7 +149,7 @@ Singleton {
                 }
 
                 property JsonObject indexing: JsonObject {
-                    property string wallpaperDir:       "~/Pictures/wallpaper"
+                    property string wallpaperDir:       "~/Pictures/wallpapers"
                     property list<string> excludePaths: ["node_modules", "target", "dist", "build", "vendor", "venv", "__pycache__"]
                     property int fullReindexHours:       24
                     property int incrementalMinutes:     5
