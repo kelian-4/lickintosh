@@ -738,6 +738,7 @@ Scope {
                         from: 0
                         to: 1
                         duration: 350
+                        onRunningChanged: if (!running && img.opacity >= 1 && bgWin.currentImg === img) GlassWallpaper.settle(img.path)
                     }
 
                     Timer {
