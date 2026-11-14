@@ -10,6 +10,7 @@ Singleton {
     property int captureUsers: 0
     property bool fast: false
     property int transitionEpoch: 0
+    property string closingAddress: ""
     property bool sessionLocked: false
     property bool closing: false
     readonly property bool captureBlocked: sessionLocked || unlockSettle.running
@@ -61,6 +62,7 @@ Singleton {
         function onRawEvent(event) {
             var n = event.name
             if (n === "closewindow") {
+                root.closingAddress = String(event.data).split(",")[0].replace(/^0x/i, "").toLowerCase()
                 root.closing = true
                 closingOff.restart()
             }
@@ -85,7 +87,10 @@ Singleton {
     Timer {
         id: closingOff
         interval: 700
-        onTriggered: root.closing = false
+        onTriggered: {
+            root.closing = false
+            root.closingAddress = ""
+        }
     }
 
     Timer {
