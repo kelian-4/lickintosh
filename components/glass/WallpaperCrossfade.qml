@@ -23,6 +23,11 @@ Item {
         incoming.z = 1
         front.z = 0
         incoming.path = path
+        Qt.callLater(checkIncoming)
+    }
+
+    function checkIncoming() {
+        if (incoming.path !== "" && incoming.path === path && incoming.imageStatus === Image.Ready && !fade.running && incoming.opacity < 1) fade.restart()
     }
 
     onPathChanged: retarget()

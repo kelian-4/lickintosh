@@ -19,6 +19,7 @@ Loader {
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
             cache: true
+            onStatusChanged: if (status === Image.Ready) slot.ready()
         }
     }
 
@@ -29,6 +30,7 @@ Loader {
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
             cache: true
+            onStatusChanged: if (status === Image.Ready) slot.ready()
         }
     }
 }
