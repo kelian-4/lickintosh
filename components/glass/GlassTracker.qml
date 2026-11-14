@@ -95,7 +95,7 @@ Singleton {
 
     Timer {
         id: fastOff
-        interval: 1500
+        interval: 900
         onTriggered: root.fast = false
     }
 
