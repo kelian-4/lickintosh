@@ -64,6 +64,7 @@ Scope {
     readonly property string _stateDir:  "$HOME/.config/lickintosh/dock"
     readonly property string _statePath: dockRoot._stateDir + "/dock-state.json"
     property bool _stateLoaded: false
+    property bool _launchpadSeeded: false
 
     onPinnedAppsChanged: {
         if (!dockRoot._stateLoaded) return
@@ -77,7 +78,7 @@ Scope {
     }
 
     function saveState() {
-        var data    = JSON.stringify({ pinnedApps: dockRoot.pinnedApps, pinnedFiles: dockRoot.pinnedFiles })
+        var data    = JSON.stringify({ pinnedApps: dockRoot.pinnedApps, pinnedFiles: dockRoot.pinnedFiles, launchpadSeeded: true })
         var escaped = data.replace(/'/g, "'\\''")
         _stateSave.command = ["sh", "-c",
             "mkdir -p " + dockRoot._stateDir + " && printf '%s' '" + escaped + "' > " + dockRoot._statePath]
@@ -260,9 +261,19 @@ Scope {
                     var data = JSON.parse(text)
                     if (data.pinnedApps && data.pinnedApps.length > 0) dockRoot.pinnedApps = data.pinnedApps
                     if (data.pinnedFiles) dockRoot.pinnedFiles = data.pinnedFiles
+                    dockRoot._launchpadSeeded = data.launchpadSeeded === true
                 } catch (e) {}
             }
+            var needSave = false
+            if (text !== "" && !dockRoot._launchpadSeeded) {
+                var has = dockRoot.pinnedApps.some(function(a) { return a.cmd === "__launchpad__" })
+                if (!has) {
+                    dockRoot.pinnedApps = [{ name: "Launchpad", cmd: "__launchpad__", icon: "", iconPath: "", autostart: false }].concat(dockRoot.pinnedApps)
+                    needSave = true
+                }
+            }
             dockRoot._stateLoaded = true
+            if (needSave) dockRoot.saveState()
             dockRoot._syncAutostartFile()
         }
     }

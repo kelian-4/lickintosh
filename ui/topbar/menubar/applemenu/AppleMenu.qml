@@ -212,7 +212,7 @@ Item {
 
         MenuRow {
             label: I18n.tr("Installateur Lickintosh…")
-            icon: "settings/update.svg"
+            icon: "dropdown/installer.svg"
             onActivated: {
                 InstallerLauncher.open("")
                 root.closeRequested()
