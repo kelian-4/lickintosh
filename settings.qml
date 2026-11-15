@@ -1,7 +1,3 @@
-//@ pragma IconTheme MacTahoe-dark
-//@ pragma UseQApplication
-//@ pragma ShellId settings-app
-//@ pragma AppId settings-app
 pragma ComponentBehavior: Bound
 
 import QtQuick
