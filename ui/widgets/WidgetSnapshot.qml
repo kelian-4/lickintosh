@@ -1,8 +1,6 @@
 import QtQuick
 import qs.services
 
-// Copie statique d'un widget pour la capture du verre : meme contenu que WidgetView,
-// mais sans verre propre (sinon le verre se capturerait lui-meme en boucle).
 Item {
     id: root
 

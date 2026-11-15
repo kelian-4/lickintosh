@@ -13,10 +13,6 @@ Item {
     signal requestFrame()
     signal restartRequested()
 
-    // Une fois armee, la source reste branchee : la derniere image capturee est
-    // conservee quand la fenetre quitte l'ecran (autre workspace) et reaffichee
-    // immediatement au retour, au lieu de laisser voir le fond d'ecran.
-    // Une fenetre sans aucune image est armee tout de suite, sans attendre le calme.
     function evaluate() {
         if (wanted && (calm || !hasContent))
             armed = true

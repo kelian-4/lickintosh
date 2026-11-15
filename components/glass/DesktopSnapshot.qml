@@ -8,7 +8,6 @@ Item {
 
     visible: root.shown
 
-    // Widgets du bureau : ils font partie de ce que le verre doit voir
     Item {
         x: WidgetState.desktopOffsetX
         y: WidgetState.desktopOffsetY
@@ -16,7 +15,6 @@ Item {
         Repeater {
             model: WidgetState.desktop
 
-            // Chargement par URL : evite un import circulaire entre components/glass et ui/widgets
             delegate: Loader {
                 id: wl
                 required property var modelData
