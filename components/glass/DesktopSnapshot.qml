@@ -8,6 +8,28 @@ Item {
 
     visible: root.shown
 
+    // Widgets du bureau : ils font partie de ce que le verre doit voir
+    Item {
+        x: WidgetState.desktopOffsetX
+        y: WidgetState.desktopOffsetY
+
+        Repeater {
+            model: WidgetState.desktop
+
+            // Chargement par URL : evite un import circulaire entre components/glass et ui/widgets
+            delegate: Loader {
+                id: wl
+                required property var modelData
+                readonly property var spec: WidgetState.entryOf("desktop", wl.modelData.id) || wl.modelData
+
+                x: wl.spec.x
+                y: wl.spec.y
+                Component.onCompleted: wl.setSource(Qt.resolvedUrl("../../ui/widgets/WidgetView.qml"), { snapshot: true, widgetData: wl.spec })
+                onLoaded: wl.item.widgetData = Qt.binding(function() { return wl.spec })
+            }
+        }
+    }
+
     Repeater {
         model: DesktopFiles.layout
 

@@ -200,16 +200,8 @@ function detect_family --argument-names os_id os_like
     echo unknown
 end
 
-function glyph_font_ok
-    command -q fc-list; or return 0
-    set -l f (fc-list ':charset=f31a' family 2>/dev/null)
-    test (count $f) -gt 0
-end
-
 function pkg_for --argument-names family item
     switch $item
-        case symbols_font
-            test $family = arch; and echo ttf-nerd-fonts-symbols
         case mod_graphs
             switch $family
                 case arch
@@ -543,11 +535,6 @@ function run_doctor
     else
         d_bad "outils manquants (paquets) : $missing_tools"
     end
-    if glyph_font_ok
-        d_ok "police de symboles presente (pingouin de la barre)"
-    else
-        d_bad "police de symboles Nerd Font absente : le pingouin de la barre ne s'affiche pas (arch : ttf-nerd-fonts-symbols)"
-    end
     if command -q fish
         d_ok "fish "(fish --version | string match -r '\d+\.\d+\.\d+')
     end
@@ -781,13 +768,6 @@ function run_deps_plan
             set -a repo $item
         end
     end
-    if glyph_font_ok
-        set -a have symbols_font
-    else if test $family = arch
-        set -a repo symbols_font
-    else
-        set -a skipped "symbols_font|install a Nerd Font (Symbols Nerd Font)"
-    end
     set -l qs_present false
     for c in qs quickshell
         command -q $c; and set qs_present true
@@ -874,19 +854,6 @@ else
         test (count $missing_req) -gt 0; and set -a warnings "outils requis manquants : $missing_req"
     end
 
-    if not glyph_font_ok
-        if test $family = arch
-            msg "    police de symboles absente : le pingouin de la barre ne s'affiche pas sans elle"
-            if ask "    Installer ttf-nerd-fonts-symbols ?"
-                refresh_index $family
-                install_items $family symbols_font
-            else
-                set -a warnings "police de symboles Nerd Font absente"
-            end
-        else
-            set -a warnings "police de symboles Nerd Font absente : installe un Nerd Font (Symbols Nerd Font) pour le pingouin de la barre"
-        end
-    end
 
     for c in qs quickshell
         if command -q $c

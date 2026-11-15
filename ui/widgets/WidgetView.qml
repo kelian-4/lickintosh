@@ -6,6 +6,8 @@ Item {
     id: root
 
     required property var widgetData
+    // Copie sans verre propre, utilisee dans la capture du bureau pour le verre (evite la recursion)
+    property bool snapshot: false
 
     readonly property var dims: WidgetState.sizeOf(root.widgetData.size)
     readonly property var resolved: WidgetRegistry.resolve(root.widgetData)
@@ -18,13 +20,26 @@ Item {
         theme: root.widgetData.theme || "glass"
     }
 
-    BoxGlass {
+    Rectangle {
         anchors.fill: parent
-        visible: palette.glass
+        visible: root.snapshot && palette.glass
         radius: 22
         color: "#59101014"
-        light: "#60ffffff"
-        rimStrength: 1.0
+        border.width: 1
+        border.color: "#30ffffff"
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: !root.snapshot
+        sourceComponent: BoxGlass {
+            anchors.fill: parent
+            visible: palette.glass
+            radius: 22
+            color: "#59101014"
+            light: "#60ffffff"
+            rimStrength: 1.0
+        }
     }
 
     Rectangle {
