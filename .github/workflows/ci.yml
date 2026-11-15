@@ -72,5 +72,9 @@ jobs:
           git add ci-status.md
           if ! git diff --cached --quiet; then
             git commit -m "chore: mise a jour ci-status.md [skip ci]"
-            git push origin HEAD:${{ github.ref_name }}
+            for i in 1 2 3; do
+              git pull --rebase -X theirs origin ${{ github.ref_name }} && git push origin HEAD:${{ github.ref_name }} && exit 0
+              sleep 3
+            done
+            exit 1
           fi
