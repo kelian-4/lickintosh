@@ -37,7 +37,6 @@ Item {
             visible: opacity > 0.003
             Rectangle { anchors.fill: parent; color: "#0c0c10" }
 
-            // Animated Canvas Video (Spotify supported music)
             Loader {
                 id: canvasLoader
                 anchors.fill: parent
@@ -68,20 +67,18 @@ Item {
                 brightness: -0.15
             }
 
-            // old and new album, each blurred; the new one fades in over the old one during a hand-over
             Repeater {
                 model: canvasLoader.active ? 0 : 2
                 delegate: MultiEffect {
                     required property int index
                     readonly property Item img: index === 0 ? ls.coverOld : ls.coverNew
                     anchors.fill: parent
-                    scale: 1.25                            // pushes the blur's soft edges off-screen
+                    scale: 1.25
                     source: img
                     autoPaddingEnabled: false
                     blurEnabled: true; blurMax: 64; blur: 1.0
                     saturation: 0.25
                     brightness: -0.16
-                    // new: fades in with the hand-over; old: only there while it's being covered
                     opacity: index === 1 ? ls.bgProg : (ls.bgProg < 1 ? 1 : 0)
                     visible: img.status === Image.Ready && opacity > 0.003
                     z: index
@@ -89,12 +86,9 @@ Item {
             }
         }
 
-    // shared, pre-blurred copy of the scene that every glass slab (and the clock) refracts
     ShaderEffectSource {
         id: sceneTex
         sourceItem: ls.sceneParent
-        // with a video wallpaper the scene changes every frame: the glass copy refreshes at 12 fps instead
-        // (blur + every glass shader re-running 30-60x a second was the main GPU cost on the lock screen)
         live: !canvasLoader.active
         visible: false
         textureSize: Qt.size(Math.max(1, Math.round(ls.width / 2)), Math.max(1, Math.round(ls.height / 2)))
@@ -122,9 +116,6 @@ Item {
         visible: false
     }
 
-    // ═════════════ COVER HAND-OVER ═════════════
-    // Two picture slots. A new cover loads into the back slot; once it's there (or after 1.5 s) the bubble's cover
-    // "burns" over to it (burn.frag) and the blurred album background cross-fades, both in step.
     readonly property string coverUrl: media.pl && media.pl.trackArtUrl ? media.pl.trackArtUrl : ""
     property int coverIdx: 0
     property real coverProg: 1
@@ -134,7 +125,7 @@ Item {
         if (coverUrl === "" || !ls.isPrimary) return;
         var cur = coverIdx === 0 ? coverA : coverB;
         if (cur.source.toString() === coverUrl) return;
-        if (cur.source.toString() === "") { cur.source = coverUrl; return; }     // first cover: just show it
+        if (cur.source.toString() === "") { cur.source = coverUrl; return; }
         (coverIdx === 0 ? coverB : coverA).source = coverUrl;
         coverPending = true;
         coverWait.restart();
@@ -153,7 +144,6 @@ Item {
     }
     Timer { id: coverWait; interval: 1500; onTriggered: ls.coverTry() }
     NumberAnimation { id: coverAnim; target: ls; property: "coverProg"; from: 0; to: 1; duration: 1100; easing.type: Easing.InOutCubic }
-    // the blurred album background: its own, quicker hand-over (0.65 s ease-out)
     property real bgProg: 1
     NumberAnimation { id: bgAnim; target: ls; property: "bgProg"; from: 0; to: 1; duration: 650; easing.type: Easing.OutCubic }
     Image { id: coverA; visible: false; width: 600; height: 600; fillMode: Image.PreserveAspectCrop; asynchronous: true; mipmap: true; sourceSize: Qt.size(600, 600); onStatusChanged: ls.coverTry() }
@@ -161,7 +151,6 @@ Item {
     readonly property Item coverNew: coverIdx === 0 ? coverA : coverB
     readonly property Item coverOld: coverIdx === 0 ? coverB : coverA
 
-    // ═════════════ NOW PLAYING ═════════════
     readonly property var player: {
         var ps = Mpris.players.values, best = null;
         for (var i = 0; i < ps.length; i++) {
@@ -171,34 +160,25 @@ Item {
         return best;
     }
     readonly property bool hasMedia: player !== null && player !== undefined && (player.trackTitle || "") !== ""
-    // Apple "artwork mode" (tap the cover: it leaves the bubble, as wide as the bubble) and Apple Music style lyrics
-    // (lyrics button). Only one at a time.
-    // npMode: "" | "art" | "lyrics" | "artlyrics" (big cover on the left, lyrics on the right — Apple Music full screen)
     readonly property bool artMode: (ls.st.npMode === "art" || ls.st.npMode === "artlyrics") && hasMedia && isPrimary && !leaving
     readonly property bool lyricsMode: (ls.st.npMode === "lyrics" || ls.st.npMode === "artlyrics") && hasMedia && isPrimary && !leaving
     readonly property bool sideMode: ls.st.npMode === "artlyrics" && hasMedia && isPrimary && !leaving
-    // 0 → 1: cover + bubble slide left, the lyrics move beside them
     property real sideT: sideMode ? 1 : 0
     Behavior on sideT { NumberAnimation { id: sideAnim; duration: 650; easing.type: Easing.OutQuint } }
     readonly property real sideGap: 32 * u
     readonly property real sideLyrW: Math.min(560 * u, width - 372 * u - sideGap - 96 * u)
-    // 0 → 1 springs; the cover, the bubble, the lyrics and the clock all follow them, so they move as one
     property real artT: artMode ? 1 : 0
     Behavior on artT { NumberAnimation { id: artAnim; duration: 650; easing.type: Easing.OutQuint } }
     property real lyrT: lyricsMode ? 1 : 0
     Behavior on lyrT { NumberAnimation { id: lyrAnim; duration: 650; easing.type: Easing.OutQuint } }
     readonly property bool npAnimating: artAnim.running || lyrAnim.running || sideAnim.running
     function clamp01(v) { return Math.max(0, Math.min(1, v)); }
-    // how much the clock gives way (follows the cover / lyrics ease-out)
     readonly property real squash: Math.max(artT, lyrT)
     readonly property real lyricsH: Math.min(ls.height * 0.42, 440 * ls.u)
-    // vertical room above the bubble: the cover, the lyrics, or (side by side) the taller of the two
-    // lyrics go UNDER the bubble when it sits in the top spot (the bubble stays put), above it in the bottom spot
     readonly property bool lyricsBelow: ls.st.mediaSlot !== "bottom"
     readonly property real panelRoom: Math.max(Math.max(0, artT) * (media.width + 24 * ls.u), lyricsBelow ? 0 : Math.max(0, lyrT) * (1 - sideT) * (lyricsH + 24 * ls.u))
     readonly property int springMs: 650
     readonly property real notifBottom: (media.on && ls.st.mediaSlot === "bottom") ? Math.min(login.y, media.base - ls.panelRoom) : login.y
-    // how far the dragged bubble is pressed past its top / bottom spot (px), 0 when not dragging
     readonly property real pressTop: media.dragging ? Math.max(0, media.slotTop - (media.base + media.dragOff)) : 0
     readonly property real pressBottom: media.dragging ? Math.max(0, (media.base + media.dragOff) - media.slotBottom) : 0
     function squishK(px) { return Math.min(1, px / (70 * u)); }
@@ -213,9 +193,6 @@ Item {
         x: (ls.width - width) / 2 - ls.sideT * (ls.sideLyrW + ls.sideGap) / 2
         readonly property bool on: ls.shown && !ls.leaving && ls.hasMedia
         onOnChanged: if (!on) ls.st.npMode = ""
-        // two fixed spots: under the clock, or just above the password field. Drag the card between them.
-        // with the cover floating, the top spot leaves room for it between the clock and the bubble
-        // computed from where the clock and the login column END UP, not where they are mid-animation
         readonly property real slotTop: 0.075 * ls.height + clock.height + 22 * ls.u + ls.panelRoom
         readonly property real slotBottom: login.y - height - 26 * ls.u
         readonly property real base: ls.st.mediaSlot === "bottom" ? slotBottom : slotTop
@@ -223,12 +200,10 @@ Item {
         property bool settling: false
         readonly property bool dragging: mediaDrag.active
         y: base + dragOff
-        // y only animates for real moves (cover / lyrics opening, slot changes), never while the lock appears
         property bool settled: false
         Timer { running: ls.shown; interval: 900; onTriggered: media.settled = true }
         opacity: on ? 1 : 0
         scale: !on ? 0.94 : (dragging ? 1.04 : 1)
-        // the bubble squashes too where it presses into the clock / the login
         transform: Scale {
             origin.x: media.width / 2; origin.y: ls.pressTop > 0 ? 0 : media.height
             xScale: 1 + 0.05 * ls.squishK(Math.max(ls.pressTop, ls.pressBottom))
@@ -246,7 +221,6 @@ Item {
             cursorShape: Qt.ClosedHandCursor
             onTranslationChanged: {
                 if (!active) return;
-                // follow the pointer, with rubber-banding past the two spots
                 var lo = media.slotTop - media.base, hi = media.slotBottom - media.base, t = translation.y;
                 if (t < lo) t = lo - Math.sqrt(lo - t) * 7;
                 else if (t > hi) t = hi + Math.sqrt(t - hi) * 7;
@@ -255,7 +229,6 @@ Item {
             onActiveChanged: {
                 ls.st.poke();
                 if (active) { settleAnim.stop(); return; }
-                // snap to the nearer spot and remember it
                 var cur = media.base + media.dragOff;
                 var slot = Math.abs(cur - media.slotBottom) < Math.abs(cur - media.slotTop) ? "bottom" : "top";
                 media.settling = true;
@@ -274,7 +247,6 @@ Item {
         Behavior on opacity { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
         Behavior on scale { NumberAnimation { duration: 650; easing.type: Easing.OutQuint } }
 
-        // keep the latest track info while fading out, so the card doesn't go blank mid-animation
         property var pl: null
         Connections { target: ls; function onPlayerChanged() { if (ls.player) media.pl = ls.player; } }
         Component.onCompleted: pl = ls.player
@@ -294,10 +266,8 @@ Item {
             Behavior on opacity { NumberAnimation { duration: 220 } }
         }
 
-        // cover art
         Item {
             id: art
-            // the cover leaves the glass bubble: it is drawn on the screen itself, above the bubble
             parent: ls
             z: media.z + 1
             visible: media.visible
@@ -317,7 +287,6 @@ Item {
             }
             Rectangle { anchors.fill: parent; radius: art.r; color: Qt.rgba(1, 1, 1, 0.12) }
             TapHandler {
-                // cover tap: bubble ↔ big cover; with lyrics open the cover joins them on the left (and leaves again)
                 onTapped: {
                     var m = ls.st.npMode;
                     ls.st.npMode = m === "" ? "art" : m === "art" ? "" : m === "lyrics" ? "artlyrics" : "lyrics";
@@ -373,7 +342,6 @@ Item {
             }
         }
 
-        // scrubber
         Item {
             id: scrub
             x: 18 * ls.u; width: parent.width - 36 * ls.u
@@ -436,7 +404,6 @@ Item {
             }
         }
 
-        // lyrics button (Apple's quote bubble), right of the controls
         Item {
             id: lyrBtn
             x: media.width - 16 * ls.u - width
@@ -462,12 +429,10 @@ Item {
                         var c = getContext("2d"); c.reset();
                         var s = width / 18; c.scale(s, s);
                         c.fillStyle = ink; c.strokeStyle = ink; c.lineWidth = 1.5; c.lineJoin = "round";
-                        // speech bubble
                         c.beginPath();
                         c.moveTo(4.5, 2.5); c.lineTo(13.5, 2.5); c.arcTo(16, 2.5, 16, 5, 2.5); c.lineTo(16, 10.5); c.arcTo(16, 13, 13.5, 13, 2.5);
                         c.lineTo(8, 13); c.lineTo(4.6, 15.8); c.lineTo(4.6, 13); c.arcTo(2, 13, 2, 10.5, 2.5); c.lineTo(2, 5); c.arcTo(2, 2.5, 4.5, 2.5, 2.5);
                         c.closePath(); c.stroke();
-                        // quote marks
                         function q(x) { c.beginPath(); c.arc(x, 7, 1.35, 0, Math.PI * 2); c.fill(); c.beginPath(); c.moveTo(x + 1.2, 7); c.quadraticCurveTo(x + 1.3, 9.6, x - 0.6, 10.4); c.stroke(); }
                         q(6.6); q(10.8);
                     }
@@ -479,7 +444,6 @@ Item {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    // lyrics button: with the cover enlarged the cover slides left and the lyrics appear beside it
                     var m = ls.st.npMode;
                     ls.st.npMode = m === "" ? "artlyrics" : m === "lyrics" || m === "artlyrics" ? "" : "artlyrics";
                     if (ls.lyricsMode && (ls.lyrStatus === "idle" || ls.lyrStatus === "none")) ls.fetchLyrics();
@@ -488,7 +452,6 @@ Item {
             }
         }
 
-        // transport controls
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             y: scrub.y + scrub.height + 6 * ls.u
@@ -503,7 +466,6 @@ Item {
                     readonly property bool can: media.pl !== null && (modelData === "prev" ? media.pl.canGoPrevious
                                                 : modelData === "next" ? media.pl.canGoNext : media.pl.canTogglePlaying)
                     opacity: can ? 1 : 0.35
-                    // glass halo on hover
                     Rectangle {
                         anchors.centerIn: parent
                         width: 40 * ls.u; height: width; radius: width / 2
@@ -538,8 +500,6 @@ Item {
         }
     }
 
-    // ═════════════ LYRICS (Apple Music style) ═════════════
-    // estimated playback position: MPRIS is polled twice a second, the lyrics need it smooth
     property real posBase: 0
     property real posAt: 0
     property bool posPlaying: false
@@ -550,12 +510,9 @@ Item {
         onTriggered: ls.estPos = ls.posBase + (ls.posPlaying ? (Date.now() - ls.posAt) / 1000 : 0)
     }
 
-    // Spotify Canvas: short looping video artwork for supported tracks
     property string canvasVideo: ""
     readonly property string spotifyTrackId: {
         if (!media.pl) return "";
-        // MPRIS trackId is often a generic D-Bus object path; do not let it mask the Spotify URL.
-        // Quickshell's MprisPlayer has no trackId / url property: the raw MPRIS fields live in `metadata`
         var md = media.pl.metadata || {};
         var candidates = [String(md["xesam:url"] || ""), String(md["mpris:trackid"] || ""), String(media.pl.uniqueId || "")];
         for (var i = 0; i < candidates.length; i++) {
@@ -587,9 +544,8 @@ Item {
         }
     }
 
-    // lyrics for the current track: NetEase, LRCLIB, and Genius, cached in ~/.cache/lickintosh/lyrics
-    property var lyrLines: []              // [{ t: seconds (-1 = unsynced), text }]
-    property string lyrStatus: "idle"      // idle | loading | synced | plain | none
+    property var lyrLines: []
+    property string lyrStatus: "idle"
     readonly property string trackKey: media.pl ? (media.pl.trackArtist || "") + "\u0001" + (media.pl.trackTitle || "") : ""
     Timer { id: lyrFetchDelay; interval: 400; onTriggered: { ls.lyrTries = 0; ls.fetchLyrics(); } }
     property int lyrTries: 0
@@ -607,9 +563,7 @@ Item {
         'k=$(printf "%s|%s" "$a" "$t" | md5sum | cut -c1-16); f="$c/$k.json"',
         '[ -s "$f" ] && { cat "$f"; exit 0; }',
         'tmp=$(mktemp); answered=0; r=""',
-        // titles like "Song (feat. X)" / "Song - Remastered 2011": also try the bare title
         'bare=$(printf "%s" "$t" | sed -E "s/ *[(\\[][^)\\]]*[)\\]]//g; s/ +- +(.*[Rr]emaster.*|[Ll]ive.*|[Rr]adio [Ee]dit.*)$//")',
-        // ── 1. NetEase Cloud Music: fast, not rate-limited. Same title + same length (±4 s) or it doesn't count.
         'ne() { code=$(curl -s --max-time 6 -A "Mozilla/5.0" -o "$tmp" -w "%{http_code}" -G "https://music.163.com/api/search/get" --data-urlencode "s=$1" -d type=1 -d limit=10); [ "$code" = 200 ] || return 1; answered=1',
         '  id=$(jq -r --arg t "$bare" --argjson d "$d" \'def n: ascii_downcase | gsub("[^\\\\p{L}\\\\p{N}]"; ""); ($t | n) as $q | [.result.songs[]? | select((.name | n) as $nm | ($nm == $q) or ($nm | startswith($q)) or ($q | startswith($nm))) | select($d == 0 or (((.duration / 1000) - $d) | fabs) <= 4)][0].id // empty\' "$tmp")',
         '  [ -n "$id" ] || return 1',
@@ -617,7 +571,6 @@ Item {
         '  l=$(jq -r ".lrc.lyric // empty" "$tmp"); case "$l" in *"[0"*|*"[1"*) ;; *) return 1;; esac',
         '  r=$(jq -nc --arg l "$l" "{syncedLyrics: \\$l}"); }',
         'ne "$a $bare" || ne "$bare"',
-        // ── 2. LRCLIB (rate-limited per second: wait and retry briefly), length-checked too
         'ua="lickintosh/1.0 (https://github.com/kelian-4/lickintosh)"; api=https://lrclib.net/api',
         'req() { n=0; while [ $n -lt 2 ]; do code=$(curl -s --max-time 8 -A "$ua" -o "$tmp" -w "%{http_code}" -G "$@"); case "$code" in 200) answered=1; return 0;; 404) answered=1; return 1;; 429) n=$((n+1)); sleep 1.5;; *) return 1;; esac; done; return 1; }',
         'pick=\'[.[] | select(.syncedLyrics != null or .plainLyrics != null) | select($d == 0 or (((.duration // 0) - $d) | fabs) <= 4)] | ([.[] | select(.syncedLyrics != null)][0] // .[0]) // empty\'',
@@ -626,7 +579,6 @@ Item {
         '[ -z "$r" ] && [ "$bare" != "$t" ] && lsearch --data-urlencode "track_name=$bare" --data-urlencode "artist_name=$a"',
         '[ -z "$r" ] && lsearch --data-urlencode "q=$a $bare"',
         'rm -f "$tmp"',
-        // ── 3. Genius: token-free, rich lyrics source
         'if [ -z "$r" ] || [ "$(printf "%s" "$r" | jq -r ".syncedLyrics // empty" 2>/dev/null)" = "" ]; then',
         '  g=$(python3 "' + Quickshell.shellDir + '/assets/lockscreen/genius-lyrics.py" "$a" "$bare" "$c" 2>/dev/null || true)',
         '  if [ -n "$g" ] && [ "$g" != "{}" ]; then',
@@ -635,7 +587,6 @@ Item {
         '  fi',
         'fi',
         'if [ -n "$r" ]; then printf "%s" "$r" | jq -c "{synced: .syncedLyrics, plain: .plainLyrics, instrumental: .instrumental}" | tee "$f"',
-        // a source really answered and nobody has it: remember; otherwise (offline / still limited) let the UI retry
         'elif [ "$answered" = 1 ]; then echo "{}" | tee "$f"',
         'else echo "{\\"retry\\":true}"; fi'
     ].join("\n")
@@ -662,7 +613,6 @@ Item {
                     for (i = 0; i < pl.length; i++) out.push({ t: -1, text: pl[i].trim() });
                     ls.lyrLines = out; ls.lyrStatus = "plain";
                 } else if (o.retry) {
-                    // rate-limited / offline: try again shortly (a few times)
                     if (ls.lyrTries < 4) { ls.lyrTries++; ls.lyrStatus = "loading"; lyrRetry.restart(); }
                     else { ls.lyrLines = []; ls.lyrStatus = "offline"; }
                 } else if (o.instrumental) {
@@ -674,7 +624,6 @@ Item {
         }
     }
 
-    // current line (a hair early, like Apple Music)
     readonly property int lyrCur: {
         if (lyrStatus !== "synced") return -1;
         var p = estPos + 0.25, c = -1;
@@ -685,13 +634,10 @@ Item {
     Item {
         id: lyr
         visible: ls.lyrT > 0.01 && media.visible
-        // lines past the feathered edges are cut off for real: not drawn and not clickable (they used to sit invisibly
-        // over the media controls and swallow clicks)
         clip: true
         z: media.z + 1
         readonly property real wTop: Math.min(ls.width - 80 * ls.u, 620 * ls.u)
         readonly property real hSide: media.width + 24 * ls.u + media.height
-        // lyrics-only: below the bubble (top spot, filling the room down to the password field) or above it (bottom spot)
         readonly property real belowY: media.y + media.height + 24 * ls.u
         readonly property real belowH: Math.max(140 * ls.u, Math.min(ls.lyricsH, (login.y - 24 * ls.u) - belowY))
         readonly property real soloH: ls.lyricsBelow ? belowH : ls.lyricsH
@@ -705,7 +651,6 @@ Item {
         scale: 0.94 + 0.06 * ls.lyrT
         transformOrigin: ls.sideMode ? Item.Left : (ls.lyricsBelow ? Item.Top : Item.Bottom)
 
-        // manual scroll (wheel); synced lyrics snap back to the current line a few seconds later
         property real manual: 0
         Timer { id: manualReset; interval: 3500; onTriggered: if (ls.lyrStatus === "synced") lyr.manual = 0 }
         WheelHandler {
@@ -713,14 +658,12 @@ Item {
         }
         Behavior on manual { NumberAnimation { duration: 260; easing.type: Easing.OutQuint } }
 
-        // where the column scrolls to: the current line sits about a third of the way down
         readonly property real target: {
             var it = ls.lyrCur >= 0 ? lyrRep.itemAt(ls.lyrCur) : null;
             var base = it ? it.y - height * 0.30 : -height * 0.30;
             return base + manual;
         }
 
-        // the lines, faded out at the top and bottom edges
         Item {
             id: lyrView
             anchors.fill: parent
@@ -747,7 +690,6 @@ Item {
                         readonly property bool gap: (modelData.text || "") === ""
                         width: lyrCol.width
                         height: gap ? 34 * ls.u : lt.implicitHeight
-                        // Apple Music's wave: every line follows the scroll on its own spring, lines further down a little later
                         transform: Translate {
                             id: lnTr
                             y: -lyr.target
@@ -767,11 +709,9 @@ Item {
                             transformOrigin: Item.Left
                             scale: ln.cur || ls.lyrStatus !== "synced" ? 1 : 0.965
                             Behavior on scale { NumberAnimation { duration: 420; easing.type: Easing.OutQuint } }
-                            // lines away from the current one go soft, like Apple Music (only near lines get a blur layer)
                             layer.enabled: ls.lyrStatus === "synced" && !ln.cur && Math.abs(ln.rel) <= 6
                             layer.effect: MultiEffect { blurEnabled: true; blurMax: 16; blur: Math.min(0.55, 0.14 * Math.abs(ln.rel)) }
                         }
-                        // instrumental break: three breathing dots
                         Row {
                             visible: ln.gap
                             anchors.verticalCenter: parent.verticalCenter
@@ -792,8 +732,6 @@ Item {
                                 }
                             }
                         }
-                        // tap a line to jump there
-                        // where this line is on screen right now (after the scroll), to ignore lines in / past the feather
                         readonly property real shownY: y + lnTr.y
                         readonly property bool inBand: shownY + height > lyr.height * 0.20 && shownY < lyr.height * 0.74
                         TapHandler {
