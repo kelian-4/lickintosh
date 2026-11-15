@@ -40,6 +40,13 @@ Switch {
             light: control.down ? "#fff" : "transparent"
             rimStrength: control.down ? 1 : 0.8
 
+            Rectangle {
+                anchors.fill: parent
+                radius: 999
+                z: -1
+                color: control.down ? "#f2ffffff" : "#ffffff"
+            }
+
             Behavior on x {
                 NumberAnimation {
                     duration: 300
