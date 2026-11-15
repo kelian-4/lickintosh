@@ -5,7 +5,7 @@ Consignes pour les agents de code (et utile à tout contributeur) travaillant su
 ## Git
 - Travaille sur la branche `dev`. Ne pousse jamais sur `main` : seul le mainteneur y fusionne `dev`.
 - Avant de pousser : `git pull --rebase origin dev`.
-- Les commits sont signés par le mainteneur. N'ajoute aucune ligne `Co-Authored-By` ni mention d'outil ou d'agent dans les messages de commit.
+- Les commits sont faits sous l'identité du mainteneur.
 - `ci-status.md` est mis à jour par la CI (commits `[skip ci]`) : ne le modifie pas à la main.
 
 ## Structure
