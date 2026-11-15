@@ -13,12 +13,10 @@
 [Fonctionnalités](#-fonctionnalités-) · [Installation](#-installation-) · [Raccourcis](#-raccourcis-clavier-) · [Configuration](#-configuration-) · [FAQ](#-faq-) · [Remerciements](#-remerciements-et-licences-)
 
 </div>
-<img width="1366" height="768" alt="2026-11-06_12:53:14" src="https://github.com/user-attachments/assets/4973a757-5baf-4a7e-9ff1-4ed01412cb63" />
+<img width="1366" height="768" alt="2026-11-15_13:12:24" src="https://github.com/user-attachments/assets/bba9e432-9503-44a3-b68d-7e639a09ac38" />
 
 
 
-> [!WARNING]
-> **Version : bêta 1.** Le projet fonctionne au quotidien sur ma machine (lol), mais je n'ai pas pu le tester sur beaucoup de configurations. Attends-toi à des bugs par endroit, et ouvre une issue quand tu en trouves un.
 
 
 
@@ -30,7 +28,7 @@
 - **Menu Apple** : À propos, Réglages Système, App Store (ouvre la page des paquets officiels de ta distribution), Éléments récents, Forcer à quitter, Suspendre, Redémarrer, Éteindre, Se déconnecter, Verrouiller.
 - **Menu global** : le menu de l'application active, avec des modèles par type d'application (navigateur, gestionnaire de fichiers, IDE, messagerie, lecteur multimédia, design, etc.).
 
-<img width="315" height="402" alt="2026-11-06_12:56:03" src="https://github.com/user-attachments/assets/3046dd1f-4fb9-4690-b929-6a4bd5731239" />
+<img width="344" height="436" alt="2026-11-15_13:15:11" src="https://github.com/user-attachments/assets/8964d9f3-2cb7-4f15-9c22-a10ec5304ab1" />
 
 - **Zone d'état** : Wi-Fi, Bluetooth, volume, batterie, Spotlight, assistant IA, Centre de contrôle, centre de notifications, zone de notification (tray), horloge.
 
@@ -51,7 +49,7 @@
 
 **Centre de contrôle**
 - **Contrôles modifiables** : Wi-Fi, lecture en cours, Bluetooth, KDE Connect, Concentration, capture d'écran, partage d'écran, luminosité, son, mode sombre, calculatrice, mode jeu, minuteur, alarme, chronomètre, maintien en éveil, Night Shift (nécessite `hyprsunset`).
-<img width="344" height="516" alt="2026-11-06_12:57:26" src="https://github.com/user-attachments/assets/c359e406-c772-440f-8302-68cea59db5d5" />
+<img width="308" height="509" alt="2026-11-15_13:16:52" src="https://github.com/user-attachments/assets/66731d92-1944-42ce-816a-512671c8297e" />
 
 **Spotlight**
 - **Sources** : applications, fichiers (dont les fichiers récents), actions système, calculatrice, historique du presse-papiers (texte et images).
@@ -80,7 +78,7 @@
 |---|---|
 | **Hyprland** | 0.57 ou plus (la configuration fournie utilise la configuration Lua) |
 | **Quickshell** | 0.3 ou plus, avec les modules Qt 6 `QtGraphs`, `QtQuick.VectorImage`, `QtDeclarative` et `QtWayland` |
-| **Outils** | Python 3, ImageMagick, `brightnessctl`, `playerctl`, `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `jq`, `curl`, `xdg-utils`, `xdg-user-dirs`, PipeWire (`pw-dump`), WirePlumber (`wpctl`), NetworkManager (`nmcli`) |
+| **Outils** | Python 3 (calculatrice du terminal), ImageMagick, `brightnessctl`, `playerctl`, `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `jq`, `curl`, `xdg-utils`, `xdg-user-dirs`, PipeWire (`pw-dump`), WirePlumber (`wpctl`), NetworkManager (`nmcli`) |
 | **Services** | NetworkManager, BlueZ, UPower, power-profiles-daemon |
 | **Configuration Hyprland fournie** | `hypridle`, `cliphist`, `hyprpolkitagent`, et les programmes de `assets/config/hypr/hyprlua/programs.lua` (terminal, gestionnaire de fichiers, navigateur, éditeur de code, lecteur multimédia) que tu peux remplacer par les tiens |
 
@@ -184,9 +182,9 @@ Les traductions anglaise et espagnole sont récentes et peuvent contenir des err
 ## • remerciements et licences •
 
 - **Liquid Glass** : [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (MIT) et MacTahoe Liquid KDE (GPL-3.0) ont servi de base d'étude pour l'effet. Les shaders ont été modifiés et améliorés, et le système de capture est le nôtre. Licences : `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt` et `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt`.
-- **MacShell** : certaines fonctionnalités et l'installateur graphique sont adaptés de [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT). Licence : `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
+- **MacShell** : le widget de musique et l'installateur graphique sont adaptés de [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT). Licence : `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
 - **Icônes** : thème [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) de vinceliuice, variante « bold ».
-- **Polices SF, curseur et fonds d'écran** : fournis dans `assets/`. Leurs droits appartiennent à leurs auteurs respectifs (les polices San Francisco et les fonds d'écran macOS sont des ressources d'Apple).
+- **Polices SF, curseur et fonds d'écran** : fournis dans `assets/`. Leurs droits appartiennent à leurs auteurs respectifs (les polices San Francisco sont des ressources d'Apple).
 
 lickintosh est un projet indépendant, sans lien avec Apple. macOS et Tahoe sont des marques d'Apple Inc.
 

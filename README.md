@@ -15,10 +15,6 @@
 </div>
 <img width="1366" height="768" alt="2026-11-15_13:12:24" src="https://github.com/user-attachments/assets/bba9e432-9503-44a3-b68d-7e639a09ac38" />
 
-> [!WARNING]
-> **Version: beta 1.** The project works day to day on my machine (lol), but I haven't been able to test it on many setups. Expect bugs here and there, and open an issue when you find one.
-
-
 ## • features •
 
 **Top bar**
@@ -181,9 +177,9 @@ The English and Spanish translations are recent and may contain mistakes. Some t
 ## • credits and licenses •
 
 - **Liquid Glass**: [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (MIT) and MacTahoe Liquid KDE (GPL-3.0) served as study references for the effect. The shaders were modified and improved, and the capture system is ours. Licenses: `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt` and `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt`.
-- **MacShell**: some features and the graphical installer are adapted from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT). License: `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
+- **MacShell**: music widget and the graphical installer are adapted from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT). License: `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
 - **Icons**: [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) by vinceliuice, "bold" variant.
-- **SF fonts, cursor and wallpapers**: shipped in `assets/`. Their rights belong to their respective authors (the San Francisco fonts and the macOS wallpapers are Apple resources).
+- **SF fonts, cursor and wallpapers**: shipped in `assets/`. Their rights belong to their respective authors (the San Francisco fonts are Apple resources).
 
 lickintosh is an independent project, not affiliated with Apple. macOS and Tahoe are trademarks of Apple Inc.
 
