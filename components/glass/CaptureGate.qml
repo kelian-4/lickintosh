@@ -13,33 +13,26 @@ Item {
     signal requestFrame()
     signal restartRequested()
 
-    onWantedChanged: {
-        if (!wanted)
-            armed = false
-        else if (calm)
+    function evaluate() {
+        if (wanted && (calm || !hasContent))
             armed = true
     }
 
-    onCalmChanged: {
-        if (calm && wanted)
-            armed = true
-    }
-
-    Component.onCompleted: {
-        if (calm && wanted)
-            armed = true
-    }
+    onWantedChanged: evaluate()
+    onCalmChanged: evaluate()
+    onHasContentChanged: evaluate()
+    Component.onCompleted: evaluate()
 
     Timer {
         interval: Math.max(50, root.interval)
-        running: root.armed && root.calm && root.hasContent
+        running: root.armed && root.wanted && root.calm && root.hasContent
         repeat: true
         onTriggered: root.requestFrame()
     }
 
     Timer {
         interval: root.restartDelay
-        running: root.armed && !root.hasContent
+        running: root.armed && root.wanted && !root.hasContent
         repeat: true
         onTriggered: {
             if (root.calm)

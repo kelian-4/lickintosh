@@ -131,15 +131,18 @@ Scope {
                         renderType: Text.NativeRendering
                     }
 
-                    VectorImage {
+                    Image {
                         id: _deviceImg
                         anchors.top: parent.top
-                        anchors.topMargin: 52
+                        anchors.topMargin: 44
                         anchors.horizontalCenter: parent.horizontalCenter
-                        width: 160
+                        width: 180
                         height: 110
-                        source: Qt.resolvedUrl(Quickshell.shellDir + "/assets/icons/devices/laptop.svg")
-                        preferredRendererType: VectorImage.CurveRenderer
+                        source: Qt.resolvedUrl("file://" + Quickshell.shellDir + "/assets/pngs/devices/mbair.png")
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        mipmap: true
+                        asynchronous: true
                     }
 
                     Text {

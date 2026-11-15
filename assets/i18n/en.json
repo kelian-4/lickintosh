@@ -560,5 +560,7 @@
  "paquet(s) manquant(s)": "package(s) missing",
  "prérequis manquent encore": "requirements still missing",
  "prérequis à installer": "requirements to install",
- "À propos": "About"
+ "À propos": "About",
+ "Aucun fond d'écran": "No wallpaper",
+ "Choisis une image dans Réglages › Fond d'écran, ou ajoute-en dans": "Pick an image in Settings › Wallpaper, or add some to"
 }

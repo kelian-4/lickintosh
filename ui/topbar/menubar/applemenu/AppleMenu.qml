@@ -181,7 +181,7 @@ Item {
         spacing: 2
 
         MenuRow {
-            label: I18n.tr("About this Mac")
+            label: I18n.tr("About this PC")
             icon: "dropdown/mac.svg"
             onActivated: {
                 root.openAbout()
@@ -212,7 +212,7 @@ Item {
 
         MenuRow {
             label: I18n.tr("Installateur Lickintosh…")
-            icon: "settings/update.svg"
+            icon: "dropdown/installer.svg"
             onActivated: {
                 InstallerLauncher.open("")
                 root.closeRequested()

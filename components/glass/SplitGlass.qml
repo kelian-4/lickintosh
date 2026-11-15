@@ -131,6 +131,8 @@ Item {
         property real highlightStrength: 0.1
         property real saturation: 1.33
         property real centerOpacity: 0.98
+        property real darkThreshold: ShellConfig.options.appearance.glassAutoDarken ? ShellConfig.options.appearance.glassDarkenThreshold : 1.0
+        property real darkStrength: ShellConfig.options.appearance.glassAutoDarken ? ShellConfig.options.appearance.glassDarkenStrength : 0.0
 
         vertexShader: Qt.resolvedUrl(Quickshell.shellDir + "/assets/shaders/liquidglass/SplitLiquidGlass.vert.qsb")
         fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/assets/shaders/liquidglass/SplitLiquidGlass.frag.qsb")

@@ -2,7 +2,7 @@
  "+ Nouvelle": "+ Nueva",
  "About": "Acerca de",
  "About This PC": "Acerca de este PC",
- "About this Mac": "Acerca de este Mac",
+ "About this PC": "Acerca de este PC",
  "Accueil": "Inicio",
  "Accès rapide": "Acceso rápido",
  "Actions système": "Acciones del sistema",
@@ -841,5 +841,7 @@
  "paquet(s) manquant(s)": "paquete(s) que faltan",
  "prérequis manquent encore": "requisitos aún faltan",
  "prérequis à installer": "requisitos por instalar",
- "À propos": "Acerca de"
+ "À propos": "Acerca de",
+ "Aucun fond d'écran": "Sin fondo de pantalla",
+ "Choisis une image dans Réglages › Fond d'écran, ou ajoute-en dans": "Elige una imagen en Ajustes › Fondo de pantalla, o añade algunas en"
 }

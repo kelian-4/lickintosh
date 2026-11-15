@@ -22,7 +22,7 @@ Scope {
     readonly property string wallpaperRawPath: {
         const configured = ShellConfig.options.wallpaper.lockscreenPath
         if (configured.length > 0) return configured
-        return Quickshell.shellDir + "/assets/wallpapers/macOS Tahoe 26 Dark Wallpaper.png"
+        return ShellConfig.options.wallpaper.path
     }
 
     readonly property string wallpaperCacheDir: (Quickshell.env("HOME") || "") + "/.cache/quickshell/lockscreen-wallpaper"

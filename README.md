@@ -13,16 +13,7 @@
 [Features](#-features-) · [Installation](#-installation-) · [Keybinds](#-keybinds-) · [Configuration](#-configuration-) · [FAQ](#-faq-) · [Credits](#-credits-and-licenses-)
 
 </div>
-<img width="1366" height="768" alt="2026-11-06_12:53:14" src="https://github.com/user-attachments/assets/4973a757-5baf-4a7e-9ff1-4ed01412cb63" />
-
-
-
-> [!WARNING]
-> **Version: beta 1.** The project runs daily on my machine (lol), but I haven't been able to test it on many setups. Expect bugs here and there, and please open an issue when you find one.
-
-
-
-
+<img width="1366" height="768" alt="2026-11-15_13:12:24" src="https://github.com/user-attachments/assets/bba9e432-9503-44a3-b68d-7e639a09ac38" />
 
 ## • features •
 
@@ -30,7 +21,8 @@
 - **Apple menu**: About, System Settings, App Store (opens your distribution's official package page), Recent Items, Force Quit, Sleep, Restart, Shut Down, Log Out, Lock.
 - **Global menu**: the active application's menu, with templates per app type (browser, file manager, IDE, messaging, media player, design, etc.).
 
-<img width="315" height="402" alt="2026-11-06_12:56:03" src="https://github.com/user-attachments/assets/3046dd1f-4fb9-4690-b929-6a4bd5731239" />
+<img width="344" height="436" alt="2026-11-15_13:15:11" src="https://github.com/user-attachments/assets/8964d9f3-2cb7-4f15-9c22-a10ec5304ab1" />
+
 
 - **Status area**: Wi-Fi, Bluetooth, volume, battery, Spotlight, AI assistant, Control Center, notification center, system tray, clock.
 
@@ -51,7 +43,8 @@
 
 **Control Center**
 - **Editable controls**: Wi-Fi, now playing, Bluetooth, KDE Connect, Focus, screenshot, screen sharing, brightness, sound, dark mode, calculator, game mode, timer, alarm, stopwatch, keep awake, Night Shift (needs `hyprsunset`).
-<img width="344" height="516" alt="2026-11-06_12:57:26" src="https://github.com/user-attachments/assets/c359e406-c772-440f-8302-68cea59db5d5" />
+<img width="308" height="509" alt="2026-11-15_13:16:52" src="https://github.com/user-attachments/assets/66731d92-1944-42ce-816a-512671c8297e" />
+
 
 **Spotlight**
 - **Sources**: applications, files (including recent files), system actions, calculator, clipboard history (text and images).
@@ -184,12 +177,12 @@ The English and Spanish translations are recent and may contain mistakes. Some t
 ## • credits and licenses •
 
 - **Liquid Glass**: [OverShifted/LiquidGlass](https://github.com/OverShifted/LiquidGlass) (MIT) and MacTahoe Liquid KDE (GPL-3.0) served as study references for the effect. The shaders were modified and improved, and the capture system is ours. Licenses: `THIRD_PARTY_LICENSES/LiquidGlass-MIT.txt` and `THIRD_PARTY_LICENSES/MacTahoeLiquidKDE-GPL-3.0.txt`.
-- **MacShell**: some features and the graphical installer are adapted from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT). License: `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
+- **MacShell**: music widget and the graphical installer are adapted from [0-ss/MacShell](https://github.com/0-ss/MacShell) (MIT). License: `THIRD_PARTY_LICENSES/MacShell-MIT.txt`.
 - **Icons**: [MacTahoe-icon-theme](https://github.com/vinceliuice/MacTahoe-icon-theme) by vinceliuice, "bold" variant.
-- **SF fonts, cursor and wallpapers**: shipped in `assets/`. Their rights belong to their respective authors (the San Francisco fonts and the macOS wallpapers are Apple resources).
+- **SF fonts, cursor and wallpapers**: shipped in `assets/`. Their rights belong to their respective authors (the San Francisco fonts are Apple resources).
 
 lickintosh is an independent project, not affiliated with Apple. macOS and Tahoe are trademarks of Apple Inc.
 
 ## • license •
 
-[PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/).
+lickintosh is free software, released under the [GNU General Public License v3.0 or later](LICENSE) (`GPL-3.0-or-later`). The full text is in the `LICENSE` file. Third-party components keep their own licenses, listed in `THIRD_PARTY_LICENSES/`.

@@ -19,6 +19,21 @@ Scope {
     signal closeRequested()
     signal openRequested()
 
+    Connections {
+        target: LauncherState
+        function onRequested() {
+            if (!root.opened) root.openRequested()
+            else root.applyPending()
+        }
+    }
+
+    function applyPending() {
+        if (LauncherState.pendingAction === "" || !spotlightLoader.item) return
+        var a = LauncherState.pendingAction
+        LauncherState.pendingAction = ""
+        spotlightLoader.item.clickAction(a)
+    }
+
     GlobalShortcut {
         name: "spotlight"
         description: "Toggle Spotlight"
@@ -219,7 +234,7 @@ Scope {
         if (root.opened) {
             const wasLoaded = spotlightLoader.item !== null
             root._spotlightLoaded = true
-            if (wasLoaded) spotlightLoader.item.reopen()
+            if (wasLoaded) { spotlightLoader.item.reopen(); root.applyPending() }
             RecentFiles.refresh()
             root.refreshClipHistory()
             root.refreshUserActions()
@@ -708,6 +723,29 @@ Scope {
                 }
             }
 
+            Column {
+                anchors.centerIn: parent
+                spacing: 8
+                visible: root.currentWallpaper === "" && !GlassWallpaper.videoActive
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: I18n.tr("Aucun fond d'écran")
+                    color: "#ffffff"
+                    opacity: 0.9
+                    font.pixelSize: 24
+                    font.weight: Font.Medium
+                }
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: I18n.tr("Choisis une image dans Réglages › Fond d'écran, ou ajoute-en dans") + " " + ShellConfig.options.spotlight.indexing.wallpaperDir
+                    color: "#ffffff"
+                    opacity: 0.55
+                    font.pixelSize: 14
+                }
+            }
+
             Image {
                 visible: false
                 width: 1
@@ -1179,6 +1217,11 @@ Scope {
                 Component.onCompleted: {
                     showAnim.start()
                     searchField.forceActiveFocus()
+                    if (LauncherState.pendingAction !== "") {
+                        var pa = LauncherState.pendingAction
+                        LauncherState.pendingAction = ""
+                        win.clickAction(pa)
+                    }
                 }
 
                 SequentialAnimation {

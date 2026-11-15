@@ -2,6 +2,7 @@ import Quickshell
 import QtQuick
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import qs.services
 
 Item {
     id: root
@@ -39,6 +40,7 @@ Item {
     property bool graceDone: false
     property bool timedOut: false
     property bool latched: false
+    property bool everLatched: false
 
     function recount() {
         var n = 0
@@ -52,12 +54,15 @@ Item {
     }
 
     function check() {
-        if (!root.latched && root.graceDone && (root.pending === 0 || root.timedOut))
+        if (!root.latched && root.graceDone && (root.pending === 0 || root.timedOut)) {
             root.latched = true
+            root.everLatched = true
+        }
     }
 
     function restartGate(grace) {
-        root.latched = false
+        if (!root.everLatched)
+            root.latched = false
         root.graceDone = false
         root.timedOut = false
         graceTimer.interval = grace
@@ -91,6 +96,15 @@ Item {
 
         function onTransitionEpochChanged() {
             root.restartGate(180)
+        }
+
+        function onCaptureBlockedChanged() {
+            if (GlassTracker.captureBlocked) {
+                root.everLatched = false
+                root.latched = false
+            } else {
+                root.restartGate(180)
+            }
         }
     }
 
@@ -129,6 +143,8 @@ Item {
                 && (ipc.at[0] - root.monitorX + ipc.size[0]) > root.region.x
                 && (ipc.at[1] - root.monitorY) < (root.region.y + root.region.height)
                 && (ipc.at[1] - root.monitorY + ipc.size[1]) > root.region.y
+            readonly property bool dying: GlassTracker.closing && GlassTracker.closingAddress !== ""
+                && modelData.address !== undefined && String(modelData.address).replace(/^0x/i, "").toLowerCase() === GlassTracker.closingAddress
             readonly property real rank: ipc && ipc.focusHistoryID !== undefined ? ipc.focusHistoryID : 0
 
             readonly property real captureOpacity: root.opacityFor(ipc ? ipc["class"] : "")
@@ -159,10 +175,17 @@ Item {
                 onRestartRequested: view.restart()
             }
 
-            captureSource: gate.armed && !restarting && !GlassTracker.closing ? modelData.wayland : null
+            captureSource: gate.armed && !restarting && !dying ? modelData.wayland : null
             live: false
-            visible: shown && !GlassTracker.closing
-            opacity: hasContent ? (translucent ? 1 : Math.min(1, captureOpacity)) : 0
+            visible: shown || opacity > 0.001
+            opacity: shown && hasContent && !dying ? (translucent ? 1 : Math.min(1, captureOpacity)) : 0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: ShellMotion.fade(0.5)
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: ShellMotion.effectsCurve
+                }
+            }
             layer.enabled: translucent
             layer.effect: ShaderEffect {
                 property real bgAlpha: view.captureOpacity

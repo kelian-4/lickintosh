@@ -18,6 +18,14 @@ ContentPage {
     property var shippedList: []
     property var userList: []
 
+    function _base(p) { return String(p).split("/").pop() }
+
+    readonly property var shippedOnly: {
+        var names = {}
+        for (var i = 0; i < userList.length; i++) names[_base(userList[i])] = true
+        return shippedList.filter(function(p) { return !names[_base(p)] })
+    }
+
     function _safeShellPath(p) {
         var s = String(p)
         var home = Quickshell.env("HOME") || ""
@@ -338,13 +346,14 @@ ContentPage {
 
     ContentSection {
         title: I18n.tr("Fournis avec le shell")
+        visible: root.shippedOnly.length > 0
 
         Flow {
             Layout.fillWidth: true
             spacing: 12
 
             Repeater {
-                model: root.shippedList
+                model: root.shippedOnly
 
                 delegate: WallpaperThumb {
                     id: _thumb
@@ -363,7 +372,7 @@ ContentPage {
             text: "Aucune image dans " + root.shippedDir
             font.pixelSize: 12
             gray: true
-            visible: root.shippedList.length === 0
+            visible: false
             Layout.fillWidth: true
         }
     }

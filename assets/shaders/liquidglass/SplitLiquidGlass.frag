@@ -25,6 +25,8 @@ layout(std140, binding = 0) uniform buf {
     float highlightStrength;
     float saturation;
     float centerOpacity;
+    float darkThreshold;
+    float darkStrength;
 };
 
 float sdRoundBox(vec2 p, vec2 halfSize, float r)
@@ -135,6 +137,9 @@ void main()
 
     vec3 col = lgGaussianBlur(backTex, halfpixel * 2.0, lensUV);
     col = lgApplyRgbDrift(backTex, col, lensUV, outNorm, backgroundSize, rgbDriftStrength, edgeQ);
+    float bright = dot(col, vec3(0.2126, 0.7152, 0.0722));
+    float darkK = clamp((bright - darkThreshold) / max(1.0 - darkThreshold, 0.01), 0.0, 1.0);
+    col *= 1.0 - darkK * darkStrength;
     col = lgApplyHighlight(col, inside, outNorm, highlightWidth, highlightStrength);
 
     float luma = dot(col, vec3(0.2126, 0.7152, 0.0722));

@@ -83,6 +83,7 @@ function qs_running
 end
 set -g fonts_dst ~/.local/share/fonts/SF
 set -g icons_dst ~/.icons
+set -g wallpapers_dst ~/Pictures/wallpapers
 set -g hypr_dst ~/.config/hypr
 
 set -g setup_only_assets fonts icons_desktop MacOS-Tahoe-Cursor config
@@ -683,6 +684,10 @@ function run_uninstall
         msg "    annule"
         return 0
     end
+    for f in (find $repo/assets/wallpapers -maxdepth 1 -type f 2>/dev/null)
+        rm -f $wallpapers_dst/(basename $f)
+    end
+    rmdir $wallpapers_dst 2>/dev/null
     pkill -f lickintosh-start >/dev/null 2>&1
     command -q qs; and qs -c $qs_name kill >/dev/null 2>&1
     pkill -f spotlight_clip_watch >/dev/null 2>&1
@@ -849,6 +854,7 @@ else
         test (count $missing_req) -gt 0; and set -a warnings "outils requis manquants : $missing_req"
     end
 
+
     for c in qs quickshell
         if command -q $c
             set qs_bin $c
@@ -1012,6 +1018,21 @@ else
     if test $installed -gt 0
         command -q fc-cache; and fc-cache -f $fonts_dst
     end
+end
+
+say "Fonds d'ecran"
+set -l wps (find $repo/assets/wallpapers -maxdepth 1 -type f 2>/dev/null | sort)
+if test (count $wps) -eq 0
+    msg "    aucun fond dans assets/wallpapers, etape ignoree"
+else
+    mkdir -p $wallpapers_dst
+    set -l wp_new 0
+    for f in $wps
+        set -l name (basename $f)
+        test -e $wallpapers_dst/$name; and continue
+        cp $f $wallpapers_dst/$name; and set wp_new (math $wp_new + 1)
+    end
+    msg "    $wp_new fond(s) copie(s) dans $wallpapers_dst"
 end
 
 say "Icones"

@@ -8,6 +8,26 @@ Item {
 
     visible: root.shown
 
+    Item {
+        x: WidgetState.desktopOffsetX
+        y: WidgetState.desktopOffsetY
+
+        Repeater {
+            model: WidgetState.desktop
+
+            delegate: Loader {
+                id: wl
+                required property var modelData
+                readonly property var spec: WidgetState.entryOf("desktop", wl.modelData.id) || wl.modelData
+
+                x: wl.spec.x
+                y: wl.spec.y
+                Component.onCompleted: wl.setSource(Qt.resolvedUrl("../../ui/widgets/WidgetSnapshot.qml"), { widgetData: wl.spec })
+                onLoaded: wl.item.widgetData = Qt.binding(function() { return wl.spec })
+            }
+        }
+    }
+
     Repeater {
         model: DesktopFiles.layout
 
