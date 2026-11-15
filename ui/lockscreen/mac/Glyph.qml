@@ -5,7 +5,7 @@ Canvas {
     property string kind: ""
     property color color: "white"
     property real level: 3
-    property bool flag: false       // "disabled" slash for wifi / bluetooth
+    property bool flag: false
     width: 18; height: 18
     antialiasing: true
     onKindChanged: requestPaint()
