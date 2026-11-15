@@ -24,7 +24,7 @@ Item {
 
                 x: wl.spec.x
                 y: wl.spec.y
-                Component.onCompleted: wl.setSource(Qt.resolvedUrl("../../ui/widgets/WidgetView.qml"), { snapshot: true, widgetData: wl.spec })
+                Component.onCompleted: wl.setSource(Qt.resolvedUrl("../../ui/widgets/WidgetSnapshot.qml"), { widgetData: wl.spec })
                 onLoaded: wl.item.widgetData = Qt.binding(function() { return wl.spec })
             }
         }
