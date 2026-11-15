@@ -190,4 +190,4 @@ lickintosh est un projet indépendant, sans lien avec Apple. macOS et Tahoe sont
 
 ## • licence •
 
-[PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/).
+lickintosh est un logiciel libre, publié sous [licence publique générale GNU v3.0 ou ultérieure](LICENSE) (`GPL-3.0-or-later`). Le texte complet est dans le fichier `LICENSE`. Les composants tiers conservent leurs propres licences, listées dans `THIRD_PARTY_LICENSES/`.
