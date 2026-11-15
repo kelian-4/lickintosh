@@ -29,6 +29,7 @@ Scope {
         GlassBackdrop {
             captureWindows: false
             gateEnabled: false
+            showDesktopWidgets: false
         }
 
         Item {

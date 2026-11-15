@@ -5,10 +5,12 @@ Item {
     id: root
 
     property bool shown: true
+    property bool widgetsShown: true
 
     visible: root.shown
 
     Item {
+        visible: root.widgetsShown
         x: WidgetState.desktopOffsetX
         y: WidgetState.desktopOffsetY
 

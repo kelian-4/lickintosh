@@ -13,6 +13,7 @@ Item {
 
     property bool captureWindows: false
     property bool showDesktopItems: root.monitorName === "" || (Quickshell.screens.length > 0 && root.monitorName === Quickshell.screens[0].name)
+    property bool showDesktopWidgets: true
     property real windowOpacity: 1.0
     property var windowOpacityByClass: ({})
     property string monitorName: ""
@@ -106,6 +107,7 @@ Item {
         DesktopSnapshot {
             anchors.fill: parent
             shown: root.showDesktopItems
+            widgetsShown: root.showDesktopWidgets
         }
 
         Loader {
