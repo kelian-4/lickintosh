@@ -9,6 +9,7 @@ Item {
 
     property real cornerRadius: 20.0
     property real cornerSquircle: 0.0
+    property bool autoDarken: true
     readonly property string element: backdrop ? backdrop.element : ""
     property real refractionWidth: Theme.glassValue(root.element, "refractionWidth")
     property real magnifyGlassStrength: Theme.glassValue(root.element, "magnifyGlassStrength")
@@ -134,8 +135,8 @@ Item {
         property real highlightStrength: root.highlightStrength
         property real materialOpacity: root.materialOpacity
         property real centerOpacity: root.centerOpacity
-        property real darkThreshold: ShellConfig.options.appearance.glassAutoDarken ? ShellConfig.options.appearance.glassDarkenThreshold : 1.0
-        property real darkStrength: ShellConfig.options.appearance.glassAutoDarken ? ShellConfig.options.appearance.glassDarkenStrength : 0.0
+        property real darkThreshold: root.autoDarken && ShellConfig.options.appearance.glassAutoDarken ? ShellConfig.options.appearance.glassDarkenThreshold : 1.0
+        property real darkStrength: root.autoDarken && ShellConfig.options.appearance.glassAutoDarken ? ShellConfig.options.appearance.glassDarkenStrength : 0.0
 
         vertexShader: Qt.resolvedUrl(root.shaderDir + "TahoeGlass.vert.qsb")
         fragmentShader: Qt.resolvedUrl(root.shaderDir + "TahoeGlass.frag.qsb")

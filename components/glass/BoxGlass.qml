@@ -70,6 +70,7 @@ Item {
         sourceComponent: TahoeGlass {
             backdrop: box.backdrop
             cornerRadius: box.radius
+            autoDarken: !(box.backdrop && box.backdrop.flat === true)
         }
     }
 }

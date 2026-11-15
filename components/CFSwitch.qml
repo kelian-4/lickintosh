@@ -31,6 +31,9 @@ Switch {
 
         BoxGlass {
             id: handle
+            backdrop: FlatBackdrop {
+                color: control.down ? "#e6e6e6" : "#ffffff"
+            }
             anchors.verticalCenter: parent.verticalCenter
             x: control.checked ? bg.width - width - control.knobInset : control.knobInset
             width: control.knobW0 + (control.down ? control.switchHeight * 0.14 : 0)
@@ -39,13 +42,6 @@ Switch {
             color: control.down ? "#20ffffff" : "#ffffff"
             light: control.down ? "#fff" : "transparent"
             rimStrength: control.down ? 1 : 0.8
-
-            Rectangle {
-                anchors.fill: parent
-                radius: 999
-                z: -1
-                color: control.down ? "#f2ffffff" : "#ffffff"
-            }
 
             Behavior on x {
                 NumberAnimation {
