@@ -31,7 +31,6 @@ Switch {
 
         BoxGlass {
             id: handle
-            backdrop: null
             anchors.verticalCenter: parent.verticalCenter
             x: control.checked ? bg.width - width - control.knobInset : control.knobInset
             width: control.knobW0 + (control.down ? control.switchHeight * 0.14 : 0)
