@@ -380,7 +380,7 @@ Vérifié : shader comparé fonction par fonction au repo (identique, sauf synta
 - Chargement de l'ensemble sur le matériel du propriétaire, performances et coût GPU (aucune mesure sur GPU réel).
 - `QsWindow.window`, `QsWindow.contentItem` et le calcul de position des fenêtres de couche.
 - Que la capture d'une fenêtre translucide revienne bien opaque noire (hypothèse), et que 0,3 pour `kitty` reproduise l'écran réel.
-- L'échec de capture suivi de `wl_display#1: error 0: invalid object` après le déverrouillage (hypothèse : capture pendant la réorganisation des fenêtres ; atténuée, non démontrée). `glass.captureWindows: false` l'écarte.
+- L'échec de capture suivi de `wl_display#1: error 0: invalid object` après le déverrouillage (capture pendant la réorganisation des fenêtres) : corrigé. `glass.captureWindows: false` écarte toute capture.
 - Écran de verrouillage, multi-écrans, échelle d'écran différente de 1, fenêtre de réglages (pas de verre).
 
 ### Limites connues
@@ -402,7 +402,7 @@ Hypothèse non démontrée sur le côté Hyprland : après avoir envoyé `failed
 
 Parades dans ce dépôt :
 
-- `glass.captureWindows` vaut `false` par défaut : aucune capture de fenêtre, donc aucun risque. Le verre ne montre alors que le fond d'écran.
+- Le plantage a été corrigé par les parades ci-dessous. `glass.captureWindows` vaut `true` par défaut ; l'option reste disponible pour couper toute capture de fenêtre, auquel cas le verre ne montre que le fond d'écran.
 - Quand la capture est activée, `GlassWindows` n'utilise plus un flux continu (`live: true`) mais une trame à la demande (`live: false`). Le composant `CaptureGate` n'arme un contexte de capture que lorsque la fenêtre est visible et que `GlassTracker.fast` est faux (aucune géométrie de fenêtre n'a bougé depuis 1,5 s), puis demande une trame toutes les `glass.captureIntervalMs` millisecondes seulement tant que tout est calme. Entre deux trames, aucun objet de trame n'existe : rien ne peut échouer.
 - La capture est suspendue pendant le verrouillage de session et 1,5 s après.
 - Testé sur banc : le composant réel `CaptureGate` avec une chronologie simulée (aucune requête de trame pendant l'agitation, reprise au calme, relance après échec simulé, arrêt à la fermeture). Non testé : le comportement réel avec Hyprland.
@@ -419,7 +419,7 @@ Parades dans ce dépôt :
 
 | Clé | Type | Défaut | Effet | Contrôle suggéré (page Apparence, nouvelle section « Fenêtres derrière le verre ») |
 |---|---|---|---|---|
-| `captureWindows` | bool | `false` | Fait voir les fenêtres derrière le verre ; expérimental (voir le plantage ci-dessus) | interrupteur avec avertissement |
+| `captureWindows` | bool | `true` | Fait voir les fenêtres derrière le verre ; activé par défaut, `false` coupe toute capture | interrupteur |
 | `captureIntervalMs` | entier | `400` | Période de rafraîchissement des fenêtres capturées | curseur 200 à 2000 (avancé) |
 | `windowOpacity` | réel | `1.0` | Opacité des fenêtres capturées | curseur 0 à 1 (avancé) |
 | `windowOpacityByClass` | objet | `{ "kitty": 0.3 }` | Opacité par classe de fenêtre ; 0 exclut la classe | éditeur de liste (avancé) ; classes via `hyprctl clients -j` |
@@ -430,7 +430,7 @@ Autres options d'apparence : `appearance.accentColor` (utilisée), `appearance.r
 
 ### Limites connues avant la beta 1
 
-- Les éléments de la couche `quickshell:desktop` (icônes et widgets du bureau) ne sont pas dans l'arrière-plan du verre : un verre posé dessus ne les montre pas. Piste après la beta : rendre une copie légère des icônes dans la scène de chaque backdrop.
-- Avec `captureWindows: false`, le verre ne reflète jamais les fenêtres.
+- Les icônes et widgets du bureau sont maintenant dans l'arrière-plan du verre (copie légère dans la scène de chaque backdrop), sauf pour le verre des widgets eux-mêmes.
+- Avec `captureWindows: false`, le verre ne reflète jamais les fenêtres (la valeur par défaut est `true`).
 - Notch et fenêtre de réglages sans verre ; poignées de curseurs sans verre ; verrouillage non testé en conditions réelles.
 - Le travail sur ce sujet reprend sur la branche `liquid_Glass_Reseacrh` (conservée) après la publication de la beta 1.
