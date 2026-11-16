@@ -30,6 +30,7 @@ Singleton {
             root.ready = true
             if (configAdapter.spotlight.indexing.wallpaperDir === "~/Pictures/wallpaper") configAdapter.spotlight.indexing.wallpaperDir = "~/Pictures/wallpapers"
             root.seedKeepAwake()
+            root.seedCaptureWindows()
         }
         onLoadFailed: function(error) {
             if (error === FileViewError.FileNotFound) {
@@ -178,7 +179,8 @@ Singleton {
             }
 
             property JsonObject glass: JsonObject {
-                property bool captureWindows: false
+                property bool captureWindows: true
+                property bool captureWindowsSeeded: false
                 property int captureIntervalMs: 400
                 property real windowOpacity: 1.0
                 property var windowOpacityByClass: ({ "kitty": 0.3 })
@@ -234,6 +236,12 @@ Singleton {
             if (list[i].type === type) return true
         }
         return false
+    }
+
+    function seedCaptureWindows() {
+        if (root.options.glass.captureWindowsSeeded) return
+        root.options.glass.captureWindows = true
+        root.options.glass.captureWindowsSeeded = true
     }
 
     function seedKeepAwake() {

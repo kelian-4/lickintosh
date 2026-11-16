@@ -11,7 +11,7 @@ Item {
     property size screenSize: Qt.size(1920, 1080)
     property point windowPosition: Qt.point(0, 0)
 
-    property bool captureWindows: false
+    property bool captureWindows: true
     property bool showDesktopItems: root.monitorName === "" || (Quickshell.screens.length > 0 && root.monitorName === Quickshell.screens[0].name)
     property bool showDesktopWidgets: true
     property real windowOpacity: 1.0
