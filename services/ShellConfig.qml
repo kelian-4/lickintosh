@@ -31,6 +31,7 @@ Singleton {
             if (configAdapter.spotlight.indexing.wallpaperDir === "~/Pictures/wallpaper") configAdapter.spotlight.indexing.wallpaperDir = "~/Pictures/wallpapers"
             root.seedKeepAwake()
             root.seedCaptureWindows()
+            root.seedAutoDarken()
         }
         onLoadFailed: function(error) {
             if (error === FileViewError.FileNotFound) {
@@ -117,6 +118,7 @@ Singleton {
                 property real   glassTintLight: 0.45
                 property real   glassTintDark: 0.40
                 property bool   glassAutoDarken: true
+                property bool   glassAutoDarkenSeeded: false
                 property real   glassDarkenThreshold: 0.70
                 property real   glassDarkenStrength: 0.50
                 property string accentOverride: ""
@@ -236,6 +238,12 @@ Singleton {
             if (list[i].type === type) return true
         }
         return false
+    }
+
+    function seedAutoDarken() {
+        if (root.options.appearance.glassAutoDarkenSeeded) return
+        root.options.appearance.glassAutoDarken = true
+        root.options.appearance.glassAutoDarkenSeeded = true
     }
 
     function seedCaptureWindows() {
