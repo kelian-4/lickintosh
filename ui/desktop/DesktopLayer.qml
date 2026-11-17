@@ -253,6 +253,8 @@ Scope {
                 function onModelReset() { stage.relayout() }
                 function onRowsInserted() { stage.relayout() }
                 function onRowsRemoved() { stage.relayout() }
+                function onDataChanged() { stage.relayout() }
+                function onLayoutChanged() { stage.relayout() }
             }
 
             Connections {
@@ -336,6 +338,8 @@ Scope {
 
                     required property var fileSize
                     required property var fileModified
+
+                    onFileNameChanged: Qt.callLater(stage.relayout)
 
                     readonly property var shownCell: (!icon.selected && stage.preview[icon.fileName]) ? stage.preview[icon.fileName] : (stage.iconCells[icon.fileName] || ({ col: 0, row: 0 }))
 

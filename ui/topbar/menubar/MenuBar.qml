@@ -23,8 +23,7 @@ RowLayout {
         opacity: appleActive ? 0.7 : 1.0
         layer.enabled: true
         layer.effect: MultiEffect {
-            colorization: 1.0
-            colorizationColor: "#FFFFFF"
+            brightness: 1.0
         }
 
         MouseArea {
