@@ -299,12 +299,6 @@ Item {
                 if (_dr.modelData.connected) {
                     BluetoothState.disconnectDevice(_dr.modelData)
                 } else {
-                    var paired = root._devices.filter(function(d) { return d.paired })
-                    for (var i = 0; i < paired.length; i++) {
-                        if (paired[i].connected && paired[i] !== _dr.modelData) {
-                            BluetoothState.disconnectDevice(paired[i])
-                        }
-                    }
                     BluetoothState.connectDevice(_dr.modelData)
                 }
             }
