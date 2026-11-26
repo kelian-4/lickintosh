@@ -34,10 +34,7 @@ Singleton {
             root.seedAutoDarken()
         }
         onLoadFailed: function(error) {
-            if (error === FileViewError.FileNotFound) {
-                root.seedWallpaper()
-                writeAdapter()
-            }
+            if (error === FileViewError.FileNotFound) writeAdapter()
         }
 
         JsonAdapter {
