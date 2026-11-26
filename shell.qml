@@ -62,7 +62,18 @@ ShellRoot {
         spotlightOpened || aiOpened || notifCenterOpened || wifiOpened || bluetoothOpened ||
         batteryOpened || volumeOpened || NotchState.expanded
 
+    // One focus grab shared by every top bar. Each screen's bar used to carry its
+    // own grab whitelisting only its own window; Hyprland keeps a single grab, so
+    // with two screens the second grab evicted the first, whose onCleared closed
+    // the notch a few ms after it started opening.
+    HyprlandFocusGrab {
+        active: NotchState.expanded
+        windows: topBars.instances
+        onCleared: NotchState.close()
+    }
+
     Variants {
+        id: topBars
         model: appRoot.interfaceShown ? Quickshell.screens : []
         PanelWindow {
             id: topBarWindow
@@ -90,12 +101,6 @@ ShellRoot {
                 item: _topBarItem
                 Region { item: _topBarTriggerZone }
                 Region { item: _topBarItem.notchExpandedPanel }
-            }
-
-            HyprlandFocusGrab {
-                active: NotchState.expanded
-                windows: [topBarWindow]
-                onCleared: NotchState.close()
             }
 
             Connections {
