@@ -174,6 +174,34 @@ Singleton {
                 property string pathDark: ""
                 property string pathLight: ""
 
+                property bool hourlyEnabled: false
+                property JsonObject hourly: JsonObject {
+                    property string h0: ""
+                    property string h1: ""
+                    property string h2: ""
+                    property string h3: ""
+                    property string h4: ""
+                    property string h5: ""
+                    property string h6: ""
+                    property string h7: ""
+                    property string h8: ""
+                    property string h9: ""
+                    property string h10: ""
+                    property string h11: ""
+                    property string h12: ""
+                    property string h13: ""
+                    property string h14: ""
+                    property string h15: ""
+                    property string h16: ""
+                    property string h17: ""
+                    property string h18: ""
+                    property string h19: ""
+                    property string h20: ""
+                    property string h21: ""
+                    property string h22: ""
+                    property string h23: ""
+                }
+
                 property string lockscreenPath: ""
             }
 
