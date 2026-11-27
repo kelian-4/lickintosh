@@ -566,5 +566,8 @@
  "Fond d'écran par heure": "Wallpaper by hour",
  "Changer de fond d'écran selon l'heure": "Change wallpaper by time of day",
  "Remplace le fond du bureau. Une heure sans fond garde celui de l'heure précédente.": "Replaces the desktop wallpaper. An hour without a wallpaper keeps the previous hour's.",
- "La sélection ci-dessous s'applique au bureau à %1. Une heure sans fond garde celui de l'heure précédente.": "The selection below applies to the desktop at %1. An hour without a wallpaper keeps the previous hour's."
+ "La sélection ci-dessous s'applique au bureau à %1. Une heure sans fond garde celui de l'heure précédente.": "The selection below applies to the desktop at %1. An hour without a wallpaper keeps the previous hour's.",
+ "Remplacer ta configuration Hyprland ?": "Replace your Hyprland configuration?",
+ "Les raccourcis clavier de ~/.config/hypr seront remplacés par ceux de Lickintosh. Une sauvegarde est faite avant.": "The keybindings in ~/.config/hypr will be replaced with Lickintosh's. A backup is made first.",
+ "Conserver la mienne": "Keep mine"
 }

@@ -13,7 +13,7 @@ ContentPage {
         IRow {
             icon: "settings/update.svg"; title: I18n.tr("Mettre à jour depuis Git")
             subtitle: I18n.tr("Récupère les dernières modifications de ce clone puis les installe. L'ancienne version est sauvegardée avant (les 3 dernières sont gardées).")
-            IButton { main: true; text: I18n.tr("Mettre à jour"); enabled: !InstallerState.busy; onClicked: InstallerState.update() }
+            IButton { main: true; text: I18n.tr("Mettre à jour"); enabled: !InstallerState.busy; onClicked: InstallerState.requestRun("update") }
         }
         IRow {
             icon: "settings/dock.svg"; title: I18n.tr("Sauvegardes")
@@ -21,6 +21,8 @@ ContentPage {
             IButton { text: I18n.tr("Ouvrir"); onClicked: InstallerState.openPath(InstallerState.dataDir + "/backups") }
         }
     }
+
+    HyprConfirm { kind: "update" }
 
     BarProgress { running: InstallerState.busy && InstallerState.runKind === "update" }
     CFText { visible: InstallerState.notice !== "" && InstallerState.runKind === "update"; text: InstallerState.notice; font.pixelSize: 12; gray: true }

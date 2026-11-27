@@ -50,10 +50,12 @@ ContentPage {
             main: true
             enabled: !InstallerState.busy
             text: InstallerState.busy && InstallerState.runKind === "install" ? I18n.tr("Installation…") : (InstallerState.installed ? I18n.tr("Réinstaller Lickintosh") : I18n.tr("Installer Lickintosh"))
-            onClicked: InstallerState.install()
+            onClicked: InstallerState.requestRun("install")
         }
         CFText { text: InstallerState.notice; font.pixelSize: 12; gray: true; Layout.fillWidth: true; elide: Text.ElideRight }
     }
+
+    HyprConfirm { kind: "install" }
 
     BarProgress { running: InstallerState.busy && InstallerState.runKind === "install" }
     LogView { viewHeight: 220 }

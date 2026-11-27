@@ -91,7 +91,7 @@ set -g managed shell.qml settings.qml installer.qml components services ui tools
 set -g required_tools 'magick|convert:imagemagick' brightnessctl:brightnessctl playerctl:playerctl wl-copy:wl-clipboard grim:grim slurp:slurp hyprpicker:hyprpicker jq:jq curl:curl xdg-open:xdg-utils xdg-user-dir:xdg-user-dirs pw-dump:pipewire wpctl:wireplumber nmcli:networkmanager bluetoothctl:bluez upower:upower powerprofilesctl:power-profiles-daemon
 
 set -l orig_argv $argv
-argparse skip-deps no-launch doctor uninstall y/yes deps-plan deps-only gui cli -- $argv; or exit 1
+argparse skip-deps no-launch no-hypr doctor uninstall y/yes deps-plan deps-only gui cli -- $argv; or exit 1
 set -q _flag_yes; and set -g assume_yes 1
 
 if test (id -u) -eq 0
@@ -1143,7 +1143,9 @@ end
 say "Configuration Hyprland ($hypr_dst)"
 set -l hypr_src $repo/assets/config/hypr
 set -l hypr_files (find $hypr_src -type f 2>/dev/null | sort)
-if test (count $hypr_files) -eq 0
+if set -q _flag_no_hypr
+    msg "    configuration Hyprland conservee (--no-hypr), etape ignoree"
+else if test (count $hypr_files) -eq 0
     msg "    assets/config/hypr est absent, etape ignoree"
 else
     set -l hypr_copied 0

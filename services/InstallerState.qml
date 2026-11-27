@@ -21,6 +21,8 @@ Singleton {
     property string runKind: ""
     property string notice: ""
     property bool optLaunch: true
+    property bool keepHypr: false
+    property string pendingRun: ""
     signal pageRequested(string page)
     function requestPage(page) { pageRequested(page) }
 
@@ -116,12 +118,23 @@ Singleton {
     function installArgs() {
         var a = ["--cli", "-y", "--skip-deps"]
         if (!optLaunch) a.push("--no-launch")
+        if (keepHypr) a.push("--no-hypr")
         return a
+    }
+
+    function requestRun(kind) { if (!busy) pendingRun = kind }
+    function cancelRun() { pendingRun = "" }
+    function confirmRun(keep) {
+        var k = pendingRun
+        pendingRun = ""
+        keepHypr = keep
+        if (k === "install") install()
+        else if (k === "update") update()
     }
 
     function install() { runMain("install", sh(installArgs())) }
     function update() {
-        runMain("update", ["sh", "-c", "git -C \"$1\" pull --ff-only && fish \"$1/setup.fish\" --cli -y --skip-deps --no-launch", "sh", repoDir])
+        runMain("update", ["sh", "-c", "git -C \"$1\" pull --ff-only && fish \"$1/setup.fish\" --cli -y --skip-deps --no-launch" + (keepHypr ? " --no-hypr" : ""), "sh", repoDir])
     }
     function doctor() { runMain("doctor", sh(["--doctor"])) }
     function uninstall() { runMain("uninstall", sh(["--uninstall", "-y"])) }
