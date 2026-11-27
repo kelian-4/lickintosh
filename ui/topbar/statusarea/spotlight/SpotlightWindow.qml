@@ -659,12 +659,34 @@ Scope {
         return /\.(mp4|webm|mkv|mov)$/i.test(path)
     }
 
+    property string hourPickerPath: ""
+
+    function applyHours(path, hours) {
+        for (var i = 0; i < hours.length; i++) ShellConfig.options.wallpaper.hourly["h" + hours[i]] = path
+        root.hourPickerPath = ""
+        root.pickNextRandom()
+    }
+
+    Loader {
+        active: root.hourPickerPath !== ""
+        sourceComponent: Component {
+            WallpaperHourPicker {
+                path: root.hourPickerPath
+                onApplied: function(hours) { root.applyHours(root.hourPickerPath, hours) }
+                onCanceled: root.hourPickerPath = ""
+            }
+        }
+    }
+
     function setWallpaper(path, persist, auto) {
         var video = root.isVideoPath(path)
         if (persist) {
             if (!video && !auto && ShellConfig.options.wallpaper.hourlyEnabled) {
-                ShellConfig.options.wallpaper.hourly["h" + new Date().getHours()] = path
-            } else if (video) {
+                root.previewWallpaper = ""
+                root.hourPickerPath = path
+                return
+            }
+            if (video) {
                 ShellConfig.options.wallpaper.videoPath = path
             } else {
                 ShellConfig.options.wallpaper.videoPath = ""
