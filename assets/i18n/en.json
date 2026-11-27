@@ -562,5 +562,9 @@
  "prérequis à installer": "requirements to install",
  "À propos": "About",
  "Aucun fond d'écran": "No wallpaper",
- "Choisis une image dans Réglages › Fond d'écran, ou ajoute-en dans": "Pick an image in Settings › Wallpaper, or add some to"
+ "Choisis une image dans Réglages › Fond d'écran, ou ajoute-en dans": "Pick an image in Settings › Wallpaper, or add some to",
+ "Fond d'écran par heure": "Wallpaper by hour",
+ "Changer de fond d'écran selon l'heure": "Change wallpaper by time of day",
+ "Remplace le fond du bureau. Une heure sans fond garde celui de l'heure précédente.": "Replaces the desktop wallpaper. An hour without a wallpaper keeps the previous hour's.",
+ "La sélection ci-dessous s'applique au bureau à %1. Une heure sans fond garde celui de l'heure précédente.": "The selection below applies to the desktop at %1. An hour without a wallpaper keeps the previous hour's."
 }

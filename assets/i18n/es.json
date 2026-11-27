@@ -843,5 +843,9 @@
  "prérequis à installer": "requisitos por instalar",
  "À propos": "Acerca de",
  "Aucun fond d'écran": "Sin fondo de pantalla",
- "Choisis une image dans Réglages › Fond d'écran, ou ajoute-en dans": "Elige una imagen en Ajustes › Fondo de pantalla, o añade algunas en"
+ "Choisis une image dans Réglages › Fond d'écran, ou ajoute-en dans": "Elige una imagen en Ajustes › Fondo de pantalla, o añade algunas en",
+ "Fond d'écran par heure": "Fondo de pantalla por hora",
+ "Changer de fond d'écran selon l'heure": "Cambiar el fondo de pantalla según la hora",
+ "Remplace le fond du bureau. Une heure sans fond garde celui de l'heure précédente.": "Sustituye el fondo del escritorio. Una hora sin fondo conserva el de la hora anterior.",
+ "La sélection ci-dessous s'applique au bureau à %1. Une heure sans fond garde celui de l'heure précédente.": "La selección de abajo se aplica al escritorio a las %1. Una hora sin fondo conserva el de la hora anterior."
 }
