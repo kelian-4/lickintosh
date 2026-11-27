@@ -852,5 +852,10 @@
  "Les raccourcis clavier de ~/.config/hypr seront remplacés par ceux de Lickintosh. Une sauvegarde est faite avant.": "Los atajos de teclado de ~/.config/hypr se sustituirán por los de Lickintosh. Se hace una copia de seguridad antes.",
  "Conserver la mienne": "Conservar la mía",
  "À quelles heures utiliser ce fond d'écran ?": "¿A qué horas usar este fondo de pantalla?",
- "Appliquer": "Aplicar"
+ "Appliquer": "Aplicar",
+ "Canal de mise à jour": "Canal de actualización",
+ "Suit la branche main (stable) ou dev (nightly). La mise à jour change de branche dans ce clone si besoin.": "Sigue main (estable) o dev (nightly). Al actualizar se cambia la rama de este clon si hace falta.",
+ "Branche actuelle : %1": "Rama actual: %1",
+ "Stable (main)": "Estable (main)",
+ "Nightly (dev)": "Nightly (dev)"
 }

@@ -22,6 +22,8 @@ Singleton {
     property string notice: ""
     property bool optLaunch: true
     property bool keepHypr: false
+    property string branch: ""
+    property string currentBranch: ""
     property string pendingRun: ""
     signal pageRequested(string page)
     function requestPage(page) { pageRequested(page) }
@@ -122,6 +124,14 @@ Singleton {
         return a
     }
 
+    function readBranch() {
+        if (branchProc.running) return
+        branchProc.buf = ""
+        branchProc.command = ["git", "-C", repoDir, "rev-parse", "--abbrev-ref", "HEAD"]
+        branchProc.running = true
+    }
+    onRepoDirChanged: readBranch()
+
     function requestRun(kind) { if (!busy) pendingRun = kind }
     function cancelRun() { pendingRun = "" }
     function confirmRun(keep) {
@@ -134,7 +144,8 @@ Singleton {
 
     function install() { runMain("install", sh(installArgs())) }
     function update() {
-        runMain("update", ["sh", "-c", "git -C \"$1\" pull --ff-only && fish \"$1/setup.fish\" --cli -y --skip-deps --no-launch" + (keepHypr ? " --no-hypr" : ""), "sh", repoDir])
+        var b = branch !== "" ? branch : "main"
+        runMain("update", ["sh", "-c", "git -C \"$1\" fetch origin \"$2\" && git -C \"$1\" checkout \"$2\" && git -C \"$1\" pull --ff-only origin \"$2\" && fish \"$1/setup.fish\" --cli -y --skip-deps --no-launch" + (keepHypr ? " --no-hypr" : ""), "sh", repoDir, b])
     }
     function doctor() { runMain("doctor", sh(["--doctor"])) }
     function uninstall() { runMain("uninstall", sh(["--uninstall", "-y"])) }
@@ -184,6 +195,7 @@ Singleton {
                 root.notice = code === 0 ? (k === "uninstall" ? "Lickintosh a été entièrement supprimé." : "Terminé.") : "Une erreur est survenue : voir la sortie ci-dessous."
                 stateWatch.reload()
                 if (k === "install" || k === "update") root.runPlan()
+                if (k === "update") root.readBranch()
             }
         }
     }
@@ -207,6 +219,16 @@ Singleton {
                 var tail = lines.filter(function(l) { return l.trim() !== "" })
                 root.planError = tail.length > 0 ? tail[tail.length - 1] : "code " + code
             }
+        }
+    }
+
+    Process {
+        id: branchProc
+        property string buf: ""
+        stdout: SplitParser { onRead: d => branchProc.buf += d.trim() }
+        onExited: (code, status) => {
+            root.currentBranch = code === 0 ? branchProc.buf : ""
+            if (root.branch === "") root.branch = root.currentBranch === "dev" ? "dev" : "main"
         }
     }
 
