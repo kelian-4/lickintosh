@@ -405,6 +405,9 @@ Parades dans ce dépôt :
 - Le plantage a été corrigé par les parades ci-dessous. `glass.captureWindows` vaut `true` par défaut ; l'option reste disponible pour couper toute capture de fenêtre, auquel cas le verre ne montre que le fond d'écran.
 - Quand la capture est activée, `GlassWindows` n'utilise plus un flux continu (`live: true`) mais une trame à la demande (`live: false`). Le composant `CaptureGate` n'arme un contexte de capture que lorsque la fenêtre est visible et que `GlassTracker.fast` est faux (aucune géométrie de fenêtre n'a bougé depuis 1,5 s), puis demande une trame toutes les `glass.captureIntervalMs` millisecondes seulement tant que tout est calme. Entre deux trames, aucun objet de trame n'existe : rien ne peut échouer.
 - La capture est suspendue pendant le verrouillage de session et 1,5 s après.
+- Retour au calme : `GlassTracker` émet `calmed()` quand l'agitation s'arrête (et à la fin de la suspension après déverrouillage) ; `CaptureGate.burst()` demande alors une trame tout de suite puis à +120, +300 et +650 ms, uniquement si la fenêtre est voulue, armée, calme et déjà avec contenu. Avant, la première trame attendait la prochaine période (`captureIntervalMs`).
+- Fenêtres en fermeture : `GlassTracker.closingSet` garde toutes les adresses fermées dans les 3 dernières secondes (avant : une seule adresse, 700 ms) ; une fenêtre ouverte à la même adresse est retirée de l'ensemble. Ces fenêtres sont masquées et ne sont plus capturées.
+- Non testé avec Hyprland : seul `CaptureGate.burst()` a été exercé sur banc hors écran.
 - Testé sur banc : le composant réel `CaptureGate` avec une chronologie simulée (aucune requête de trame pendant l'agitation, reprise au calme, relance après échec simulé, arrêt à la fermeture). Non testé : le comportement réel avec Hyprland.
 
 ### Installation : relancer Quickshell après `setup.fish`
@@ -420,7 +423,7 @@ Parades dans ce dépôt :
 | Clé | Type | Défaut | Effet | Contrôle suggéré (page Apparence, nouvelle section « Fenêtres derrière le verre ») |
 |---|---|---|---|---|
 | `captureWindows` | bool | `true` | Fait voir les fenêtres derrière le verre ; activé par défaut, `false` coupe toute capture | interrupteur |
-| `captureIntervalMs` | entier | `400` | Période de rafraîchissement des fenêtres capturées | curseur 200 à 2000 (avancé) |
+| `captureIntervalMs` | entier | `200` | Période de rafraîchissement des fenêtres capturées | curseur 200 à 2000 (avancé) |
 | `windowOpacity` | réel | `1.0` | Opacité des fenêtres capturées | curseur 0 à 1 (avancé) |
 | `windowOpacityByClass` | objet | `{ "kitty": 0.3 }` | Opacité par classe de fenêtre ; 0 exclut la classe | éditeur de liste (avancé) ; classes via `hyprctl clients -j` |
 

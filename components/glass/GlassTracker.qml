@@ -11,6 +11,7 @@ Singleton {
     property bool fast: false
     property int transitionEpoch: 0
     property string closingAddress: ""
+    property var closingSet: ({})
     property bool sessionLocked: false
     property bool closing: false
     readonly property bool captureBlocked: sessionLocked || unlockSettle.running
@@ -23,8 +24,43 @@ Singleton {
     Timer {
         id: unlockSettle
         interval: 1500
+        onTriggered: root.calmed()
     }
     property string lastSignature: ""
+
+    signal calmed()
+
+    function normalizeAddress(a) {
+        return String(a === undefined || a === null ? "" : a).replace(/^0x/i, "").toLowerCase()
+    }
+
+    function isClosing(address) {
+        var a = root.normalizeAddress(address)
+        return a !== "" && root.closingSet[a] !== undefined
+    }
+
+    function markClosing(address) {
+        var a = root.normalizeAddress(address)
+        if (a === "")
+            return
+        var next = {}
+        for (var k in root.closingSet)
+            next[k] = root.closingSet[k]
+        next[a] = Date.now()
+        root.closingSet = next
+        closingPrune.restart()
+    }
+
+    function unmarkClosing(address) {
+        var a = root.normalizeAddress(address)
+        if (a === "" || root.closingSet[a] === undefined)
+            return
+        var next = {}
+        for (var k in root.closingSet)
+            if (k !== a)
+                next[k] = root.closingSet[k]
+        root.closingSet = next
+    }
 
     property int captureFastInterval: 40
     property int captureIdleInterval: 200
@@ -61,7 +97,10 @@ Singleton {
 
         function onRawEvent(event) {
             var n = event.name
+            if (n === "openwindow")
+                root.unmarkClosing(String(event.data).split(",")[0])
             if (n === "closewindow") {
+                root.markClosing(String(event.data).split(",")[0])
                 root.closingAddress = String(event.data).split(",")[0].replace(/^0x/i, "").toLowerCase()
                 root.closing = true
                 closingOff.restart()
@@ -94,9 +133,31 @@ Singleton {
     }
 
     Timer {
+        id: closingPrune
+        interval: 3000
+        onTriggered: {
+            var now = Date.now()
+            var next = {}
+            var left = 0
+            for (var k in root.closingSet) {
+                if (now - root.closingSet[k] < 3000) {
+                    next[k] = root.closingSet[k]
+                    left++
+                }
+            }
+            root.closingSet = next
+            if (left > 0)
+                closingPrune.restart()
+        }
+    }
+
+    Timer {
         id: fastOff
         interval: 900
-        onTriggered: root.fast = false
+        onTriggered: {
+            root.fast = false
+            root.calmed()
+        }
     }
 
     Timer {
