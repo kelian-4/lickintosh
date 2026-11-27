@@ -79,13 +79,13 @@
 
 ## • installation •
 
-```fish
+```sh
 git clone https://github.com/kelian-4/lickintosh.git
 cd lickintosh
-./setup.fish
+./setup.sh
 ```
 
-The script is written for fish. Don't run it as root: it asks for `sudo` (or `doas`) itself when needed.
+The installer is written for fish. `./setup.sh` works from any shell: if fish is missing it offers to install it with your package manager, then runs `setup.fish` with the same options. If fish is already installed you can run `./setup.fish` directly. Don't run it as root: it asks for `sudo` (or `doas`) itself when needed.
 
 | Option | Effect |
 |---|---|
@@ -153,6 +153,7 @@ Almost everything is set in the **Settings** app, opened from the Apple menu ("S
 | `tools/` | Helper scripts (battery history, power, calculator, thumbnails, Liquid Glass shaders) |
 | `docs/` | Research notes, including `liquid-glass-research.md` |
 | `setup.fish` | Installation script |
+| `setup.sh` | POSIX launcher: installs fish if needed, then runs `setup.fish` |
 
 The Liquid Glass shaders are rebuilt with `tools/liquid-glass/build-shaders.sh`.
 
