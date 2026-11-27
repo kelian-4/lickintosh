@@ -355,12 +355,16 @@ ContentPage {
             text: I18n.tr("Changer de fond d'écran selon l'heure")
             description: I18n.tr("Remplace le fond du bureau. Une heure sans fond garde celui de l'heure précédente.")
             checked: ShellConfig.options.wallpaper.hourlyEnabled
-            onToggled: function(v) { ShellConfig.options.wallpaper.hourlyEnabled = v }
+            onToggled: function(v) {
+                ShellConfig.options.wallpaper.hourlyEnabled = v
+                if (!v && root.activeTarget.indexOf("hour") === 0) root.activeTarget = "desktop"
+            }
         }
 
         Flow {
             Layout.fillWidth: true
             spacing: 10
+            visible: ShellConfig.options.wallpaper.hourlyEnabled
 
             Repeater {
                 model: 24

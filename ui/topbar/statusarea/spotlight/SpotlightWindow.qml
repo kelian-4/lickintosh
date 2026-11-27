@@ -174,7 +174,7 @@ Scope {
             if (missing && !thumbProc.running) thumbProc.running = true
 
             if (root.currentWallpaper === "" && ShellConfig.options.wallpaper.videoPath === "" && out.length > 0) {
-                root.setWallpaper(out[0].path, true)
+                root.setWallpaper(out[0].path, true, true)
             }
         }
     }
@@ -659,10 +659,12 @@ Scope {
         return /\.(mp4|webm|mkv|mov)$/i.test(path)
     }
 
-    function setWallpaper(path, persist) {
+    function setWallpaper(path, persist, auto) {
         var video = root.isVideoPath(path)
         if (persist) {
-            if (video) {
+            if (!video && !auto && ShellConfig.options.wallpaper.hourlyEnabled) {
+                ShellConfig.options.wallpaper.hourly["h" + new Date().getHours()] = path
+            } else if (video) {
                 ShellConfig.options.wallpaper.videoPath = path
             } else {
                 ShellConfig.options.wallpaper.videoPath = ""
