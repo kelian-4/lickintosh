@@ -36,6 +36,8 @@ Item {
     readonly property real monitorX: monitorObject && monitorObject.lastIpcObject ? (monitorObject.lastIpcObject.x ?? 0) : 0
     readonly property real monitorY: monitorObject && monitorObject.lastIpcObject ? (monitorObject.lastIpcObject.y ?? 0) : 0
 
+    onRegionChanged: root.recount()
+
     property int pending: 0
     property bool graceDone: false
     property bool timedOut: false
@@ -54,7 +56,8 @@ Item {
     }
 
     function check() {
-        if (!root.latched && root.graceDone && (root.pending === 0 || root.timedOut)) {
+        var regionReady = root.region.width > 0 && root.region.height > 0
+        if (!root.latched && root.graceDone && ((regionReady && root.pending === 0) || root.timedOut)) {
             root.latched = true
             root.everLatched = true
         }
@@ -149,7 +152,7 @@ Item {
 
             readonly property real captureOpacity: root.opacityFor(ipc ? ipc["class"] : "")
             readonly property bool translucent: captureOpacity > 0 && captureOpacity < 1
-            readonly property bool pending: inRegion && captureOpacity > 0 && !hasContent && gate.calm
+            readonly property bool pending: inRegion && captureOpacity > 0 && !hasContent
             onPendingChanged: root.recount()
 
             property bool restarting: false
