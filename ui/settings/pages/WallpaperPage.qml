@@ -452,7 +452,7 @@ ContentPage {
         }
 
         CFText {
-            text: "Aucune image dans " + root.shippedDir
+            text: I18n.tr("Aucune image dans %1").replace("%1", root.shippedDir)
             font.pixelSize: 12
             gray: true
             visible: false

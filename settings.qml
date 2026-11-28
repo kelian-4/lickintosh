@@ -336,7 +336,7 @@ FloatingWindow {
                                         var q = _sidebarRoot.searchQuery.toLowerCase()
                                         if (q.length === 0) return true
                                         for (var i = 0; i < _group.modelData.items.length; i++) {
-                                            if (_group.modelData.items[i].name.toLowerCase().indexOf(q) !== -1) return true
+                                            if (I18n.tr(_group.modelData.items[i].name).toLowerCase().indexOf(q) !== -1 || _group.modelData.items[i].name.toLowerCase().indexOf(q) !== -1) return true
                                         }
                                         return false
                                     }
@@ -371,7 +371,7 @@ FloatingWindow {
                                             readonly property bool _selected: root.currentIndex === _row._flatIndex
                                             readonly property bool _matchesSearch: {
                                                 var q = _sidebarRoot.searchQuery.toLowerCase()
-                                                return q.length === 0 || _row.modelData.name.toLowerCase().indexOf(q) !== -1
+                                                return q.length === 0 || I18n.tr(_row.modelData.name).toLowerCase().indexOf(q) !== -1 || _row.modelData.name.toLowerCase().indexOf(q) !== -1
                                             }
 
                                             Layout.fillWidth: true
@@ -401,7 +401,7 @@ FloatingWindow {
                                                 }
 
                                                 CFText {
-                                                    text: _row.modelData.name
+                                                    text: I18n.tr(_row.modelData.name)
                                                     font.pixelSize: 14
                                                     color: _row._selected ? Theme.onAccent : Theme.textPrimary
                                                     Layout.fillWidth: true
