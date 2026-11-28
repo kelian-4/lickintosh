@@ -42,6 +42,14 @@ export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-wayland}"
 if [ -z "${QT_QPA_PLATFORMTHEME:-}" ] && command -v qt6ct >/dev/null 2>&1; then
     export QT_QPA_PLATFORMTHEME=qt6ct
 fi
+if [ -z "${QS_ICON_THEME:-}" ]; then
+    for icon_dir in "$HOME/.local/share/icons" "$HOME/.icons" /usr/share/icons; do
+        if [ -d "$icon_dir/MacTahoe-dark" ]; then
+            export QS_ICON_THEME=MacTahoe-dark
+            break
+        fi
+    done
+fi
 export QT_LOGGING_RULES="${QT_LOGGING_RULES:-qt.multimedia.ffmpeg*=false}"
 export QT_FFMPEG_DECODING_HW_DEVICE_TYPES="${QT_FFMPEG_DECODING_HW_DEVICE_TYPES:-vaapi,cuda}"
 
