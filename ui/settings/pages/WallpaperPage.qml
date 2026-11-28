@@ -52,6 +52,7 @@ ContentPage {
     }
 
     function pathOf(target) {
+        if (target.indexOf("hour") === 0) return ShellConfig.options.wallpaper.hourly["h" + target.substring(4)]
         if (target === "lockscreen") return ShellConfig.options.wallpaper.lockscreenPath
         if (target === "desktopDark") return ShellConfig.options.wallpaper.pathDark
         if (target === "desktopLight") return ShellConfig.options.wallpaper.pathLight
@@ -62,7 +63,8 @@ ContentPage {
     readonly property string currentPath: root.pathOf(root.activeTarget)
 
     function apply(path) {
-        if (root.activeTarget === "lockscreen") ShellConfig.options.wallpaper.lockscreenPath = path
+        if (root.activeTarget.indexOf("hour") === 0) ShellConfig.options.wallpaper.hourly["h" + root.activeTarget.substring(4)] = path
+        else if (root.activeTarget === "lockscreen") ShellConfig.options.wallpaper.lockscreenPath = path
         else if (root.activeTarget === "desktopDark") ShellConfig.options.wallpaper.pathDark = path
         else if (root.activeTarget === "desktopLight") ShellConfig.options.wallpaper.pathLight = path
         else {
@@ -266,13 +268,15 @@ ContentPage {
         }
 
         CFText {
-            text: root.activeTarget === "lockscreen"
+            text: root.activeTarget.indexOf("hour") === 0
+                ? I18n.tr("La sélection ci-dessous s'applique au bureau à %1. Une heure sans fond garde celui de l'heure précédente.").replace("%1", ("0" + root.activeTarget.substring(4)).slice(-2) + ":00")
+                : (root.activeTarget === "lockscreen"
                 ? I18n.tr("La sélection ci-dessous s'applique à l'écran de verrouillage.")
                 : (root.activeTarget === "desktopDark"
                     ? I18n.tr("La sélection ci-dessous s'applique au bureau en mode sombre. Sans fond choisi ici, le fond du bureau est utilisé.")
                     : (root.activeTarget === "desktopLight"
                         ? I18n.tr("La sélection ci-dessous s'applique au bureau en mode clair. Sans fond choisi ici, le fond du bureau est utilisé.")
-                        : I18n.tr("La sélection ci-dessous s'applique au bureau.")))
+                        : I18n.tr("La sélection ci-dessous s'applique au bureau."))))
             font.pixelSize: 12
             gray: true
             Layout.fillWidth: true
@@ -345,6 +349,85 @@ ContentPage {
     }
 
     ContentSection {
+        title: I18n.tr("Fond d'écran par heure")
+
+        ConfigSwitch {
+            text: I18n.tr("Changer de fond d'écran selon l'heure")
+            description: I18n.tr("Remplace le fond du bureau. Une heure sans fond garde celui de l'heure précédente.")
+            checked: ShellConfig.options.wallpaper.hourlyEnabled
+            onToggled: function(v) {
+                ShellConfig.options.wallpaper.hourlyEnabled = v
+                if (!v && root.activeTarget.indexOf("hour") === 0) root.activeTarget = "desktop"
+            }
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: 10
+            visible: ShellConfig.options.wallpaper.hourlyEnabled
+
+            Repeater {
+                model: 24
+
+                delegate: ColumnLayout {
+                    id: _hour
+                    required property int index
+                    spacing: 4
+
+                    readonly property string hourKey: "hour" + _hour.index
+                    readonly property bool isActive: root.activeTarget === _hour.hourKey
+                    readonly property string shownPath: root.pathOf(_hour.hourKey)
+
+                    Item {
+                        Layout.preferredWidth: 96
+                        Layout.preferredHeight: 56
+
+                        CFClippingRect {
+                            anchors.fill: parent
+                            radius: 8
+                            color: "#25000000"
+
+                            Image {
+                                anchors.fill: parent
+                                source: _hour.shownPath !== "" ? "file://" + _hour.shownPath : ""
+                                fillMode: Image.PreserveAspectCrop
+                                asynchronous: true
+                                sourceSize: Qt.size(192, 112)
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: -2
+                            radius: 10
+                            color: "transparent"
+                            border.width: 2
+                            border.color: Theme.accent
+                            visible: _hour.isActive
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.activeTarget = _hour.hourKey
+                        }
+                    }
+
+                    CFText {
+                        text: ("0" + _hour.index).slice(-2) + ":00"
+                        font.pixelSize: 11
+                        font.weight: _hour.isActive ? Font.Bold : Font.Normal
+                        gray: !_hour.isActive
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                }
+            }
+
+            Item { Layout.fillWidth: true }
+        }
+    }
+
+    ContentSection {
         title: I18n.tr("Fournis avec le shell")
         visible: root.shippedOnly.length > 0
 
@@ -369,7 +452,7 @@ ContentPage {
         }
 
         CFText {
-            text: "Aucune image dans " + root.shippedDir
+            text: I18n.tr("Aucune image dans %1").replace("%1", root.shippedDir)
             font.pixelSize: 12
             gray: true
             visible: false

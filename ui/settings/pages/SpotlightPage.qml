@@ -343,7 +343,7 @@ ContentPage {
             }
 
             CFText {
-                text: "Toutes les " + ShellConfig.options.spotlight.indexing.incrementalMinutes + " min"
+                text: I18n.tr("Toutes les %1 min").replace("%1", ShellConfig.options.spotlight.indexing.incrementalMinutes)
                 gray: true
                 font.pixelSize: 13
             }
@@ -371,7 +371,7 @@ ContentPage {
             }
 
             CFText {
-                text: "Toutes les " + ShellConfig.options.spotlight.indexing.fullReindexHours + " h"
+                text: I18n.tr("Toutes les %1 h").replace("%1", ShellConfig.options.spotlight.indexing.fullReindexHours)
                 gray: true
                 font.pixelSize: 13
             }

@@ -36,6 +36,8 @@ Item {
     readonly property real monitorX: monitorObject && monitorObject.lastIpcObject ? (monitorObject.lastIpcObject.x ?? 0) : 0
     readonly property real monitorY: monitorObject && monitorObject.lastIpcObject ? (monitorObject.lastIpcObject.y ?? 0) : 0
 
+    onRegionChanged: root.recount()
+
     property int pending: 0
     property bool graceDone: false
     property bool timedOut: false
@@ -54,7 +56,8 @@ Item {
     }
 
     function check() {
-        if (!root.latched && root.graceDone && (root.pending === 0 || root.timedOut)) {
+        var regionReady = root.region.width > 0 && root.region.height > 0
+        if (!root.latched && root.graceDone && ((regionReady && root.pending === 0) || root.timedOut)) {
             root.latched = true
             root.everLatched = true
         }
@@ -143,13 +146,13 @@ Item {
                 && (ipc.at[0] - root.monitorX + ipc.size[0]) > root.region.x
                 && (ipc.at[1] - root.monitorY) < (root.region.y + root.region.height)
                 && (ipc.at[1] - root.monitorY + ipc.size[1]) > root.region.y
-            readonly property bool dying: GlassTracker.closing && GlassTracker.closingAddress !== ""
-                && modelData.address !== undefined && String(modelData.address).replace(/^0x/i, "").toLowerCase() === GlassTracker.closingAddress
+            readonly property bool dying: modelData.address !== undefined && GlassTracker.closingSet !== undefined
+                && GlassTracker.isClosing(modelData.address)
             readonly property real rank: ipc && ipc.focusHistoryID !== undefined ? ipc.focusHistoryID : 0
 
             readonly property real captureOpacity: root.opacityFor(ipc ? ipc["class"] : "")
             readonly property bool translucent: captureOpacity > 0 && captureOpacity < 1
-            readonly property bool pending: inRegion && captureOpacity > 0 && !hasContent && gate.calm
+            readonly property bool pending: inRegion && captureOpacity > 0 && !hasContent
             onPendingChanged: root.recount()
 
             property bool restarting: false
@@ -173,6 +176,11 @@ Item {
                 interval: root.captureInterval
                 onRequestFrame: view.captureFrame()
                 onRestartRequested: view.restart()
+            }
+
+            Connections {
+                target: GlassTracker
+                function onCalmed() { gate.burst() }
             }
 
             captureSource: gate.armed && !restarting && !dying ? modelData.wayland : null

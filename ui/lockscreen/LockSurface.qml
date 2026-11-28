@@ -35,6 +35,12 @@ WlSessionLockSurface {
         Component.onCompleted: GlassRegistry.register(root, lockBackdrop)
         Component.onDestruction: GlassRegistry.unregister(lockBackdrop)
     }
+    SceneBackdrop {
+        id: coverBackdrop
+        blurSource: macPlayer.sceneGlass
+        screenSize: Qt.size(root.width, root.height)
+    }
+    readonly property Item activeBackdrop: macPlayer.artBgActive ? coverBackdrop : lockBackdrop
     readonly property bool reduceMotion: ShellConfig.options.appearance.reduceMotion
 
     color: "transparent"
@@ -159,7 +165,7 @@ WlSessionLockSurface {
 
         LockControlCenter {
             id: lockControlCenter
-            glassBackdrop: lockBackdrop
+            glassBackdrop: root.activeBackdrop
             open: root.controlCenterOpen && root.controlCenterAvailable
             anchors.top: statusIndicators.bottom
             anchors.topMargin: 14
@@ -326,7 +332,7 @@ WlSessionLockSurface {
 
         LockNotifications {
             id: notifStack
-            glassBackdrop: lockBackdrop
+            glassBackdrop: root.activeBackdrop
             anchors.horizontalCenter: parent.horizontalCenter
             y: macPlayer.notifBottom - height - (visible ? 16 : 0)
             opacity: Math.max(0, 1 - macPlayer.lyrT * 2.2)
@@ -449,7 +455,7 @@ WlSessionLockSurface {
 
                     BoxGlass {
                         anchors.fill: parent
-                        backdrop: lockBackdrop
+                        backdrop: root.activeBackdrop
                         radius: pill.radius
                         color: Qt.rgba(1, 1, 1, 0.14)
                         light: Qt.rgba(1, 1, 1, 0.32)

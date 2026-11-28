@@ -84,13 +84,13 @@
 
 ## • installation •
 
-```fish
+```sh
 git clone https://github.com/kelian-4/lickintosh.git
 cd lickintosh
-./setup.fish
+./setup.sh
 ```
 
-Le script est écrit pour fish. Ne le lance pas en root : il demande `sudo` (ou `doas`) lui-même quand il en a besoin.
+L'installeur est écrit pour fish. `./setup.sh` fonctionne depuis n'importe quel shell : si fish manque, il propose de l'installer avec ton gestionnaire de paquets, puis lance `setup.fish` avec les mêmes options. Si fish est déjà installé, tu peux lancer `./setup.fish` directement. Ne le lance pas en root : il demande `sudo` (ou `doas`) lui-même quand il en a besoin.
 
 | Option | Effet |
 |---|---|
@@ -158,6 +158,7 @@ Presque tout se règle dans l'application **Réglages**, ouverte depuis le menu 
 | `tools/` | Scripts d'appoint (historique de batterie, énergie, calculatrice, vignettes, shaders Liquid Glass) |
 | `docs/` | Notes de recherche, dont `liquid-glass-research.md` |
 | `setup.fish` | Script d'installation |
+| `setup.sh` | Lanceur POSIX : installe fish si besoin, puis lance `setup.fish` |
 
 Les shaders Liquid Glass se recompilent avec `tools/liquid-glass/build-shaders.sh`.
 

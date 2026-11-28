@@ -54,7 +54,7 @@ ContentPage {
 
             CFText {
                 visible: BatteryHealthState.chargeLimitSupported && BatteryHealthState.chargeLimitValue < 100
-                text: "Limité à " + BatteryHealthState.chargeLimitValue + " %"
+                text: I18n.tr("Limité à %1 %").replace("%1", BatteryHealthState.chargeLimitValue)
                 gray: true
                 font.pixelSize: 13
             }

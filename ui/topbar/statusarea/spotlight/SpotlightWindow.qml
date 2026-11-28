@@ -174,7 +174,7 @@ Scope {
             if (missing && !thumbProc.running) thumbProc.running = true
 
             if (root.currentWallpaper === "" && ShellConfig.options.wallpaper.videoPath === "" && out.length > 0) {
-                root.setWallpaper(out[0].path, true)
+                root.setWallpaper(out[0].path, true, true)
             }
         }
     }
@@ -659,9 +659,33 @@ Scope {
         return /\.(mp4|webm|mkv|mov)$/i.test(path)
     }
 
-    function setWallpaper(path, persist) {
+    property string hourPickerPath: ""
+
+    function applyHours(path, hours) {
+        for (var i = 0; i < hours.length; i++) ShellConfig.options.wallpaper.hourly["h" + hours[i]] = path
+        root.hourPickerPath = ""
+        root.pickNextRandom()
+    }
+
+    Loader {
+        active: root.hourPickerPath !== ""
+        sourceComponent: Component {
+            WallpaperHourPicker {
+                path: root.hourPickerPath
+                onApplied: function(hours) { root.applyHours(root.hourPickerPath, hours) }
+                onCanceled: root.hourPickerPath = ""
+            }
+        }
+    }
+
+    function setWallpaper(path, persist, auto) {
         var video = root.isVideoPath(path)
         if (persist) {
+            if (!video && !auto && ShellConfig.options.wallpaper.hourlyEnabled) {
+                root.previewWallpaper = ""
+                root.hourPickerPath = path
+                return
+            }
             if (video) {
                 ShellConfig.options.wallpaper.videoPath = path
             } else {

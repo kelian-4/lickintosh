@@ -16,12 +16,28 @@ Singleton {
     readonly property string modePath: Theme.isDark ? ShellConfig.options.wallpaper.pathDark
         : (Theme.isLight ? ShellConfig.options.wallpaper.pathLight : "")
 
-    readonly property bool videoActive: preview === "" && ShellConfig.options.wallpaper.videoPath !== "" && modePath === ""
+    SystemClock {
+        id: clock
+        precision: SystemClock.Minutes
+    }
+
+    readonly property string hourlyPath: {
+        if (!ShellConfig.options.wallpaper.hourlyEnabled) return ""
+        var hour = clock.hours
+        for (var k = 0; k < 24; k++) {
+            var p = ShellConfig.options.wallpaper.hourly["h" + ((hour - k + 24) % 24)]
+            if (p !== "") return p
+        }
+        return ""
+    }
+
+    readonly property bool videoActive: preview === "" && ShellConfig.options.wallpaper.videoPath !== "" && modePath === "" && hourlyPath === ""
 
     readonly property string basePath: ShellConfig.options.wallpaper.path
 
     readonly property string stillPath: {
         if (preview !== "") return preview
+        if (hourlyPath !== "") return hourlyPath
         if (Theme.isDark) {
             var dark = ShellConfig.options.wallpaper.pathDark
             return dark !== "" ? dark : pairOf(basePath, "Dark")

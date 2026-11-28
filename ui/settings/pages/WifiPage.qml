@@ -824,10 +824,10 @@ ContentPage {
                         Layout.topMargin: 4
                     }
 
-                    DetailDropdown { label: "Configurer IPv4"; value: NetworkManager.detailsIPv4Method.length > 0 ? NetworkManager.detailsIPv4Method : "Utilisation du DHCP" }
-                    DetailRow { label: "Adresse IP";              value: NetworkManager.detailsIPv4 }
-                    DetailRow { label: "Masque de sous-réseau";   value: NetworkManager.detailsSubnet }
-                    DetailRow { label: "Routeur";                 value: NetworkManager.detailsRouter }
+                    DetailDropdown { label: I18n.tr("Configurer IPv4"); value: NetworkManager.detailsIPv4Method.length > 0 ? NetworkManager.detailsIPv4Method : I18n.tr("Utilisation du DHCP") }
+                    DetailRow { label: I18n.tr("Adresse IP");              value: NetworkManager.detailsIPv4 }
+                    DetailRow { label: I18n.tr("Masque de sous-réseau");   value: NetworkManager.detailsSubnet }
+                    DetailRow { label: I18n.tr("Routeur");                 value: NetworkManager.detailsRouter }
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -860,7 +860,7 @@ ContentPage {
                         }
                     }
 
-                    DetailRow { label: "ID client DHCP (si requis)"; value: "" }
+                    DetailRow { label: I18n.tr("ID client DHCP (si requis)"); value: "" }
 
                     CFText {
                         text: I18n.tr("Configuration IPv6")
@@ -870,8 +870,8 @@ ContentPage {
                         Layout.topMargin: 8
                     }
 
-                    DetailDropdown { label: "Configurer IPv6"; value: NetworkManager.detailsIPv6Method.length > 0 ? NetworkManager.detailsIPv6Method : "Automatiquement" }
-                    DetailRow { label: "Adresse IPv6"; value: NetworkManager.detailsIPv6 }
+                    DetailDropdown { label: I18n.tr("Configurer IPv6"); value: NetworkManager.detailsIPv6Method.length > 0 ? NetworkManager.detailsIPv6Method : I18n.tr("Automatiquement") }
+                    DetailRow { label: I18n.tr("Adresse IPv6"); value: NetworkManager.detailsIPv6 }
                 }
 
                 Rectangle {
